@@ -1,0 +1,34 @@
+{
+  "name": "connect",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mintlify Connect",
+  "author": "Mintlify <hi@mintlify.com>",
+  "license": "ISC",
+  "homepage": "https://github.com/mintlify/connect",
+  "keywords": [
+    "probot",
+    "github",
+    "probot-app"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "probot run ./lib/index.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "probot": "^11.0.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.19",
+    "@types/node": "^14.14.19",
+    "jest": "^26.6.3",
+    "nock": "^13.0.5",
+    "smee-client": "^1.2.2",
+    "ts-jest": "^26.4.4",
+    "typescript": "^4.1.3"
+  },
+  "engines": {
+    "node": ">= 10.13.0"
+  }
+}
