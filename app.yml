@@ -23,7 +23,7 @@ default_events:
   # - fork
   # - gollum
   # - issue_comment
-  - issues
+  # - issues
 # - label
 # - milestone
 # - member
@@ -35,7 +35,7 @@ default_events:
 # - project_card
 # - project_column
 # - public
-# - pull_request
+  - pull_request
 # - pull_request_review
 # - pull_request_review_comment
 # - push
@@ -70,7 +70,7 @@ default_permissions:
 
   # Issues and related comments, assignees, labels, and milestones.
   # https://developer.github.com/v3/apps/permissions/#permission-on-issues
-  issues: write
+  # issues: write
 
   # Search repositories, list collaborators, and access repository metadata.
   # https://developer.github.com/v3/apps/permissions/#metadata-permissions
@@ -82,7 +82,7 @@ default_permissions:
 
   # Pull requests and related comments, assignees, labels, milestones, and merges.
   # https://developer.github.com/v3/apps/permissions/#permission-on-pull-requests
-  # pull_requests: read
+  pull_requests: read
 
   # Manage the post-receive hooks for a repository.
   # https://developer.github.com/v3/apps/permissions/#permission-on-repository-hooks
