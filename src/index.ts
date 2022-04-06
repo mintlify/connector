@@ -24,14 +24,18 @@ export = (app: Probot) => {
     });
     
     filesContext.forEach(async (fileContext) => {
-      const contentRequest = context.repo({ path: fileContext.path, ref: baseRef });
-      const content = await context.octokit.repos.getContent(contentRequest) as { data: { content: string } };
-      const contentString = Buffer.from(content.data.content, 'base64').toString();
+      try {
+        const contentRequest = context.repo({ path: fileContext.path, ref: baseRef });
+        const content = await context.octokit.repos.getContent(contentRequest) as { data: { content: string } };
+        const contentString = Buffer.from(content.data.content, 'base64').toString();
 
-      const changes = parsePatch(fileContext.patch);
+        const changes = parsePatch(fileContext.patch);
 
-      context.log.info(contentString);
-      context.log.info(changes);
+        context.log.info(contentString);
+        context.log.info(changes);
+      } catch {
+        context.log.error(`File doesn't exist for ${fileContext.path}`);
+      }
     })
   });
 };
