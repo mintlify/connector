@@ -13,10 +13,13 @@
   ],
   "scripts": {
     "build": "tsc",
-    "start": "probot run ./lib/index.js",
+    "start": "npm run build && probot run ./lib/index.js",
+    "dev": "nodemon -e ts,js --exec npm start",
     "test": "jest"
   },
   "dependencies": {
+    "nodemon": "^2.0.15",
+    "parse-diff": "^0.9.0",
     "probot": "^11.0.1"
   },
   "devDependencies": {
