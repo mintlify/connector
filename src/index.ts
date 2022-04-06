@@ -1,4 +1,5 @@
 import { Probot } from "probot";
+import { parsePatch } from "./patch";
 
 export = (app: Probot) => {
   app.on(["pull_request.opened", "pull_request.reopened"], async (context) => {
@@ -27,9 +28,10 @@ export = (app: Probot) => {
       const content = await context.octokit.repos.getContent(contentRequest) as { data: { content: string } };
       const contentString = Buffer.from(content.data.content, 'base64').toString();
 
-      context.log.info(fileContext.path);
-      context.log.info(fileContext.patch || '');
+      const changes = parsePatch(fileContext.patch);
+
       context.log.info(contentString);
+      context.log.info(changes);
     })
   });
 };
