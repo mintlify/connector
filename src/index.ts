@@ -8,6 +8,8 @@ export = (app: Probot) => {
     const pullNumber = context.payload.number;
     const baseRef = context.payload.pull_request.base.ref;
 
+    context.log.info(context.payload.repository);
+
     const files = await context.octokit.pulls.listFiles({
       owner,
       repo,
