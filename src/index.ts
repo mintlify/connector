@@ -1,5 +1,11 @@
 import { Probot } from "probot";
-import { parsePatch } from "./patch";
+import { Change, parsePatch } from "./patch";
+
+type File = {
+  filename: string;
+	content: string;
+	changes: Change[]
+}
 
 export = (app: Probot) => {
   app.on(["pull_request.opened", "pull_request.reopened"], async (context) => {
@@ -8,9 +14,7 @@ export = (app: Probot) => {
     const pullNumber = context.payload.number;
     const baseRef = context.payload.pull_request.base.ref;
 
-    context.log.info(context.payload.repository);
-
-    const files = await context.octokit.pulls.listFiles({
+    const pullRequestFiles = await context.octokit.pulls.listFiles({
       owner,
       repo,
       pull_number: pullNumber,
@@ -18,12 +22,14 @@ export = (app: Probot) => {
       per_page: 100
     });
 
-    const filesContext = files.data.map(file => {
+    const filesContext = pullRequestFiles.data.map(file => {
       return {
         path: file.filename,
         patch: file.patch
       }
     });
+    
+    const files: File[] = [];
     
     filesContext.forEach(async (fileContext) => {
       try {
@@ -33,11 +39,18 @@ export = (app: Probot) => {
 
         const changes = parsePatch(fileContext.patch);
 
-        context.log.info(contentString);
-        context.log.info(changes);
+        files.push({
+          filename: fileContext.path,
+          content: contentString,
+          changes: changes
+        })
+
       } catch {
         context.log.error(`File doesn't exist for ${fileContext.path}`);
       }
-    })
+    });
+
+    // send files to the API
+    // send owner to API
   });
 };

@@ -1,13 +1,13 @@
-type PatchChange = {
+export type Change = {
   type: 'add' | 'delete';
   line: number;
   content: string;
 }
 
-export const parsePatch = (patch?: string): PatchChange[] => {
+export const parsePatch = (patch?: string): Change[] => {
   if (!patch) return [];
 
-  const changes: PatchChange[] = [];
+  const changes: Change[] = [];
   const lines = patch.split('\n');
 
   let currentLine = 0;
