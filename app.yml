@@ -125,10 +125,10 @@ default_permissions:
   # https://developer.github.com/v3/apps/permissions/
   # organization_administration: read
 # The name of the GitHub App. Defaults to the name specified in package.json
-# name: My Probot App
+name: Mintlify Connect
 
 # The homepage of your GitHub App.
-# url: https://example.com/
+url: https://mintlify.com/connect
 
 # A description of the GitHub App.
 # description: A description of my awesome app
