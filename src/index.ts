@@ -51,11 +51,62 @@ export = (app: Probot) => {
       }
     });
 
-    const response = await axios.post(`http://localhost:5000/connect/v01/`, {
-      files,
-      owner,
+    const response = await axios.get(`http://localhost:5000/connect/v01/`, {
+      data: {
+        files,
+        owner,    
+      }
     });
 
-    console.log(response);
+    console.log(response.data);
+
+    // Check notifications
+    await context.octokit.pulls.createReviewComment({
+      owner,
+      repo,
+      pull_number: pullNumber,
+      body: 'Hey there',
+      commit_id: context.payload.pull_request.head.sha,
+      path: 'src/index.ts',
+      position: 1,
+      // start_line: 54,
+      // start_side: 'RIGHT',
+      // line: 55,
+      // side: 'RIGHT'
+    });
   });
+
+  app.on('pull_request_review_thread.resolved' as any, async (context) => {
+    const owner = context.payload.repository.owner.login;
+    const repo = context.payload.repository.name;
+    const pullNumber = context.payload.pull_request.number;
+    const reviewComments: any = await context.octokit.graphql(`query FetchReviewComments {
+      repository(owner: "${owner}", name: "${repo}") {
+        pullRequest(number: ${pullNumber}) {
+          reviewDecision
+          reviewThreads(first: 100) {
+            edges {
+              node {
+                isResolved
+                comments(first: 1) {
+                  edges {
+                    node {
+                      body
+                      author {
+                        login
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }`);
+
+    reviewComments.repository.pullRequest.reviewThreads.edges.forEach((edge: any) => {
+      console.log(edge.node.comments.edges[0].node);
+    })
+  })
 };
