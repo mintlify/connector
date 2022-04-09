@@ -73,6 +73,7 @@ export = (app: Probot) => {
     const alerts: Alert[] = response.data.alerts;
     if (alerts?.length === 0) return;
 
+    // https://github.com/mintlify/connect
     const comments = alerts.map((alert) => {
       return {
         body: alert.message,
