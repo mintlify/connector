@@ -51,8 +51,6 @@ export = (app: Probot) => {
       }
     });
 
-    // send files to the API  
-    // send owner to API
     const response = await axios.post(`http://localhost:5000/connect/v01/`, {
       files,
       owner,
