@@ -1,4 +1,5 @@
 import { Probot } from "probot";
+import axios from 'axios';
 import { Change, parsePatch } from "./patch";
 
 type File = {
@@ -50,7 +51,13 @@ export = (app: Probot) => {
       }
     });
 
-    // send files to the API
+    // send files to the API  
     // send owner to API
+    const response = await axios.post(`http://localhost:5000/connect/v01/`, {
+      files,
+      owner,
+    });
+
+    console.log(response);
   });
 };
