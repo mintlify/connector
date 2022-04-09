@@ -8,6 +8,18 @@ type File = {
 	changes: Change[]
 }
 
+type LineRange = {
+  start: number;
+  end: number;
+}
+
+type Alert = {
+  url: string;
+  message: string;
+  fileName: string;
+  lineRange: LineRange
+}
+
 export = (app: Probot) => {
   app.on(["pull_request.opened", "pull_request.reopened"], async (context) => {
     const owner = context.payload.repository.owner.login;
@@ -51,13 +63,84 @@ export = (app: Probot) => {
       }
     });
 
-    // send files to the API  
-    // send owner to API
-    const response = await axios.post(`http://localhost:5000/connect/v01/`, {
-      files,
-      owner,
+    const response = await axios.get(`http://localhost:5000/connect/v01/`, {
+      data: {
+        files,
+        owner,    
+      }
     });
 
-    console.log(response);
+    const alerts: Alert[] = response.data.alerts;
+    if (alerts?.length === 0) return;
+
+    const comments = alerts.map((alert) => {
+      return {
+        body: alert.message,
+        path: alert.fileName,
+        start_line: alert.lineRange.start,
+        start_side: 'RIGHT',
+        line: alert.lineRange.end,
+        side: 'RIGHT'
+      };
+    });
+
+    await context.octokit.pulls.createReview({
+      owner,
+      repo,
+      pull_number: pullNumber,
+      body: 'Documentation review required',
+      commit_id: context.payload.pull_request.head.sha,
+      event: 'REQUEST_CHANGES',
+      comments,
+    })
   });
+
+  app.on('pull_request_review_thread.resolved' as any, async (context) => {
+    const owner = context.payload.repository.owner.login;
+    const repo = context.payload.repository.name;
+    const pullNumber = context.payload.pull_request.number;
+    const reviewComments: any = await context.octokit.graphql(`query FetchReviewComments {
+      repository(owner: "${owner}", name: "${repo}") {
+        pullRequest(number: ${pullNumber}) {
+          reviewDecision
+          reviewThreads(first: 100) {
+            edges {
+              node {
+                isResolved
+                comments(first: 1) {
+                  edges {
+                    node {
+                      body
+                      author {
+                        login
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }`);
+
+    const ADMIN_LOGIN = 'mintlify-connect';
+
+    const allAdminReviewComments = reviewComments.repository.pullRequest.reviewThreads.edges.filter((edge: any) => {
+      return edge.node.comments.edges[0].node.author.login === ADMIN_LOGIN;
+    });
+
+    const isAllResolved = allAdminReviewComments.every((comment: any) => comment.node.isResolved);
+
+    if (isAllResolved) {
+      await context.octokit.pulls.createReview({
+        owner,
+        repo,
+        pull_number: pullNumber,
+        body: 'All document fixes have been addressed',
+        commit_id: context.payload.pull_request.head.sha,
+        event: 'APPROVE'
+      })
+    }
+  })
 };
