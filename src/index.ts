@@ -42,32 +42,31 @@ export = (app: Probot) => {
       }
     });
     
-    const files: File[] = [];
-    
-    filesContext.forEach(async (fileContext) => {
-      try {
-        const contentRequest = context.repo({ path: fileContext.path, ref: baseRef });
-        const content = await context.octokit.repos.getContent(contentRequest) as { data: { content: string } };
-        const contentString = Buffer.from(content.data.content, 'base64').toString();
-
-        const changes = parsePatch(fileContext.patch);
-
-        files.push({
-          filename: fileContext.path,
-          content: contentString,
-          changes: changes
-        })
-
-      } catch {
-        context.log.error(`File doesn't exist for ${fileContext.path}`);
-      }
+    const getFilesContentPromises = filesContext.map((fileContext) => {
+      return new Promise(async (resolve) => {
+        try {
+          const contentRequest = context.repo({ path: fileContext.path, ref: baseRef });
+          const content = await context.octokit.repos.getContent(contentRequest) as { data: { content: string } };
+          const contentString = Buffer.from(content.data.content, 'base64').toString();
+  
+          const changes = parsePatch(fileContext.patch);
+  
+          resolve({
+            filename: fileContext.path,
+            content: contentString,
+            changes: changes
+          })
+  
+        } catch {
+          resolve(null);
+        }
+      })
     });
 
-    const response = await axios.get(`http://localhost:5000/connect/v01/`, {
-      data: {
-        files,
-        owner,    
-      }
+    const files = await Promise.all(getFilesContentPromises) as File[];
+    const response = await axios.post(`http://localhost:5000/connect/v01/`, {
+      files,
+      owner,
     });
 
     const alerts: Alert[] = response.data.alerts;
