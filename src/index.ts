@@ -8,6 +8,18 @@ type File = {
 	changes: Change[]
 }
 
+type LineRange = {
+  start: number;
+  end: number;
+}
+
+type Alert = {
+  url: string;
+  message: string;
+  fileName: string;
+  lineRange: LineRange
+}
+
 export = (app: Probot) => {
   app.on(["pull_request.opened", "pull_request.reopened"], async (context) => {
     const owner = context.payload.repository.owner.login;
@@ -58,22 +70,29 @@ export = (app: Probot) => {
       }
     });
 
-    console.log(response.data);
+    const alerts: Alert[] = response.data.alerts;
+    if (alerts?.length === 0) return;
 
-    // Check notifications
-    await context.octokit.pulls.createReviewComment({
+    const comments = alerts.map((alert) => {
+      return {
+        body: alert.message,
+        path: alert.fileName,
+        start_line: alert.lineRange.start,
+        start_side: 'RIGHT',
+        line: alert.lineRange.end,
+        side: 'RIGHT'
+      };
+    });
+
+    await context.octokit.pulls.createReview({
       owner,
       repo,
       pull_number: pullNumber,
-      body: 'Hey there',
+      body: 'Documentation review required',
       commit_id: context.payload.pull_request.head.sha,
-      path: 'src/index.ts',
-      position: 1,
-      // start_line: 54,
-      // start_side: 'RIGHT',
-      // line: 55,
-      // side: 'RIGHT'
-    });
+      event: 'REQUEST_CHANGES',
+      comments,
+    })
   });
 
   app.on('pull_request_review_thread.resolved' as any, async (context) => {
@@ -105,8 +124,23 @@ export = (app: Probot) => {
       }
     }`);
 
-    reviewComments.repository.pullRequest.reviewThreads.edges.forEach((edge: any) => {
-      console.log(edge.node.comments.edges[0].node);
-    })
+    const ADMIN_LOGIN = 'mintlify-connect';
+
+    const allAdminReviewComments = reviewComments.repository.pullRequest.reviewThreads.edges.filter((edge: any) => {
+      return edge.node.comments.edges[0].node.author.login === ADMIN_LOGIN;
+    });
+
+    const isAllResolved = allAdminReviewComments.every((comment: any) => comment.node.isResolved);
+
+    if (isAllResolved) {
+      await context.octokit.pulls.createReview({
+        owner,
+        repo,
+        pull_number: pullNumber,
+        body: 'All document fixes have been addressed',
+        commit_id: context.payload.pull_request.head.sha,
+        event: 'APPROVE'
+      })
+    }
   })
 };
