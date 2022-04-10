@@ -22,7 +22,7 @@ type Alert = {
 }
 
 export = (app: Probot) => {
-  app.on(["pull_request.opened", "pull_request.reopened"], async (context) => {
+  app.on(["pull_request.opened", "pull_request.reopened", "pull_request.synchronize"], async (context) => {
     const owner = context.payload.repository.owner.login;
     const repo = context.payload.repository.name;
     const pullNumber = context.payload.number;
@@ -93,7 +93,7 @@ export = (app: Probot) => {
         side: 'RIGHT'
       })
     });
-    
+
     const checkPromise = context.octokit.checks.create({
       owner,
       repo,
@@ -151,5 +151,5 @@ export = (app: Probot) => {
         conclusion: 'success',
       });
     }
-  })
+  });
 };
