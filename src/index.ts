@@ -101,6 +101,7 @@ export = (app: Probot) => {
       name: 'Documentation Maintenance Check',
       status: 'completed',
       conclusion: 'action_required',
+      details_url: alerts[0].url,
     })
     reviewCommentPromises.push(checkPromise)
     await Promise.all(reviewCommentPromises);
