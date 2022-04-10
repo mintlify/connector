@@ -93,8 +93,7 @@ export = (app: Probot) => {
         side: 'RIGHT'
       })
     });
-
-    // https://github.com
+    
     const checkPromise = context.octokit.checks.create({
       owner,
       repo,
