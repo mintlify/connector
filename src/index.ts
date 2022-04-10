@@ -94,11 +94,12 @@ export = (app: Probot) => {
       })
     });
 
+    // https://github.com
     const checkPromise = context.octokit.checks.create({
       owner,
       repo,
       head_sha: context.payload.pull_request.head.sha,
-      name: 'mintlify-connect',
+      name: 'Documentation Maintenance Check',
       status: 'completed',
       conclusion: 'action_required',
     })
@@ -142,12 +143,13 @@ export = (app: Probot) => {
     const isAllResolved = allAdminReviewComments.every((comment: any) => comment.node.isResolved);
 
     if (isAllResolved) {
-      await context.octokit.pulls.createReview({
+      await context.octokit.checks.create({
         owner,
         repo,
-        pull_number: pullNumber,
-        commit_id: context.payload.pull_request.head.sha,
-        event: 'APPROVE'
+        head_sha: context.payload.pull_request.head.sha,
+        name: 'Documentation Maintenance Check',
+        status: 'completed',
+        conclusion: 'success',
       });
     }
   })
