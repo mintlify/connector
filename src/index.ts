@@ -1,6 +1,7 @@
 import { Probot } from "probot";
 import axios from 'axios';
 import { Change, parsePatch } from "./patch";
+import { ADMIN_LOGIN, ENDPOINT } from "./enums";
 
 type File = {
   filename: string;
@@ -20,10 +21,8 @@ type Alert = {
   lineRange: LineRange
 }
 
-const ENDPOINT = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'https://api.mintlify.com'
-
 export = (app: Probot) => {
-  app.on(["pull_request.opened", "pull_request.reopened"], async (context) => {
+  app.on(["pull_request.opened", "pull_request.reopened", "pull_request.synchronize"], async (context) => {
     const owner = context.payload.repository.owner.login;
     const repo = context.payload.repository.name;
     const pullNumber = context.payload.number;
@@ -50,15 +49,12 @@ export = (app: Probot) => {
           const contentRequest = context.repo({ path: fileContext.path, ref: headRef });
           const content = await context.octokit.repos.getContent(contentRequest) as { data: { content: string } };
           const contentString = Buffer.from(content.data.content, 'base64').toString();
-  
           const changes = parsePatch(fileContext.patch);
-  
           resolve({
             filename: fileContext.path,
             content: contentString,
             changes: changes
           })
-  
         } catch {
           resolve(null);
         }
@@ -73,37 +69,41 @@ export = (app: Probot) => {
 
     const alerts: Alert[] = response.data.alerts;
     if (alerts?.length === 0) {
-      await context.octokit.pulls.createReview({
+      await context.octokit.checks.create({
         owner,
         repo,
-        pull_number: pullNumber,
-        commit_id: context.payload.pull_request.head.sha,
-        event: 'APPROVE',
+        head_sha: context.payload.pull_request.head.sha,
+        name: 'mintlify-connect',
+        status: 'completed',
+        conclusion: 'success',
       });
 
       return;
     };
 
-    const comments = alerts.map((alert) => {
-      return {
+    const reviewCommentPromises: Promise<any>[] = alerts.map((alert) => {
+      return context.octokit.pulls.createReviewComment({
+        owner,
+        repo,
+        pull_number: pullNumber,
+        commit_id: context.payload.pull_request.head.sha,
         body: alert.message,
         path: alert.filename,
-        // start_line: alert.lineRange.start,
-        // start_side: 'RIGHT',
         line: alert.lineRange.start,
         side: 'RIGHT'
-      };
+      })
     });
 
-    await context.octokit.pulls.createReview({
+    const checkPromise = context.octokit.checks.create({
       owner,
       repo,
-      pull_number: pullNumber,
-      body: response.data.reviewAlert,
-      commit_id: context.payload.pull_request.head.sha,
-      event: 'REQUEST_CHANGES',
-      comments,
-    });
+      head_sha: context.payload.pull_request.head.sha,
+      name: 'Documentation Maintenance Check',
+      status: 'completed',
+      conclusion: 'action_required',
+    })
+    reviewCommentPromises.push(checkPromise)
+    await Promise.all(reviewCommentPromises);
   });
 
   app.on('pull_request_review_thread.resolved' as any, async (context) => {
@@ -135,8 +135,6 @@ export = (app: Probot) => {
       }
     }`);
 
-    const ADMIN_LOGIN = 'mintlify-connect';
-
     const allAdminReviewComments = reviewComments.repository.pullRequest.reviewThreads.edges.filter((edge: any) => {
       return edge.node.comments.edges[0].node.author.login === ADMIN_LOGIN;
     });
@@ -144,13 +142,14 @@ export = (app: Probot) => {
     const isAllResolved = allAdminReviewComments.every((comment: any) => comment.node.isResolved);
 
     if (isAllResolved) {
-      await context.octokit.pulls.createReview({
+      await context.octokit.checks.create({
         owner,
         repo,
-        pull_number: pullNumber,
-        commit_id: context.payload.pull_request.head.sha,
-        event: 'APPROVE'
+        head_sha: context.payload.pull_request.head.sha,
+        name: 'Documentation Maintenance Check',
+        status: 'completed',
+        conclusion: 'success',
       });
     }
-  })
+  });
 };
