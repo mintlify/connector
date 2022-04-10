@@ -12,8 +12,7 @@
     "probot-app"
   ],
   "scripts": {
-    "build": "tsc",
-    "postinstall": "npm run build",
+    "postinstall": "tsc",
     "start": "npm run build && probot run ./lib/index.js",
     "dev": "nodemon -e ts,js --exec npm start",
     "test": "jest"
