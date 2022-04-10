@@ -16,7 +16,7 @@ type LineRange = {
 type Alert = {
   url: string;
   message: string;
-  fileName: string;
+  filename: string;
   lineRange: LineRange
 }
 
@@ -25,7 +25,7 @@ export = (app: Probot) => {
     const owner = context.payload.repository.owner.login;
     const repo = context.payload.repository.name;
     const pullNumber = context.payload.number;
-    const baseRef = context.payload.pull_request.base.ref;
+    const headRef = context.payload.pull_request.head.ref;
 
     const pullRequestFiles = await context.octokit.pulls.listFiles({
       owner,
@@ -42,44 +42,54 @@ export = (app: Probot) => {
       }
     });
     
-    const files: File[] = [];
-    
-    filesContext.forEach(async (fileContext) => {
-      try {
-        const contentRequest = context.repo({ path: fileContext.path, ref: baseRef });
-        const content = await context.octokit.repos.getContent(contentRequest) as { data: { content: string } };
-        const contentString = Buffer.from(content.data.content, 'base64').toString();
-
-        const changes = parsePatch(fileContext.patch);
-
-        files.push({
-          filename: fileContext.path,
-          content: contentString,
-          changes: changes
-        })
-
-      } catch {
-        context.log.error(`File doesn't exist for ${fileContext.path}`);
-      }
+    const getFilesContentPromises = filesContext.map((fileContext) => {
+      return new Promise(async (resolve) => {
+        try {
+          const contentRequest = context.repo({ path: fileContext.path, ref: headRef });
+          const content = await context.octokit.repos.getContent(contentRequest) as { data: { content: string } };
+          const contentString = Buffer.from(content.data.content, 'base64').toString();
+  
+          const changes = parsePatch(fileContext.patch);
+  
+          resolve({
+            filename: fileContext.path,
+            content: contentString,
+            changes: changes
+          })
+  
+        } catch {
+          resolve(null);
+        }
+      })
     });
 
-    const response = await axios.get(`http://localhost:5000/connect/v01/`, {
-      data: {
-        files,
-        owner,    
-      }
+    const files = await Promise.all(getFilesContentPromises) as File[];
+    const response = await axios.post(`http://localhost:5000/connect/v01/`, {
+      files,
+      owner,
     });
 
     const alerts: Alert[] = response.data.alerts;
-    if (alerts?.length === 0) return;
+    if (alerts?.length === 0) {
+      await context.octokit.pulls.createReview({
+        owner,
+        repo,
+        pull_number: pullNumber,
+        commit_id: context.payload.pull_request.head.sha,
+        event: 'APPROVE',
+      });
 
+      return;
+    };
+
+    // https://github.com/mintlify/connect
     const comments = alerts.map((alert) => {
       return {
         body: alert.message,
-        path: alert.fileName,
-        start_line: alert.lineRange.start,
-        start_side: 'RIGHT',
-        line: alert.lineRange.end,
+        path: alert.filename,
+        // start_line: alert.lineRange.start,
+        // start_side: 'RIGHT',
+        line: alert.lineRange.start,
         side: 'RIGHT'
       };
     });
@@ -88,11 +98,11 @@ export = (app: Probot) => {
       owner,
       repo,
       pull_number: pullNumber,
-      body: 'Documentation review required',
+      body: response.data.reviewAlert,
       commit_id: context.payload.pull_request.head.sha,
       event: 'REQUEST_CHANGES',
       comments,
-    })
+    });
   });
 
   app.on('pull_request_review_thread.resolved' as any, async (context) => {
@@ -137,10 +147,9 @@ export = (app: Probot) => {
         owner,
         repo,
         pull_number: pullNumber,
-        body: 'All document fixes have been addressed',
         commit_id: context.payload.pull_request.head.sha,
         event: 'APPROVE'
-      })
+      });
     }
   })
 };
