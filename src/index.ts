@@ -25,7 +25,7 @@ export = (app: Probot) => {
     const owner = context.payload.repository.owner.login;
     const repo = context.payload.repository.name;
     const pullNumber = context.payload.number;
-    const baseRef = context.payload.pull_request.base.ref;
+    const headRef = context.payload.pull_request.head.ref;
 
     const pullRequestFiles = await context.octokit.pulls.listFiles({
       owner,
@@ -45,7 +45,7 @@ export = (app: Probot) => {
     const getFilesContentPromises = filesContext.map((fileContext) => {
       return new Promise(async (resolve) => {
         try {
-          const contentRequest = context.repo({ path: fileContext.path, ref: baseRef });
+          const contentRequest = context.repo({ path: fileContext.path, ref: headRef });
           const content = await context.octokit.repos.getContent(contentRequest) as { data: { content: string } };
           const contentString = Buffer.from(content.data.content, 'base64').toString();
   
