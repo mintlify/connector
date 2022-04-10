@@ -16,7 +16,7 @@ type LineRange = {
 type Alert = {
   url: string;
   message: string;
-  fileName: string;
+  filename: string;
   lineRange: LineRange
 }
 
@@ -70,16 +70,26 @@ export = (app: Probot) => {
     });
 
     const alerts: Alert[] = response.data.alerts;
-    if (alerts?.length === 0) return;
+    if (alerts?.length === 0) {
+      await context.octokit.pulls.createReview({
+        owner,
+        repo,
+        pull_number: pullNumber,
+        commit_id: context.payload.pull_request.head.sha,
+        event: 'APPROVE',
+      });
+
+      return;
+    };
 
     // https://github.com/mintlify/connect
     const comments = alerts.map((alert) => {
       return {
         body: alert.message,
-        path: alert.fileName,
-        start_line: alert.lineRange.start,
-        start_side: 'RIGHT',
-        line: alert.lineRange.end,
+        path: alert.filename,
+        // start_line: alert.lineRange.start,
+        // start_side: 'RIGHT',
+        line: alert.lineRange.start,
         side: 'RIGHT'
       };
     });
@@ -88,11 +98,11 @@ export = (app: Probot) => {
       owner,
       repo,
       pull_number: pullNumber,
-      body: 'Documentation review required',
+      body: response.data.reviewAlert,
       commit_id: context.payload.pull_request.head.sha,
       event: 'REQUEST_CHANGES',
       comments,
-    })
+    });
   });
 
   app.on('pull_request_review_thread.resolved' as any, async (context) => {
@@ -137,10 +147,9 @@ export = (app: Probot) => {
         owner,
         repo,
         pull_number: pullNumber,
-        body: 'All document fixes have been addressed',
         commit_id: context.payload.pull_request.head.sha,
         event: 'APPROVE'
-      })
+      });
     }
   })
 };
