@@ -20,6 +20,8 @@ type Alert = {
   lineRange: LineRange
 }
 
+const ENDPOINT = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'https://api.mintlify.com'
+
 export = (app: Probot) => {
   app.on(["pull_request.opened", "pull_request.reopened"], async (context) => {
     const owner = context.payload.repository.owner.login;
@@ -64,7 +66,7 @@ export = (app: Probot) => {
     });
 
     const files = await Promise.all(getFilesContentPromises) as File[];
-    const response = await axios.post(`http://localhost:5000/connect/v01/`, {
+    const response = await axios.post(`${ENDPOINT}/connect/v01/`, {
       files,
       owner,
     });
@@ -82,7 +84,6 @@ export = (app: Probot) => {
       return;
     };
 
-    // https://github.com/mintlify/connect
     const comments = alerts.map((alert) => {
       return {
         body: alert.message,
