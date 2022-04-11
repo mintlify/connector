@@ -67,6 +67,7 @@ export = (app: Probot) => {
       owner,
     });
 
+    // notion.so
     const alerts: Alert[] = response.data.alerts;
     if (alerts?.length === 0) {
       await context.octokit.checks.create({
