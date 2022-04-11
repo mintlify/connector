@@ -73,7 +73,7 @@ export = (app: Probot) => {
         owner,
         repo,
         head_sha: context.payload.pull_request.head.sha,
-        name: 'mintlify-connect',
+        name: 'Documentation Maintenance Check',
         status: 'completed',
         conclusion: 'success',
       });
