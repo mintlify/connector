@@ -4,6 +4,7 @@ export type Change = {
   content: string;
 }
 
+// Hey there
 export const parsePatch = (patch?: string): Change[] => {
   if (!patch) return [];
 
