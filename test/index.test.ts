@@ -75,6 +75,31 @@ export const getAlertsForAllFiles = async (files: ConnectFile[]): Promise<Alert[
   ])
   });
 
+  test('Adding new file', () => {
+    const patch = `@@ -0,0 +1,3 @@
++import { Client } from '@notionhq/client';
++
++console.log("Hi there")`;
+  const changes = parsePatch(patch);
+  expect(changes).toStrictEqual([
+    {
+      type: 'add',
+      line: 1,
+      content: 'import { Client } from \'@notionhq/client\';'
+    },
+    {
+      type: 'add',
+      line: 2,
+      content: ''
+    },
+    {
+      type: 'add',
+      line: 3,
+      content: 'console.log("Hi there")'
+    }
+  ])
+  });
+
   test('No content', () => {
     const patch = undefined;
     const changes = parsePatch(patch);
