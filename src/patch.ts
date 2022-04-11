@@ -16,6 +16,8 @@ export const parsePatch = (patch?: string): Change[] => {
   for (const line of lines) {
     const firstCharOfLine = line.charAt(0);
 
+    console.log("Hey there");
+
     if (line.match(/@@ -[0-9]+,[0-9]+ \+[0-9]+,[0-9]+ @@/)) {
       let startLine = line.match(/[0-9]+/);
       if (startLine) {
