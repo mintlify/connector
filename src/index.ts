@@ -67,7 +67,7 @@ export = (app: Probot) => {
       owner,
     });
 
-    // https://notion.so/mintlify/Ithaca-Product-Meeting-36b4bcf8b6e444bcbf3c2944163b27dd
+    // https://www.notion.so/mintlify/Ithaca-Product-Meeting-36b4bcf8b6e444bcbf3c2944163b27dd
     const alerts: Alert[] = response.data.alerts;
     if (alerts?.length === 0) {
       await context.octokit.checks.create({
