@@ -1,0 +1,12 @@
+{
+  "environments": {
+    "test": {
+      "scripts": {
+        "test": "npm test"
+      }
+    }
+  },
+  "buildpacks": [
+    {"url": "https://github.com/heroku/heroku-buildpack-nodejs#latest"}
+  ]
+}
