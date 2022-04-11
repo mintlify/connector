@@ -4,7 +4,7 @@ export type Change = {
   content: string;
 }
 
-// Hey there
+// https://github.com/connect
 export const parsePatch = (patch?: string): Change[] => {
   if (!patch) return [];
 
