@@ -9,7 +9,7 @@ type File = {
 	content: string;
 	changes: Change[]
 }
-
+// https://www.notion.so/mintlify/Notion-11f0252e5193461cad0aaef5a4d21515#13390f2ad4ef47cfb6c5ab728607f97e
 type LineRange = {
   start: number;
   end: number;
