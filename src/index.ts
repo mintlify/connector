@@ -44,8 +44,7 @@ export = (app: Probot) => {
       }
     });
     
-    const getFilesContentPromises = filesContext.map((fileContext) => {
-      return new Promise(async (resolve) => {
+    const getFilesContentPromises = filesContext.map((fileContext) => new Promise(async (resolve) => {
         try {
           const contentRequest = context.repo({ path: fileContext.path, ref: headRef });
           const content = await context.octokit.repos.getContent(contentRequest) as { data: { content: string } };
@@ -60,7 +59,7 @@ export = (app: Probot) => {
           resolve(null);
         }
       })
-    });
+    );
 
     const files = await Promise.all(getFilesContentPromises) as File[];
     const connectPromise = axios.post(`${ENDPOINT}/connect/v01/`, {
