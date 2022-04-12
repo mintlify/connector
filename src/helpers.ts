@@ -43,3 +43,32 @@ export const getReviewComments = async (context: Context) => {
 export const checkIfAllAlertsAreResolve = (allConnectReviewComments: any[]) => {
   return allConnectReviewComments.every((comment: any) => comment.isResolved);
 }
+
+export const createSuccessCheck = (context: Context) => {
+  const owner = context.payload.repository.owner.login;
+  const repo = context.payload.repository.name;
+
+  return context.octokit.checks.create({
+    owner,
+    repo,
+    head_sha: context.payload.pull_request.head.sha,
+    name: 'Documentation Maintenance Check',
+    status: 'completed',
+    conclusion: 'success',
+  })
+}
+
+export const createActionRequiredCheck = (context: Context, detailsUrl?: string) => {
+  const owner = context.payload.repository.owner.login;
+  const repo = context.payload.repository.name;
+
+  return context.octokit.checks.create({
+    owner,
+    repo,
+    head_sha: context.payload.pull_request.head.sha,
+    name: 'Documentation Maintenance Check',
+    status: 'completed',
+    conclusion: 'action_required',
+    details_url: detailsUrl,
+  })
+}

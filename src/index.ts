@@ -2,7 +2,7 @@
 import { Context, Probot } from "probot";
 import axios from 'axios';
 import { Change, parsePatch } from "./patch";
-import { getReviewComments, ENDPOINT, checkIfAllAlertsAreResolve } from "./helpers";
+import { getReviewComments, ENDPOINT, checkIfAllAlertsAreResolve, createSuccessCheck, createActionRequiredCheck } from "./helpers";
 
 type File = {
   filename: string;
@@ -85,15 +85,7 @@ export = (app: Probot) => {
     const isAllPreviousAlertsResolved = checkIfAllAlertsAreResolve(previousAlerts);
 
     if (newAlerts.length === 0 && isAllPreviousAlertsResolved) {
-      await context.octokit.checks.create({
-        owner,
-        repo,
-        head_sha: context.payload.pull_request.head.sha,
-        name: 'Documentation Maintenance Check',
-        status: 'completed',
-        conclusion: 'success',
-      });
-
+      await createSuccessCheck(context);
       return;
     };
 
@@ -110,24 +102,13 @@ export = (app: Probot) => {
       })
     });
 
-    const checkPromise = context.octokit.checks.create({
-      owner,
-      repo,
-      head_sha: context.payload.pull_request.head.sha,
-      name: 'Documentation Maintenance Check',
-      status: 'completed',
-      conclusion: 'action_required',
-      details_url: newAlerts[0].url,
-    })
-    reviewCommentPromises.push(checkPromise)
+    const actionRequiredCheckPromise = createActionRequiredCheck(context, newAlerts[0].url); // Do not add await
+    reviewCommentPromises.push(actionRequiredCheckPromise);
     await Promise.all(reviewCommentPromises);
-    
     return;
   });
 
   app.on('pull_request_review_thread.resolved' as any, async (context: Context) => {
-    const owner = context.payload.repository.owner.login;
-    const repo = context.payload.repository.name;
     const previousAlerts = await getReviewComments(context);
     const isAllPreviousAlertsResolved = checkIfAllAlertsAreResolve(previousAlerts);
 
@@ -135,13 +116,6 @@ export = (app: Probot) => {
       return;
     }
 
-    await context.octokit.checks.create({
-      owner,
-      repo,
-      head_sha: context.payload.pull_request.head.sha,
-      name: 'Documentation Maintenance Check',
-      status: 'completed',
-      conclusion: 'success',
-    });
+    await createSuccessCheck(context);
   });
 };
