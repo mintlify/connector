@@ -1,4 +1,4 @@
-// https://www.notion.so/mintlify/Notion-11f0252e5193461cad0aaef5a4d21515
+// https://www.notion.so/Installation-37aab83daa5e48b88cde8bd3891fa181
 import { Probot } from "probot";
 import axios from 'axios';
 import { Change, parsePatch } from "./patch";
