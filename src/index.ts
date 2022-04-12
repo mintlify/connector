@@ -1,3 +1,4 @@
+// https://www.notion.so/mintlify/Installation-37aab83daa5e48b88cde8bd3891fa181#f2f13932f22041ad8c33a3e073104304
 import { Probot } from "probot";
 import axios from 'axios';
 import { Change, parsePatch } from "./patch";
@@ -67,7 +68,6 @@ export = (app: Probot) => {
       owner,
     });
 
-    // https://www.notion.so/mintlify/Installation-37aab83daa5e48b88cde8bd3891fa181#f2f13932f22041ad8c33a3e073104304
     const alerts: Alert[] = response.data.alerts;
     if (alerts?.length === 0) {
       await context.octokit.checks.create({
