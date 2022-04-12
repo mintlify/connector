@@ -1,4 +1,4 @@
-// https://www.notion.so/Installation-37aab83daa5e48b88cde8bd3891fa181
+// https://github.com/mintlify/connect/pull/32
 import { Probot } from "probot";
 import axios from 'axios';
 import { Change, parsePatch } from "./patch";
