@@ -49,7 +49,7 @@ export = (app: Probot) => {
           const contentRequest = context.repo({ path: fileContext.path, ref: headRef });
           const content = await context.octokit.repos.getContent(contentRequest) as { data: { content: string } };
           const contentString = Buffer.from(content.data.content, 'base64').toString();
-          const changes = parsePatch(fileContext.patch);
+          const { changes } = parsePatch(fileContext.patch);
           resolve({
             filename: fileContext.path,
             content: contentString,

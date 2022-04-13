@@ -11,7 +11,7 @@ describe('Patch to changes', () => {
 +	return 0;
 }`;
 
-    const changes = parsePatch(patch);
+    const { changes, lineRanges } = parsePatch(patch);
     expect(changes).toStrictEqual([
       {
         type: 'delete',
@@ -28,7 +28,19 @@ describe('Patch to changes', () => {
         line: 6,
         content: '	return 0;'
       }
-    ])
+    ]);
+    expect(lineRanges).toStrictEqual([
+      {
+        minusRange: {
+          start: 1,
+          end: 5,
+        },
+        addRange: {
+          start: 1,
+          end: 6
+        }
+      }
+    ]);
   });
 
   test('Complex patch', () => {
@@ -45,7 +57,7 @@ describe('Patch to changes', () => {
 
 export const getAlertsForAllFiles = async (files: ConnectFile[]): Promise<Alert[]> => {`;
 
-  const changes = parsePatch(patch);
+  const { changes, lineRanges } = parsePatch(patch);
   expect(changes).toStrictEqual([
     {
       type: 'delete',
@@ -72,7 +84,19 @@ export const getAlertsForAllFiles = async (files: ConnectFile[]): Promise<Alert[
       line: 20,
       content: ' return alertResults;'
     }
-  ])
+  ]);
+    expect(lineRanges).toStrictEqual([
+      {
+        minusRange: {
+          start: 15,
+          end: 22,
+        },
+        addRange: {
+          start: 15,
+          end: 23
+        }
+      }
+    ]);
   });
 
   test('Patch with different start lines', () => {
@@ -91,7 +115,7 @@ getProgress(): Progress {
 +    }
 +}
 }`;
-    const changes = parsePatch(patch);
+    const { changes, lineRanges } = parsePatch(patch);
     expect(changes).toStrictEqual([
       {
         type: 'add',
@@ -144,6 +168,18 @@ getProgress(): Progress {
         content: '}'
       },
     ]);
+    expect(lineRanges).toStrictEqual([
+      {
+        minusRange: {
+          start: 109,
+          end: 112,
+        },
+        addRange: {
+          start: 111,
+          end: 124
+        }
+      }
+    ]);
   })
 
   test('Adding new file', () => {
@@ -151,7 +187,7 @@ getProgress(): Progress {
 +import { Client } from '@notionhq/client';
 +
 +console.log("Hi there")`;
-  const changes = parsePatch(patch);
+  const { changes, lineRanges } = parsePatch(patch);
   expect(changes).toStrictEqual([
     {
       type: 'add',
@@ -168,7 +204,19 @@ getProgress(): Progress {
       line: 3,
       content: 'console.log("Hi there")'
     }
-  ])
+  ]);
+  expect(lineRanges).toStrictEqual([
+    {
+      minusRange: {
+        start: 0,
+        end: -1,
+      },
+      addRange: {
+        start: 1,
+        end: 3
+      }
+    }
+  ]);
   });
 
   test('Deleting file', () => {
@@ -182,7 +230,7 @@ getProgress(): Progress {
 -const Link = mongoose.model('Link', LinkSchema, 'links');
 -
 -export default Link; `;
-    const changes = parsePatch(patch);
+    const { changes, lineRanges } = parsePatch(patch);
     expect(changes).toStrictEqual([
       {
         type: 'delete',
@@ -229,12 +277,102 @@ getProgress(): Progress {
         line: 9,
         content: 'export default Link; '
       },
-    ])
+    ]);
+
+    expect(lineRanges).toStrictEqual([
+      {
+        minusRange: {
+          start: 1,
+          end: 9,
+        },
+        addRange: {
+          start: 0,
+          end: -1
+        }
+      }
+    ]);
+  });
+
+  test('Patch with multiple new lines', () => {
+    const patch = `@@ -8,7 +8,8 @@ import {
+  getFirstNodeByValue,
+  getNodeByPath,
+  findKindWithinRange,
+-  getProgressHelper
++  getProgressHelper,
++  extractBaseComments
+} from '../helpers';
+
+const JAVA_SYNOPSIS = {
+@@ -80,4 +81,7 @@ export default class Java implements PL {
+  getProgress(tree: TreeNode, types: ProgressIndicator[]): Progress {
+    return getProgressHelper(this, tree, types);
+  }
++  extractComment(tree: TreeNode): string {
++      return extractBaseComments(tree);
++  }
+}`;
+    const { changes, lineRanges } = parsePatch(patch);
+    expect(changes).toStrictEqual([
+      {
+        type: 'delete',
+        line: 11,
+        content: '  getProgressHelper'
+      },
+      {
+        type: 'add',
+        line: 11,
+        content: '  getProgressHelper,'
+      },
+      {
+        type: 'add',
+        line: 12,
+        content: '  extractBaseComments'
+      },
+      {
+        type: 'add',
+        line: 84,
+        content: '  extractComment(tree: TreeNode): string {'
+      },
+      {
+        type: 'add',
+        line: 85,
+        content: '      return extractBaseComments(tree);'
+      },
+      {
+        type: 'add',
+        line: 86,
+        content: '  }'
+      },
+    ]);
+    expect(lineRanges).toStrictEqual([
+      {
+        minusRange: {
+          start: 8,
+          end: 14,
+        },
+        addRange: {
+          start: 8,
+          end: 15
+        }
+      },
+      {
+        minusRange: {
+          start: 80,
+          end: 83,
+        },
+        addRange: {
+          start: 81,
+          end: 87
+        }
+      }
+    ]);
   })
 
   test('No content', () => {
     const patch = undefined;
-    const changes = parsePatch(patch);
+    const { changes, lineRanges } = parsePatch(patch);
     expect(changes).toStrictEqual([]);
+    expect(lineRanges).toStrictEqual([]);
   })
 });
