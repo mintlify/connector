@@ -4,7 +4,7 @@ export type Change = {
   content: string;
 }
 
-type LineRange = {
+export type PatchLineRange = {
   minusRange: {
     start: number,
     end: number, // inclusive
@@ -15,11 +15,11 @@ type LineRange = {
   },
 }
 
-export const parsePatch = (patch?: string): { changes: Change[], lineRanges: LineRange[] } => {
-  if (!patch) return { changes: [], lineRanges: [] };
+export const parsePatch = (patch?: string): { changes: Change[], patchLineRanges: PatchLineRange[] } => {
+  if (!patch) return { changes: [], patchLineRanges: [] };
 
   const changes: Change[] = [];
-  const lineRanges: LineRange[] = [];
+  const patchLineRanges: PatchLineRange[] = [];
   const lines = patch.split('\n');
 
   let currentMinusLine = 0;
@@ -36,7 +36,7 @@ export const parsePatch = (patch?: string): { changes: Change[], lineRanges: Lin
       let minusLinesDiff = parseInt(minusLine![2]);
       let addLinesDiff = parseInt(addLine![2]);
 
-      lineRanges.push({
+      patchLineRanges.push({
         minusRange: {
           start: currentMinusLine,
           end: currentMinusLine + minusLinesDiff - 1
@@ -74,5 +74,5 @@ export const parsePatch = (patch?: string): { changes: Change[], lineRanges: Lin
     }
   }
 
-  return { changes, lineRanges };
+  return { changes, patchLineRanges };
 }

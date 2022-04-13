@@ -1,7 +1,7 @@
 // https://www.notion.so/mintlify/Installation-37aab83daa5e48b88cde8bd3891fa181
 import { Context, Probot } from "probot";
 import axios from 'axios';
-import { Change, parsePatch } from "./patch";
+import { Change, parsePatch, PatchLineRange } from "./patch";
 import { getReviewComments, ENDPOINT, checkIfAllAlertsAreResolve, createSuccessCheck, createActionRequiredCheck } from "./helpers";
 
 type File = {
@@ -43,13 +43,17 @@ export = (app: Probot) => {
         patch: file.patch
       }
     });
+
+    const filesPatchLineRangesMap: Record<string, PatchLineRange[]> = {};
     
     const getFilesContentPromises = filesContext.map((fileContext) => new Promise(async (resolve) => {
         try {
           const contentRequest = context.repo({ path: fileContext.path, ref: headRef });
           const content = await context.octokit.repos.getContent(contentRequest) as { data: { content: string } };
           const contentString = Buffer.from(content.data.content, 'base64').toString();
-          const { changes } = parsePatch(fileContext.patch);
+          const { changes, patchLineRanges } = parsePatch(fileContext.patch);
+          // Add range to map
+          filesPatchLineRangesMap[fileContext.path] = patchLineRanges;
           resolve({
             filename: fileContext.path,
             content: contentString,
@@ -88,22 +92,25 @@ export = (app: Probot) => {
       return;
     };
 
-    const reviewCommentPromises: Promise<any>[] = newAlerts.map((newAlert) => {
-      return context.octokit.pulls.createReviewComment({
-        owner,
-        repo,
-        pull_number: pullNumber,
-        commit_id: context.payload.pull_request.head.sha,
-        body: newAlert.message,
-        path: newAlert.filename,
-        line: newAlert.lineRange.start,
-        side: 'RIGHT'
-      })
+    const reviewCommentPromises: any[] = newAlerts.map((newAlert) => {
+      const patchLineRange = filesPatchLineRangesMap[newAlert.filename];
+      if (patchLineRange == null) return null;
+      
+      console.log(patchLineRange);
+      // return context.octokit.pulls.createReviewComment({
+      //   owner,
+      //   repo,
+      //   pull_number: pullNumber,
+      //   commit_id: context.payload.pull_request.head.sha,
+      //   body: newAlert.message,
+      //   path: newAlert.filename,
+      //   line: newAlert.lineRange.start,
+      //   side: 'RIGHT'
+      // })
+      return null;
     });
-
-    const actionRequiredCheckPromise = createActionRequiredCheck(context, newAlerts[0].url); // Do not add await
-    reviewCommentPromises.push(actionRequiredCheckPromise);
     await Promise.all(reviewCommentPromises);
+    await createActionRequiredCheck(context, newAlerts[0].url);
     return;
   });
 

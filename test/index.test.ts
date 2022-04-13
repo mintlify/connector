@@ -11,7 +11,7 @@ describe('Patch to changes', () => {
 +	return 0;
 }`;
 
-    const { changes, lineRanges } = parsePatch(patch);
+    const { changes, patchLineRanges } = parsePatch(patch);
     expect(changes).toStrictEqual([
       {
         type: 'delete',
@@ -29,7 +29,7 @@ describe('Patch to changes', () => {
         content: '	return 0;'
       }
     ]);
-    expect(lineRanges).toStrictEqual([
+    expect(patchLineRanges).toStrictEqual([
       {
         minusRange: {
           start: 1,
@@ -57,7 +57,7 @@ describe('Patch to changes', () => {
 
 export const getAlertsForAllFiles = async (files: ConnectFile[]): Promise<Alert[]> => {`;
 
-  const { changes, lineRanges } = parsePatch(patch);
+  const { changes, patchLineRanges } = parsePatch(patch);
   expect(changes).toStrictEqual([
     {
       type: 'delete',
@@ -85,7 +85,7 @@ export const getAlertsForAllFiles = async (files: ConnectFile[]): Promise<Alert[
       content: ' return alertResults;'
     }
   ]);
-    expect(lineRanges).toStrictEqual([
+    expect(patchLineRanges).toStrictEqual([
       {
         minusRange: {
           start: 15,
@@ -115,7 +115,7 @@ getProgress(): Progress {
 +    }
 +}
 }`;
-    const { changes, lineRanges } = parsePatch(patch);
+    const { changes, patchLineRanges } = parsePatch(patch);
     expect(changes).toStrictEqual([
       {
         type: 'add',
@@ -168,7 +168,7 @@ getProgress(): Progress {
         content: '}'
       },
     ]);
-    expect(lineRanges).toStrictEqual([
+    expect(patchLineRanges).toStrictEqual([
       {
         minusRange: {
           start: 109,
@@ -187,7 +187,7 @@ getProgress(): Progress {
 +import { Client } from '@notionhq/client';
 +
 +console.log("Hi there")`;
-  const { changes, lineRanges } = parsePatch(patch);
+  const { changes, patchLineRanges } = parsePatch(patch);
   expect(changes).toStrictEqual([
     {
       type: 'add',
@@ -205,7 +205,7 @@ getProgress(): Progress {
       content: 'console.log("Hi there")'
     }
   ]);
-  expect(lineRanges).toStrictEqual([
+  expect(patchLineRanges).toStrictEqual([
     {
       minusRange: {
         start: 0,
@@ -230,7 +230,7 @@ getProgress(): Progress {
 -const Link = mongoose.model('Link', LinkSchema, 'links');
 -
 -export default Link; `;
-    const { changes, lineRanges } = parsePatch(patch);
+    const { changes, patchLineRanges } = parsePatch(patch);
     expect(changes).toStrictEqual([
       {
         type: 'delete',
@@ -279,7 +279,7 @@ getProgress(): Progress {
       },
     ]);
 
-    expect(lineRanges).toStrictEqual([
+    expect(patchLineRanges).toStrictEqual([
       {
         minusRange: {
           start: 1,
@@ -312,7 +312,7 @@ const JAVA_SYNOPSIS = {
 +      return extractBaseComments(tree);
 +  }
 }`;
-    const { changes, lineRanges } = parsePatch(patch);
+    const { changes, patchLineRanges } = parsePatch(patch);
     expect(changes).toStrictEqual([
       {
         type: 'delete',
@@ -345,7 +345,7 @@ const JAVA_SYNOPSIS = {
         content: '  }'
       },
     ]);
-    expect(lineRanges).toStrictEqual([
+    expect(patchLineRanges).toStrictEqual([
       {
         minusRange: {
           start: 8,
@@ -371,8 +371,8 @@ const JAVA_SYNOPSIS = {
 
   test('No content', () => {
     const patch = undefined;
-    const { changes, lineRanges } = parsePatch(patch);
+    const { changes, patchLineRanges } = parsePatch(patch);
     expect(changes).toStrictEqual([]);
-    expect(lineRanges).toStrictEqual([]);
+    expect(patchLineRanges).toStrictEqual([]);
   })
 });
