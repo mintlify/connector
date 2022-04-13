@@ -1,4 +1,4 @@
-// https://www.notion.so/mintlify/Installation-37aab83daa5e48b88cde8bd3891fa181
+// https://www.notion.so/mintlify/Mintlify-Connect-v0-1-c77063caf3f6492e85badd026b769a69#b86dad0336df4a4a861a30489330f792
 import { Context, Probot } from "probot";
 import axios from 'axios';
 import { Alert, File, getEncompassingRangeAndSideForAlert, parsePatch, PatchLineRange } from "./patch";
