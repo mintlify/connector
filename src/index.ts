@@ -2,7 +2,7 @@
 import { Probot } from "probot";
 import axios from 'axios';
 import { Change, parsePatch } from "./patch";
-import { ADMIN_LOGIN, ENDPOINT } from "./enums";
+import { getReviewComments, ENDPOINT, checkIfAllAlertsAreResolve, createSuccessCheck, createActionRequiredCheck } from "./helpers";
 
 type File = {
   filename: string;
@@ -44,8 +44,7 @@ export = (app: Probot) => {
       }
     });
     
-    const getFilesContentPromises = filesContext.map((fileContext) => {
-      return new Promise(async (resolve) => {
+    const getFilesContentPromises = filesContext.map((fileContext) => new Promise(async (resolve) => {
         try {
           const contentRequest = context.repo({ path: fileContext.path, ref: headRef });
           const content = await context.octokit.repos.getContent(contentRequest) as { data: { content: string } };
@@ -60,98 +59,62 @@ export = (app: Probot) => {
           resolve(null);
         }
       })
-    });
+    );
 
     const files = await Promise.all(getFilesContentPromises) as File[];
-    const response = await axios.post(`${ENDPOINT}/connect/v01/`, {
+    const connectPromise = axios.post(`${ENDPOINT}/connect/v01/`, {
       files,
       owner,
     });
+    const previousAlertsPromise = getReviewComments(context);
+    const [connectResponse, previousAlerts] = await Promise.all([connectPromise, previousAlertsPromise]);
 
-    const alerts: Alert[] = response.data.alerts;
-    if (alerts?.length === 0) {
-      await context.octokit.checks.create({
-        owner,
-        repo,
-        head_sha: context.payload.pull_request.head.sha,
-        name: 'Documentation Maintenance Check',
-        status: 'completed',
-        conclusion: 'success',
-      });
+    const incomingAlerts: Alert[] = connectResponse.data.alerts;
+    if (incomingAlerts == null) {
+      return;
+    }
 
+    // New alerts do not exist in previous alerts
+    const previousAlertsContent = previousAlerts.map((previousAlert: any) => {
+      return previousAlert.comments.edges[0].node.body;
+    })
+    const newAlerts = incomingAlerts.filter((incomingAlert) => {
+      return previousAlertsContent.includes(incomingAlert.message) === false;
+    });
+    const isAllPreviousAlertsResolved = checkIfAllAlertsAreResolve(previousAlerts);
+
+    if (newAlerts.length === 0 && isAllPreviousAlertsResolved) {
+      await createSuccessCheck(context);
       return;
     };
 
-    const reviewCommentPromises: Promise<any>[] = alerts.map((alert) => {
+    const reviewCommentPromises: Promise<any>[] = newAlerts.map((newAlert) => {
       return context.octokit.pulls.createReviewComment({
         owner,
         repo,
         pull_number: pullNumber,
         commit_id: context.payload.pull_request.head.sha,
-        body: alert.message,
-        path: alert.filename,
-        line: alert.lineRange.start,
+        body: newAlert.message,
+        path: newAlert.filename,
+        line: newAlert.lineRange.start,
         side: 'RIGHT'
       })
     });
 
-    const checkPromise = context.octokit.checks.create({
-      owner,
-      repo,
-      head_sha: context.payload.pull_request.head.sha,
-      name: 'Documentation Maintenance Check',
-      status: 'completed',
-      conclusion: 'action_required',
-      details_url: alerts[0].url,
-    })
-    reviewCommentPromises.push(checkPromise)
+    const actionRequiredCheckPromise = createActionRequiredCheck(context, newAlerts[0].url); // Do not add await
+    reviewCommentPromises.push(actionRequiredCheckPromise);
     await Promise.all(reviewCommentPromises);
+    return;
   });
 
-  app.on('pull_request_review_thread.resolved' as any, async (context) => {
-    const owner = context.payload.repository.owner.login;
-    const repo = context.payload.repository.name;
-    const pullNumber = context.payload.pull_request.number;
-    const reviewComments: any = await context.octokit.graphql(`query FetchReviewComments {
-      repository(owner: "${owner}", name: "${repo}") {
-        pullRequest(number: ${pullNumber}) {
-          reviewDecision
-          reviewThreads(first: 100) {
-            edges {
-              node {
-                isResolved
-                comments(first: 1) {
-                  edges {
-                    node {
-                      body
-                      author {
-                        login
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }`);
+  app.on('pull_request_review_thread.resolved' as any, async (context: Context) => {
+    const previousAlerts = await getReviewComments(context);
+    const isAllPreviousAlertsResolved = checkIfAllAlertsAreResolve(previousAlerts);
 
-    const allAdminReviewComments = reviewComments.repository.pullRequest.reviewThreads.edges.filter((edge: any) => {
-      return edge.node.comments.edges[0].node.author.login === ADMIN_LOGIN;
-    });
-
-    const isAllResolved = allAdminReviewComments.every((comment: any) => comment.node.isResolved);
-
-    if (isAllResolved) {
-      await context.octokit.checks.create({
-        owner,
-        repo,
-        head_sha: context.payload.pull_request.head.sha,
-        name: 'Documentation Maintenance Check',
-        status: 'completed',
-        conclusion: 'success',
-      });
+    if (!isAllPreviousAlertsResolved) {
+      return;
     }
+
+    await createSuccessCheck(context);
   });
 };
