@@ -1,26 +1,8 @@
 // https://www.notion.so/mintlify/Installation-37aab83daa5e48b88cde8bd3891fa181
 import { Context, Probot } from "probot";
 import axios from 'axios';
-import { Change, parsePatch } from "./patch";
+import { Alert, File, getEncompassingRangeAndSideForAlert, parsePatch, PatchLineRange } from "./patch";
 import { getReviewComments, ENDPOINT, checkIfAllAlertsAreResolve, createSuccessCheck, createActionRequiredCheck } from "./helpers";
-
-type File = {
-  filename: string;
-	content: string;
-	changes: Change[]
-}
-
-type LineRange = {
-  start: number;
-  end: number;
-}
-
-type Alert = {
-  url: string;
-  message: string;
-  filename: string;
-  lineRange: LineRange
-}
 
 export = (app: Probot) => {
   app.on(["pull_request.opened", "pull_request.reopened", "pull_request.synchronize"], async (context) => {
@@ -43,13 +25,17 @@ export = (app: Probot) => {
         patch: file.patch
       }
     });
+
+    const filesPatchLineRangesMap: Record<string, PatchLineRange[]> = {};
     
     const getFilesContentPromises = filesContext.map((fileContext) => new Promise(async (resolve) => {
         try {
           const contentRequest = context.repo({ path: fileContext.path, ref: headRef });
           const content = await context.octokit.repos.getContent(contentRequest) as { data: { content: string } };
           const contentString = Buffer.from(content.data.content, 'base64').toString();
-          const changes = parsePatch(fileContext.patch);
+          const { changes, patchLineRanges } = parsePatch(fileContext.patch);
+          // Add range to map
+          filesPatchLineRangesMap[fileContext.path] = patchLineRanges;
           resolve({
             filename: fileContext.path,
             content: contentString,
@@ -75,11 +61,17 @@ export = (app: Probot) => {
     }
 
     // New alerts do not exist in previous alerts
-    const previousAlertsContent = previousAlerts.map((previousAlert: any) => {
-      return previousAlert.comments.edges[0].node.body;
-    })
+    const previousAlertsData = previousAlerts.map((previousAlert: any) => {
+      return {
+        path: previousAlert.path,
+        content: previousAlert.comments.edges[0].node.body
+      };
+    });
+
     const newAlerts = incomingAlerts.filter((incomingAlert) => {
-      return previousAlertsContent.includes(incomingAlert.message) === false;
+      return previousAlertsData.every((previousAlertData: any) => {
+        return incomingAlert.message !== previousAlertData.content && incomingAlert.filename !== previousAlertData.path
+      });
     });
     const isAllPreviousAlertsResolved = checkIfAllAlertsAreResolve(previousAlerts);
 
@@ -88,7 +80,11 @@ export = (app: Probot) => {
       return;
     };
 
-    const reviewCommentPromises: Promise<any>[] = newAlerts.map((newAlert) => {
+    const reviewCommentPromises: any[] = newAlerts.map((newAlert) => {
+      const patchLineRanges = filesPatchLineRangesMap[newAlert.filename];
+      if (patchLineRanges == null) return null;
+      
+      const encompassedRangeAndSide = getEncompassingRangeAndSideForAlert(patchLineRanges, newAlert.lineRange);
       return context.octokit.pulls.createReviewComment({
         owner,
         repo,
@@ -96,14 +92,15 @@ export = (app: Probot) => {
         commit_id: context.payload.pull_request.head.sha,
         body: newAlert.message,
         path: newAlert.filename,
-        line: newAlert.lineRange.start,
-        side: 'RIGHT'
+        start_line: encompassedRangeAndSide.start.line,
+        start_side: encompassedRangeAndSide.start.side,
+        line: encompassedRangeAndSide.end.line,
+        side: encompassedRangeAndSide.end.side
       })
+      return null;
     });
-
-    const actionRequiredCheckPromise = createActionRequiredCheck(context, newAlerts[0].url); // Do not add await
-    reviewCommentPromises.push(actionRequiredCheckPromise);
     await Promise.all(reviewCommentPromises);
+    await createActionRequiredCheck(context, newAlerts[0].url);
     return;
   });
 

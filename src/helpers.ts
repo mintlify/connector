@@ -16,6 +16,8 @@ export const getReviewComments = async (context: Context) => {
           edges {
             node {
               isResolved
+              path
+              id
               comments(first: 1) {
                 edges {
                   node {
