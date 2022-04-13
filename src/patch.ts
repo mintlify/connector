@@ -10,51 +10,40 @@ export const parsePatch = (patch?: string): Change[] => {
   const changes: Change[] = [];
   const lines = patch.split('\n');
 
-  let currentLine = 0;
-  let negativeCount = 0;
+  let currentMinusLine = 0;
+  let currentAddLine = 0;
   for (const line of lines) {
     const firstCharOfLine = line.charAt(0);
 
     if (line.match(/@@ -[0-9]+,[0-9]+ \+[0-9]+,[0-9]+ @@/)) {
-      let startLine = line.match(/[0-9]+/);
-      if (startLine) {
-        currentLine = parseInt(startLine[0]);
-      }
-
-      // Consider for special case where R is 0
-      if (currentLine === 0) {
-        currentLine = 1;
-      }
-      continue;
+      currentMinusLine = parseInt(line.match(/-([0-9]+)/)![1])
+      currentAddLine = parseInt(line.match(/\+([0-9]+)/)![1])
     }
 
     else if (firstCharOfLine === '-') {
       changes.push({
         type: 'delete',
-        line: currentLine,
+        line: currentMinusLine,
         content: line.substring(1)
       });
 
-      negativeCount += 1;
+      currentMinusLine += 1;
     }
 
     else if (firstCharOfLine === '+') {
-      if (negativeCount > 0) {
-        currentLine -= negativeCount;
-        negativeCount = 0;
-      }
       changes.push({
         type: 'add',
-        line: currentLine,
+        line: currentAddLine,
         content: line.substring(1)
       });
+
+      currentAddLine += 1;
     }
 
     else {
-      negativeCount = 0;
+      currentMinusLine += 1;
+      currentAddLine += 1;
     }
-
-    currentLine += 1;
   }
 
   return changes;
