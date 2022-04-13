@@ -1,5 +1,5 @@
 // https://github.com/mintlify/connect/pull/32
-import { Probot } from "probot";
+import { Probot, Context } from "probot";
 import axios from 'axios';
 import { Change, parsePatch } from "./patch";
 import { getReviewComments, ENDPOINT, checkIfAllAlertsAreResolve, createSuccessCheck, createActionRequiredCheck } from "./helpers";
