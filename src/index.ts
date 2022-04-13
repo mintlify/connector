@@ -13,6 +13,7 @@ type File = {
 type LineRange = {
   start: number;
   end: number;
+  bro: number;
 }
 
 type Alert = {
