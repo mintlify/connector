@@ -1,18 +1,30 @@
-export type Change = {
+type Change = {
   type: 'add' | 'delete';
   line: number;
   content: string;
 }
 
+type LineRange = {
+  start: number;
+  end: number;
+}
+
+export type File = {
+  filename: string;
+	content: string;
+	changes: Change[]
+}
+
+export type Alert = {
+  url: string;
+  message: string;
+  filename: string;
+  lineRange: LineRange
+}
+
 export type PatchLineRange = {
-  minusRange: {
-    start: number,
-    end: number, // inclusive
-  },
-  addRange: {
-    start: number,
-    end: number, // inclusive
-  },
+  minusRange: LineRange,
+  addRange: LineRange,
 }
 
 export const parsePatch = (patch?: string): { changes: Change[], patchLineRanges: PatchLineRange[] } => {
@@ -75,4 +87,53 @@ export const parsePatch = (patch?: string): { changes: Change[], patchLineRanges
   }
 
   return { changes, patchLineRanges };
+}
+
+type Side = 'LEFT' | 'RIGHT'
+
+type RangeAndSide = {
+  start: {
+    line: number;
+    side: Side;
+  };
+  end: {
+    line: number;
+    side: Side;
+  }
+}
+
+export const getEncompassingRangeAndSideForAlert = (patchLineRanges: PatchLineRange[], alertLineRange: LineRange): RangeAndSide => {
+  let patchWithLargestEncompassedRange: RangeAndSide = {
+    start: {
+      line: 0,
+      side: 'LEFT'
+    },
+    end: {
+      line: 0,
+      side: 'RIGHT'
+    }
+  };
+  patchLineRanges.forEach((patchLineRange) => {
+    const isMinusStartSmaller = patchLineRange.minusRange.start <= patchLineRange.addRange.start;
+    const smallestStartLine = isMinusStartSmaller ? patchLineRange.minusRange.start : patchLineRange.addRange.start;
+    const smallestStartSide = isMinusStartSmaller ? 'LEFT' : 'RIGHT';
+
+    const isPositiveEndLarger = patchLineRange.addRange.end >= patchLineRange.minusRange.end;
+    const largestEndLine = isPositiveEndLarger ? patchLineRange.addRange.end : patchLineRange.minusRange.end;
+    const largestEndSide = isMinusStartSmaller ? 'RIGHT' : 'LEFT';
+
+    if (Math.min(largestEndLine, alertLineRange.end) - Math.max(smallestStartLine, alertLineRange.start)) {
+      patchWithLargestEncompassedRange = {
+        start: {
+          line: smallestStartLine,
+          side: smallestStartSide
+        },
+        end: {
+          line: largestEndLine,
+          side: largestEndSide
+        }
+      }
+    }
+  })
+  return patchWithLargestEncompassedRange;
 }

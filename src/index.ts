@@ -1,26 +1,8 @@
 // https://www.notion.so/mintlify/Installation-37aab83daa5e48b88cde8bd3891fa181
 import { Context, Probot } from "probot";
 import axios from 'axios';
-import { Change, parsePatch, PatchLineRange } from "./patch";
+import { Alert, File, getEncompassingRangeAndSideForAlert, parsePatch, PatchLineRange } from "./patch";
 import { getReviewComments, ENDPOINT, checkIfAllAlertsAreResolve, createSuccessCheck, createActionRequiredCheck } from "./helpers";
-
-type File = {
-  filename: string;
-	content: string;
-	changes: Change[]
-}
-
-type LineRange = {
-  start: number;
-  end: number;
-}
-
-type Alert = {
-  url: string;
-  message: string;
-  filename: string;
-  lineRange: LineRange
-}
 
 export = (app: Probot) => {
   app.on(["pull_request.opened", "pull_request.reopened", "pull_request.synchronize"], async (context) => {
@@ -93,20 +75,22 @@ export = (app: Probot) => {
     };
 
     const reviewCommentPromises: any[] = newAlerts.map((newAlert) => {
-      const patchLineRange = filesPatchLineRangesMap[newAlert.filename];
-      if (patchLineRange == null) return null;
+      const patchLineRanges = filesPatchLineRangesMap[newAlert.filename];
+      if (patchLineRanges == null) return null;
       
-      console.log(patchLineRange);
-      // return context.octokit.pulls.createReviewComment({
-      //   owner,
-      //   repo,
-      //   pull_number: pullNumber,
-      //   commit_id: context.payload.pull_request.head.sha,
-      //   body: newAlert.message,
-      //   path: newAlert.filename,
-      //   line: newAlert.lineRange.start,
-      //   side: 'RIGHT'
-      // })
+      const encompassedRangeAndSide = getEncompassingRangeAndSideForAlert(patchLineRanges, newAlert.lineRange);
+      return context.octokit.pulls.createReviewComment({
+        owner,
+        repo,
+        pull_number: pullNumber,
+        commit_id: context.payload.pull_request.head.sha,
+        body: newAlert.message,
+        path: newAlert.filename,
+        start_line: encompassedRangeAndSide.start.line,
+        start_side: encompassedRangeAndSide.start.side,
+        line: encompassedRangeAndSide.end.line,
+        side: encompassedRangeAndSide.end.side
+      })
       return null;
     });
     await Promise.all(reviewCommentPromises);
