@@ -125,11 +125,11 @@ export const getEncompassingRangeAndSideForAlert = (patchLineRanges: PatchLineRa
     if (Math.min(largestEndLine, alertLineRange.end) - Math.max(smallestStartLine, alertLineRange.start)) {
       patchWithLargestEncompassedRange = {
         start: {
-          line: smallestStartLine,
+          line: Math.max(smallestStartLine, alertLineRange.start),
           side: smallestStartSide
         },
         end: {
-          line: largestEndLine,
+          line: Math.min(largestEndLine, alertLineRange.end),
           side: largestEndSide
         }
       }

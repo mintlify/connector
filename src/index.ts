@@ -61,11 +61,17 @@ export = (app: Probot) => {
     }
 
     // New alerts do not exist in previous alerts
-    const previousAlertsContent = previousAlerts.map((previousAlert: any) => {
-      return previousAlert.comments.edges[0].node.body;
-    })
+    const previousAlertsData = previousAlerts.map((previousAlert: any) => {
+      return {
+        path: previousAlert.path,
+        content: previousAlert.comments.edges[0].node.body
+      };
+    });
+
     const newAlerts = incomingAlerts.filter((incomingAlert) => {
-      return previousAlertsContent.includes(incomingAlert.message) === false;
+      return previousAlertsData.every((previousAlertData: any) => {
+        return incomingAlert.message !== previousAlertData.content && incomingAlert.filename !== previousAlertData.path
+      });
     });
     const isAllPreviousAlertsResolved = checkIfAllAlertsAreResolve(previousAlerts);
 
