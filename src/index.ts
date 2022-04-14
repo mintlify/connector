@@ -97,7 +97,6 @@ export = (app: Probot) => {
         line: encompassedRangeAndSide.end.line,
         side: encompassedRangeAndSide.end.side
       })
-      return null;
     });
     await Promise.all(reviewCommentPromises);
     await createActionRequiredCheck(context, newAlerts[0].url);

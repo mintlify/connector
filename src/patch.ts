@@ -120,7 +120,7 @@ export const getEncompassingRangeAndSideForAlert = (patchLineRanges: PatchLineRa
 
     const isPositiveEndLarger = patchLineRange.addRange.end >= patchLineRange.minusRange.end;
     const largestEndLine = isPositiveEndLarger ? patchLineRange.addRange.end : patchLineRange.minusRange.end;
-    const largestEndSide = isMinusStartSmaller ? 'RIGHT' : 'LEFT';
+    const largestEndSide = isPositiveEndLarger ? 'RIGHT' : 'LEFT';
 
     if (Math.min(largestEndLine, alertLineRange.end) - Math.max(smallestStartLine, alertLineRange.start)) {
       patchWithLargestEncompassedRange = {
