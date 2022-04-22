@@ -104,23 +104,14 @@ export = (app: Probot) => {
     return;
   });
 
-  app.on('pull_request_review_thread.resolved' as any, async (context: Context) => {
+  app.on(['pull_request_review_thread.resolved', 'pull_request_review_thread.unresolved'] as any, async (context: Context) => {
     await createInProgressCheck(context);
     const previousAlerts = await getReviewComments(context);
     const isAllPreviousAlertsResolved = checkIfAllAlertsAreResolve(previousAlerts);
 
-    if (!isAllPreviousAlertsResolved) {
-      await createActionRequiredCheck(context);
-    }
-
-    await createSuccessCheck(context);
-  });
-
-  app.on('pull_request_review_thread.unresolved' as any, async (context: Context) => {
-    const previousAlerts = await getReviewComments(context);
-    const isAllPreviousAlertsResolved = checkIfAllAlertsAreResolve(previousAlerts);
-
-    if (!isAllPreviousAlertsResolved) {
+    if (isAllPreviousAlertsResolved) {
+      await createSuccessCheck(context);
+    } else {
       await createActionRequiredCheck(context);
     }
   });
