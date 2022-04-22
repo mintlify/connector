@@ -46,6 +46,19 @@ export const checkIfAllAlertsAreResolve = (allConnectReviewComments: any[]) => {
   return allConnectReviewComments.every((comment: any) => comment.isResolved);
 }
 
+export const createInProgressCheck = (context: Context) => {
+  const owner = context.payload.repository.owner.login;
+  const repo = context.payload.repository.name;
+
+  return context.octokit.checks.create({
+    owner,
+    repo,
+    head_sha: context.payload.pull_request.head.sha,
+    name: 'Continuous Documentation Check',
+    status: 'in_progress'
+  })
+}
+
 export const createSuccessCheck = (context: Context) => {
   const owner = context.payload.repository.owner.login;
   const repo = context.payload.repository.name;
@@ -54,7 +67,7 @@ export const createSuccessCheck = (context: Context) => {
     owner,
     repo,
     head_sha: context.payload.pull_request.head.sha,
-    name: 'Documentation Maintenance Check',
+    name: 'Continuous Documentation Check',
     status: 'completed',
     conclusion: 'success',
   })
@@ -68,7 +81,7 @@ export const createActionRequiredCheck = (context: Context, detailsUrl?: string)
     owner,
     repo,
     head_sha: context.payload.pull_request.head.sha,
-    name: 'Documentation Maintenance Check',
+    name: 'Continuous Documentation Check',
     status: 'completed',
     conclusion: 'action_required',
     details_url: detailsUrl,
