@@ -105,11 +105,12 @@ export = (app: Probot) => {
   });
 
   app.on('pull_request_review_thread.resolved' as any, async (context: Context) => {
+    await createInProgressCheck(context);
     const previousAlerts = await getReviewComments(context);
     const isAllPreviousAlertsResolved = checkIfAllAlertsAreResolve(previousAlerts);
 
     if (!isAllPreviousAlertsResolved) {
-      return;
+      await createActionRequiredCheck(context);
     }
 
     await createSuccessCheck(context);
