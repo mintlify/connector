@@ -113,4 +113,13 @@ export = (app: Probot) => {
 
     await createSuccessCheck(context);
   });
+
+  app.on('pull_request_review_thread.unresolved' as any, async (context: Context) => {
+    const previousAlerts = await getReviewComments(context);
+    const isAllPreviousAlertsResolved = checkIfAllAlertsAreResolve(previousAlerts);
+
+    if (!isAllPreviousAlertsResolved) {
+      await createActionRequiredCheck(context);
+    }
+  });
 };
