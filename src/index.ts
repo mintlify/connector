@@ -60,8 +60,9 @@ export = (app: Probot) => {
     const { newLinksMessage }: { newLinksMessage: string } = connectResponse.data;
   
     if (newLinksMessage != null) {
-      const previousAlertContent = previousAlerts.map((previousAlert: any) => previousAlert.comments.edges[0].node.body);
-      if (!previousAlertContent.includes(newLinksMessage)) {
+      const commentResponse = await context.octokit.rest.issues.listComments(context.issue());
+      const comments = commentResponse.data.map((comment) => comment.body);
+      if (!comments.includes(newLinksMessage)) {
         await context.octokit.issues.createComment(context.issue({body: newLinksMessage}))
       }
     }
