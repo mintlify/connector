@@ -57,6 +57,15 @@ export = (app: Probot) => {
     const [connectResponse, previousAlerts] = await Promise.all([connectPromise, previousAlertsPromise]);
 
     const incomingAlerts: Alert[] = connectResponse.data.alerts;
+    const { newLinksMessage }: { newLinksMessage: string } = connectResponse.data;
+  
+    if (newLinksMessage != null) {
+      const previousAlertContent = previousAlerts.map((previousAlert: any) => previousAlert.comments.edges[0].node.body);
+      if (!previousAlertContent.includes(newLinksMessage)) {
+        await context.octokit.issues.createComment(context.issue({body: newLinksMessage}))
+      }
+    }
+
     if (incomingAlerts == null) {
       return;
     }
@@ -100,6 +109,7 @@ export = (app: Probot) => {
       })
     });
     await Promise.all(reviewCommentPromises);
+    console.log({newAlerts});
     await createActionRequiredCheck(context, newAlerts[0].url);
     return;
   });
