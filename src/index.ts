@@ -110,7 +110,6 @@ export = (app: Probot) => {
       })
     });
     await Promise.all(reviewCommentPromises);
-    console.log({newAlerts});
     await createActionRequiredCheck(context, newAlerts[0].url);
     return;
   });
