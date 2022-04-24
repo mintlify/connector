@@ -2,10 +2,11 @@
 import { Context, Probot } from "probot";
 import axios from 'axios';
 import { Alert, File, getEncompassingRangeAndSideForAlert, parsePatch, PatchLineRange } from "./patch";
-import { getReviewComments, ENDPOINT, checkIfAllAlertsAreResolve, createSuccessCheck, createActionRequiredCheck } from "./helpers";
+import { getReviewComments, ENDPOINT, checkIfAllAlertsAreResolve, createSuccessCheck, createActionRequiredCheck, createInProgressCheck } from "./helpers";
 
 export = (app: Probot) => {
   app.on(["pull_request.opened", "pull_request.reopened", "pull_request.synchronize"], async (context) => {
+    await createInProgressCheck(context);
     const owner = context.payload.repository.owner.login;
     const repo = context.payload.repository.name;
     const pullNumber = context.payload.number;
@@ -56,6 +57,16 @@ export = (app: Probot) => {
     const [connectResponse, previousAlerts] = await Promise.all([connectPromise, previousAlertsPromise]);
 
     const incomingAlerts: Alert[] = connectResponse.data.alerts;
+    const { newLinksMessage }: { newLinksMessage: string } = connectResponse.data;
+  
+    if (newLinksMessage != null) {
+      const commentResponse = await context.octokit.rest.issues.listComments(context.issue());
+      const comments = commentResponse.data.map((comment) => comment.body);
+      if (!comments.includes(newLinksMessage)) {
+        await context.octokit.issues.createComment(context.issue({body: newLinksMessage}))
+      }
+    }
+
     if (incomingAlerts == null) {
       return;
     }
@@ -103,14 +114,15 @@ export = (app: Probot) => {
     return;
   });
 
-  app.on('pull_request_review_thread.resolved' as any, async (context: Context) => {
+  app.on(['pull_request_review_thread.resolved', 'pull_request_review_thread.unresolved'] as any, async (context: Context) => {
+    await createInProgressCheck(context);
     const previousAlerts = await getReviewComments(context);
     const isAllPreviousAlertsResolved = checkIfAllAlertsAreResolve(previousAlerts);
 
-    if (!isAllPreviousAlertsResolved) {
-      return;
+    if (isAllPreviousAlertsResolved) {
+      await createSuccessCheck(context);
+    } else {
+      await createActionRequiredCheck(context);
     }
-
-    await createSuccessCheck(context);
   });
 };
