@@ -5,6 +5,14 @@ import { Alert, File, getEncompassingRangeAndSideForAlert, parsePatch, PatchLine
 import { getReviewComments, ENDPOINT, checkIfAllAlertsAreResolve, createSuccessCheck, createActionRequiredCheck, createInProgressCheck } from "./helpers";
 
 export = (app: Probot) => {
+  app.on('installation.created', async (context) => {
+    const owner = context.payload.installation.account.login;
+    await axios.post(`${ENDPOINT}/connect/v01/`, {
+      owner,
+      source: 'github'
+    });
+  });
+
   app.on(["pull_request.opened", "pull_request.reopened", "pull_request.synchronize"], async (context) => {
     await createInProgressCheck(context);
     const owner = context.payload.repository.owner.login;
