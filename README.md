@@ -1,4 +1,4 @@
-# 🔗 Mintlify Connect
+# 🪴 Mintlify Connect
 
 > A GitHub App built with [Probot](https://github.com/probot/probot) that Mintlify Connect
 
