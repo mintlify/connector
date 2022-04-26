@@ -1,8 +1,5 @@
 import { Context } from "probot";
-
-const ISDEV = process.env.NODE_ENV === 'development';
-export const ADMIN_LOGIN = ISDEV ? 'mintlify-connect-dev' : 'mintlify-connect';
-export const ENDPOINT = ISDEV ? 'http://localhost:5000' : 'https://api.mintlify.com'
+import { ADMIN_LOGIN } from "../constants";
 
 export const getReviewComments = async (context: Context) => {
   const owner = context.payload.repository.owner.login;
