@@ -1,0 +1,23 @@
+{
+  "name": "connect",
+  "version": "1.0.0",
+  "description": "Automations for continuous up-to-date documentation",
+  "main": "server/index.ts",
+  "scripts": {
+    "dev": "npm run dev --workspace=github & npm run dev --workspace=server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mintlify/connect.git"
+  },
+  "author": "Mintlify",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mintlify/connect/issues"
+  },
+  "homepage": "https://github.com/mintlify/connect#readme",
+  "workspaces": [
+    "github",
+    "server"
+  ]
+}
