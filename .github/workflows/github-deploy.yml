@@ -1,0 +1,28 @@
+name: Deploy GitHub app
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - github/**
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout source code
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      working-directory: ./github
+      run: npm install --prefix ./
+
+    - name: Deploy to Heroku
+      uses: akhileshns/heroku-deploy@v3.12.12
+      with:
+        heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+        heroku_app_name: figstack
+        team: mintlify
+        heroku_email: han@mintlify.com
+        appdir: github
