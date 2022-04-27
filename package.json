@@ -1,37 +1,23 @@
 {
   "name": "connect",
   "version": "1.0.0",
-  "private": true,
-  "description": "Mintlify Connect",
-  "author": "Mintlify <hi@mintlify.com>",
-  "license": "ISC",
-  "homepage": "https://github.com/mintlify/connect",
-  "keywords": [
-    "probot",
-    "github",
-    "probot-app"
-  ],
+  "description": "Automations for continuous up-to-date documentation",
+  "main": "server/index.ts",
   "scripts": {
-    "build": "tsc",
-    "start": "npm run build && probot run ./lib/index.js",
-    "dev": "nodemon -e ts,js --exec npm start",
-    "test": "jest"
+    "dev": "npm run dev --workspace=github & npm run dev --workspace=server"
   },
-  "dependencies": {
-    "axios": "^0.26.1",
-    "nodemon": "^2.0.15",
-    "probot": "^11.0.1",
-    "typescript": "^4.6.3"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mintlify/connect.git"
   },
-  "devDependencies": {
-    "@types/jest": "^26.0.19",
-    "@types/node": "^14.14.19",
-    "jest": "^26.6.3",
-    "nock": "^13.0.5",
-    "smee-client": "^1.2.2",
-    "ts-jest": "^26.4.4"
+  "author": "Mintlify",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mintlify/connect/issues"
   },
-  "engines": {
-    "node": ">= 10.13.0"
-  }
+  "homepage": "https://github.com/mintlify/connect#readme",
+  "workspaces": [
+    "github",
+    "server"
+  ]
 }
