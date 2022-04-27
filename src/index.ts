@@ -6,6 +6,7 @@ import { getReviewComments, ENDPOINT, checkIfAllAlertsAreResolve, createSuccessC
 
 export = (app: Probot) => {
   app.on(["pull_request.opened", "pull_request.reopened", "pull_request.synchronize"], async (context) => {
+    console.log('yeeetttttt');
     await createInProgressCheck(context);
     const owner = context.payload.repository.owner.login;
     const repo = context.payload.repository.name;
