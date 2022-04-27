@@ -1,4 +1,4 @@
-import { PLConnect } from 'parsing/types';
+import { FileSkeleton, PLConnect } from 'parsing/types';
 import TypeScript from 'parsing/languages/typescript';
 import JavaScript from 'parsing/languages/javascript';
 import Python from 'parsing/languages/python';
@@ -15,6 +15,9 @@ import Go from './go';
 
 class UnknownPL implements PLConnect {
   extractComment(): string {
+      return null;
+  }
+  getFileSkeleton(): FileSkeleton {
       return null;
   }
 }

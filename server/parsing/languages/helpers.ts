@@ -1,4 +1,4 @@
-import { TreeNode } from 'parsing/types';
+import { TreeNode, PLConnect } from 'parsing/types';
 import extract from 'extract-comments';
 
 export const checkNodeByKind = (node: TreeNode | null, ...kinds: string[]): boolean => {
@@ -147,9 +147,6 @@ export const removeFront = (str: string, num: number): string => {
   return str.trim().slice(num).trim();
 }
 
-/*
-  A lot of programming languages share the same comment syntax as JS, this function removes common syntax for those languages
-*/
 export const extractBaseComments = (tree: TreeNode): string | null => {
   if (!['comment', 'block_comment'].includes(tree.kind)) {
     return null;
@@ -157,4 +154,37 @@ export const extractBaseComments = (tree: TreeNode): string | null => {
   const comments = extract(tree.value);
   if (comments.length === 0) { return null; }
   return comments[0].value.trim();
+}
+
+export const nodeIsOnPath = (tree: TreeNode, path: string[]): boolean => {
+  const traverse = (node: TreeNode | null, remainingPath: string[]): boolean => {
+    if (remainingPath.length === 0) return true;
+
+    const isOnCurrentPath = node?.kind === remainingPath[0];
+    if (isOnCurrentPath) {
+      return traverse(node, remainingPath.slice(1));
+    }
+
+    // one of the children is on path
+    const childOnValidPath = node?.children?.find((child) => child.kind === remainingPath[0]);
+    if (childOnValidPath != null) {
+      return traverse(childOnValidPath, remainingPath.slice(1));
+    }
+
+    return false;
+  }
+
+  return traverse(tree, path);
+}
+
+export const getTopComment = (pl: PLConnect, tree: TreeNode, paths: string[][]): string => {
+  if (tree.children == null) { return null; }
+  const { children } = tree;
+  const firstNode = children[0];
+  const secondNode = children[1];
+  const onPath = paths.map((path) => nodeIsOnPath(secondNode, path));
+  if (onPath.includes(true)) { // if the next child is one of these types then don't count it as a top comment
+    return null;
+  }
+  return pl.extractComment(firstNode);
 }
