@@ -13,7 +13,9 @@ export type NotionAuthConnectorType = {
 export type AuthConnectorType = {
   source: string,
   sourceId: string,
-  notion: NotionAuthConnectorType
+  notion: NotionAuthConnectorType,
+  alerts: boolean,
+  gitbook: boolean
 }
 
 const NotionAuthConnectorSchema = new Schema({
@@ -27,6 +29,8 @@ const NotionAuthConnectorSchema = new Schema({
 const AuthConnectorSchema = new Schema({
     source: { type: String, required: true },
     sourceId: { type: String, required: true },
+    alerts: { type: Boolean },
+    gitbook: { type: Boolean },
     notion: { type: NotionAuthConnectorSchema }
 })
 

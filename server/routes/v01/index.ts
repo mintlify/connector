@@ -37,4 +37,27 @@ v01Router.post('/', async (req, res) => {
     });
 });
 
+v01Router.get('/integrations', async (req, res) => {
+    const { owner }: { owner: string } = req.body;
+
+    if (owner == null) return res.status(400).end();
+
+    const { gitbook, alerts } = await getAuthConnector(owner);
+
+    return res.status(200).send({
+        gitbook,
+        alerts
+    })
+});
+
+v01Router.post('/auth', async (req, res) => {
+    const { owner, source } = req.body;
+    const authConnector = {
+        sourceId: owner,
+        source
+    };
+    await AuthConnector.create(authConnector);
+    return res.status(200).end();
+});
+
 export default v01Router;
