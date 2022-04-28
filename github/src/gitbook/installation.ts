@@ -3,6 +3,22 @@ import axios from 'axios';
 
 import { ENDPOINT } from "../constants";
 
+type GitbookFile = {
+  filename: string;
+  content: string;
+}
+
+const gitbookFilesToTrees = (gitbookFiles: GitbookFile[]) => {
+  return gitbookFiles.map((gbFile) => {
+    return {
+      path: gbFile.filename,
+      mode: '100644',
+      type: 'blob',
+      content: gbFile.content
+    };
+  });
+};
+
 const installation = async (context: any, repo: string) => {
     const owner = context.payload.installation.account.login;
     const integrationsResponse = await axios.get(`${ENDPOINT}/v01/integrations`, {
@@ -42,11 +58,39 @@ const installation = async (context: any, repo: string) => {
         }
       }));
       const files = await Promise.all(fileContentPromises);
-      const gitbookFiles = await axios.post(`${ENDPOINT}/gitbook/`, {
+      const gitbookFileResponse = await axios.post(`${ENDPOINT}/gitbook/`, {
         files,
         owner,
       });
-      console.log(gitbookFiles.data);
+      const gitbookFiles = gitbookFileResponse.data.mdFiles as GitbookFile[];
+      const treeChildren = gitbookFilesToTrees(gitbookFiles);
+      const refResponse = await context.octokit.rest.git.getRef({
+        owner,
+        repo,
+        ref: `heads/${defaultBranch}`
+      });
+      const baseSha = refResponse.data.object.sha;
+      const createdTreeResponse = await context.octokit.rest.git.createTree({
+        owner,
+        repo,
+        tree: treeChildren,
+        base_tree: baseSha
+      });
+      const treeSha = createdTreeResponse.data.sha;
+      const commitResponse = await context.octokit.rest.git.createCommit({
+        owner,
+        repo,
+        message: 'Initial docs generated',
+        tree: treeSha,
+        parents: [baseSha]
+      });
+      const commitSha = commitResponse.data.sha;
+      await context.octokit.rest.git.updateRef({
+        owner,
+        repo,
+        ref: `heads/${defaultBranch}`,
+        sha: commitSha
+      });
     }
 }
 
