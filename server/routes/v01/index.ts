@@ -6,7 +6,7 @@ import AuthConnector from 'models/AuthConnector';
 
 const v01Router = express.Router();
 
-const getAuthConnector = (sourceId: string) => {
+export const getAuthConnector = (sourceId: string) => {
     return AuthConnector.findOne({sourceId});
 }
 

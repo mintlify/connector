@@ -18,6 +18,7 @@ export type Skeleton = {
   signature: string;
   lineRange: LineRange;
   doc: string;
+  url?: string;
 }
 
 export type FileSkeleton = {

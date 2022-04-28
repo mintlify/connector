@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import 'services/mongoose';
 import notionRouter from 'routes/notion';
 import v01Router from 'routes/v01';
+import gitbookRouter from 'routes/gitbook';
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.get('/', (_, res) => {
 // Connect
 app.use('/v01', v01Router);
 app.use('/notion', notionRouter);
+app.use('/gitbook', gitbookRouter);
 
 app.listen(PORT, () => {
   console.log(`Listening at PORT ${PORT}`);

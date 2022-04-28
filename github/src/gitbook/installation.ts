@@ -5,7 +5,7 @@ import { ENDPOINT } from "../constants";
 
 const installation = async (context: any, repo: string) => {
     const owner = context.payload.installation.account.login;
-    const integrationsResponse = await axios.get(`${ENDPOINT}/connect/v01/integrations`, {
+    const integrationsResponse = await axios.get(`${ENDPOINT}/v01/integrations`, {
       data: {
         owner
       }
@@ -23,8 +23,30 @@ const installation = async (context: any, repo: string) => {
         tree_sha: defaultBranch,
         recursive: true
       })
-      const { tree } = contentResponse.data
-      console.log(tree);
+      const { tree } = contentResponse.data;
+      const fileContentPromises = tree.map((file: any) => new Promise(async (resolve, reject) => {
+        try {
+          const contentRequest = {
+            owner,
+            repo,
+            path: file.path 
+          };
+          const content = await context.octokit.repos.getContent(contentRequest) as { data: { content: string } };
+          const contentString = Buffer.from(content.data.content, 'base64').toString();
+          resolve({
+            filename: file.path,
+            content: contentString
+          });
+        } catch (e) {
+          reject(e);
+        }
+      }));
+      const files = await Promise.all(fileContentPromises);
+      const gitbookFiles = await axios.post(`${ENDPOINT}/gitbook/`, {
+        files,
+        owner,
+      });
+      console.log(gitbookFiles.data);
     }
 }
 

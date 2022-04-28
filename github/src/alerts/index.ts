@@ -49,7 +49,7 @@ export const alerts = (app: Probot) => {
         );
 
         const files = await Promise.all(getFilesContentPromises) as File[];
-        const connectPromise = axios.post(`${ENDPOINT}/connect/v01/`, {
+        const connectPromise = axios.post(`${ENDPOINT}/v01/`, {
           files,
           owner,
         });
