@@ -61,6 +61,8 @@ const installation = async (context: any, repo: string) => {
       const gitbookFileResponse = await axios.post(`${ENDPOINT}/gitbook/`, {
         files,
         owner,
+        branch: defaultBranch,
+        repo
       });
       const gitbookFiles = gitbookFileResponse.data.mdFiles as GitbookFile[];
       const treeChildren = gitbookFilesToTrees(gitbookFiles);
@@ -80,7 +82,7 @@ const installation = async (context: any, repo: string) => {
       const commitResponse = await context.octokit.rest.git.createCommit({
         owner,
         repo,
-        message: 'Initial docs generated',
+        message: 'Initial docs generated {3}',
         tree: treeSha,
         parents: [baseSha]
       });
@@ -97,10 +99,12 @@ const installation = async (context: any, repo: string) => {
 export const gitbookInstallation = (app: Probot) => {
     app.on('installation.created', async (context) => {
         const repo = context.payload.repositories[0]?.name;
+        console.log({repo});
         await installation(context, repo);
     });
     app.on('installation_repositories.added', async (context) => {
         const repo = context.payload.repositories_added[0]?.name;
+        console.log({repo});
         await installation(context, repo);
     });
 }

@@ -14,11 +14,9 @@ export type GitbookFile = {
 const gitbookRouter = express.Router();
 
 gitbookRouter.post('/', async (req, res) => {
-    const { files, owner } : { files: GitbookFile[], owner: string } = req.body;
+    const { files, owner, branch, repo } : { files: GitbookFile[], owner: string, branch: string, repo: string } = req.body;
 
     if (files == null) return res.status(400).end();
-    if (owner == null) return res.status(400).end();
-    if (files === []) return res.status(200).end();
 
     const authConnector = await getAuthConnector(owner);
 
@@ -27,7 +25,7 @@ gitbookRouter.post('/', async (req, res) => {
         const languageId = getLanguageIdByFilename(file.filename);
         const content = formatCode(languageId, file.content);
         const fileSkeleton = getFileSkeleton(content, languageId);
-        fileSkeleton.skeletons = addUrlsToSkeletons(fileSkeleton.skeletons, file.filename, authConnector);
+        fileSkeleton.skeletons = addUrlsToSkeletons(fileSkeleton.skeletons, repo, branch, file.filename, authConnector);
         const markdown = fileSkeletonToMarkdown(fileSkeleton, file.filename);
         const mdFilename = `mintlify/${file.filename}.md`
         const mdFile = { filename: mdFilename, content: markdown };
