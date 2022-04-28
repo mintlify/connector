@@ -12,7 +12,7 @@ export const getAlertsForFile = async (file: ConnectFile, authConnector?: AuthCo
     const languageId = getLanguageIdByFilename(file.filename);
     const content = formatCode(languageId, file.content);
     const pl = getPL(languageId);
-    const tree = await getTreeSitterProgram(content, languageId);
+    const tree = getTreeSitterProgram(content, languageId);
     const links: Link[] = getLinksInFile(tree.root, file.changes, pl);
     const alertPromises: Promise<Alert>[] = links.map(async (link) => await linkToAlert(link, file.filename, authConnector));
     const alertResults = await Promise.all(alertPromises) as Alert[];
