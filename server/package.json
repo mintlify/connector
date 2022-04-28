@@ -42,7 +42,6 @@
     "@notionhq/client": "^1.0.4",
     "analytics-node": "^6.0.0",
     "axios": "^0.23.0",
-    "connect-datadog": "^0.0.9",
     "cors": "^2.8.5",
     "dotenv": "^14.2.0",
     "express": "^4.17.1",
