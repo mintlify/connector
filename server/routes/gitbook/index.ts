@@ -15,13 +15,13 @@ const gitbookRouter = express.Router();
 
 gitbookRouter.post('/', async (req, res) => {
     const { files, owner, branch, repo } : { files: GitbookFile[], owner: string, branch: string, repo: string } = req.body;
-
     if (files == null) return res.status(400).end();
 
     const authConnector = await getAuthConnector(owner);
+    const prunedFiles = files.filter((file) => file != null);
 
     const mdFiles: GitbookFile[] = [];
-    files.forEach(async (file) => {
+    prunedFiles.forEach(async (file) => {
         const languageId = getLanguageIdByFilename(file.filename);
         const content = formatCode(languageId, file.content);
         const fileSkeleton = getFileSkeleton(content, languageId);

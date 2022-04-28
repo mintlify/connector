@@ -38,9 +38,12 @@ const installation = async (context: any, repo: string) => {
         repo,
         tree_sha: defaultBranch,
         recursive: true
-      })
+      });
       const { tree } = contentResponse.data;
-      const fileContentPromises = tree.map((file: any) => new Promise(async (resolve, reject) => {
+      const fileContentPromises = tree.map((file: any) => new Promise(async (resolve) => {
+        if (file.mode !== '100644') { // skip anything that isn't a file in the tree
+          resolve(null)
+        }
         try {
           const contentRequest = {
             owner,
@@ -53,11 +56,12 @@ const installation = async (context: any, repo: string) => {
             filename: file.path,
             content: contentString
           });
-        } catch (e) {
-          reject(e);
+        } catch {
+          resolve(null)
         }
       }));
-      const files = await Promise.all(fileContentPromises);
+      const fileResponses = await Promise.all(fileContentPromises);
+      const files = fileResponses.filter((file) => file != null);
       const gitbookFileResponse = await axios.post(`${ENDPOINT}/gitbook/`, {
         files,
         owner,
@@ -82,7 +86,7 @@ const installation = async (context: any, repo: string) => {
       const commitResponse = await context.octokit.rest.git.createCommit({
         owner,
         repo,
-        message: 'Initial docs generated {3}',
+        message: 'Initial docs generated 4',
         tree: treeSha,
         parents: [baseSha]
       });
