@@ -6,6 +6,8 @@ import { fileSkeletonToMarkdown } from './markdown';
 import { getAuthConnector } from 'routes/v01';
 import { addUrlsToSkeletons } from './url';
 
+const SUPPORTED_LANGUAGES = ['typescript'];
+
 export type GitbookFile = {
     filename: string;
     content: string;
@@ -23,6 +25,7 @@ gitbookRouter.post('/', async (req, res) => {
     const mdFiles: GitbookFile[] = [];
     prunedFiles.forEach(async (file) => {
         const languageId = getLanguageIdByFilename(file.filename);
+        if (!SUPPORTED_LANGUAGES.includes(languageId)) return;
         const content = formatCode(languageId, file.content);
         const fileSkeleton = getFileSkeleton(content, languageId);
         fileSkeleton.skeletons = addUrlsToSkeletons(fileSkeleton.skeletons, repo, branch, file.filename, authConnector);
