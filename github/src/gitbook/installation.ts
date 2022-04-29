@@ -106,12 +106,10 @@ const installation = async (context: any, repo: string) => {
 export const gitbookInstallation = (app: Probot) => {
     app.on('installation.created', async (context) => {
         const repo = context.payload.repositories[0]?.name;
-        console.log({repo});
         await installation(context, repo);
     });
     app.on('installation_repositories.added', async (context) => {
         const repo = context.payload.repositories_added[0]?.name;
-        console.log({repo});
         await installation(context, repo);
     });
 }
