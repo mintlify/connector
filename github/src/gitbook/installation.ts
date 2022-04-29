@@ -64,7 +64,7 @@ const installation = async (context: any, repo: string) => {
       // TODO: account for when SUMMARY.md is named differently or doesn't exist
       const files = fileResponses.filter((file) => file != null && file.filename !== 'SUMMARY.md');
       const summary = fileResponses.find((file) => file.filename === 'SUMMARY.md');
-      const gitbookFileResponse = await axios.post(`${ENDPOINT}/gitbook/`, {
+      const gitbookFileResponse = await axios.post(`${ENDPOINT}/gitbook/installation`, {
         files,
         owner,
         branch: defaultBranch,
