@@ -2,8 +2,8 @@ import { Client } from '@notionhq/client';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import { GetBlockResponse, GetPageResponse } from '@notionhq/client/build/src/api-endpoints';
-import { Link } from 'routes/v01/types';
-import { urlify } from 'routes/v01/links';
+import { Link } from 'helpers/types';
+import { urlify } from 'helpers/links';
 
 dotenv.config();
 
