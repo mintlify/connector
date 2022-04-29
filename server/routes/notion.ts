@@ -46,6 +46,7 @@ notionRouter.get('/authorization', async (req, res) => {
       workspaceId: response.workspace_id,
     }
   };
+  
   await AuthConnector.findOneAndUpdate(credentials, notionAuth, { upsert: true });
   return res.redirect('https://notion.so');
 });
