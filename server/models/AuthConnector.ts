@@ -27,6 +27,7 @@ const NotionAuthConnectorSchema = new Schema({
 const AuthConnectorSchema = new Schema({
     source: { type: String, required: true },
     sourceId: { type: String, required: true },
+    hashedSourceId: { type: String, required: true },
     notion: { type: NotionAuthConnectorSchema }
 })
 
