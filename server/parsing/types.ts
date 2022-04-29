@@ -24,6 +24,7 @@ export type Skeleton = {
 export type FileSkeleton = {
   topComment: string;
   skeletons: Skeleton[];
+  filename?: string;
 }
 
 export interface PLConnect {

@@ -61,12 +61,15 @@ const installation = async (context: any, repo: string) => {
         }
       }));
       const fileResponses = await Promise.all(fileContentPromises);
-      const files = fileResponses.filter((file) => file != null);
+      // TODO: account for when SUMMARY.md is named differently or doesn't exist
+      const files = fileResponses.filter((file) => file != null && file.filename !== 'SUMMARY.md');
+      const summary = fileResponses.find((file) => file.filename === 'SUMMARY.md');
       const gitbookFileResponse = await axios.post(`${ENDPOINT}/gitbook/`, {
         files,
         owner,
         branch: defaultBranch,
-        repo
+        repo,
+        summary
       });
       const gitbookFiles = gitbookFileResponse.data.mdFiles as GitbookFile[];
       const treeChildren = gitbookFilesToTrees(gitbookFiles);

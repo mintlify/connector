@@ -2,7 +2,7 @@ import express from 'express';
 
 import { getLanguageIdByFilename } from 'parsing/filenames';
 import { formatCode, getFileSkeleton } from 'parsing';
-import { fileSkeletonToMarkdown } from './markdown';
+import { fileSkeletonToMarkdown, summaryUpdateOnInstallation } from './markdown';
 import { getAuthConnector } from 'routes/v01';
 import { addUrlsToSkeletons } from './url';
 
@@ -16,7 +16,7 @@ export type GitbookFile = {
 const gitbookRouter = express.Router();
 
 gitbookRouter.post('/', async (req, res) => {
-    const { files, owner, branch, repo } : { files: GitbookFile[], owner: string, branch: string, repo: string } = req.body;
+    const { files, owner, branch, repo, summary } : { files: GitbookFile[], owner: string, branch: string, repo: string, summary: GitbookFile } = req.body;
     if (files == null) return res.status(400).end();
 
     const authConnector = await getAuthConnector(owner);
@@ -29,11 +29,13 @@ gitbookRouter.post('/', async (req, res) => {
         const content = formatCode(languageId, file.content);
         const fileSkeleton = getFileSkeleton(content, languageId);
         fileSkeleton.skeletons = addUrlsToSkeletons(fileSkeleton.skeletons, repo, branch, file.filename, authConnector);
-        const markdown = fileSkeletonToMarkdown(fileSkeleton, file.filename);
+        fileSkeleton.skeletons = fileSkeleton.skeletons.map((skeleton) => { return { ...skeleton, filename: file.filename };});
+        const markdown = fileSkeletonToMarkdown(fileSkeleton);
         const mdFilename = `mintlify/${file.filename}.md`
         const mdFile = { filename: mdFilename, content: markdown };
         mdFiles.push(mdFile);
     });
+    mdFiles.push(summaryUpdateOnInstallation(summary, mdFiles));
     return res.status(200).send({
         mdFiles
     });
