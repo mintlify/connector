@@ -2,13 +2,13 @@ import { Client } from '@notionhq/client';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import { GetBlockResponse, GetPageResponse } from '@notionhq/client/build/src/api-endpoints';
-import { Link } from 'routes/v01/types';
-import { urlify } from 'routes/v01/links';
+import { Link } from 'helpers/types';
+import { urlify } from 'helpers/links';
 
 dotenv.config();
 
 const clientId = 'ec770c41-07f8-44bd-a4d8-66d30e9786c8';
-const redirectUrl = 'https://api.mintlify.com/notion/authorization';
+const redirectUrl = 'https://connect.mintlify.com/notion/authorization';
 
 export const isNotionUrl = (url: URL): boolean => {
     return url.host === 'www.notion.so' || url.host === 'notion.so';
