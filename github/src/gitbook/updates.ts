@@ -66,7 +66,8 @@ export const gitbookUpdates = (app: Probot) => {
                 filePairs,
                 mdToCode: true
             });
-            console.log(gitbookUpdateResponse);
+            const updatedFiles = gitbookUpdateResponse.data.files;
+            console.log(updatedFiles);
             // update code files from here
         } else { // if code is updated...
             // get code file & existing md file

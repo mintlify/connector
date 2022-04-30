@@ -7,7 +7,7 @@ import { sha512Hash } from 'helpers/hash';
 
 const v01Router = express.Router();
 
-const getAuthConnector = (sourceId: string) => {
+export const getAuthConnector = (sourceId: string) => {
     const hashedSourceId = sha512Hash(sourceId);
     return AuthConnector.findOne({hashedSourceId});
 }
