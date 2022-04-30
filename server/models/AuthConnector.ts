@@ -31,6 +31,7 @@ const AuthConnectorSchema = new Schema({
     sourceId: { type: String, required: true },
     alerts: { type: Boolean },
     gitbook: { type: Boolean },
+    hashedSourceId: { type: String, required: true },
     notion: { type: NotionAuthConnectorSchema }
 })
 

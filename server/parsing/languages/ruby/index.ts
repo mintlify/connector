@@ -1,7 +1,5 @@
 import { PLConnect, TreeNode } from 'parsing/types';
-import {
-  removeFront
-} from '../helpers';
+import { removeFront } from '../helpers';
 
 export default class Ruby implements PLConnect {  
   extractComment(tree: TreeNode): string | null {
