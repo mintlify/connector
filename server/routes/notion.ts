@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { sha512 } from 'helpers/hash';
+import { sha512Hash } from 'helpers/hash';
 import AuthConnector from 'models/AuthConnector';
 import { getNotionAccessTokenFromCode, getNotionURL } from 'services/notion';
 
@@ -36,7 +36,7 @@ notionRouter.get('/authorization', async (req, res) => {
   const credentials = {
     source: stateParsed.source,
     sourceId,
-    hashedSourceId: sha512(sourceId)
+    hashedSourceId: sha512Hash(sourceId)
   }
 
   const notionAuth = {

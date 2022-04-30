@@ -3,12 +3,12 @@ import { ConnectFile, Alert } from '../../helpers/types';
 import { createNewLinksMessage, getAlertsForAllFiles } from '../../helpers/alerts';
 import { track } from 'services/segment';
 import AuthConnector from 'models/AuthConnector';
-import { sha512 } from 'helpers/hash';
+import { sha512Hash } from 'helpers/hash';
 
 const v01Router = express.Router();
 
 const getAuthConnector = (sourceId: string) => {
-    const hashedSourceId = sha512(sourceId);
+    const hashedSourceId = sha512Hash(sourceId);
     return AuthConnector.findOne({hashedSourceId});
 }
 
