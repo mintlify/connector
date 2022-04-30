@@ -1,3 +1,4 @@
+// https://www.notion.so/mintlify/Data-modelling-e7910474830748b9bcc285b3d4ad06e5
 import mongoose from 'mongoose';
 
 const { Schema } = mongoose;
