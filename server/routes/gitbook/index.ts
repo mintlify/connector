@@ -1,16 +1,14 @@
 import express from 'express';
 
-import { getLanguageIdByFilename } from 'parsing/filenames';
-import { formatCode, getFileSkeleton } from 'parsing';
-import { fileSkeletonToMarkdown, summaryUpdateOnInstallation } from './markdown';
+import { mdToFileSkeleton } from './markdown';
 import { getAuthConnector } from 'routes/v01';
-import { addUrlsToSkeletons } from './url';
-
-const SUPPORTED_LANGUAGES = ['typescript'];
+import { FileSkeleton } from 'parsing/types';
+import { filesToMdFiles, updateCodeFile, updateMdFile } from './helpers';
 
 export type GitbookFile = {
     filename: string;
     content: string;
+    fileSkeleton?: FileSkeleton;
 }
 
 export type FilePair = {
@@ -27,32 +25,39 @@ gitbookRouter.post('/installation', async (req, res) => {
     const authConnector = await getAuthConnector(owner);
     const prunedFiles = files.filter((file) => file != null);
 
-    const mdFiles: GitbookFile[] = [];
-    prunedFiles.forEach(async (file) => {
-        const languageId = getLanguageIdByFilename(file.filename);
-        if (!SUPPORTED_LANGUAGES.includes(languageId)) return;
-        const content = formatCode(languageId, file.content);
-        const fileSkeleton = getFileSkeleton(content, languageId);
-        fileSkeleton.skeletons = addUrlsToSkeletons(fileSkeleton.skeletons, repo, branch, file.filename, authConnector);
-        fileSkeleton.skeletons = fileSkeleton.skeletons.map((skeleton) => { return { ...skeleton, filename: file.filename };});
-        const markdown = fileSkeletonToMarkdown(fileSkeleton);
-        const mdFilename = `mintlify/${file.filename}.md`
-        const mdFile = { filename: mdFilename, content: markdown };
-        mdFiles.push(mdFile);
-    });
-    mdFiles.push(summaryUpdateOnInstallation(summary, mdFiles));
+    const mdFiles: GitbookFile[] = filesToMdFiles(prunedFiles, repo, branch, summary, authConnector);
     return res.status(200).send({
-        mdFiles
+        files: mdFiles
     });
 });
 
 gitbookRouter.post('/update', async (req, res) => {
-    const { filePairs, direction } : { filePairs: FilePair[], direction: string } = req.body;
+    const { filePairs, mdToCode } : { filePairs: FilePair[], mdToCode: boolean} = req.body;
     if (filePairs == null) return res.status(400).end();
-    if (direction === 'mdToCode') {
-        // parse md
-    } else if (direction === 'codeToMd') {
-        // MVP just regenerate md files
+    const filePairsWithSkeletons: FilePair[] = filePairs.map((pairs) => {
+        const md = {
+            ...pairs.md,
+            fileSkeleton: mdToFileSkeleton(pairs.md)
+        };
+        const code = {
+            ...pairs.code,
+            fileSkeleton: mdToFileSkeleton(pairs.code)
+        }
+        return {
+            md,
+            code
+        };
+    });
+    if (mdToCode) {
+        const updatedCodeFiles: GitbookFile[] = filePairsWithSkeletons.map((filePair) => updateCodeFile(filePair));
+        return res.status(200).send({
+            files: updatedCodeFiles
+        });
+    } else {
+        const updatedMdFiles: GitbookFile[] = filePairsWithSkeletons.map((filePair) => updateMdFile(filePair));
+        return res.status(200).send({
+            files: updatedMdFiles
+        });
     }
 });
 

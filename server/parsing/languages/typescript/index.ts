@@ -52,6 +52,7 @@ const getSkeletonFromNode = (parent: TreeNode, node: TreeNode, i: number, pl: PL
     return {
       signature,
       doc: comment,
+      rawDoc: node.value,
       lineRange
     };
   }

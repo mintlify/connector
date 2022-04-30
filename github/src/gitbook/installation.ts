@@ -3,7 +3,7 @@ import axios from 'axios';
 
 import { ENDPOINT } from "../constants";
 
-type GitbookFile = {
+export type GitbookFile = {
   filename: string;
   content: string;
 }
@@ -71,7 +71,7 @@ const installation = async (context: any, repo: string) => {
         repo,
         summary
       });
-      const gitbookFiles = gitbookFileResponse.data.mdFiles as GitbookFile[];
+      const gitbookFiles = gitbookFileResponse.data.files as GitbookFile[];
       const treeChildren = gitbookFilesToTrees(gitbookFiles);
       const refResponse = await context.octokit.rest.git.getRef({
         owner,

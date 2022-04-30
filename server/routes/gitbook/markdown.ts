@@ -1,6 +1,10 @@
 import { FileSkeleton, Skeleton } from 'parsing/types';
 import { GitbookFile } from '.';
+
 import path from 'path';
+import { marked } from 'marked';
+
+/* ----------------- SKELETON TO MARKDOWN ----------------- */
 
 const formatTopComment = (topComment: string): string => {
     return `---
@@ -39,3 +43,41 @@ export const summaryUpdateOnInstallation = (summary: GitbookFile, files: Gitbook
         content
     };
 }
+
+/* ----------------- MARKDOWN TO SKELETON ----------------- */
+const isSignature = (node: any): boolean => {
+    return (node.type === 'heading'
+        && node.depth === 4
+        && node.tokens[0].type === 'link')
+};
+
+const mdToSkeletons = (tree: any[]): Skeleton[] => {
+    const skeletons: Skeleton[] = [];
+    tree.map((node, i) => {
+        const nextNode = tree[i+1];
+        if (isSignature(node) && nextNode.type === 'paragraph') {
+            const signature = node.tokens[0].text;
+            const url = node.tokens[0].href;
+            const doc = nextNode.text;
+            const skeleton: Skeleton = {
+                signature,
+                url,
+                doc
+            }
+            skeletons.push(skeleton);
+        }
+    })
+    return skeletons;
+};
+
+export const mdToFileSkeleton = (file: GitbookFile): FileSkeleton => {
+    const tokens = marked.lexer(file.content);
+    const skeletons: Skeleton[] = mdToSkeletons(tokens);
+    const topComment = tokens[1].text.slice(13);
+    return {
+        skeletons,
+        topComment,
+        filename: file.filename
+    };
+}
+

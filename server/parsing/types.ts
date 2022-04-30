@@ -16,9 +16,10 @@ export type Program = {
 
 export type Skeleton = {
   signature: string;
-  lineRange: LineRange;
+  lineRange?: LineRange;
   doc: string;
   url?: string;
+  rawDoc?: string;
 }
 
 export type FileSkeleton = {
