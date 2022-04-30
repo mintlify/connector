@@ -10,9 +10,7 @@ dotenv.config();
 const clientId = 'ec770c41-07f8-44bd-a4d8-66d30e9786c8';
 const redirectUrl = 'https://connect.mintlify.com/notion/authorization';
 
-export const isNotionUrl = (url: URL): boolean => {
-    return url.host === 'www.notion.so' || url.host === 'notion.so';
-}
+export const isNotionUrl = (url: URL): boolean => url.host === 'www.notion.so' || url.host === 'notion.so'
 
 export const getPageId = (url: URL): string => {
     const { pathname } = url;
@@ -21,9 +19,7 @@ export const getPageId = (url: URL): string => {
     return pageId;
 };
 
-export const isBlock = (url: URL): boolean => {
-    return url.hash !== '';
-}
+export const isBlock = (url: URL): boolean => url.hash !== '';
 
 export const getBlockId = (url: URL): string => {
     const { hash } = url;
