@@ -52,6 +52,7 @@ export = (app: Probot) => {
     const connectPromise = axios.post(`${ENDPOINT}/v01/`, {
       files,
       owner,
+      installationId: context.payload.installation?.id
     });
     const previousAlertsPromise = getReviewComments(context);
     const [connectResponse, previousAlerts] = await Promise.all([connectPromise, previousAlertsPromise]);
@@ -110,7 +111,7 @@ export = (app: Probot) => {
       })
     });
     await Promise.all(reviewCommentPromises);
-    await createActionRequiredCheck(context, newAlerts[0].url);
+    await createActionRequiredCheck(context, newAlerts[0]?.url);
     return;
   });
 
