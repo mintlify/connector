@@ -3,8 +3,8 @@ import * as cheerio from 'cheerio';
 
 const client = new webScrapingApiClient(process.env.WEBSCRAPER_KEY);
 
-export const getContentFromWebpage = async (): Promise<string> => {
-  const response = await client.get('https://mintlify.readme.io/reference/start', {
+export const getContentFromWebpage = async (url: string): Promise<string> => {
+  const response = await client.get(url, {
         render_js: 1,
         proxy_type: 'datacenter',
         country: 'us',
@@ -13,6 +13,7 @@ export const getContentFromWebpage = async (): Promise<string> => {
         wait_until: 'domcontentloaded',
         wait_for: 2000,
     });
+    
     if (response.success) {
         const content = response.response.data;
         const $ = cheerio.load(content);

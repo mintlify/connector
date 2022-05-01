@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import 'services/mongoose';
 import notionRouter from 'routes/notion';
 import v01Router from 'routes/v01';
+import diffRouter from 'routes/v01/diff';
 
 dotenv.config();
 
@@ -19,12 +20,13 @@ if (process.env.NODE_ENV !== 'production') {
 
 app.set('trust proxy', 1);
 app.get('/', (_, res) => {
-  res.send('🌿 Welcome to the Mintlify API')
+  res.send('🌿 Welcome to the Mintlify Connect API')
 });
 
 // Connect
 app.use('/v01', v01Router);
 app.use('/notion', notionRouter);
+app.use('/diff', diffRouter);
 
 app.listen(PORT, () => {
   console.log(`Listening at PORT ${PORT}`);

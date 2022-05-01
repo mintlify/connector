@@ -6,6 +6,12 @@ import { track } from 'services/segment';
 import AuthConnector from 'models/AuthConnector';
 import { sha512Hash } from 'helpers/hash';
 
+type AlertsRequest = {
+    files: ConnectFile[],
+    owner: string,
+    installationId: string,
+}
+
 const v01Router = express.Router();
 
 const getAuthConnector = (sourceId: string) => {
@@ -14,7 +20,7 @@ const getAuthConnector = (sourceId: string) => {
 }
 
 v01Router.post('/', async (req, res) => {
-    const { files, owner } : { files: ConnectFile[], owner: string; } = req.body;
+    const { files, owner, installationId } : AlertsRequest = req.body;
 
     if (files == null) return res.status(400).end();
     if (owner == null) return res.status(400).end();
@@ -25,6 +31,8 @@ v01Router.post('/', async (req, res) => {
 
     const newLinks: Alert[] = allAlerts.filter((alert) => alert.type === 'new');
     const newLinksMessage = newLinks.length > 0 ? await createNewLinksMessage(newLinks, authConnector) : null;
+
+    console.log(installationId);
 
     // logging
     const isAlerting = alerts.length > 0;
