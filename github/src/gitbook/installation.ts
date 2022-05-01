@@ -8,7 +8,15 @@ export type GitbookFile = {
   content: string;
 }
 
-const gitbookFilesToTrees = (gitbookFiles: GitbookFile[]) => {
+type Tree = {
+  path?: string | undefined;
+  mode?: "100644" | "100755" | "040000" | "160000" | "120000" | undefined;
+  type?: "blob" | "tree" | "commit" | undefined;
+  sha?: string | null | undefined;
+  content?: string | undefined;
+}
+
+export const gitbookFilesToTrees = (gitbookFiles: GitbookFile[]): Tree[] => {
   return gitbookFiles.map((gbFile) => {
     return {
       path: gbFile.filename,
@@ -89,7 +97,7 @@ const installation = async (context: any, repo: string) => {
       const commitResponse = await context.octokit.rest.git.createCommit({
         owner,
         repo,
-        message: 'Initial docs generated 4',
+        message: 'Initial docs generated',
         tree: treeSha,
         parents: [baseSha]
       });
