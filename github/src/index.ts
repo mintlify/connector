@@ -1,6 +1,7 @@
 // https://www.notion.so/mintlify/Installation-37aab83daa5e48b88cde8bd3891fa181
 import { ApplicationFunctionOptions, Context, Probot } from "probot";
 import axios from 'axios';
+import './services/mongoose';
 import { Alert, File, getEncompassingRangeAndSideForAlert, parsePatch, PatchLineRange } from "./helpers/patch";
 import { getReviewComments, ENDPOINT, checkIfAllAlertsAreResolve,
   createSuccessCheck, createActionRequiredCheck, createInProgressCheck } from "./helpers/octokit";
@@ -51,7 +52,7 @@ export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
     );
 
     const files = await Promise.all(getFilesContentPromises) as File[];
-    const connectPromise = axios.post(`${ENDPOINT}/v01/`, {
+    const connectPromise = axios.post(`${ENDPOINT}/routes/v01/`, {
       files,
       owner,
       installationId: context.payload.installation?.id
