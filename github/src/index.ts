@@ -1,10 +1,13 @@
 // https://www.notion.so/mintlify/Installation-37aab83daa5e48b88cde8bd3891fa181
-import { Context, Probot } from "probot";
+import { ApplicationFunctionOptions, Context, Probot } from "probot";
 import axios from 'axios';
-import { Alert, File, getEncompassingRangeAndSideForAlert, parsePatch, PatchLineRange } from "./patch";
-import { getReviewComments, ENDPOINT, checkIfAllAlertsAreResolve, createSuccessCheck, createActionRequiredCheck, createInProgressCheck } from "./helpers";
+import './services/mongoose';
+import { Alert, File, getEncompassingRangeAndSideForAlert, parsePatch, PatchLineRange } from "./helpers/patch";
+import { getReviewComments, ENDPOINT, checkIfAllAlertsAreResolve,
+  createSuccessCheck, createActionRequiredCheck, createInProgressCheck } from "./helpers/octokit";
+import headRouter from "./routes";
 
-export = (app: Probot) => {
+export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
   app.on(["pull_request.opened", "pull_request.reopened", "pull_request.synchronize"], async (context) => {
     await createInProgressCheck(context);
     const owner = context.payload.repository.owner.login;
@@ -49,9 +52,10 @@ export = (app: Probot) => {
     );
 
     const files = await Promise.all(getFilesContentPromises) as File[];
-    const connectPromise = axios.post(`${ENDPOINT}/v01/`, {
+    const connectPromise = axios.post(`${ENDPOINT}/routes/v01/`, {
       files,
       owner,
+      installationId: context.payload.installation?.id
     });
     const previousAlertsPromise = getReviewComments(context);
     const [connectResponse, previousAlerts] = await Promise.all([connectPromise, previousAlertsPromise]);
@@ -110,7 +114,7 @@ export = (app: Probot) => {
       })
     });
     await Promise.all(reviewCommentPromises);
-    await createActionRequiredCheck(context, newAlerts[0].url);
+    await createActionRequiredCheck(context, newAlerts[0]?.url);
     return;
   });
 
@@ -125,4 +129,7 @@ export = (app: Probot) => {
       await createActionRequiredCheck(context);
     }
   });
+
+  const router = getRouter!("/routes");
+  router.use(headRouter);
 };
