@@ -1,10 +1,12 @@
 // https://www.notion.so/mintlify/Installation-37aab83daa5e48b88cde8bd3891fa181
-import { Context, Probot } from "probot";
+import { ApplicationFunctionOptions, Context, Probot } from "probot";
 import axios from 'axios';
-import { Alert, File, getEncompassingRangeAndSideForAlert, parsePatch, PatchLineRange } from "./patch";
-import { getReviewComments, ENDPOINT, checkIfAllAlertsAreResolve, createSuccessCheck, createActionRequiredCheck, createInProgressCheck } from "./helpers";
+import { Alert, File, getEncompassingRangeAndSideForAlert, parsePatch, PatchLineRange } from "./helpers/patch";
+import { getReviewComments, ENDPOINT, checkIfAllAlertsAreResolve,
+  createSuccessCheck, createActionRequiredCheck, createInProgressCheck } from "./helpers/octokit";
+import headRouter from "./routes";
 
-export = (app: Probot) => {
+export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
   app.on(["pull_request.opened", "pull_request.reopened", "pull_request.synchronize"], async (context) => {
     await createInProgressCheck(context);
     const owner = context.payload.repository.owner.login;
@@ -126,4 +128,7 @@ export = (app: Probot) => {
       await createActionRequiredCheck(context);
     }
   });
+
+  const router = getRouter!("/routes");
+  router.use(headRouter);
 };
