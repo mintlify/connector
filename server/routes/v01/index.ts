@@ -21,7 +21,6 @@ v01Router.post('/', async (req, res) => {
 
     const authConnector = await getAuthConnector(owner);
     const allAlerts = await getAlertsForAllFiles(files, authConnector);
-    console.log({allAlerts});
     const alerts = allAlerts.filter((alert) => alert.type !== 'new');
 
     const newLinks: Alert[] = allAlerts.filter((alert) => alert.type === 'new');
