@@ -32,6 +32,10 @@ export type Link = {
 export type AlertsRequest = {
     files: ConnectFile[],
     owner: string,
+}
+
+export type TaskRequest = {
+    owner: string,
     repo: string,
     pullNumber: number,
     installationId?: number,

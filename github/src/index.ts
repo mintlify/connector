@@ -53,13 +53,7 @@ export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
     );
 
     const files = await Promise.all(getFilesContentPromises) as File[];
-    const alertsRequest: AlertsRequest = {
-      files,
-      owner,
-      repo,
-      pullNumber,
-      installationId: context.payload.installation?.id
-    }
+    const alertsRequest: AlertsRequest = { files, owner }
     const connectPromise = axios.post(`${ENDPOINT}/routes/v01/`, alertsRequest);
     const previousAlertsPromise = getReviewComments(context);
     const [connectResponse, previousAlerts] = await Promise.all([connectPromise, previousAlertsPromise]);
@@ -117,9 +111,10 @@ export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
         side: encompassedRangeAndSide.end.side
       })
     });
-    const reviewComments = await Promise.all(reviewCommentPromises);
-    console.log(reviewComments);
+    await Promise.all(reviewCommentPromises);
+
     // Create tasks using review comments
+    // const taskRequests = reviewComments.map(())
     await createActionRequiredCheck(context, newAlerts[0]?.url);
     return;
   });

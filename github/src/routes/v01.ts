@@ -5,7 +5,6 @@ import { createNewLinksMessage, getAlertsForAllFiles } from '../helpers/alerts';
 import { track } from '../services/segment';
 import AuthConnector, { AuthConnectorType } from '../models/AuthConnector';
 import { sha512Hash } from '../helpers/hash';
-import { createVersionTasks } from '../helpers/versioning';
 
 const v01Router = express.Router();
 
@@ -37,7 +36,7 @@ v01Router.post('/', async (req, res) => {
         numberOfAlerts: alerts.length
     });
 
-    createVersionTasks(alerts, alertsRequest, authConnector);
+    // createVersionTasks(alerts, alertsRequest, authConnector);
     return res.status(200).send({
         alerts,
         newLinksMessage
