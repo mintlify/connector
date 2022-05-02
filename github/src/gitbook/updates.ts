@@ -27,14 +27,6 @@ const createFilePairs = (codeContent: (GitbookFile|null)[], mdContent: (GitbookF
     }).filter((pair) => pair != null);
 };
 
-const getSummaryMd = (filePairs: ({md: GitbookFile|null, code: GitbookFile|null}|null)[]): GitbookFile|null => {
-    const findPair = filePairs.find(filePair => filePair?.md?.filename === 'SUMMARY.md');
-    if (findPair) {
-        return findPair.md;
-    }
-    return null;
-}
-
 export const gitbookUpdates = (app: Probot) => {
     app.on('push', async (context) => {
         const owner = context.payload.repository.owner.name;
@@ -107,11 +99,13 @@ export const gitbookUpdates = (app: Probot) => {
 
             const mdFileContentPromises = createFileContentPromises(relevantMdFilenames);
             const codeFileContentPromises = createFileContentPromises(codeFilenames);
-            const fileContentResponse = await Promise.all(mdFileContentPromises.concat(codeFileContentPromises)) as GitbookFile[];
+            const pairPromises = mdFileContentPromises.concat(codeFileContentPromises);
+            const summaryPromise = createFileContentPromises(['SUMMARY.md']);
+            const fileContentResponse = await Promise.all(pairPromises.concat(summaryPromise)) as GitbookFile[];
             const mdContent = fileContentResponse.slice(0, mdFileContentPromises.length);
-            const codeContent = fileContentResponse.slice(mdFileContentPromises.length);
+            const codeContent = fileContentResponse.slice(mdFileContentPromises.length, fileContentResponse.length - 1);
+            const summary = fileContentResponse[fileContentResponse.length - 1];
             const filePairs = createFilePairs(codeContent, mdContent);
-            const summary = getSummaryMd(filePairs);
             const gitbookUpdateResponse = await axios.post(`${ENDPOINT}/gitbook/update`, {
                 filePairs,
                 mdToCode: true,
@@ -128,14 +122,14 @@ export const gitbookUpdates = (app: Probot) => {
             const equivMdFilenames: string[] = modifiedFilenames.map((codeFilename) => getMdFileEquiv(codeFilename));
             const newFilenames: string[] = headCommit?.added;
             if (modifiedFilenames.length === 0 && newFilenames.length === 0) return;
-            const filePromises = [...createFileContentPromises(modifiedFilenames), ...createFileContentPromises(equivMdFilenames), ...createFileContentPromises(newFilenames)];
+            const filePromises = [...createFileContentPromises(modifiedFilenames), ...createFileContentPromises(equivMdFilenames), ...createFileContentPromises(newFilenames), ...createFileContentPromises(['SUMMARY.md'])];
             const fileResponses = await Promise.all(filePromises);
 
             const codeContent = fileResponses.slice(0, modifiedFilenames.length);
             const mdContent = fileResponses.slice(modifiedFilenames.length, modifiedFilenames.length + equivMdFilenames.length);
             const filePairs = createFilePairs(codeContent, mdContent);
-            const summary = getSummaryMd(filePairs);
-            const newFileContent = fileResponses.slice(modifiedFilenames.length + equivMdFilenames.length);
+            const summary = fileResponses[fileResponses.length - 1];
+            const newFileContent = fileResponses.slice(modifiedFilenames.length + equivMdFilenames.length, filePromises.length - 1);
             const gitbookUpdateResponse = await axios.post(`${ENDPOINT}/gitbook/update`, {
                 filePairs,
                 mdToCode: false,

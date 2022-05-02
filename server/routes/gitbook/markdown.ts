@@ -43,10 +43,15 @@ const formatFileSkeletonForSummary = (file: GitbookFile): string => {
 
 // TODO: Create Hierarchy
 export const summaryUpdateOnInstallation = (summary: GitbookFile, files: GitbookFile[]): GitbookFile => {
-    const existingContent = summary ?? '';
+    const existingContent = summary.content ?? '';
     const header = '## Mintlify Docs <a href="#mintlify" id="mintlify"></a>\n\n';
     const table = files.map((file) => formatFileSkeletonForSummary(file)).join('\n');
-    const content = `${existingContent}\n\n${header}${table}`;
+    let content = existingContent;
+    if (existingContent.includes(header)) {
+        content = `${existingContent}\n${table}`;
+    } else {
+        content = `${existingContent}\n\n${header}${table}`;
+    }
     return {
         filename: summary?.filename ?? 'SUMMARY.md',
         content
@@ -83,6 +88,7 @@ export const mdToFileSkeleton = (file: GitbookFile): FileSkeleton => {
     if (file === null) return;
     const tokens: any = marked.lexer(file.content);
     const skeletons: Skeleton[] = mdToSkeletons(tokens);
+    console.log({tokens});
     const topComment = tokens[1]?.text.slice(13);
     return {
         skeletons,

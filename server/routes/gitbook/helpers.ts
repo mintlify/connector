@@ -22,7 +22,6 @@ export const fileToFileSkeleton = (file: GitbookFile, repo?: string, branch?: st
 };
 
 export const fileToMdFile = (file: GitbookFile, repo?: string, branch?: string, authConnector?: AuthConnectorType): GitbookFile => {
-    console.log({file});
     const fileSkeleton = fileToFileSkeleton(file, repo, branch, authConnector);
     const markdown = fileSkeletonToMarkdown(fileSkeleton);
     const mdFilename = `mintlify/${file.filename}.md`;
