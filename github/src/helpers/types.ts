@@ -34,6 +34,5 @@ export type AlertsRequest = {
     owner: string,
     repo: string,
     pullNumber: number,
-    commitId: string,
     installationId?: number,
 }

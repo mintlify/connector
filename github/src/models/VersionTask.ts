@@ -16,7 +16,6 @@ const GitHubSchema = new Schema({
   owner: { type: String, required: true },
   repo: { type: String, required: true },
   pullNumber: { type: Number, required: true },
-  commentId: { type: Number, required: true },
 })
 
 const VersionTaskSchema = new Schema({

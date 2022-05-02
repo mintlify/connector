@@ -58,7 +58,6 @@ export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
       owner,
       repo,
       pullNumber,
-      commitId,
       installationId: context.payload.installation?.id
     }
     const connectPromise = axios.post(`${ENDPOINT}/routes/v01/`, alertsRequest);
