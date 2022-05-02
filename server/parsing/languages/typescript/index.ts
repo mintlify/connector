@@ -4,7 +4,8 @@ import {
   extractBaseComments,
   nodeIsOnPath,
   findChildByKind,
-  getTopComment
+  getTopComment,
+  wrapAround
 } from '../helpers';
 
 
@@ -93,5 +94,12 @@ export default class TypeScript implements PLConnect {
       topComment,
       skeletons
     };
+  }
+  comment(str: string): string {
+    if (str.trim().split('/n').length > 1) {
+      const starredCode = str.split('\n').map((line) => ` * ${line}`).join('\n');
+      return wrapAround(starredCode, '/**', ' */', true);
+    }
+    return `// ${str}`;
   }
 }

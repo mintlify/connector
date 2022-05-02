@@ -2,6 +2,7 @@ import { GitbookFile, FilePair } from '.';
 import { FileSkeleton, Skeleton } from 'parsing/types';
 import { AuthConnectorType } from 'models/AuthConnector';
 import { getLanguageIdByFilename } from 'parsing/filenames';
+import getPL from 'parsing/languages';
 import { formatCode, getFileSkeleton } from 'parsing';
 import { addUrlsToSkeletons } from './url';
 import { fileSkeletonToMarkdown, summaryUpdateOnInstallation } from './markdown';
@@ -45,8 +46,10 @@ export const updateCodeFile = (filePair: FilePair): GitbookFile => {
     mdSkeletons.forEach((skeleton) => {
         const matchingSkeleton = codeSkeletons.find((codeSkeleton) => codeSkeleton.signature === skeleton.signature);
         if (matchingSkeleton != null && skeleton.doc !== matchingSkeleton.doc) {
-            // TODO format skeleton.doc to comment
-            newContent = newContent.replace(matchingSkeleton.rawDoc, skeleton.doc);
+            const languageId = getLanguageIdByFilename(code.filename);
+            const desiredPL = getPL(languageId);
+            const comment = desiredPL.comment(skeleton.doc);
+            newContent = newContent.replace(matchingSkeleton.rawDoc, comment);
         }
     });
     return {

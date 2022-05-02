@@ -188,3 +188,11 @@ export const getTopComment = (pl: PLConnect, tree: TreeNode, paths: string[][]):
   }
   return pl.extractComment(firstNode);
 }
+
+export const wrapAround = (code: string, start: string, end: string, newLine = true): string => {
+  if (newLine) {
+    return `${start}\n${code}\n${end}`;
+  }
+
+  return `${start} ${code} ${end}`;
+};

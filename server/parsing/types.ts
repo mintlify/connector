@@ -33,4 +33,5 @@ export interface PLConnect {
   extractComment(tree: TreeNode): string | null;
   // For Gitbook integration
   getFileSkeleton?(tree: TreeNode): FileSkeleton;
+  comment?(str: string): string;
 }
