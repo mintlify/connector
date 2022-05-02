@@ -28,3 +28,12 @@ export type Link = {
     lineRange: LineRange;
     type: string;
 }
+
+export type AlertsRequest = {
+    files: ConnectFile[],
+    owner: string,
+    repo: string,
+    pullNumber: number,
+    commitId: string,
+    installationId?: number,
+}

@@ -6,6 +6,7 @@ import { Alert, File, getEncompassingRangeAndSideForAlert, parsePatch, PatchLine
 import { getReviewComments, ENDPOINT, checkIfAllAlertsAreResolve,
   createSuccessCheck, createActionRequiredCheck, createInProgressCheck } from "./helpers/octokit";
 import headRouter from "./routes";
+import { AlertsRequest } from "./helpers/types";
 
 export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
   app.on(["pull_request.opened", "pull_request.reopened", "pull_request.synchronize"], async (context) => {
@@ -14,6 +15,7 @@ export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
     const repo = context.payload.repository.name;
     const pullNumber = context.payload.number;
     const headRef = context.payload.pull_request.head.ref;
+    const commitId = context.payload.pull_request.head.sha;
 
     const pullRequestFiles = await context.octokit.pulls.listFiles({
       owner,
@@ -31,7 +33,6 @@ export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
     });
 
     const filesPatchLineRangesMap: Record<string, PatchLineRange[]> = {};
-    
     const getFilesContentPromises = filesContext.map((fileContext) => new Promise(async (resolve) => {
         try {
           const contentRequest = context.repo({ path: fileContext.path, ref: headRef });
@@ -52,11 +53,15 @@ export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
     );
 
     const files = await Promise.all(getFilesContentPromises) as File[];
-    const connectPromise = axios.post(`${ENDPOINT}/routes/v01/`, {
+    const alertsRequest: AlertsRequest = {
       files,
       owner,
+      repo,
+      pullNumber,
+      commitId,
       installationId: context.payload.installation?.id
-    });
+    }
+    const connectPromise = axios.post(`${ENDPOINT}/routes/v01/`, alertsRequest);
     const previousAlertsPromise = getReviewComments(context);
     const [connectResponse, previousAlerts] = await Promise.all([connectPromise, previousAlertsPromise]);
 
@@ -104,7 +109,7 @@ export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
         owner,
         repo,
         pull_number: pullNumber,
-        commit_id: context.payload.pull_request.head.sha,
+        commit_id: commitId,
         body: newAlert.message,
         path: newAlert.filename,
         start_line: encompassedRangeAndSide.start.line,
