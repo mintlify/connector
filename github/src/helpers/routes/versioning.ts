@@ -1,7 +1,7 @@
 // https://mintlify.readme.io/reference/start
-import { AuthConnectorType } from "../models/AuthConnector";
-import VersionTask from "../models/VersionTask";
-import { getContentFromWebpage } from "../services/webscraper";
+import { AuthConnectorType } from "../../models/AuthConnector";
+import VersionTask from "../../models/VersionTask";
+import { getContentFromWebpage } from "../../services/webscraper";
 import { Alert } from "./patch";
 import { AlertsRequest } from "./types";
 

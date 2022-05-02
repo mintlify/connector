@@ -1,12 +1,12 @@
 import axios from 'axios';
 import { urlify } from './links';
-import { isNotionUrl, isBlock, getNotionBlockContent, getNotionPageTitle } from '../services/notion';
-import { getLanguageIdByFilename } from '../parsing/filenames';
-import getPL from '../parsing/languages';
-import { formatCode, getTreeSitterProgram } from '../parsing';
+import { isNotionUrl, isBlock, getNotionBlockContent, getNotionPageTitle } from '../../services/notion';
+import { getLanguageIdByFilename } from '../../parsing/filenames';
+import getPL from '../../parsing/languages';
+import { formatCode, getTreeSitterProgram } from '../../parsing';
 import { ConnectFile, Alert, Link } from './types';
 import { getLinksInFile } from './links';
-import { AuthConnectorType } from '../models/AuthConnector';
+import { AuthConnectorType } from '../../models/AuthConnector';
 
 export const getAlertsForFile = async (file: ConnectFile, authConnector?: AuthConnectorType): Promise<Alert[]> => {
     const languageId = getLanguageIdByFilename(file.filename);

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { AlertsRequest } from '../helpers/types';
+import { AlertsRequest } from '../helpers/routes/types';
 
 const { Schema } = mongoose;
 

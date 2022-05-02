@@ -1,6 +1,6 @@
 // https://www.notion.so/mintlify/Connect-d9d337715f974520a793da685b056415
 import { Router } from 'express';
-import { sha512Hash } from '../helpers/hash';
+import { sha512Hash } from '../helpers/routes/hash';
 import AuthConnector from '../models/AuthConnector';
 import { getNotionAccessTokenFromCode, getNotionURL } from '../services/notion';
 

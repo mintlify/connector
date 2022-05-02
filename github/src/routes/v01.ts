@@ -1,10 +1,10 @@
 // https://www.notion.so/mintlify/Connect-d9d337715f974520a793da685b056415
 import express from 'express';
-import { Alert, AlertsRequest } from '../helpers/types';
-import { createNewLinksMessage, getAlertsForAllFiles } from '../helpers/alerts';
+import { Alert, AlertsRequest } from '../helpers/routes/types';
+import { createNewLinksMessage, getAlertsForAllFiles } from '../helpers/routes/alerts';
 import { track } from '../services/segment';
 import AuthConnector, { AuthConnectorType } from '../models/AuthConnector';
-import { sha512Hash } from '../helpers/hash';
+import { sha512Hash } from '../helpers/routes/hash';
 
 const v01Router = express.Router();
 

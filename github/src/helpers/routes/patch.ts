@@ -9,7 +9,7 @@ type LineRange = {
   end: number;
 }
 
-export type File = {
+export type FileInfo = {
   filename: string;
 	content: string;
 	changes: Change[]

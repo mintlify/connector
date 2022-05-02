@@ -1,9 +1,9 @@
 import { Client } from '@notionhq/client';
 import dotenv from 'dotenv';
 import axios from 'axios';
-import { Link } from '../helpers/types';
-import { urlify } from '../helpers/links';
-import { ENDPOINT } from '../helpers/octokit';
+import { Link } from '../helpers/routes/types';
+import { urlify } from '../helpers/routes/links';
+import { ENDPOINT } from '../helpers/routes/octokit';
 
 dotenv.config();
 
