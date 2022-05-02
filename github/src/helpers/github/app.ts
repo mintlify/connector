@@ -1,5 +1,8 @@
+import axios from "axios";
 import { Context } from "probot";
-import { FileInfo, parsePatch, PatchLineRange } from "../routes/patch";
+import { Alert, FileInfo, parsePatch, PatchLineRange } from "../routes/patch";
+import { AlertsRequest } from "../routes/types";
+import { ENDPOINT, getReviewComments } from "./octokit";
 
 type AllFilesAndMap = {
   files: FileInfo[],
@@ -50,5 +53,25 @@ export const getAllFilesAndMap = async (context: Context): Promise<AllFilesAndMa
   return {
     files,
     filesPatchLineRangesMap
+  }
+}
+
+type AlertsResponse = {
+  incomingAlerts: Alert[],
+  previousAlerts: Alert[],
+  newLinksMessage: string,
+}
+
+export const getAlerts = async (context: Context, files: FileInfo[]): Promise<AlertsResponse> => {
+  const owner = context.payload.repository.owner.login;
+  const alertsRequest: AlertsRequest = { files, owner }
+  const connectPromise = axios.post(`${ENDPOINT}/routes/v01/`, alertsRequest);
+  const previousAlertsPromise = getReviewComments(context);
+  const [connectResponse, previousAlerts] = await Promise.all([connectPromise, previousAlertsPromise]);
+
+  return {
+    incomingAlerts: connectResponse.data.alerts,
+    previousAlerts,
+    newLinksMessage: connectResponse.data.newLinksMessage
   }
 }

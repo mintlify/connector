@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import axios from 'axios';
 import { Link } from '../helpers/routes/types';
 import { urlify } from '../helpers/routes/links';
-import { ENDPOINT } from '../helpers/routes/octokit';
+import { ENDPOINT } from '../helpers/github/octokit';
 
 dotenv.config();
 

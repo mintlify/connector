@@ -1,13 +1,9 @@
+import { FileInfo } from "./patch";
+
 export type Change = {
     type: 'add' | 'delete';
     line: number;
     content: string;
-}
-
-export type ConnectFile = {
-    filename: string;
-    content: string;
-    changes: Change[];
 }
 
 export type LineRange = {
@@ -30,7 +26,7 @@ export type Link = {
 }
 
 export type AlertsRequest = {
-    files: ConnectFile[],
+    files: FileInfo[],
     owner: string,
 }
 

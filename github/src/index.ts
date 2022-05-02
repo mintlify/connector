@@ -1,13 +1,11 @@
 // https://www.notion.so/mintlify/Installation-37aab83daa5e48b88cde8bd3891fa181
 import { ApplicationFunctionOptions, Context, Probot } from "probot";
-import axios from 'axios';
 import './services/mongoose';
-import { Alert, getEncompassingRangeAndSideForAlert } from "./helpers/routes/patch";
-import { getReviewComments, ENDPOINT, checkIfAllAlertsAreResolve,
-  createSuccessCheck, createActionRequiredCheck, createInProgressCheck } from "./helpers/routes/octokit";
+import { getEncompassingRangeAndSideForAlert } from "./helpers/routes/patch";
+import { getReviewComments, checkIfAllAlertsAreResolve,
+  createSuccessCheck, createActionRequiredCheck, createInProgressCheck } from "./helpers/github/octokit";
 import headRouter from "./routes";
-import { AlertsRequest } from "./helpers/routes/types";
-import { getAllFilesAndMap } from "./helpers/github/app";
+import { getAlerts, getAllFilesAndMap } from "./helpers/github/app";
 
 export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
   app.on(["pull_request.opened", "pull_request.reopened", "pull_request.synchronize"], async (context) => {
@@ -18,13 +16,7 @@ export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
     const commitId = context.payload.pull_request.head.sha;
 
     const { files, filesPatchLineRangesMap } = await getAllFilesAndMap(context);
-    const alertsRequest: AlertsRequest = { files, owner }
-    const connectPromise = axios.post(`${ENDPOINT}/routes/v01/`, alertsRequest);
-    const previousAlertsPromise = getReviewComments(context);
-    const [connectResponse, previousAlerts] = await Promise.all([connectPromise, previousAlertsPromise]);
-
-    const incomingAlerts: Alert[] = connectResponse.data.alerts;
-    const { newLinksMessage }: { newLinksMessage: string } = connectResponse.data;
+    const { incomingAlerts, previousAlerts, newLinksMessage } = await getAlerts(context, files);
   
     if (newLinksMessage != null) {
       const commentResponse = await context.octokit.rest.issues.listComments(context.issue());
