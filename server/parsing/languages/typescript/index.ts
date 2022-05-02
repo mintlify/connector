@@ -38,17 +38,16 @@ const TYPESCRIPT_SYNOPSIS = {
 }
 
 const getSkeletonFromNode = (parent: TreeNode, node: TreeNode, i: number, pl: PLConnect, file: string): Skeleton => {
-  if (i === 0) return;
   const childBefore = parent.children[i-1];
   if (nodeIsOnPath(node, TYPESCRIPT_SYNOPSIS.ARROW_FUNCTION.path)) {
-    // get signature
     const variableDeclarator = findChildByKind(node, 'variable_declarator');
     const functionName = findChildByKind(variableDeclarator, 'identifier').value;
     const arrowFunction = findChildByKind(variableDeclarator, 'arrow_function').value;
     const params = arrowFunction.substring(0, arrowFunction.indexOf('=>')).trim();
     const signature = `${functionName}${params}`;
     const lineRange = getLineRange(file, node.value);
-    const comment = pl.extractComment(childBefore);
+    const comment = childBefore != null ? pl.extractComment(childBefore) : null;
+    
     if (comment != null && nodeIsOnNextLine(childBefore, node)) {
       return {
         signature,
@@ -96,8 +95,8 @@ export default class TypeScript implements PLConnect {
     const topComment = getTopComment(this, tree, typesToAvoid);
     const skeletons = getSkeletons(tree);
     return {
-      topComment,
-      skeletons
+      skeletons,
+      topComment
     };
   }
   comment(str: string): string {

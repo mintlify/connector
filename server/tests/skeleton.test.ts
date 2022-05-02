@@ -1,7 +1,7 @@
 import { getFileSkeleton } from 'parsing';
 
 describe('file skeleton', () => {
-    test('test', () => {
+    test('arrow function', () => {
         const file = `/**
  * TOP COMMENT
  *  WOOT WOOT
@@ -49,4 +49,20 @@ const arrowFunction = (ayo: string, param: string): string => {
             skeletons
         })
     });
+
+    test('function w/ no doc', () => {
+        const file = `const arrowFunction = (ayo: string, param: string): string => {
+    return 'yo';
+}`;
+        const fileSkeleton = getFileSkeleton(file, 'typescript');
+        const skeletons = [{
+            signature: 'arrowFunction(ayo: string, param: string): string',
+            lineRange: { start: 1, end: 3 }
+        }];
+        expect(fileSkeleton).toEqual({
+            skeletons,
+            topComment: null
+        })
+    });
+
 })

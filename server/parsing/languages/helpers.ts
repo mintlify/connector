@@ -178,7 +178,7 @@ export const nodeIsOnPath = (tree: TreeNode, path: string[]): boolean => {
 }
 
 export const nodeIsOnNextLine = (firstNode: TreeNode, nextNode: TreeNode): boolean => {
-  return firstNode.end === nextNode.start - 1;
+  return firstNode?.end === nextNode?.start - 1;
 }
 
 export const getTopComment = (pl: PLConnect, tree: TreeNode, paths: string[][]): string => {
