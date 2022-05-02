@@ -1,10 +1,28 @@
 const webScrapingApiClient = require('webscrapingapi');
 import * as cheerio from 'cheerio';
+import { AuthConnectorType } from '../models/AuthConnector';
+import { getNotionContent, isNotionUrl } from './notion';
 
 const client = new webScrapingApiClient(process.env.WEBSCRAPER_KEY);
 
-export const getContentFromWebpage = async (url: string): Promise<string> => {
-  const response = await client.get(url, {
+type ScrapingMethod = 'notion' | 'web';
+
+const getScrapingMethod = (url: string): ScrapingMethod => {
+    const urlParsed = new URL(url);
+    if (isNotionUrl(urlParsed)) {
+        return 'notion';
+    }
+    return 'web';
+}
+
+export const getContentFromWebpage = async (url: string, authConnector?: AuthConnectorType): Promise<string> => {
+    const scrapingMethod = getScrapingMethod(url);
+    const notionAccessToken = authConnector?.notion.accessToken;
+    if (scrapingMethod === 'notion' && notionAccessToken) {
+        return getNotionContent(url, notionAccessToken)
+    }
+
+    const response = await client.get(url, {
         render_js: 1,
         proxy_type: 'datacenter',
         country: 'us',

@@ -1,14 +1,15 @@
 import axios from 'axios';
 import { urlify } from './links';
-import { isNotionUrl, isBlock, getNotionBlockContent, getNotionPageTitle } from '../services/notion';
-import { getLanguageIdByFilename } from '../parsing/filenames';
-import getPL from '../parsing/languages';
-import { formatCode, getTreeSitterProgram } from '../parsing';
-import { ConnectFile, Alert, Link } from './types';
+import { isNotionUrl, isBlock, getNotionBlockContent, getNotionPageTitle } from '../../services/notion';
+import { getLanguageIdByFilename } from '../../parsing/filenames';
+import getPL from '../../parsing/languages';
+import { formatCode, getTreeSitterProgram } from '../../parsing';
+import { Alert, Link } from './types';
 import { getLinksInFile } from './links';
-import { AuthConnectorType } from '../models/AuthConnector';
+import { AuthConnectorType } from '../../models/AuthConnector';
+import { FileInfo } from './patch';
 
-export const getAlertsForFile = async (file: ConnectFile, authConnector?: AuthConnectorType): Promise<Alert[]> => {
+export const getAlertsForFile = async (file: FileInfo, authConnector?: AuthConnectorType): Promise<Alert[]> => {
     const languageId = getLanguageIdByFilename(file.filename);
     const content = formatCode(languageId, file.content);
     const pl = getPL(languageId);
@@ -19,7 +20,7 @@ export const getAlertsForFile = async (file: ConnectFile, authConnector?: AuthCo
     return alertResults;
 }
 
-export const getAlertsForAllFiles = async (files: ConnectFile[], authConnector?: AuthConnectorType): Promise<Alert[]> => {
+export const getAlertsForAllFiles = async (files: FileInfo[], authConnector?: AuthConnectorType): Promise<Alert[]> => {
     const alertPromises = files
         .filter((file) => file != null)
         .map(async (file) => {
@@ -83,7 +84,7 @@ export const createMessage = async (link: Link, authConnector?: AuthConnectorTyp
     if (isNotionUrl(url) && authConnector?.notion) {
         const isblock = isBlock(url);
         if (isblock) {
-            const blockContent = await getNotionBlockContent(link, authConnector.notion.accessToken);
+            const blockContent = await getNotionBlockContent(link.url, authConnector.notion.accessToken);
             return createMessageContent(link, linkText, 'notionBlock', blockContent);
         } else {
             return createMessageContent(link, linkText, 'notionPage');
