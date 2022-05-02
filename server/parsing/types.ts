@@ -23,7 +23,7 @@ export type Skeleton = {
 }
 
 export type FileSkeleton = {
-  topComment: string;
+  topComment?: string;
   skeletons: Skeleton[];
   filename?: string;
 }

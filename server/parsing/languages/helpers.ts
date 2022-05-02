@@ -186,7 +186,7 @@ export const getTopComment = (pl: PLConnect, tree: TreeNode, paths: string[][]):
   const { children } = tree;
   const firstNode = children[0];
   const secondNode = children[1];
-  if (!nodeIsOnNextLine(firstNode, secondNode)){
+  if (!nodeIsOnNextLine(firstNode, secondNode)){ // if the next child isn't directly after the comment it doesn't matter
     return pl.extractComment(firstNode);
   }
   const onPath = paths.map((path) => nodeIsOnPath(secondNode, path));

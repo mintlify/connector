@@ -23,8 +23,8 @@ const formatSkeletonToMarkdown = (skeleton: Skeleton): string => {
 }
 
 export const fileSkeletonToMarkdown = (fileSkeleton: FileSkeleton): string => {
-    const { topComment, skeletons } = fileSkeleton;
-    const description = formatTopComment(topComment);
+    const { skeletons } = fileSkeleton;
+    const description = fileSkeleton?.topComment == null ? '' : formatTopComment(fileSkeleton?.topComment);
     const title = formatTitle(fileSkeleton.filename);
     const formattedSkeletons = skeletons.map((skeleton) => formatSkeletonToMarkdown(skeleton)).join('\n\n');
     return `${description}${title}${formattedSkeletons}`;
