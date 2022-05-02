@@ -83,7 +83,7 @@ export const createMessage = async (link: Link, authConnector?: AuthConnectorTyp
     if (isNotionUrl(url) && authConnector?.notion) {
         const isblock = isBlock(url);
         if (isblock) {
-            const blockContent = await getNotionBlockContent(link, authConnector.notion.accessToken);
+            const blockContent = await getNotionBlockContent(link.url, authConnector.notion.accessToken);
             return createMessageContent(link, linkText, 'notionBlock', blockContent);
         } else {
             return createMessageContent(link, linkText, 'notionPage');

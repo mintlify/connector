@@ -37,7 +37,7 @@ v01Router.post('/', async (req, res) => {
         numberOfAlerts: alerts.length
     });
 
-    createVersionTasks(alerts, alertsRequest);
+    createVersionTasks(alerts, alertsRequest, authConnector);
     return res.status(200).send({
         alerts,
         newLinksMessage

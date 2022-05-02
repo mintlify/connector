@@ -43,11 +43,11 @@ export const getNotionPageTitle = async (link: Link, notionAccessToken: string):
     }
 }
 
-export const getNotionBlockContent = async (link: Link, notionAccessToken: string): Promise<string> => {
+export const getNotionBlockContent = async (url: string, notionAccessToken: string): Promise<string> => {
     try {
-        const url = new URL(urlify(link.url));
+        const urlParsed = new URL(urlify(url));
         const notion = new Client({ auth: notionAccessToken });
-        const blockId = getBlockId(url);
+        const blockId = getBlockId(urlParsed);
         const response: any = await notion.blocks.retrieve({
             block_id: blockId,
         });
@@ -60,19 +60,19 @@ export const getNotionBlockContent = async (link: Link, notionAccessToken: strin
     }
 }
 
-export const getNotionContent = async (link: Link, notionAccessToken: string): Promise<string> => {
+export const getNotionContent = async (url: string, notionAccessToken: string): Promise<string> => {
     try {
-        const url = new URL(urlify(link.url));
+        const urlParsed = new URL(urlify(url));
         const notion = new Client({ auth: notionAccessToken });
-        if (isBlock(url)) {
-            const blockId = getBlockId(url);
+        if (isBlock(urlParsed)) {
+            const blockId = getBlockId(urlParsed);
             const response: any = await notion.blocks.retrieve({
                 block_id: blockId,
             });
             const type = response?.type;
             return response[type].rich_text[0].text.content ?? response[type].url ?? response[type].external.url ?? '';
         } else { // page
-            const pageId = getPageId(url);
+            const pageId = getPageId(urlParsed);
             const response: any = await notion.pages.retrieve({ page_id: pageId });
             let title = response.properties.title.title[0].text.content;
             if (response.icon.type === 'emoji') {
