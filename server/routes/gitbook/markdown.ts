@@ -28,6 +28,14 @@ export const fileSkeletonToMarkdown = (fileSkeleton: FileSkeleton): string => {
     return `${description}${title}${formattedSkeletons}`;
 }
 
+export const fileSkeletonToMarkdownFile = (fileSkeleton: FileSkeleton): GitbookFile => {
+    const mdFilename = `mintlify/${fileSkeleton.filename}.md`;
+    return {
+        filename: mdFilename,
+        content: fileSkeletonToMarkdown(fileSkeleton)
+    };
+}
+
 const formatFileSkeletonForSummary = (file: GitbookFile): string => {
     const filename = path.parse(file.filename).base.slice(0,-3);
     return `* [${filename}](${file.filename})`;
@@ -35,11 +43,12 @@ const formatFileSkeletonForSummary = (file: GitbookFile): string => {
 
 // TODO: Create Hierarchy
 export const summaryUpdateOnInstallation = (summary: GitbookFile, files: GitbookFile[]): GitbookFile => {
+    const existingContent = summary ?? '';
     const header = '## Mintlify Docs <a href="#mintlify" id="mintlify"></a>\n\n';
     const table = files.map((file) => formatFileSkeletonForSummary(file)).join('\n');
-    const content = `${summary.content}\n\n${header}${table}`;
+    const content = `${existingContent}\n\n${header}${table}`;
     return {
-        filename: summary.filename,
+        filename: summary?.filename ?? 'SUMMARY.md',
         content
     };
 }
@@ -71,6 +80,7 @@ const mdToSkeletons = (tree: any[]): Skeleton[] => {
 };
 
 export const mdToFileSkeleton = (file: GitbookFile): FileSkeleton => {
+    if (file === null) return;
     const tokens: any = marked.lexer(file.content);
     const skeletons: Skeleton[] = mdToSkeletons(tokens);
     const topComment = tokens[1]?.text.slice(13);

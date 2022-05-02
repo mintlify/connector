@@ -54,15 +54,20 @@ gitbookRouter.post('/update', async (req, res) => {
         return res.status(200).send({
             files: updatedCodeFiles
         });
-    } else {        
+    } else {
         const updatedMdFiles: GitbookFile[] = filePairsWithSkeletons.map((filePair) => updateMdFile(filePair));
         const newFiles: GitbookFile[] = req.body?.newFiles;
         if (newFiles != null) {
             const { owner, repo, branch, summary } : { owner: string, repo: string, branch: string, summary: GitbookFile } = req.body;
             const authConnector = await getAuthConnector(owner);
             const newMdFiles: GitbookFile[] = filesToMdFiles(newFiles, repo, branch, authConnector, summary);
+            const updatedFiles = updatedMdFiles.concat(newMdFiles).filter((file) => {
+                const properties = Object.keys(file);
+                return properties.length !== 0;
+            })
+
             return res.status(200).send({
-                files: updatedMdFiles.concat(newMdFiles)
+                files: updatedFiles
             });
         }
         return res.status(200).send({

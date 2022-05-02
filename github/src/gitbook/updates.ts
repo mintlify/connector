@@ -1,20 +1,38 @@
 import axios from 'axios';
 import { Probot } from 'probot';
-import { ACCEPTED_LANGUAGES, ENDPOINT } from '../constants';
+import { ACCEPTED_LANGUAGES, ENDPOINT, ADMIN_LOGIN } from '../constants';
 
 import { getFileExtension, GitbookFile, gitbookFilesToTrees } from './installation';
 
 const isRelevantMdFile = (filename: string): boolean => {
     const relevantPathRegex = filename.match(/mintlify\/.+\.md/);
     return relevantPathRegex != null && relevantPathRegex.length > 0;
-}
+};
 
 const getCodeFileName = (mdName: string): string => {
     return mdName.substring(10).slice(-3);
-}
+};
 
 const getMdFileEquiv = (codeFilename: string): string => {
     return `mintlify/${codeFilename}.md`;
+};
+
+const createFilePairs = (codeContent: (GitbookFile|null)[], mdContent: (GitbookFile|null)[]): ({md: GitbookFile|null, code: GitbookFile|null} | null)[] => {
+    return codeContent.map((code, i) => {
+        if (codeContent == null || mdContent == null) return null;
+        return {
+            md: mdContent[i],
+            code
+        }
+    }).filter((pair) => pair != null);
+};
+
+const getSummaryMd = (filePairs: ({md: GitbookFile|null, code: GitbookFile|null}|null)[]): GitbookFile|null => {
+    const findPair = filePairs.find(filePair => filePair?.md?.filename === 'SUMMARY.md');
+    if (findPair) {
+        return findPair.md;
+    }
+    return null;
 }
 
 export const gitbookUpdates = (app: Probot) => {
@@ -56,6 +74,7 @@ export const gitbookUpdates = (app: Probot) => {
 
         const pushChanges = async (files: GitbookFile[], message: string) => {
             const treeChildren = gitbookFilesToTrees(files);
+            if (treeChildren.length === 0) return;
             const createdTreeResponse = await context.octokit.rest.git.createTree({
                 owner,
                 repo,
@@ -78,8 +97,9 @@ export const gitbookUpdates = (app: Probot) => {
                 sha: commitSha
             });
         };
-
-        if (sender === 'gitbook-com[bot]') {
+        if (sender === ADMIN_LOGIN) {
+            return;
+        } else if (sender === 'gitbook-com[bot]') {
             const changedFilenames: string[] = headCommit?.modified;
             if (changedFilenames == null) return;
             const relevantMdFilenames = changedFilenames.filter((filename) => isRelevantMdFile(filename));
@@ -90,41 +110,40 @@ export const gitbookUpdates = (app: Probot) => {
             const fileContentResponse = await Promise.all(mdFileContentPromises.concat(codeFileContentPromises)) as GitbookFile[];
             const mdContent = fileContentResponse.slice(0, mdFileContentPromises.length);
             const codeContent = fileContentResponse.slice(mdFileContentPromises.length);
-            const filePairs = codeContent.map((code, i) => {
-                if (codeContent == null || mdContent == null) return;
-                return {
-                    md: mdContent[i],
-                    code
-                }
-            }).filter((pair) => pair != null);
+            const filePairs = createFilePairs(codeContent, mdContent);
+            const summary = getSummaryMd(filePairs);
             const gitbookUpdateResponse = await axios.post(`${ENDPOINT}/gitbook/update`, {
                 filePairs,
-                mdToCode: true
+                mdToCode: true,
+                owner,
+                repo,
+                branch: currBranch,
+                summary
             });
             const updatedFiles: GitbookFile[] = gitbookUpdateResponse.data.files;
             await pushChanges(updatedFiles, 'Sync docstrings with gitbook updates');
         } else { // if code is updated...
             // get code file & existing md file
-            const modifiedFilenames: string[] = headCommit?.modified;
+            const modifiedFilenames: string[] = headCommit?.modified.filter((filename: any) => !isRelevantMdFile(filename)); // TODO - if md was edited, edit the other way around
             const equivMdFilenames: string[] = modifiedFilenames.map((codeFilename) => getMdFileEquiv(codeFilename));
             const newFilenames: string[] = headCommit?.added;
+            if (modifiedFilenames.length === 0 && newFilenames.length === 0) return;
             const filePromises = [...createFileContentPromises(modifiedFilenames), ...createFileContentPromises(equivMdFilenames), ...createFileContentPromises(newFilenames)];
             const fileResponses = await Promise.all(filePromises);
 
             const codeContent = fileResponses.slice(0, modifiedFilenames.length);
             const mdContent = fileResponses.slice(modifiedFilenames.length, modifiedFilenames.length + equivMdFilenames.length);
-            const filePairs = codeContent.map((code, i) => {
-                if (codeContent == null || mdContent == null) return;
-                return {
-                    md: mdContent[i],
-                    code
-                }
-            }).filter((pair) => pair != null);
+            const filePairs = createFilePairs(codeContent, mdContent);
+            const summary = getSummaryMd(filePairs);
             const newFileContent = fileResponses.slice(modifiedFilenames.length + equivMdFilenames.length);
             const gitbookUpdateResponse = await axios.post(`${ENDPOINT}/gitbook/update`, {
                 filePairs,
                 mdToCode: false,
-                newFiles: newFileContent
+                newFiles: newFileContent,
+                owner,
+                repo,
+                branch: currBranch,
+                summary
             });
             const updatedFiles: GitbookFile[] = gitbookUpdateResponse.data.files;
             await pushChanges(updatedFiles, 'Sync markdown files with code updates');

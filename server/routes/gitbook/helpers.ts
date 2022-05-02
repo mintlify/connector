@@ -5,7 +5,7 @@ import { getLanguageIdByFilename } from 'parsing/filenames';
 import getPL from 'parsing/languages';
 import { formatCode, getFileSkeleton } from 'parsing';
 import { addUrlsToSkeletons } from './url';
-import { fileSkeletonToMarkdown, summaryUpdateOnInstallation } from './markdown';
+import { fileSkeletonToMarkdown, fileSkeletonToMarkdownFile, summaryUpdateOnInstallation } from './markdown';
 
 const SUPPORTED_LANGUAGES = ['typescript'];
 
@@ -22,9 +22,10 @@ export const fileToFileSkeleton = (file: GitbookFile, repo?: string, branch?: st
 };
 
 export const fileToMdFile = (file: GitbookFile, repo?: string, branch?: string, authConnector?: AuthConnectorType): GitbookFile => {
+    console.log({file});
     const fileSkeleton = fileToFileSkeleton(file, repo, branch, authConnector);
     const markdown = fileSkeletonToMarkdown(fileSkeleton);
-    const mdFilename = `mintlify/${fileSkeleton.filename}.md`
+    const mdFilename = `mintlify/${file.filename}.md`;
     return { filename: mdFilename, content: markdown };
 };
 
@@ -60,7 +61,10 @@ export const updateCodeFile = (filePair: FilePair): GitbookFile => {
 
 export const updateMdFile = (filePair: FilePair): GitbookFile => {
     const { md } = filePair;
-    const mdSkeletons: Skeleton[] = filePair.md.fileSkeleton.skeletons;
+    const mdSkeletons: Skeleton[] = filePair.md?.fileSkeleton?.skeletons ?? null;
+    if (md === null) {
+        return fileSkeletonToMarkdownFile(filePair.code.fileSkeleton);
+    }
     const codeSkeletons: Skeleton[] = filePair.code.fileSkeleton.skeletons;
     let newContent = md.content;
     codeSkeletons.forEach((skeleton) => {
