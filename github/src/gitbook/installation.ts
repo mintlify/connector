@@ -1,7 +1,7 @@
 import { Probot } from 'probot';
 import axios from 'axios';
 
-import { ENDPOINT } from "../constants";
+import { ENDPOINT, ACCEPTED_LANGUAGES } from "../constants";
 
 export type GitbookFile = {
   filename: string;
@@ -14,6 +14,14 @@ type Tree = {
   type?: "blob" | "tree" | "commit" | undefined;
   sha?: string | null | undefined;
   content?: string | undefined;
+}
+
+export const getFileExtension = (filename: string): string => {
+  const fileExtensionRegex = /(?:\.([^.]+))?$/;
+  const regexExec = fileExtensionRegex.exec(filename);
+  if (regexExec == null) return '';
+  const fileExtension = regexExec[1];
+  return fileExtension;
 }
 
 export const gitbookFilesToTrees = (gitbookFiles: GitbookFile[]): Tree[] => {
@@ -51,6 +59,10 @@ const installation = async (context: any, repo: string) => {
       const fileContentPromises = tree.map((file: any) => new Promise(async (resolve) => {
         if (file.mode !== '100644') { // skip anything that isn't a file in the tree
           resolve(null)
+        }
+        const fileExtension = getFileExtension(file.path);
+        if (!ACCEPTED_LANGUAGES.includes(fileExtension)) {
+          resolve(null);
         }
         try {
           const contentRequest = {

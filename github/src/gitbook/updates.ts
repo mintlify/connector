@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { Probot } from 'probot';
-import { ENDPOINT } from '../constants';
+import { ACCEPTED_LANGUAGES, ENDPOINT } from '../constants';
 
-import { GitbookFile, gitbookFilesToTrees } from './installation';
+import { getFileExtension, GitbookFile, gitbookFilesToTrees } from './installation';
 
 const isRelevantMdFile = (filename: string): boolean => {
     const relevantPathRegex = filename.match(/mintlify\/.+\.md/);
@@ -33,6 +33,10 @@ export const gitbookUpdates = (app: Probot) => {
         const createFileContentPromises = (filenames: string[]): Promise<GitbookFile | null>[] => {
             return filenames.map((filename: string) => new Promise(async (resolve) => {
                 try {
+                    const fileExtension = getFileExtension(filename);
+                    if (!ACCEPTED_LANGUAGES.includes(fileExtension)) {
+                        resolve(null);
+                    }
                     const contentRequest = {
                       owner,
                       repo,
