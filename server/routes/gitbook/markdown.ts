@@ -71,9 +71,9 @@ const mdToSkeletons = (tree: any[]): Skeleton[] => {
 };
 
 export const mdToFileSkeleton = (file: GitbookFile): FileSkeleton => {
-    const tokens = marked.lexer(file.content);
+    const tokens: any = marked.lexer(file.content);
     const skeletons: Skeleton[] = mdToSkeletons(tokens);
-    const topComment = tokens[1].text.slice(13);
+    const topComment = tokens[1]?.text.slice(13);
     return {
         skeletons,
         topComment,

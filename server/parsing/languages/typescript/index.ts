@@ -1,5 +1,5 @@
 import { PLConnect, TreeNode, Skeleton, FileSkeleton } from 'parsing/types';
-import { getLineRange } from 'routes/v01/links';
+import { getLineRange } from 'helpers/links';
 import {
   extractBaseComments,
   nodeIsOnPath,
