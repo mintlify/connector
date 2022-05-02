@@ -5,7 +5,8 @@ import {
   nodeIsOnPath,
   findChildByKind,
   getTopComment,
-  wrapAround
+  wrapAround,
+  nodeIsOnNextLine
 } from '../helpers';
 
 
@@ -37,23 +38,27 @@ const TYPESCRIPT_SYNOPSIS = {
 }
 
 const getSkeletonFromNode = (parent: TreeNode, node: TreeNode, i: number, pl: PLConnect, file: string): Skeleton => {
-  const comment = pl.extractComment(node);
-  if (comment == null) {
-    return null;
-  }
-  const nextChild = parent.children[i+1];
-  if (nodeIsOnPath(nextChild, TYPESCRIPT_SYNOPSIS.ARROW_FUNCTION.path)) {
+  if (i === 0) return;
+  const childBefore = parent.children[i-1];
+  if (nodeIsOnPath(node, TYPESCRIPT_SYNOPSIS.ARROW_FUNCTION.path)) {
     // get signature
-    const variableDeclarator = findChildByKind(nextChild, 'variable_declarator');
+    const variableDeclarator = findChildByKind(node, 'variable_declarator');
     const functionName = findChildByKind(variableDeclarator, 'identifier').value;
     const arrowFunction = findChildByKind(variableDeclarator, 'arrow_function').value;
     const params = arrowFunction.substring(0, arrowFunction.indexOf('=>')).trim();
     const signature = `${functionName}${params}`;
-    const lineRange = getLineRange(file, nextChild.value);
+    const lineRange = getLineRange(file, node.value);
+    const comment = pl.extractComment(childBefore);
+    if (comment != null && nodeIsOnNextLine(childBefore, node)) {
+      return {
+        signature,
+        lineRange,
+        rawDoc: childBefore.value,
+        doc: comment,
+      };
+    }
     return {
       signature,
-      doc: comment,
-      rawDoc: node.value,
       lineRange
     };
   }

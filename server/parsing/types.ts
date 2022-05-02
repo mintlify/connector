@@ -1,4 +1,4 @@
-import { LineRange } from 'routes/v01/types';
+import { LineRange } from 'helpers/types';
 
 export type TreeNode = {
   kind: string;
@@ -17,7 +17,7 @@ export type Program = {
 export type Skeleton = {
   signature: string;
   lineRange?: LineRange;
-  doc: string;
+  doc?: string;
   url?: string;
   rawDoc?: string;
 }

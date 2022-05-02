@@ -16,8 +16,10 @@ ${topComment}
 const formatTitle = (title: string): string => {
     return `# ${title}\n\n`
 };
+
 const formatSkeletonToMarkdown = (skeleton: Skeleton): string => {
-    return `### [${skeleton.signature}](${skeleton.url})\n\n${skeleton.doc}`;
+    const doc = skeleton?.doc == null ? '' : `\n\n${skeleton.doc}`
+    return `### [${skeleton.signature}](${skeleton.url})${doc}`;
 }
 
 export const fileSkeletonToMarkdown = (fileSkeleton: FileSkeleton): string => {
