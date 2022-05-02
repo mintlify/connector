@@ -117,7 +117,9 @@ export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
         side: encompassedRangeAndSide.end.side
       })
     });
-    await Promise.all(reviewCommentPromises);
+    const reviewComments = await Promise.all(reviewCommentPromises);
+    console.log(reviewComments);
+    // Create tasks using review comments
     await createActionRequiredCheck(context, newAlerts[0]?.url);
     return;
   });

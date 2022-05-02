@@ -19,8 +19,7 @@ const GitHubSchema = new Schema({
 })
 
 const VersionTaskSchema = new Schema({
-  github: { type: GitHubSchema },
-  installationId: { type: String, required: true },  
+  github: { type: GitHubSchema }, 
   url: { type: String, required: true },
   content: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
