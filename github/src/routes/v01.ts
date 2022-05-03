@@ -66,8 +66,10 @@ v01Router.post('/auth', async (req, res) => {
     await AuthConnector.create(authConnector);
     return res.status(200).end();
 });
-v01Router.get('/install', async (_, res) => {
-    track('connect-temp', 'Install Connect GitHub App');
+
+v01Router.get('/install', async (req, res) => {
+    const { installation_id } = req.query;
+    track(installation_id as string, 'Install Connect GitHub App');
     return res.redirect('https://mintlify.notion.site/Mintlify-Connect-c77063caf3f6492e85badd026b769a69');
 })
 
