@@ -39,28 +39,42 @@ const TYPESCRIPT_SYNOPSIS = {
 
 const getSkeletonFromNode = (parent: TreeNode, node: TreeNode, i: number, pl: PLConnect, file: string): Skeleton => {
   const childBefore = parent.children[i-1];
+  let signature = '';
+  const comment = childBefore != null ? pl.extractComment(childBefore) : null;
+  const lineRange = getLineRange(file, node.value);
   if (nodeIsOnPath(node, TYPESCRIPT_SYNOPSIS.ARROW_FUNCTION.path)) {
     const variableDeclarator = findChildByKind(node, 'variable_declarator');
-    const functionName = findChildByKind(variableDeclarator, 'identifier').value;
+    const functionName = findChildByKind(variableDeclarator, 'identifier').value ?? '';
     const arrowFunction = findChildByKind(variableDeclarator, 'arrow_function').value;
     const params = arrowFunction.substring(0, arrowFunction.indexOf('=>')).trim();
-    const signature = `${functionName}${params}`;
-    const lineRange = getLineRange(file, node.value);
-    const comment = childBefore != null ? pl.extractComment(childBefore) : null;
-    
-    if (comment != null && nodeIsOnNextLine(childBefore, node)) {
-      return {
-        signature,
-        lineRange,
-        rawDoc: childBefore.value,
-        doc: comment,
-      };
-    }
+    signature = `${functionName}${params}`;
+  } else if (nodeIsOnPath(node, TYPESCRIPT_SYNOPSIS.VAR_FUNCTION.path)) {
+    const variableDeclarator = findChildByKind(node, 'variable_declarator');
+    const functionName = findChildByKind(variableDeclarator, 'identifier').value ?? '';
+    const func = findChildByKind(variableDeclarator, 'function').value;
+    const bracketIndex = func.indexOf('{');
+    const params = func.substring(8, bracketIndex).trim();
+    signature = `${functionName}${params}`;
+  } else if (nodeIsOnPath(node, TYPESCRIPT_SYNOPSIS.FUNCTION_EXPRESSION.path)) {
+    const funcDec = findChildByKind(node, 'function_declaration');
+    const functionName = findChildByKind(funcDec, 'identifier').value ?? '';
+    const params = findChildByKind(funcDec, 'formal_parameters').value;
+    const returnType = findChildByKind(funcDec, 'type_annotation').value ?? '';
+    signature = `${functionName}${params}${returnType}`;
+  }
+
+  if (comment != null && nodeIsOnNextLine(childBefore, node)) {
     return {
       signature,
-      lineRange
+      lineRange,
+      rawDoc: childBefore.value,
+      doc: comment,
     };
   }
+  return {
+    signature,
+    lineRange
+  };
 }
 
 const getSkeletons = (tree: TreeNode): Skeleton[] => {
