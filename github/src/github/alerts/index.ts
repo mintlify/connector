@@ -1,13 +1,12 @@
 // https://www.notion.so/mintlify/Installation-37aab83daa5e48b88cde8bd3891fa181
-import express from 'express';
+
 import { Context, Probot } from "probot";
 import '../../services/mongoose';
 import { getReviewComments, checkIfAllAlertsAreResolve,
   createSuccessCheck, createActionRequiredCheck, createInProgressCheck } from "../helpers/octokit";
-import headRouter from "../../routes";
 import { createReviewCommentsFromAlerts, filterNewAlerts, getAlerts, getAllFilesAndMap, potentiallCreateNewLinksComment } from "../helpers/app";
 
-const alerts = (app: Probot, getRouter : ((path?: string | undefined) => express.Router) | undefined) => {
+const alerts = (app: Probot) => {
   app.on(["pull_request.opened", "pull_request.reopened", "pull_request.synchronize"], async (context) => {
     await createInProgressCheck(context);
 
@@ -44,9 +43,6 @@ const alerts = (app: Probot, getRouter : ((path?: string | undefined) => express
       await createActionRequiredCheck(context);
     }
   });
-
-  const router = getRouter!("/routes");
-  router.use(headRouter);
 };
 
 export default alerts;
