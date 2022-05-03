@@ -1,10 +1,12 @@
 import { PLConnect, TreeNode, Skeleton, FileSkeleton } from 'parsing/types';
-import { getLineRange } from 'routes/v01/links';
+import { getLineRange } from 'helpers/links';
 import {
   extractBaseComments,
   nodeIsOnPath,
   findChildByKind,
-  getTopComment
+  getTopComment,
+  wrapAround,
+  nodeIsOnNextLine
 } from '../helpers';
 
 
@@ -36,25 +38,43 @@ const TYPESCRIPT_SYNOPSIS = {
 }
 
 const getSkeletonFromNode = (parent: TreeNode, node: TreeNode, i: number, pl: PLConnect, file: string): Skeleton => {
-  const comment = pl.extractComment(node);
-  if (comment == null) {
-    return null;
-  }
-  const nextChild = parent.children[i+1];
-  if (nodeIsOnPath(nextChild, TYPESCRIPT_SYNOPSIS.ARROW_FUNCTION.path)) {
-    // get signature
-    const variableDeclarator = findChildByKind(nextChild, 'variable_declarator');
-    const functionName = findChildByKind(variableDeclarator, 'identifier').value;
+  const childBefore = parent.children[i-1];
+  let signature = '';
+  const comment = childBefore != null ? pl.extractComment(childBefore) : null;
+  const lineRange = getLineRange(file, node.value);
+  if (nodeIsOnPath(node, TYPESCRIPT_SYNOPSIS.ARROW_FUNCTION.path)) {
+    const variableDeclarator = findChildByKind(node, 'variable_declarator');
+    const functionName = findChildByKind(variableDeclarator, 'identifier').value ?? '';
     const arrowFunction = findChildByKind(variableDeclarator, 'arrow_function').value;
     const params = arrowFunction.substring(0, arrowFunction.indexOf('=>')).trim();
-    const signature = `${functionName}${params}`;
-    const lineRange = getLineRange(file, nextChild.value);
+    signature = `${functionName}${params}`;
+  } else if (nodeIsOnPath(node, TYPESCRIPT_SYNOPSIS.VAR_FUNCTION.path)) {
+    const variableDeclarator = findChildByKind(node, 'variable_declarator');
+    const functionName = findChildByKind(variableDeclarator, 'identifier').value ?? '';
+    const func = findChildByKind(variableDeclarator, 'function').value;
+    const bracketIndex = func.indexOf('{');
+    const params = func.substring(8, bracketIndex).trim();
+    signature = `${functionName}${params}`;
+  } else if (nodeIsOnPath(node, TYPESCRIPT_SYNOPSIS.FUNCTION_EXPRESSION.path)) {
+    const funcDec = findChildByKind(node, 'function_declaration');
+    const functionName = findChildByKind(funcDec, 'identifier').value ?? '';
+    const params = findChildByKind(funcDec, 'formal_parameters').value;
+    const returnType = findChildByKind(funcDec, 'type_annotation').value ?? '';
+    signature = `${functionName}${params}${returnType}`;
+  }
+
+  if (comment != null && nodeIsOnNextLine(childBefore, node)) {
     return {
       signature,
+      lineRange,
+      rawDoc: childBefore.value,
       doc: comment,
-      lineRange
     };
   }
+  return {
+    signature,
+    lineRange
+  };
 }
 
 const getSkeletons = (tree: TreeNode): Skeleton[] => {
@@ -89,8 +109,15 @@ export default class TypeScript implements PLConnect {
     const topComment = getTopComment(this, tree, typesToAvoid);
     const skeletons = getSkeletons(tree);
     return {
-      topComment,
-      skeletons
+      skeletons,
+      topComment
     };
+  }
+  comment(str: string): string {
+    if (str.trim().split('/n').length > 1) {
+      const starredCode = str.split('\n').map((line) => ` * ${line}`).join('\n');
+      return wrapAround(starredCode, '/**', ' */', true);
+    }
+    return `// ${str}`;
   }
 }

@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { sha512Hash } from 'helpers/hash';
 import AuthConnector from 'models/AuthConnector';
 import { getNotionAccessTokenFromCode, getNotionURL } from 'services/notion';
 
@@ -30,10 +31,12 @@ notionRouter.get('/authorization', async (req, res) => {
   if (state == null) return res.status(403).send('No state provided');
 
   const stateParsed = JSON.parse(decodeURIComponent(state as string));
+  const sourceId = stateParsed.id;
 
   const credentials = {
     source: stateParsed.source,
-    sourceId: stateParsed.id,
+    sourceId,
+    hashedSourceId: sha512Hash(sourceId)
   }
 
   const notionAuth = {
@@ -46,6 +49,7 @@ notionRouter.get('/authorization', async (req, res) => {
       workspaceId: response.workspace_id,
     }
   };
+  
   await AuthConnector.findOneAndUpdate(credentials, notionAuth, { upsert: true });
   return res.redirect('https://notion.so');
 });

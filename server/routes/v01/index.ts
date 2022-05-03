@@ -1,13 +1,15 @@
 import express from 'express';
-import { ConnectFile, Alert } from './types';
-import { createNewLinksMessage, getAlertsForAllFiles } from './alerts';
+import { ConnectFile, Alert } from '../../helpers/types';
+import { createNewLinksMessage, getAlertsForAllFiles } from '../../helpers/alerts';
 import { track } from 'services/segment';
 import AuthConnector from 'models/AuthConnector';
+import { sha512Hash } from 'helpers/hash';
 
 const v01Router = express.Router();
 
 export const getAuthConnector = (sourceId: string) => {
-    return AuthConnector.findOne({sourceId});
+    const hashedSourceId = sha512Hash(sourceId);
+    return AuthConnector.findOne({hashedSourceId});
 }
 
 v01Router.post('/', async (req, res) => {

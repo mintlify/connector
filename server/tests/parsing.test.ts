@@ -1,6 +1,6 @@
-import { createMessage, getAlertsForAllFiles, getAlertsForFile } from 'routes/v01/alerts';
-import { checkIfUrl } from 'routes/v01/links';
-import { ConnectFile, Alert, Change } from 'routes/v01/types';
+import { createMessage, getAlertsForAllFiles, getAlertsForFile } from 'helpers/alerts';
+import { checkIfUrl } from 'helpers/links';
+import { ConnectFile, Alert, Change } from 'helpers/types';
 
 describe('URL checker', () => {
   test('Simple URL', () => {

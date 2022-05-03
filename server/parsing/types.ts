@@ -1,4 +1,4 @@
-import { LineRange } from 'routes/v01/types';
+import { LineRange } from 'helpers/types';
 
 export type TreeNode = {
   kind: string;
@@ -16,14 +16,16 @@ export type Program = {
 
 export type Skeleton = {
   signature: string;
-  lineRange: LineRange;
-  doc: string;
+  lineRange?: LineRange;
+  doc?: string;
   url?: string;
+  rawDoc?: string;
 }
 
 export type FileSkeleton = {
-  topComment: string;
+  topComment?: string;
   skeletons: Skeleton[];
+  filename?: string;
 }
 
 export interface PLConnect {
@@ -31,4 +33,5 @@ export interface PLConnect {
   extractComment(tree: TreeNode): string | null;
   // For Gitbook integration
   getFileSkeleton?(tree: TreeNode): FileSkeleton;
+  comment?(str: string): string;
 }

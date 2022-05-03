@@ -1,5 +1,5 @@
-import { createMessage, getAlertsForFile } from 'routes/v01/alerts';
-import { Alert, Change, ConnectFile } from 'routes/v01/types';
+import { createMessage, getAlertsForFile } from 'helpers/alerts';
+import { Alert, Change, ConnectFile } from 'helpers/types';
 
 describe('Auth connector', () => {
   const notionAuthConnector = {

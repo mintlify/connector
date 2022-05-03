@@ -177,14 +177,29 @@ export const nodeIsOnPath = (tree: TreeNode, path: string[]): boolean => {
   return traverse(tree, path);
 }
 
+export const nodeIsOnNextLine = (firstNode: TreeNode, nextNode: TreeNode): boolean => {
+  return firstNode?.end === nextNode?.start - 1;
+}
+
 export const getTopComment = (pl: PLConnect, tree: TreeNode, paths: string[][]): string => {
   if (tree.children == null) { return null; }
   const { children } = tree;
   const firstNode = children[0];
   const secondNode = children[1];
+  if (!nodeIsOnNextLine(firstNode, secondNode)){ // if the next child isn't directly after the comment it doesn't matter
+    return pl.extractComment(firstNode);
+  }
   const onPath = paths.map((path) => nodeIsOnPath(secondNode, path));
   if (onPath.includes(true)) { // if the next child is one of these types then don't count it as a top comment
     return null;
   }
   return pl.extractComment(firstNode);
 }
+
+export const wrapAround = (code: string, start: string, end: string, newLine = true): string => {
+  if (newLine) {
+    return `${start}\n${code}\n${end}`;
+  }
+
+  return `${start} ${code} ${end}`;
+};

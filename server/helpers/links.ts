@@ -1,5 +1,5 @@
 import { PLConnect, TreeNode } from 'parsing/types';
-import { Change, Link, LineRange } from 'routes/v01/types';
+import { Change, Link, LineRange } from 'helpers/types';
 
 export const urlify = (str: string): string => {
     let content = str;

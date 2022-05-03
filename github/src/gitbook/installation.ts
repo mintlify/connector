@@ -1,14 +1,30 @@
 import { Probot } from 'probot';
 import axios from 'axios';
 
-import { ENDPOINT } from "../constants";
+import { ENDPOINT, ACCEPTED_LANGUAGES } from "../constants";
 
-type GitbookFile = {
+export type GitbookFile = {
   filename: string;
   content: string;
 }
 
-const gitbookFilesToTrees = (gitbookFiles: GitbookFile[]) => {
+type Tree = {
+  path?: string | undefined;
+  mode?: "100644" | "100755" | "040000" | "160000" | "120000" | undefined;
+  type?: "blob" | "tree" | "commit" | undefined;
+  sha?: string | null | undefined;
+  content?: string | undefined;
+}
+
+export const getFileExtension = (filename: string): string => {
+  const fileExtensionRegex = /(?:\.([^.]+))?$/;
+  const regexExec = fileExtensionRegex.exec(filename);
+  if (regexExec == null) return '';
+  const fileExtension = regexExec[1];
+  return fileExtension;
+}
+
+export const gitbookFilesToTrees = (gitbookFiles: GitbookFile[]): Tree[] => {
   return gitbookFiles.map((gbFile) => {
     return {
       path: gbFile.filename,
@@ -38,9 +54,16 @@ const installation = async (context: any, repo: string) => {
         repo,
         tree_sha: defaultBranch,
         recursive: true
-      })
+      });
       const { tree } = contentResponse.data;
-      const fileContentPromises = tree.map((file: any) => new Promise(async (resolve, reject) => {
+      const fileContentPromises = tree.map((file: any) => new Promise(async (resolve) => {
+        if (file.mode !== '100644') { // skip anything that isn't a file in the tree
+          resolve(null)
+        }
+        const fileExtension = getFileExtension(file.path);
+        if (!ACCEPTED_LANGUAGES.includes(fileExtension)) {
+          resolve(null);
+        }
         try {
           const contentRequest = {
             owner,
@@ -53,16 +76,22 @@ const installation = async (context: any, repo: string) => {
             filename: file.path,
             content: contentString
           });
-        } catch (e) {
-          reject(e);
+        } catch {
+          resolve(null)
         }
       }));
-      const files = await Promise.all(fileContentPromises);
-      const gitbookFileResponse = await axios.post(`${ENDPOINT}/gitbook/`, {
+      const fileResponses = await Promise.all(fileContentPromises);
+      // TODO: account for when SUMMARY.md is named differently or doesn't exist
+      const files = fileResponses.filter((file) => file != null && file.filename !== 'SUMMARY.md');
+      const summary = fileResponses.find((file) => file.filename === 'SUMMARY.md');
+      const gitbookFileResponse = await axios.post(`${ENDPOINT}/gitbook/installation`, {
         files,
         owner,
+        branch: defaultBranch,
+        repo,
+        summary
       });
-      const gitbookFiles = gitbookFileResponse.data.mdFiles as GitbookFile[];
+      const gitbookFiles = gitbookFileResponse.data.files as GitbookFile[];
       const treeChildren = gitbookFilesToTrees(gitbookFiles);
       const refResponse = await context.octokit.rest.git.getRef({
         owner,
