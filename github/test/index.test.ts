@@ -1,4 +1,4 @@
-import { parsePatch } from '../src/patch';
+import { parsePatch } from '../src/helpers/routes/patch';
 
 describe('Patch to changes', () => {
   test('Simple patch', () => {
