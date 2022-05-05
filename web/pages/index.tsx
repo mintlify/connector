@@ -16,7 +16,6 @@ const projects = [
     siteHref: '#',
     repoHref: '#',
     repo: 'debbielewis/workcation',
-    tech: 'Laravel',
     lastDeploy: '3h ago',
     location: 'United states',
     starred: true,
@@ -28,7 +27,6 @@ const projects = [
     siteHref: '#',
     repoHref: '#',
     repo: 'debbielewis/workcation',
-    tech: 'Laravel',
     lastDeploy: '3h ago',
     location: 'United states',
     starred: true,
@@ -190,8 +188,6 @@ const Home: NextPage = () => {
                       </button>
                     </p>
                     <p className="flex text-gray-500 text-sm space-x-2">
-                      <span>{project.tech}</span>
-                      <span aria-hidden="true">&middot;</span>
                       <span>Last deploy {project.lastDeploy}</span>
                       <span aria-hidden="true">&middot;</span>
                       <span>{project.location}</span>

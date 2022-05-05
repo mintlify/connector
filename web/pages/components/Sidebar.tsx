@@ -2,9 +2,17 @@ import {
   BadgeCheckIcon,
   CollectionIcon,
 } from '@heroicons/react/solid'
+import { useState } from 'react'
+import AddDocumentCommand from './AddDocumentCommand'
 
 export default function Sidebar() {
+  const [isOpen, setIsOpen] = useState(false);
   return (
+    <>
+    <AddDocumentCommand
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
+    />
     <div className="xl:flex-shrink-0 xl:w-64 xl:border-r xl:border-gray-200 bg-white">
       <div className="pl-4 pr-6 py-6 sm:pl-6 lg:pl-8 xl:pl-0">
         <div className="flex items-center justify-between">
@@ -45,6 +53,7 @@ export default function Sidebar() {
                 <button
                   type="button"
                   className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary xl:w-full"
+                  onClick={() => setIsOpen(true)}
                 >
                   Add Documentation
                 </button>
@@ -64,12 +73,13 @@ export default function Sidebar() {
               </div>
               <div className="flex items-center space-x-2">
                 <CollectionIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                <span className="text-sm text-gray-500 font-medium">Connected to GitHub</span>
+                <span className="text-sm text-gray-500 font-medium">Invite team member</span>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+    </>
   )
 }
