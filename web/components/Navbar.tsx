@@ -6,6 +6,7 @@ import {
 } from '@heroicons/react/solid'
 import { XIcon } from '@heroicons/react/outline'
 import { classNames } from '../helpers/functions'
+import Link from 'next/link'
 
 const userNavigation = [
   { name: 'Your Profile', href: '#' },
@@ -36,15 +37,20 @@ export default function Navbar() {
                 <div className="hidden lg:block lg:ml-6">
                   <div className="flex space-x-4">
                     {/* Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" */}
-                    <a href="#" className="bg-gray-800 text-white px-3 py-2 rounded-md text-sm font-medium">
-                      Overview
-                    </a>
-                    <a
-                      href="#"
-                      className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                    <Link
+                      href="/"
                     >
-                      Rules
-                    </a>
+                      <span className="bg-gray-800 text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer">
+                        Overview
+                      </span>
+                    </Link>
+                    <Link
+                      href="/rules"
+                    >
+                      <span className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer">
+                        Rules
+                      </span>
+                    </Link>
                   </div>
                 </div>
               </div>

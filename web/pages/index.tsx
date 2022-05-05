@@ -6,8 +6,8 @@ import {
   SortAscendingIcon,
   StarIcon,
 } from '@heroicons/react/solid'
-import Sidebar from './components/Sidebar'
-import { classNames } from './helpers/functions'
+import Sidebar from '../components/Sidebar'
+import { classNames } from '../helpers/functions'
 
 const projects = [
   {
