@@ -8,6 +8,7 @@ import {
 } from '@heroicons/react/solid'
 import Sidebar from '../components/Sidebar'
 import { classNames } from '../helpers/functions'
+import Layout from '../components/layout'
 
 const projects = [
   {
@@ -41,9 +42,10 @@ const activityItems = [
 
 const Home: NextPage = () => {
   return (
+    <Layout>
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
       {/* Left sidebar & main wrapper */}
-      <div className="flex-1 min-w-0 bg-white xl:flex">
+      <div className="flex-1 min-w-0 xl:flex">
         <Sidebar />
         {/* Projects List */}
         <div className="bg-white lg:min-w-0 lg:flex-1">
@@ -237,6 +239,7 @@ const Home: NextPage = () => {
         </div>
       </div>
     </div>
+    </Layout>
   )
 }
 

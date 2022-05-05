@@ -13,7 +13,7 @@ export default function Sidebar() {
       isOpen={isOpen}
       setIsOpen={setIsOpen}
     />
-    <div className="xl:flex-shrink-0 xl:w-64 xl:border-r xl:border-gray-200 bg-white">
+    <div className="xl:flex-shrink-0 xl:w-64 xl:border-r xl:border-gray-200">
       <div className="pl-4 pr-6 py-6 sm:pl-6 lg:pl-8 xl:pl-0">
         <div className="flex items-center justify-between">
           <div className="flex-1 space-y-8">

@@ -7,6 +7,7 @@ import {
 import { XIcon } from '@heroicons/react/outline'
 import { classNames } from '../helpers/functions'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 const userNavigation = [
   { name: 'Your Profile', href: '#' },
@@ -14,7 +15,14 @@ const userNavigation = [
   { name: 'Sign out', href: '#' },
 ]
 
+const navButtonClass = (isActive: boolean) => {
+  return isActive
+    ? 'bg-gray-800 text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer hover:bg-gray-700'
+    : 'text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer'
+}
+
 export default function Navbar() {
+  const router = useRouter();
   return (
     <Disclosure as="nav" className="bg-background">
       {({ open }) => (
@@ -26,12 +34,12 @@ export default function Navbar() {
                   <img
                     className="block lg:hidden h-5 w-auto"
                     src="/assets/mintlify-worded.svg"
-                    alt="Workflow"
+                    alt="Mintlify"
                   />
                   <img
                     className="hidden lg:block h-5 w-auto"
                     src="/assets/mintlify-worded.svg"
-                    alt="Workflow"
+                    alt="Mintlify"
                   />
                 </div>
                 <div className="hidden lg:block lg:ml-6">
@@ -40,14 +48,14 @@ export default function Navbar() {
                     <Link
                       href="/"
                     >
-                      <span className="bg-gray-800 text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer">
+                      <span className={navButtonClass(router.pathname === '/')}>
                         Overview
                       </span>
                     </Link>
                     <Link
                       href="/rules"
                     >
-                      <span className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer">
+                      <span className={navButtonClass(router.pathname === '/rules')}>
                         Rules
                       </span>
                     </Link>
@@ -68,7 +76,6 @@ export default function Navbar() {
                       name="search"
                       className="block w-full pl-10 pr-3 py-2 border border-transparent rounded-md leading-5 bg-gray-700 text-gray-300 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-white focus:ring-white focus:text-gray-900 sm:text-sm"
                       placeholder="Search"
-                      type="search"
                     />
                     <div className="absolute inset-y-0 right-0 flex py-1.5 pr-1.5">
                       <kbd className="inline-flex items-center border border-gray-200 border-opacity-60 rounded px-2 text-sm font-sans font-medium text-gray-400">
