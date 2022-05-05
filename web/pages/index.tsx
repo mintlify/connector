@@ -10,28 +10,66 @@ import Sidebar from '../components/Sidebar'
 import { classNames } from '../helpers/functions'
 import Layout from '../components/layout'
 
-const projects = [
+const sources = [
   {
-    name: 'Workcation',
-    href: '#',
-    siteHref: '#',
-    repoHref: '#',
-    repo: 'debbielewis/workcation',
+    id: '1',
+    name: 'API Quickstart',
+    lastUpdated: '3 days ago',
+    icon: 'https://files.readme.io/6966a5f-small-In_Rectangle.png',
+    href: 'https://mintlify.readme.io/reference/start',
     lastDeploy: '3h ago',
     location: 'United states',
     starred: true,
-    active: true,
+    members: [
+      {
+        name: 'Courtney Henry',
+        handle: 'courtneyhenry',
+        imageUrl:
+          'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+      },
+      {
+        name: 'Tom Cook',
+        handle: 'tomcook',
+        imageUrl:
+          'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+      },
+    ]
   },
   {
-    name: 'Workcation',
-    href: '#',
-    siteHref: '#',
-    repoHref: '#',
-    repo: 'debbielewis/workcation',
+    id: '2',
+    name: 'Mintlify Connect Technical Specs',
+    lastUpdated: '1 hour ago',
+    icon: 'https://cdn.worldvectorlogo.com/logos/notion-logo-1.svg',
+    href: 'https://mintlify.readme.io/reference/start',
     lastDeploy: '3h ago',
     location: 'United states',
     starred: true,
-    active: true,
+    members: [
+      {
+        name: 'Dries Vincent',
+        handle: 'driesvincent',
+        imageUrl:
+          'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+      },
+      {
+        name: 'Lindsay Walton',
+        handle: 'lindsaywalton',
+        imageUrl:
+          'https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+      },
+      {
+        name: 'Courtney Henry',
+        handle: 'courtneyhenry',
+        imageUrl:
+          'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+      },
+      {
+        name: 'Tom Cook',
+        handle: 'tomcook',
+        imageUrl:
+          'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+      },
+    ]
   },
   // More projects...
 ]
@@ -105,57 +143,38 @@ const Home: NextPage = () => {
             </div>
           </div>
           <ul role="list" className="relative z-0 divide-y divide-gray-200 border-b border-gray-200">
-            {projects.map((project) => (
+            {sources.map((source) => (
               <li
-                key={project.repo}
+                key={source.id}
                 className="relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6"
               >
                 <div className="flex items-center justify-between space-x-4">
                   {/* Repo name and link */}
                   <div className="min-w-0 space-y-3">
                     <div className="flex items-center space-x-3">
-                      <span
-                        className={classNames(
-                          project.active ? 'bg-green-100' : 'bg-gray-100',
-                          'h-4 w-4 rounded-full flex items-center justify-center'
-                        )}
-                        aria-hidden="true"
-                      >
-                        <span
-                          className={classNames(
-                            project.active ? 'bg-green-400' : 'bg-gray-400',
-                            'h-2 w-2 rounded-full'
-                          )}
-                        />
-                      </span>
-
                       <span className="block">
-                        <h2 className="text-sm font-medium">
-                          <a href={project.href}>
-                            <span className="absolute inset-0" aria-hidden="true" />
-                            {project.name}{' '}
-                            <span className="sr-only">{project.active ? 'Running' : 'Not running'}</span>
-                          </a>
+                        <h2 className="text-sm font-medium text-gray-700">
+                          <div className="flex items-center space-x-1">
+                            <div>
+                              <img src={source.icon} alt="Icon" className="h-4 w-4" />
+                            </div>
+                            <div>
+                              {source.name}
+                            </div>
+                          </div>
                         </h2>
                       </span>
                     </div>
-                    <a href={project.repoHref} className="relative group flex items-center space-x-2.5">
-                      <svg
-                        className="flex-shrink-0 w-5 h-5 text-gray-400 group-hover:text-gray-500"
-                        viewBox="0 0 18 18"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        aria-hidden="true"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          clipRule="evenodd"
-                          d="M8.99917 0C4.02996 0 0 4.02545 0 8.99143C0 12.9639 2.57853 16.3336 6.15489 17.5225C6.60518 17.6053 6.76927 17.3277 6.76927 17.0892C6.76927 16.8762 6.76153 16.3104 6.75711 15.5603C4.25372 16.1034 3.72553 14.3548 3.72553 14.3548C3.31612 13.316 2.72605 13.0395 2.72605 13.0395C1.9089 12.482 2.78793 12.4931 2.78793 12.4931C3.69127 12.5565 4.16643 13.4198 4.16643 13.4198C4.96921 14.7936 6.27312 14.3968 6.78584 14.1666C6.86761 13.5859 7.10022 13.1896 7.35713 12.965C5.35873 12.7381 3.25756 11.9665 3.25756 8.52116C3.25756 7.53978 3.6084 6.73667 4.18411 6.10854C4.09129 5.88114 3.78244 4.96654 4.27251 3.72904C4.27251 3.72904 5.02778 3.48728 6.74717 4.65082C7.46487 4.45101 8.23506 4.35165 9.00028 4.34779C9.76494 4.35165 10.5346 4.45101 11.2534 4.65082C12.9717 3.48728 13.7258 3.72904 13.7258 3.72904C14.217 4.96654 13.9082 5.88114 13.8159 6.10854C14.3927 6.73667 14.7408 7.53978 14.7408 8.52116C14.7408 11.9753 12.6363 12.7354 10.6318 12.9578C10.9545 13.2355 11.2423 13.7841 11.2423 14.6231C11.2423 15.8247 11.2313 16.7945 11.2313 17.0892C11.2313 17.3299 11.3937 17.6097 11.8501 17.522C15.4237 16.3303 18 12.9628 18 8.99143C18 4.02545 13.97 0 8.99917 0Z"
-                          fill="currentcolor"
-                        />
-                      </svg>
-                      <span className="text-sm text-gray-500 group-hover:text-gray-900 font-medium truncate">
-                        {project.repo}
+                    <a className="relative group flex items-center space-x-2.5">
+                      <span className="flex items-center space-x-2 text-sm text-gray-500 group-hover:text-gray-900 truncate">
+                        <div>
+                          <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" className="w-3 h-3 text-gray-500">
+                            <path fill="currentColor" fillRule="evenodd" d="M1.643 3.143L.427 1.927A.25.25 0 000 2.104V5.75c0 .138.112.25.25.25h3.646a.25.25 0 00.177-.427L2.715 4.215a6.5 6.5 0 11-1.18 4.458.75.75 0 10-1.493.154 8.001 8.001 0 101.6-5.684zM7.75 4a.75.75 0 01.75.75v2.992l2.028.812a.75.75 0 01-.557 1.392l-2.5-1A.75.75 0 017 8.25v-3.5A.75.75 0 017.75 4z"></path>
+                          </svg>
+                        </div>
+                        <div>
+                          Last updated {source.lastUpdated}
+                        </div>
                       </span>
                     </a>
                   </div>
@@ -166,7 +185,7 @@ const Home: NextPage = () => {
                   <div className="hidden sm:flex flex-col flex-shrink-0 items-end space-y-3">
                     <p className="flex items-center space-x-4">
                       <a
-                        href={project.siteHref}
+                        href={source.href}
                         className="relative text-sm text-gray-500 hover:text-gray-900 font-medium"
                       >
                         Visit site
@@ -176,11 +195,11 @@ const Home: NextPage = () => {
                         className="relative bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                       >
                         <span className="sr-only">
-                          {project.starred ? 'Add to favorites' : 'Remove from favorites'}
+                          {source.starred ? 'Add to favorites' : 'Remove from favorites'}
                         </span>
                         <StarIcon
                           className={classNames(
-                            project.starred
+                            source.starred
                               ? 'text-yellow-300 hover:text-yellow-400'
                               : 'text-gray-300 hover:text-gray-400',
                             'h-5 w-5'
@@ -189,11 +208,23 @@ const Home: NextPage = () => {
                         />
                       </button>
                     </p>
-                    <p className="flex text-gray-500 text-sm space-x-2">
-                      <span>Last deploy {project.lastDeploy}</span>
-                      <span aria-hidden="true">&middot;</span>
-                      <span>{project.location}</span>
-                    </p>
+                    <div className="flex items-center space-x-2">
+                      <div className="flex flex-shrink-0">
+                        {source.members.map((member) => (
+                          <img
+                            key={member.handle}
+                            className="max-w-none h-4 w-4 rounded-full ring-2 ring-white"
+                            src={member.imageUrl}
+                            alt={member.name}
+                          />
+                        ))}
+                      </div>
+                      {source.members.length > 5 ? (
+                        <span className="flex-shrink-0 text-xs leading-5 font-medium">
+                          +{source.members.length - 1}
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
               </li>
