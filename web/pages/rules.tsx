@@ -31,6 +31,24 @@ const projects = [
   // More projects...
 ]
 
+const integrations = [
+  {
+    name: 'GitHub',
+    role: 'Not installed',
+    imageUrl: '/assets/integrations/github.svg',
+  },
+  {
+    name: 'VS Code',
+    role: 'Installed',
+    imageUrl: '/assets/integrations/vscode.svg',
+  },
+  {
+    name: 'Slack',
+    role: 'Not installed',
+    imageUrl: '/assets/integrations/slack.svg',
+  },
+]
+
 const Rules: NextPage = () => {
   return (
     <Layout>
@@ -198,8 +216,24 @@ const Rules: NextPage = () => {
           <div className="pt-6 pb-2">
             <h2 className="text-sm font-semibold">Integrations</h2>
           </div>
-          <div>
-            {/* Add integrations */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {integrations.map((integration) => (
+              <div
+                key={integration.name}
+                className="relative rounded-lg border border-gray-300 bg-white px-3 py-2 shadow-sm flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary"
+              >
+                <div className="flex-shrink-0">
+                  <img className="h-6 w-6" src={integration.imageUrl} alt="" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <a href="#" className="focus:outline-none">
+                    <span className="absolute inset-0" aria-hidden="true" />
+                    <p className="text-sm font-medium text-gray-900">{integration.name}</p>
+                    <p className="text-xs text-gray-500 truncate">{integration.role}</p>
+                  </a>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

@@ -24,7 +24,7 @@ const navButtonClass = (isActive: boolean) => {
 export default function Navbar() {
   const router = useRouter();
   return (
-    <Disclosure as="nav" className="bg-background">
+    <Disclosure as="nav" className="bg-background z-10">
       {({ open }) => (
         <>
           <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
