@@ -1,13 +1,14 @@
 import { Menu } from "@headlessui/react";
-import { ChevronRightIcon, ChevronDownIcon, DotsVerticalIcon, MailIcon, PencilIcon, SortAscendingIcon } from "@heroicons/react/solid";
+import { ChevronRightIcon, ChevronDownIcon, DotsVerticalIcon, SortAscendingIcon } from "@heroicons/react/solid";
 import { NextPage } from "next";
 import Sidebar from "../components/Sidebar";
 import { classNames } from "../helpers/functions";
 import Layout from "../components/layout";
+import { getTypeIcon } from "../helpers/Icons";
 
+export type SourceType = 'github' | 'doc';
+export type DestinationType = 'doc' | 'slack' | 'email';
 type RuleType = 'Update Request' | 'Notification';
-type SourceType = 'github' | 'doc';
-type DestinationType = 'doc' | 'slack' | 'email';
 
 type Rule = {
   active: boolean,
@@ -80,44 +81,6 @@ const integrations = [
     imageUrl: '/assets/integrations/slack.svg',
   },
 ]
-
-const getIcon = (type: SourceType | DestinationType, className: string) => {
-  if (type === 'github') {
-    return <svg
-      className={className}
-      viewBox="0 0 18 18"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M8.99917 0C4.02996 0 0 4.02545 0 8.99143C0 12.9639 2.57853 16.3336 6.15489 17.5225C6.60518 17.6053 6.76927 17.3277 6.76927 17.0892C6.76927 16.8762 6.76153 16.3104 6.75711 15.5603C4.25372 16.1034 3.72553 14.3548 3.72553 14.3548C3.31612 13.316 2.72605 13.0395 2.72605 13.0395C1.9089 12.482 2.78793 12.4931 2.78793 12.4931C3.69127 12.5565 4.16643 13.4198 4.16643 13.4198C4.96921 14.7936 6.27312 14.3968 6.78584 14.1666C6.86761 13.5859 7.10022 13.1896 7.35713 12.965C5.35873 12.7381 3.25756 11.9665 3.25756 8.52116C3.25756 7.53978 3.6084 6.73667 4.18411 6.10854C4.09129 5.88114 3.78244 4.96654 4.27251 3.72904C4.27251 3.72904 5.02778 3.48728 6.74717 4.65082C7.46487 4.45101 8.23506 4.35165 9.00028 4.34779C9.76494 4.35165 10.5346 4.45101 11.2534 4.65082C12.9717 3.48728 13.7258 3.72904 13.7258 3.72904C14.217 4.96654 13.9082 5.88114 13.8159 6.10854C14.3927 6.73667 14.7408 7.53978 14.7408 8.52116C14.7408 11.9753 12.6363 12.7354 10.6318 12.9578C10.9545 13.2355 11.2423 13.7841 11.2423 14.6231C11.2423 15.8247 11.2313 16.7945 11.2313 17.0892C11.2313 17.3299 11.3937 17.6097 11.8501 17.522C15.4237 16.3303 18 12.9628 18 8.99143C18 4.02545 13.97 0 8.99917 0Z"
-        fill="currentcolor"
-      />
-    </svg>
-  }
-
-  if (type === 'doc') {
-    return <PencilIcon className={className} />
-  }
-
-  if (type === 'email') {
-    return <MailIcon className={className} />
-  }
-
-  if (type === 'slack') {
-    return <svg className={className} viewBox="0 0 127 127" xmlns="http://www.w3.org/2000/svg">
-      <path d="M27.2 80c0 7.3-5.9 13.2-13.2 13.2C6.7 93.2.8 87.3.8 80c0-7.3 5.9-13.2 13.2-13.2h13.2V80zm6.6 0c0-7.3 5.9-13.2 13.2-13.2 7.3 0 13.2 5.9 13.2 13.2v33c0 7.3-5.9 13.2-13.2 13.2-7.3 0-13.2-5.9-13.2-13.2V80z" fill="currentColor"/>
-      <path d="M47 27c-7.3 0-13.2-5.9-13.2-13.2C33.8 6.5 39.7.6 47 .6c7.3 0 13.2 5.9 13.2 13.2V27H47zm0 6.7c7.3 0 13.2 5.9 13.2 13.2 0 7.3-5.9 13.2-13.2 13.2H13.9C6.6 60.1.7 54.2.7 46.9c0-7.3 5.9-13.2 13.2-13.2H47z" fill="currentColor"/>
-      <path d="M99.9 46.9c0-7.3 5.9-13.2 13.2-13.2 7.3 0 13.2 5.9 13.2 13.2 0 7.3-5.9 13.2-13.2 13.2H99.9V46.9zm-6.6 0c0 7.3-5.9 13.2-13.2 13.2-7.3 0-13.2-5.9-13.2-13.2V13.8C66.9 6.5 72.8.6 80.1.6c7.3 0 13.2 5.9 13.2 13.2v33.1z" fill="currentColor"/>
-      <path d="M80.1 99.8c7.3 0 13.2 5.9 13.2 13.2 0 7.3-5.9 13.2-13.2 13.2-7.3 0-13.2-5.9-13.2-13.2V99.8h13.2zm0-6.6c-7.3 0-13.2-5.9-13.2-13.2 0-7.3 5.9-13.2 13.2-13.2h33.1c7.3 0 13.2 5.9 13.2 13.2 0 7.3-5.9 13.2-13.2 13.2H80.1z" fill="currentColor"/>
-    </svg>
-  }
-
-  return null;
-}
 
 const Rules: NextPage = () => {
   return (
@@ -221,7 +184,7 @@ const Rules: NextPage = () => {
                     <div className="ml-0.5 flex items-center space-x-1">
                       <div>
                         <a href={rule.sourceHref} className="relative group flex items-center space-x-2">
-                          {getIcon(rule.source, 'flex-shrink-0 w-4 h-4 text-gray-400 group-hover:text-gray-500')}
+                          {getTypeIcon(rule.source, 'flex-shrink-0 w-4 h-4 text-gray-400 group-hover:text-gray-500')}
                           <span className="text-sm text-gray-500 group-hover:text-gray-900 truncate">
                             {rule.sourceName}
                           </span>
@@ -234,7 +197,7 @@ const Rules: NextPage = () => {
                       </div>
                       <div>
                         <a href={rule.sourceHref} className="relative group flex items-center space-x-2">
-                          {getIcon(rule.destination, 'flex-shrink-0 w-4 h-4 text-gray-400 group-hover:text-gray-500')}
+                          {getTypeIcon(rule.destination, 'flex-shrink-0 w-4 h-4 text-gray-400 group-hover:text-gray-500')}
                           <span className="text-sm text-gray-500 group-hover:text-gray-900 truncate">
                             {rule.destinationName}
                           </span>
