@@ -1,5 +1,6 @@
 import { MailIcon, PencilIcon } from "@heroicons/react/solid";
-import { DestinationType, SourceType } from "../pages/rules";
+import { BellIcon, DocumentTextIcon } from "@heroicons/react/outline";
+import { DestinationType, RuleType, SourceType } from "../pages/rules";
 
 export type SVGIconProps = {
   className: string,
@@ -38,6 +39,22 @@ export const ConfluenceIcon = ({className, isActive}: SVGIconProps) => (
 		</g>
 </svg>
 )
+
+export const getRuleTypeIcon = (type: RuleType) => {
+  if (type === 'Notification') {
+    return <div className="h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center">
+      <BellIcon className="h-6 w-6 text-yellow-600" />
+    </div>
+  }
+
+  if (type === 'Update') {
+    return <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+        <DocumentTextIcon className="h-6 w-6 text-green-600" />
+      </div>
+  }
+
+  return null;
+}
 
 export const getTypeIcon = (type: SourceType | DestinationType, className: string) => {
   if (type === 'github') {

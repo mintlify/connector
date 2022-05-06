@@ -1,17 +1,18 @@
-import { Menu } from "@headlessui/react";
-import { ChevronRightIcon, ChevronDownIcon, SortAscendingIcon, MailIcon, CheckCircleIcon } from "@heroicons/react/solid";
+import { ChevronRightIcon, MailIcon } from "@heroicons/react/solid";
+import { BellIcon } from "@heroicons/react/outline";
 import { NextPage } from "next";
 import Sidebar from "../components/Sidebar";
 import { classNames } from "../helpers/functions";
 import Layout from "../components/layout";
+import { getRuleTypeIcon, getTypeIcon } from "../helpers/Icons";
 
 export type SourceType = 'github' | 'doc';
 export type DestinationType = 'doc' | 'slack' | 'email';
-type RuleType = 'Update Request' | 'Notification';
+export type RuleType = 'Update' | 'Notification';
 
 type Rule = {
+  id: string,
   active: boolean,
-  name: string,
   type: RuleType,
   source: SourceType,
   sourceName: string,
@@ -24,24 +25,12 @@ const tabs = [
   { name: 'Active', href: '#', count: '2', current: true },
   { name: 'Paused', href: '#', count: '0', current: false },
 ]
-const candidates = [
-  {
-    name: 'Emily Selman',
-    email: 'emily.selman@example.com',
-    imageUrl:
-      'https://images.unsplash.com/photo-1502685104226-ee32379fefbe?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    applied: 'January 7, 2020',
-    appliedDatetime: '2020-07-01T15:34:56',
-    status: 'Completed phone screening',
-  },
-  // More candidates...
-]
 
 const rules: Rule[] = [
   {
+    id: '1',
     active: true,
-    name: 'User properties document syncing',
-    type: 'Update Request',
+    type: 'Update',
     source: 'github',
     sourceName: 'writer - src/models/User.ts',
     sourceHref: '',
@@ -49,8 +38,8 @@ const rules: Rule[] = [
     destinationName: 'User Model',
   },
   {
+    id: '2',
     active: true,
-    name: 'Email when technical architecture is changed',
     type: 'Notification',
     source: 'doc',
     sourceName: 'Technical Overview',
@@ -59,8 +48,8 @@ const rules: Rule[] = [
     destinationName: 'hi@mintlify.com',
   },
   {
+    id: '3',
     active: true,
-    name: 'Alert when payment endpoints config is updated',
     type: 'Notification',
     source: 'github',
     sourceName: 'writer - src/payments.ts:24-36',
@@ -69,9 +58,9 @@ const rules: Rule[] = [
     destinationName: '#doc-changes',
   },
   {
+    id: '4',
     active: false,
-    name: 'Database schema document syncing',
-    type: 'Update Request',
+    type: 'Update',
     source: 'github',
     sourceName: 'connect - server/services/mongoose.ts',
     sourceHref: '',
@@ -98,18 +87,13 @@ const integrations = [
   },
 ]
 
-const listMenu = [
-  {
-    name: 'Edit',
-  },
-  {
-    name: 'Turn off',
-  },
-  {
-    name: 'Delete',
-    isRed: true,
+const getDestinationTitle = (ruleType: RuleType) => {
+  if (ruleType === 'Update') {
+    return 'Requires updating';
   }
-]
+
+  return 'Notifies';
+}
 
 const Rules: NextPage = () => {
   return (
@@ -175,37 +159,30 @@ const Rules: NextPage = () => {
 
             {/* Stacked list */}
             <ul role="list" className="mt-5 border-t border-gray-200 divide-y divide-gray-200 sm:mt-0 sm:border-t-0">
-              {candidates.map((candidate) => (
-                <li key={candidate.email}>
+              {rules.map((rule) => (
+                <li key={rule.id}>
                   <a href="#" className="group block">
                     <div className="flex items-center py-5 px-4 sm:py-6 sm:px-0">
                       <div className="min-w-0 flex-1 flex items-center">
                         <div className="flex-shrink-0">
-                          <img
-                            className="h-12 w-12 rounded-full group-hover:opacity-75"
-                            src={candidate.imageUrl}
-                            alt=""
-                          />
+                          {getRuleTypeIcon(rule.type)}
                         </div>
-                        <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
+                        <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-2">
                           <div>
-                            <p className="text-sm font-medium text-primary truncate">{candidate.name}</p>
+                            <p className="text-sm truncate">Triggered by changes in</p>
                             <p className="mt-2 flex items-center text-sm text-gray-500">
-                              <MailIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" aria-hidden="true" />
-                              <span className="truncate">{candidate.email}</span>
+                              {getTypeIcon(rule.source, 'flex-shrink-0 mr-1.5 h-4 w-4')}
+                              <span className="truncate">{rule.sourceName}</span>
                             </p>
                           </div>
                           <div className="hidden md:block">
                             <div>
                               <p className="text-sm text-gray-900">
-                                Applied on <time dateTime={candidate.appliedDatetime}>{candidate.applied}</time>
+                                {getDestinationTitle(rule.type)}
                               </p>
                               <p className="mt-2 flex items-center text-sm text-gray-500">
-                                <CheckCircleIcon
-                                  className="flex-shrink-0 mr-1.5 h-5 w-5 text-green-400"
-                                  aria-hidden="true"
-                                />
-                                {candidate.status}
+                                {getTypeIcon(rule.destination, 'flex-shrink-0 mr-1.5 h-4 w-4')}
+                                <span className="truncate">{rule.destinationName}</span>
                               </p>
                             </div>
                           </div>
