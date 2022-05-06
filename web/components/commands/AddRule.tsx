@@ -1,20 +1,30 @@
-import { Fragment, useState } from 'react'
+import { Fragment } from 'react'
 import { Combobox, Dialog, Transition } from '@headlessui/react'
-import {
-  PencilAltIcon,
-} from '@heroicons/react/outline'
 import { classNames } from '../../helpers/functions'
+import { getRuleTypeIcon } from '../../helpers/Icons';
+import { RuleType } from '../../pages/rules';
+import { ChevronRightIcon } from '@heroicons/react/solid';
 
-const items = [
+type RuleItem = {
+  id: string,
+  type: RuleType,
+  title: string,
+  description: string,
+}
+
+const ruleItems: RuleItem[] = [
   {
-    id: 1,
-    name: 'Text',
-    description: 'Add freeform text with basic formatting options.',
-    url: '#',
-    color: 'bg-indigo-500',
-    icon: PencilAltIcon,
+    id: '1',
+    type: 'Update',
+    title: 'Require documentation update',
+    description: 'Enforce updates when relevant code changes',
   },
-  // More items...
+  {
+    id: '2',
+    type: 'Notification',
+    title: 'Send alert on change',
+    description: 'Be notified when documentation or code changes',
+  },
 ];
 
 type AddRuleProps = {
@@ -22,12 +32,10 @@ type AddRuleProps = {
   setIsOpen: (isOpen: boolean) => void,
 }
 
-export default function AddRule() {
-  const [open, setOpen] = useState(true)
-
+export default function AddRule({ isOpen, setIsOpen }: AddRuleProps) {
   return (
-    <Transition.Root show={open} as={Fragment} appear>
-      <Dialog as="div" className="relative z-10" onClose={setOpen}>
+    <Transition.Root show={isOpen} as={Fragment} appear>
+      <Dialog as="div" className="relative z-10" onClose={setIsOpen}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -53,24 +61,17 @@ export default function AddRule() {
             <Dialog.Panel className="mx-auto max-w-xl transform divide-y divide-gray-100 overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
               <Combobox onChange={() => {}} value="">
                   <Combobox.Options static className="max-h-96 scroll-py-3 overflow-y-auto p-3">
-                    {items.map((item) => (
+                    {ruleItems.map((item) => (
                       <Combobox.Option
                         key={item.id}
                         value={item}
                         className={({ active }) =>
-                          classNames('flex cursor-default select-none rounded-xl p-3', active ? 'bg-gray-100' : '')
+                          classNames('flex items-center cursor-default select-none rounded-xl p-3 hover:cursor-pointer', active ? 'bg-gray-50' : '')
                         }
                       >
                         {({ active }) => (
                           <>
-                            <div
-                              className={classNames(
-                                'flex h-10 w-10 flex-none items-center justify-center rounded-lg',
-                                item.color
-                              )}
-                            >
-                              <item.icon className="h-6 w-6 text-white" aria-hidden="true" />
-                            </div>
+                            {getRuleTypeIcon(item.type)}
                             <div className="ml-4 flex-auto">
                               <p
                                 className={classNames(
@@ -78,12 +79,16 @@ export default function AddRule() {
                                   active ? 'text-gray-900' : 'text-gray-700'
                                 )}
                               >
-                                {item.name}
+                                {item.title}
                               </p>
                               <p className={classNames('text-sm', active ? 'text-gray-700' : 'text-gray-500')}>
                                 {item.description}
                               </p>
                             </div>
+                            <ChevronRightIcon
+                              className="h-5 w-5 text-gray-400 group-hover:text-gray-700"
+                              aria-hidden="true"
+                            />
                           </>
                         )}
                       </Combobox.Option>
