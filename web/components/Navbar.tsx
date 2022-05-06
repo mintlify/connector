@@ -9,10 +9,20 @@ import { classNames } from '../helpers/functions'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 
+const navigation = [
+  {
+    name: 'Overview',
+    href: '/',
+  },
+  {
+    name: 'Rules',
+    href: '/rules',
+  }
+]
+
 const userNavigation = [
-  { name: 'Your Profile', href: '#' },
-  { name: 'Settings', href: '#' },
-  { name: 'Sign out', href: '#' },
+  { name: 'Profile', href: '/profile' },
+  { name: 'Sign out', href: '/' },
 ]
 
 const navButtonClass = (isActive: boolean) => {
@@ -30,35 +40,34 @@ export default function Navbar() {
           <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
             <div className="relative flex items-center justify-between h-16">
               <div className="flex items-center px-2 lg:px-0">
-                <div className="flex-shrink-0">
-                  <img
-                    className="block lg:hidden h-5 w-auto"
-                    src="/assets/mintlify-worded.svg"
-                    alt="Mintlify"
-                  />
-                  <img
-                    className="hidden lg:block h-5 w-auto"
-                    src="/assets/mintlify-worded.svg"
-                    alt="Mintlify"
-                  />
-                </div>
+                <Link href="/">
+                  <button className="flex-shrink-0">
+                    <img
+                      className="block lg:hidden h-5 w-auto"
+                      src="/assets/mintlify-worded.svg"
+                      alt="Mintlify"
+                    />
+                    <img
+                      className="hidden lg:block h-5 w-auto"
+                      src="/assets/mintlify-worded.svg"
+                      alt="Mintlify"
+                    />
+                  </button>
+                </Link>
                 <div className="hidden lg:block lg:ml-6">
                   <div className="flex space-x-4">
-                    {/* Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" */}
-                    <Link
-                      href="/"
-                    >
-                      <span className={navButtonClass(router.pathname === '/')}>
-                        Overview
-                      </span>
-                    </Link>
-                    <Link
-                      href="/rules"
-                    >
-                      <span className={navButtonClass(router.pathname === '/rules')}>
-                        Rules
-                      </span>
-                    </Link>
+                    {
+                      navigation.map((nav) => (
+                        <Link
+                          key={nav.name}
+                          href={nav.href}
+                        >
+                          <span className={navButtonClass(router.pathname === nav.href)}>
+                            {nav.name}
+                          </span>
+                        </Link>
+                      ))
+                    }
                   </div>
                 </div>
               </div>
@@ -147,35 +156,19 @@ export default function Navbar() {
 
           <Disclosure.Panel className="lg:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              {/* Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" */}
-              <Disclosure.Button
-                as="a"
-                href="#"
-                className="bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium"
-              >
-                Dashboard
-              </Disclosure.Button>
-              <Disclosure.Button
-                as="a"
-                href="#"
-                className="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
-              >
-                Team
-              </Disclosure.Button>
-              <Disclosure.Button
-                as="a"
-                href="#"
-                className="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
-              >
-                Projects
-              </Disclosure.Button>
-              <Disclosure.Button
-                as="a"
-                href="#"
-                className="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
-              >
-                Calendar
-              </Disclosure.Button>
+              {
+                navigation.map((nav) => (
+                  <Disclosure.Button
+                    key={nav.name}
+                    as="a"
+                    href={nav.href}
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700"
+                  >
+                    {nav.name}
+                  </Disclosure.Button>
+                  )
+                )
+              }
             </div>
             <div className="pt-4 pb-3 border-t border-gray-700">
               <div className="flex items-center px-5">
@@ -192,27 +185,18 @@ export default function Navbar() {
                 </div>
               </div>
               <div className="mt-3 px-2 space-y-1">
-                <Disclosure.Button
-                  as="a"
-                  href="#"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700"
-                >
-                  Your Profile
-                </Disclosure.Button>
-                <Disclosure.Button
-                  as="a"
-                  href="#"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700"
-                >
-                  Settings
-                </Disclosure.Button>
-                <Disclosure.Button
-                  as="a"
-                  href="#"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700"
-                >
-                  Sign out
-                </Disclosure.Button>
+                {
+                  userNavigation.map((nav) => (
+                    <Disclosure.Button
+                      as="a"
+                      key={nav.name}
+                      href={nav.href}
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700"
+                    >
+                      {nav.name}
+                    </Disclosure.Button>
+                  ))
+                }
               </div>
             </div>
           </Disclosure.Panel>
