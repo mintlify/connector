@@ -5,7 +5,6 @@ import {
   ChevronRightIcon,
   DotsVerticalIcon,
   SortAscendingIcon,
-  StarIcon,
 } from '@heroicons/react/solid'
 import Sidebar from '../components/Sidebar'
 import { classNames } from '../helpers/functions'
@@ -104,7 +103,7 @@ const Home: NextPage = () => {
                   Sort
                   <ChevronDownIcon className="ml-2.5 -mr-1.5 h-5 w-5 text-gray-400" aria-hidden="true" />
                 </Menu.Button>
-                <Menu.Items className="origin-top-right z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <Menu.Items className="origin-top-right absolute right-0 mt-2 w-28 z-10 rounded-md shadow-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
                   <div className="py-1">
                     <Menu.Item>
                       {({ active }) => (
@@ -210,7 +209,7 @@ const Home: NextPage = () => {
                                         className={classNames(
                                           active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                                           menu.isRed ? 'text-red-500' : '',
-                                          'w-full flex justify-end px-4 py-2 text-sm'
+                                          'w-full flex items-center space-x-2 px-4 py-2 text-sm'
                                         )}
                                       >
                                         <span>{menu.name}</span>

@@ -1,5 +1,6 @@
 import { Menu } from "@headlessui/react";
 import { ChevronRightIcon, ChevronDownIcon, DotsVerticalIcon, SortAscendingIcon } from "@heroicons/react/solid";
+import { TrashIcon, PauseIcon, PencilIcon } from "@heroicons/react/outline";
 import { NextPage } from "next";
 import Sidebar from "../components/Sidebar";
 import { classNames } from "../helpers/functions";
@@ -84,7 +85,7 @@ const integrations = [
 
 const listMenu = [
   {
-    name: 'Edit'
+    name: 'Edit',
   },
   {
     name: 'Turn off',
@@ -231,7 +232,7 @@ const Rules: NextPage = () => {
                             <DotsVerticalIcon className="h-4 w-4" aria-hidden="true" />
                           </Menu.Button>
                         </div>
-                          <Menu.Items className="origin-top-right absolute right-0 mt-2 w-24 z-10 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+                          <Menu.Items className="origin-top-right absolute right-0 mt-2 w-28 z-10 rounded-md shadow-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
                             <div className="py-1">
                               {
                                 listMenu.map((menu) => (
@@ -242,7 +243,7 @@ const Rules: NextPage = () => {
                                         className={classNames(
                                           active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                                           menu.isRed ? 'text-red-500' : '',
-                                          'w-full flex justify-between px-4 py-2 text-sm'
+                                          'w-full flex items-center space-x-2 px-3 py-1.5 text-sm'
                                         )}
                                       >
                                         <span>{menu.name}</span>
