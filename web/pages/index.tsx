@@ -18,8 +18,6 @@ const sources = [
     icon: 'https://files.readme.io/6966a5f-small-In_Rectangle.png',
     href: 'https://mintlify.readme.io/reference/start',
     lastDeploy: '3h ago',
-    location: 'United states',
-    starred: true,
     members: [
       {
         name: 'Courtney Henry',
@@ -42,8 +40,6 @@ const sources = [
     icon: 'https://cdn.worldvectorlogo.com/logos/notion-logo-1.svg',
     href: 'https://mintlify.readme.io/reference/start',
     lastDeploy: '3h ago',
-    location: 'United states',
-    starred: true,
     members: [
       {
         name: 'Dries Vincent',
@@ -71,7 +67,28 @@ const sources = [
       },
     ]
   },
-  // More projects...
+  {
+    id: '3',
+    name: 'Mintlify User Database Model',
+    lastUpdated: '2 hour ago',
+    icon: 'https://cdn.worldvectorlogo.com/logos/notion-logo-1.svg',
+    href: 'https://mintlify.readme.io/reference/start',
+    lastDeploy: '7 days ago',
+    members: [
+      {
+        name: 'Dries Vincent',
+        handle: 'driesvincent',
+        imageUrl:
+          'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+      },
+      {
+        name: 'Lindsay Walton',
+        handle: 'lindsaywalton',
+        imageUrl:
+          'https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+      },
+    ]
+  },
 ]
 const activityItems = [
   { project: 'Workcation', commit: '2d89f0c8', environment: 'production', time: '1h' },
