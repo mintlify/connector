@@ -1,6 +1,6 @@
 import {
   BadgeCheckIcon,
-  CollectionIcon,
+  PlusIcon,
 } from '@heroicons/react/solid'
 import { useState } from 'react'
 import AddDocumentCommand from './AddDocumentCommand'
@@ -60,7 +60,7 @@ export default function Sidebar() {
                 <span className="text-sm text-gray-500 font-medium">Pro Member</span>
               </div>
               <div className="flex items-center space-x-2">
-                <CollectionIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                <PlusIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                 <span className="text-sm text-gray-500 font-medium">Invite team member</span>
               </div>
             </div>

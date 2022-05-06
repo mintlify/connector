@@ -52,7 +52,7 @@ export default function AddDocumentCommand({ isOpen, setIsOpen }: AddDocumentCom
                     aria-hidden="true"
                   />
                   <Combobox.Input
-                    className="h-12 w-full rounded-t-xl border-0 bg-transparent pl-11 pr-4 text-gray-800 placeholder-gray-400 sm:text-sm focus:outline-none"
+                    className="h-12 w-full rounded-t-xl border-0 bg-transparent pl-11 pr-4 text-gray-800 placeholder-gray-400 sm:text-sm focus:outline-none focus:ring-0"
                     placeholder="Add link"
                     onChange={(event) => setQuery(event.target.value)}
                   />

@@ -11,7 +11,7 @@ const navigation = [
   { name: 'Integrations', href: '#', icon: ViewGridAddIcon, current: false },
 ]
 
-const Profile: NextPage = () => {
+const Settings: NextPage = () => {
   return (
     <Layout>
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
@@ -408,4 +408,4 @@ const Profile: NextPage = () => {
   )
 };
 
-export default Profile;
+export default Settings;
