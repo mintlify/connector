@@ -79,6 +79,13 @@ const activityItems = [
   // More items...
 ]
 
+const listMenu = [
+  {
+    name: 'Delete',
+    isRed: true,
+  }
+]
+
 const Home: NextPage = () => {
   return (
     <Layout>
@@ -192,47 +199,26 @@ const Home: NextPage = () => {
                             <DotsVerticalIcon className="h-4 w-4" aria-hidden="true" />
                           </Menu.Button>
                         </div>
-                          <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 z-10 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <Menu.Items className="origin-top-right absolute right-0 mt-2 z-10 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
                             <div className="py-1">
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <button
-                                    type="button"
-                                    className={classNames(
-                                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                                      'w-full flex justify-between px-4 py-2 text-sm'
+                              {
+                                listMenu.map((menu) => (
+                                  <Menu.Item key={menu.name}>
+                                    {({ active }) => (
+                                      <button
+                                        type="button"
+                                        className={classNames(
+                                          active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                          menu.isRed ? 'text-red-500' : '',
+                                          'w-full flex justify-end px-4 py-2 text-sm'
+                                        )}
+                                      >
+                                        <span>{menu.name}</span>
+                                      </button>
                                     )}
-                                  >
-                                    <span>Copy email address</span>
-                                  </button>
-                                )}
-                              </Menu.Item>
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <a
-                                    href="#"
-                                    className={classNames(
-                                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                                      'flex justify-between px-4 py-2 text-sm'
-                                    )}
-                                  >
-                                    <span>Previous conversations</span>
-                                  </a>
-                                )}
-                              </Menu.Item>
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <a
-                                    href="#"
-                                    className={classNames(
-                                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                                      'flex justify-between px-4 py-2 text-sm'
-                                    )}
-                                  >
-                                    <span>View original</span>
-                                  </a>
-                                )}
-                              </Menu.Item>
+                                  </Menu.Item>
+                                ))
+                              }
                             </div>
                           </Menu.Items>
                       </Menu>
