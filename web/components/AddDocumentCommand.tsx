@@ -1,14 +1,15 @@
 import { Fragment, useState } from 'react'
 import { Combobox, Dialog, Transition } from '@headlessui/react'
 import { PlusIcon, LinkIcon } from '@heroicons/react/solid'
-import { FolderAddIcon, FolderIcon, HashtagIcon, TagIcon } from '@heroicons/react/outline'
+import { FolderIcon } from '@heroicons/react/outline'
 import { classNames } from '../helpers/functions'
+import { ConfluenceIcon, GoogleDocsIcon, NotionIcon } from '../helpers/Icons'
 
 const quickActions = [
-  { name: 'Add website link', icon: LinkIcon, shortcut: 'L', url: '#' },
-  { name: 'Add Notion page', icon: FolderAddIcon, shortcut: 'N', url: '#' },
-  { name: 'Add Google docs', icon: HashtagIcon, shortcut: 'G', url: '#' },
-  { name: 'Add Confluence page', icon: TagIcon, shortcut: 'C', url: '#' },
+  { name: 'Add website link', icon: (className: string) => <LinkIcon className={classNames(className, 'h-5 w-5')} aria-hidden="true" />, shortcut: 'L', url: '#' },
+  { name: 'Add Notion page', icon: (className: string, isActive: boolean) => <NotionIcon className={className} isActive={isActive} />, shortcut: 'N', url: '#' },
+  { name: 'Add Google docs', icon: (className: string, isActive: boolean) => <GoogleDocsIcon className={className} isActive={isActive} />, shortcut: 'G', url: '#' },
+  { name: 'Add Confluence page', icon: (className: string, isActive: boolean) =>  <ConfluenceIcon className={className} isActive={isActive} />, shortcut: 'C', url: '#' },
 ]
 
 type AddDocumentCommandProps = {
@@ -77,10 +78,7 @@ export default function AddDocumentCommand({ isOpen, setIsOpen }: AddDocumentCom
                             >
                               {({ active }) => (
                                 <>
-                                  <action.icon
-                                    className={classNames('h-6 w-6 flex-none', active ? 'text-white' : 'text-gray-400')}
-                                    aria-hidden="true"
-                                  />
+                                  {action.icon('h-4 w-4 flex-none fill-current', active)}
                                   <span className="ml-3 flex-auto truncate">{action.name}</span>
                                   <span
                                     className={classNames(
