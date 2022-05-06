@@ -1,3 +1,4 @@
+import { CogIcon } from '@heroicons/react/outline';
 import {
   BadgeCheckIcon,
   PlusIcon,
@@ -56,12 +57,12 @@ export default function Sidebar() {
             {/* Meta info */}
             <div className="flex flex-col space-y-6 sm:flex-row sm:space-y-0 sm:space-x-8 xl:flex-col xl:space-x-0 xl:space-y-6">
               <div className="flex items-center space-x-2">
-                <BadgeCheckIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                <span className="text-sm text-gray-500 font-medium">Pro Member</span>
-              </div>
-              <div className="flex items-center space-x-2">
                 <PlusIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                 <span className="text-sm text-gray-500 font-medium">Invite team member</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <CogIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                <span className="text-sm text-gray-500 font-medium">Settings</span>
               </div>
             </div>
           </div>

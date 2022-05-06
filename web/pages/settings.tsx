@@ -1,14 +1,11 @@
 import { NextPage } from "next";
 import { classNames } from "../helpers/functions";
 import Layout from "../components/layout";
-import { CreditCardIcon, KeyIcon, UserCircleIcon, UserGroupIcon, ViewGridAddIcon } from '@heroicons/react/outline'
+import { UserCircleIcon, UserGroupIcon } from '@heroicons/react/outline'
 
 const navigation = [
-  { name: 'Account', href: '#', icon: UserCircleIcon, current: true },
-  { name: 'Password', href: '#', icon: KeyIcon, current: false },
-  { name: 'Plan & Billing', href: '#', icon: CreditCardIcon, current: false },
-  { name: 'Team', href: '#', icon: UserGroupIcon, current: false },
-  { name: 'Integrations', href: '#', icon: ViewGridAddIcon, current: false },
+  { name: 'Profile', href: '#', icon: UserCircleIcon, current: true },
+  { name: 'Team Settings', href: '#', icon: UserGroupIcon, current: false },
 ]
 
 const Settings: NextPage = () => {
@@ -24,7 +21,7 @@ const Settings: NextPage = () => {
               href={item.href}
               className={classNames(
                 item.current
-                  ? 'bg-gray-50 text-indigo-700 hover:text-indigo-700 hover:bg-white'
+                  ? 'bg-gray-50 text-primary hover:text-primary hover:bg-white'
                   : 'text-gray-900 hover:text-gray-900 hover:bg-gray-50',
                 'group rounded-md px-3 py-2 flex items-center text-sm font-medium'
               )}
@@ -33,7 +30,7 @@ const Settings: NextPage = () => {
               <item.icon
                 className={classNames(
                   item.current
-                    ? 'text-indigo-500 group-hover:text-indigo-500'
+                    ? 'text-primary group-hover:text-primary'
                     : 'text-gray-400 group-hover:text-gray-500',
                   'flex-shrink-0 -ml-1 mr-3 h-6 w-6'
                 )}
