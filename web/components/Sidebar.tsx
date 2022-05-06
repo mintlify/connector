@@ -1,18 +1,23 @@
 import { CogIcon } from '@heroicons/react/outline';
 import {
-  BadgeCheckIcon,
   PlusIcon,
 } from '@heroicons/react/solid'
 import { useState } from 'react'
-import AddDocumentCommand from './AddDocumentCommand'
+import AddDocument from './commands/AddDocument'
+import AddRule from './commands/AddRule'
 
 export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
+  const [isAddRuleOpen, setIsAddRuleOpen] = useState(false);
   return (
     <>
-    <AddDocumentCommand
-      isOpen={isOpen}
-      setIsOpen={setIsOpen}
+    <AddDocument
+      isOpen={isAddDocumentOpen}
+      setIsOpen={setIsAddDocumentOpen}
+    />
+    <AddRule
+      isOpen={isAddRuleOpen}
+      setIsOpen={setIsAddRuleOpen}
     />
     <div className="xl:flex-shrink-0 xl:w-64 xl:border-r xl:border-gray-200">
       <div className="pl-4 pr-6 py-6 sm:pl-6 lg:pl-8 xl:pl-0">
@@ -41,14 +46,15 @@ export default function Sidebar() {
               <div className="flex flex-col sm:flex-row xl:flex-col">
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary xl:w-full"
-                  onClick={() => setIsOpen(true)}
+                  className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-hover xl:w-full"
+                  onClick={() => setIsAddDocumentOpen(true)}
                 >
                   Add Documentation
                 </button>
                 <button
                   type="button"
-                  className="mt-3 inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full"
+                  className="mt-3 inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full"
+                  onClick={() => setIsAddRuleOpen(true)}
                 >
                   Add Rule
                 </button>

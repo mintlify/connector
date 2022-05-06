@@ -2,8 +2,8 @@ import { Fragment, useState } from 'react'
 import { Combobox, Dialog, Transition } from '@headlessui/react'
 import { PlusIcon, LinkIcon } from '@heroicons/react/solid'
 import { FolderIcon } from '@heroicons/react/outline'
-import { classNames } from '../helpers/functions'
-import { ConfluenceIcon, GoogleDocsIcon, NotionIcon } from '../helpers/Icons'
+import { classNames } from '../../helpers/functions'
+import { ConfluenceIcon, GoogleDocsIcon, NotionIcon } from '../../helpers/Icons'
 
 const quickActions = [
   { name: 'Add website link', icon: (className: string) => <LinkIcon className={classNames(className, 'h-5 w-5')} aria-hidden="true" />, shortcut: 'L', url: '#' },
@@ -12,12 +12,12 @@ const quickActions = [
   { name: 'Add Confluence page', icon: (className: string, isActive: boolean) =>  <ConfluenceIcon className={className} isActive={isActive} />, shortcut: 'C', url: '#' },
 ]
 
-type AddDocumentCommandProps = {
+type AddDocumentProps = {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void,
 }
 
-export default function AddDocumentCommand({ isOpen, setIsOpen }: AddDocumentCommandProps) {
+export default function AddDocument({ isOpen, setIsOpen }: AddDocumentProps) {
   const [query, setQuery] = useState('');
 
   return (

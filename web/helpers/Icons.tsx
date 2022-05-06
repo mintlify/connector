@@ -42,13 +42,13 @@ export const ConfluenceIcon = ({className, isActive}: SVGIconProps) => (
 
 export const getRuleTypeIcon = (type: RuleType) => {
   if (type === 'Notification') {
-    return <div className="h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center">
+    return <div className="h-10 w-10 rounded-lg bg-yellow-100 flex items-center justify-center">
       <BellIcon className="h-6 w-6 text-yellow-600" />
     </div>
   }
 
   if (type === 'Update') {
-    return <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+    return <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
         <DocumentTextIcon className="h-6 w-6 text-green-600" />
       </div>
   }
