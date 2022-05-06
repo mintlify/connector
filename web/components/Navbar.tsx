@@ -27,8 +27,8 @@ const userNavigation = [
 
 const navButtonClass = (isActive: boolean) => {
   return isActive
-    ? 'bg-gray-800 text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer hover:bg-gray-700'
-    : 'text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer'
+    ? 'bg-gray-800 text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer hover:bg-gray-800'
+    : 'text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer'
 }
 
 export default function Navbar() {
@@ -96,7 +96,7 @@ export default function Navbar() {
               </div>
               <div className="flex lg:hidden">
                 {/* Mobile menu button */}
-                <Disclosure.Button className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+                <Disclosure.Button className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
                   <span className="sr-only">Open main menu</span>
                   {open ? (
                     <XIcon className="block h-6 w-6" aria-hidden="true" />
@@ -162,7 +162,7 @@ export default function Navbar() {
                     key={nav.name}
                     as="a"
                     href={nav.href}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-800"
                   >
                     {nav.name}
                   </Disclosure.Button>
@@ -191,7 +191,7 @@ export default function Navbar() {
                       as="a"
                       key={nav.name}
                       href={nav.href}
-                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-800"
                     >
                       {nav.name}
                     </Disclosure.Button>

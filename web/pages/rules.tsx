@@ -1,11 +1,9 @@
 import { Menu } from "@headlessui/react";
-import { ChevronRightIcon, ChevronDownIcon, DotsVerticalIcon, SortAscendingIcon } from "@heroicons/react/solid";
-import { TrashIcon, PauseIcon, PencilIcon } from "@heroicons/react/outline";
+import { ChevronRightIcon, ChevronDownIcon, SortAscendingIcon, MailIcon, CheckCircleIcon } from "@heroicons/react/solid";
 import { NextPage } from "next";
 import Sidebar from "../components/Sidebar";
 import { classNames } from "../helpers/functions";
 import Layout from "../components/layout";
-import { getTypeIcon } from "../helpers/Icons";
 
 export type SourceType = 'github' | 'doc';
 export type DestinationType = 'doc' | 'slack' | 'email';
@@ -21,6 +19,23 @@ type Rule = {
   destination: DestinationType,
   destinationName: string,
 }
+
+const tabs = [
+  { name: 'Active', href: '#', count: '2', current: true },
+  { name: 'Paused', href: '#', count: '0', current: false },
+]
+const candidates = [
+  {
+    name: 'Emily Selman',
+    email: 'emily.selman@example.com',
+    imageUrl:
+      'https://images.unsplash.com/photo-1502685104226-ee32379fefbe?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    applied: 'January 7, 2020',
+    appliedDatetime: '2020-07-01T15:34:56',
+    status: 'Completed phone screening',
+  },
+  // More candidates...
+]
 
 const rules: Rule[] = [
   {
@@ -105,165 +120,109 @@ const Rules: NextPage = () => {
         <Sidebar />
         {/* Projects List */}
         <div className="bg-white lg:min-w-0 lg:flex-1">
-          <div className="pl-4 pr-6 pt-4 pb-4 border-b border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
-            <div className="flex items-center">
-              <h1 className="flex-1 text-lg font-medium">Rules</h1>
-              <Menu as="div" className="relative">
-                <Menu.Button className="w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                  <SortAscendingIcon className="mr-3 h-5 w-5 text-gray-400" aria-hidden="true" />
-                  Sort
-                  <ChevronDownIcon className="ml-2.5 -mr-1.5 h-5 w-5 text-gray-400" aria-hidden="true" />
-                </Menu.Button>
-                <Menu.Items className="origin-top-right z-10 absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
-                  <div className="py-1">
-                    <Menu.Item>
-                      {({ active }) => (
-                        <a
-                          href="#"
-                          className={classNames(
-                            active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                            'block px-4 py-2 text-sm'
-                          )}
-                        >
-                          Name
-                        </a>
-                      )}
-                    </Menu.Item>
-                    <Menu.Item>
-                      {({ active }) => (
-                        <a
-                          href="#"
-                          className={classNames(
-                            active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                            'block px-4 py-2 text-sm'
-                          )}
-                        >
-                          Date modified
-                        </a>
-                      )}
-                    </Menu.Item>
-                    <Menu.Item>
-                      {({ active }) => (
-                        <a
-                          href="#"
-                          className={classNames(
-                            active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                            'block px-4 py-2 text-sm'
-                          )}
-                        >
-                          Date created
-                        </a>
-                      )}
-                    </Menu.Item>
-                  </div>
-                </Menu.Items>
-              </Menu>
-            </div>
-          </div>
-          <ul role="list" className="relative z-0 divide-y divide-gray-200 border-b border-gray-200">
-            {rules.map((rule) => (
-              <li
-                key={rule.name}
-                className="relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6"
-              >
-                <div className="flex items-center justify-between space-x-4">
-                  {/* Repo name and link */}
-                  <div className="min-w-0 space-y-3">
-                    <div className="flex items-center space-x-2">
-                      <span
-                        className={classNames(
-                          rule.active ? 'bg-green-100' : 'bg-gray-100',
-                          'h-5 w-5 rounded-full flex items-center justify-center'
-                        )}
-                        aria-hidden="true"
-                      >
-                        <span
-                          className={classNames(
-                            rule.active ? 'bg-secondary' : 'bg-gray-400',
-                            'h-2.5 w-2.5 rounded-full'
-                          )}
-                        />
-                      </span>
+          <div className="pl-4 pr-6 pt-4 pb-4 border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
+          <div className="px-4 sm:px-0">
+              <h2 className="text-lg font-medium text-gray-900">Rules</h2>
 
-                      <span className="block">
-                        <h2 className="text-sm font-medium">
-                          <a href={rule.sourceHref}>
-                            <span className="absolute inset-0" aria-hidden="true" />
-                            {rule.name}{' '}
-                            <span className="sr-only">{rule.active ? 'Running' : 'Not running'}</span>
-                          </a>
-                        </h2>
-                      </span>
-                    </div>
-                    <div className="ml-0.5 flex items-center space-x-1">
-                      <div>
-                        <a href={rule.sourceHref} className="relative group flex items-center space-x-2">
-                          {getTypeIcon(rule.source, 'flex-shrink-0 w-4 h-4 text-gray-400 group-hover:text-gray-500')}
-                          <span className="text-sm text-gray-500 group-hover:text-gray-900 truncate">
-                            {rule.sourceName}
+              {/* Tabs */}
+              <div className="sm:hidden">
+                <label htmlFor="tabs" className="sr-only">
+                  Select a tab
+                </label>
+                {/* Use an "onChange" listener to redirect the user to the selected tab URL. */}
+                <select
+                  id="tabs"
+                  name="tabs"
+                  className="mt-4 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md"
+                  defaultValue={tabs.find((tab) => tab.current)?.name}
+                >
+                  {tabs.map((tab) => (
+                    <option key={tab.name}>{tab.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="hidden sm:block">
+                <div className="border-b border-gray-200">
+                  <nav className="mt-2 -mb-px flex space-x-8" aria-label="Tabs">
+                    {tabs.map((tab) => (
+                      <a
+                        key={tab.name}
+                        href={tab.href}
+                        className={classNames(
+                          tab.current
+                            ? 'border-primary text-primary'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200',
+                          'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+                        )}
+                      >
+                        {tab.name}
+                        {tab.count ? (
+                          <span
+                            className={classNames(
+                              tab.current ? 'bg-green-100 text-primary' : 'bg-gray-100 text-gray-900',
+                              'hidden ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium md:inline-block'
+                            )}
+                          >
+                            {tab.count}
                           </span>
-                        </a>
-                      </div>
-                      <div>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512" className="h-4 w-4 text-gray-500">
-                          <path d="M118.6 105.4l128 127.1C252.9 239.6 256 247.8 256 255.1s-3.125 16.38-9.375 22.63l-128 127.1c-9.156 9.156-22.91 11.9-34.88 6.943S64 396.9 64 383.1V128c0-12.94 7.781-24.62 19.75-29.58S109.5 96.23 118.6 105.4z" fill="currentColor"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <a href={rule.sourceHref} className="relative group flex items-center space-x-2">
-                          {getTypeIcon(rule.destination, 'flex-shrink-0 w-4 h-4 text-gray-400 group-hover:text-gray-500')}
-                          <span className="text-sm text-gray-500 group-hover:text-gray-900 truncate">
-                            {rule.destinationName}
-                          </span>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="sm:hidden">
-                    <ChevronRightIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                  </div>
-                  {/* Repo meta info */}
-                  <div className="hidden sm:flex flex-col flex-shrink-0 items-end space-y-3">
-                    <span className="flex items-center space-x-4">
-                    <Menu as="div" className="relative inline-block text-left">
-                        <div>
-                          <Menu.Button className="p-1 rounded-full flex items-center text-gray-400 hover:text-gray-600">
-                            <span className="sr-only">Open options</span>
-                            <DotsVerticalIcon className="h-4 w-4" aria-hidden="true" />
-                          </Menu.Button>
-                        </div>
-                          <Menu.Items className="origin-top-right absolute right-0 mt-2 w-28 z-10 rounded-md shadow-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
-                            <div className="py-1">
-                              {
-                                listMenu.map((menu) => (
-                                  <Menu.Item key={menu.name}>
-                                    {({ active }) => (
-                                      <button
-                                        type="button"
-                                        className={classNames(
-                                          active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                                          menu.isRed ? 'text-red-500' : '',
-                                          'w-full flex items-center space-x-2 px-3 py-1.5 text-sm'
-                                        )}
-                                      >
-                                        <span>{menu.name}</span>
-                                      </button>
-                                    )}
-                                  </Menu.Item>
-                                ))
-                              }
-                            </div>
-                          </Menu.Items>
-                      </Menu>
-                    </span>
-                    <p className="flex text-gray-500 text-xs space-x-2">
-                      <span>{rule.type}</span>
-                    </p>
-                  </div>
+                        ) : null}
+                      </a>
+                    ))}
+                  </nav>
                 </div>
-              </li>
-            ))}
-          </ul>
+              </div>
+            </div>
+
+            {/* Stacked list */}
+            <ul role="list" className="mt-5 border-t border-gray-200 divide-y divide-gray-200 sm:mt-0 sm:border-t-0">
+              {candidates.map((candidate) => (
+                <li key={candidate.email}>
+                  <a href="#" className="group block">
+                    <div className="flex items-center py-5 px-4 sm:py-6 sm:px-0">
+                      <div className="min-w-0 flex-1 flex items-center">
+                        <div className="flex-shrink-0">
+                          <img
+                            className="h-12 w-12 rounded-full group-hover:opacity-75"
+                            src={candidate.imageUrl}
+                            alt=""
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
+                          <div>
+                            <p className="text-sm font-medium text-primary truncate">{candidate.name}</p>
+                            <p className="mt-2 flex items-center text-sm text-gray-500">
+                              <MailIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" aria-hidden="true" />
+                              <span className="truncate">{candidate.email}</span>
+                            </p>
+                          </div>
+                          <div className="hidden md:block">
+                            <div>
+                              <p className="text-sm text-gray-900">
+                                Applied on <time dateTime={candidate.appliedDatetime}>{candidate.applied}</time>
+                              </p>
+                              <p className="mt-2 flex items-center text-sm text-gray-500">
+                                <CheckCircleIcon
+                                  className="flex-shrink-0 mr-1.5 h-5 w-5 text-green-400"
+                                  aria-hidden="true"
+                                />
+                                {candidate.status}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <ChevronRightIcon
+                          className="h-5 w-5 text-gray-400 group-hover:text-gray-700"
+                          aria-hidden="true"
+                        />
+                      </div>
+                    </div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
       {/* Activity feed */}
