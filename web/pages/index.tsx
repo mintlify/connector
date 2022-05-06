@@ -155,7 +155,7 @@ const Home: NextPage = () => {
                     <div className="flex items-center space-x-3">
                       <span className="block">
                         <h2 className="text-sm font-medium text-gray-700">
-                          <div className="flex items-center space-x-1">
+                          <div className="flex items-center space-x-1.5">
                             <div>
                               <img src={source.icon} alt="Icon" className="h-4 w-4" />
                             </div>
@@ -169,7 +169,7 @@ const Home: NextPage = () => {
                     <a className="relative group flex items-center space-x-2.5">
                       <span className="flex items-center space-x-2 text-sm text-gray-500 group-hover:text-gray-900 truncate">
                         <div>
-                          <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" className="w-3 h-3 text-gray-500">
+                          <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" className="w-3 h-3 text-gray-500">
                             <path fill="currentColor" fillRule="evenodd" d="M1.643 3.143L.427 1.927A.25.25 0 000 2.104V5.75c0 .138.112.25.25.25h3.646a.25.25 0 00.177-.427L2.715 4.215a6.5 6.5 0 11-1.18 4.458.75.75 0 10-1.493.154 8.001 8.001 0 101.6-5.684zM7.75 4a.75.75 0 01.75.75v2.992l2.028.812a.75.75 0 01-.557 1.392l-2.5-1A.75.75 0 017 8.25v-3.5A.75.75 0 017.75 4z"></path>
                           </svg>
                         </div>

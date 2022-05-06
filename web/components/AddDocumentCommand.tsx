@@ -71,7 +71,7 @@ export default function AddDocumentCommand({ isOpen, setIsOpen }: AddDocumentCom
                               value={action}
                               className={({ active }) =>
                                 classNames(
-                                  'flex cursor-default select-none items-center rounded-md px-3 py-2',
+                                  'flex select-none items-center rounded-md px-3 py-2 cursor-pointer',
                                   active ? 'bg-primary text-white' : ''
                                 )
                               }
