@@ -185,12 +185,6 @@ const Home: NextPage = () => {
                   {/* Repo meta info */}
                   <div className="hidden sm:flex flex-col flex-shrink-0 items-end space-y-3">
                     <span className="flex items-center space-x-4">
-                      <a
-                        href={source.href}
-                        className="relative text-sm text-gray-500 hover:text-gray-900 font-medium"
-                      >
-                        Visit site
-                      </a>
                       <Menu as="div" className="relative inline-block text-left">
                         <div>
                           <Menu.Button className="p-1 rounded-full flex items-center text-gray-400 hover:text-gray-600">
