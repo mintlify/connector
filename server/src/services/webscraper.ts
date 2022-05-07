@@ -6,17 +6,57 @@ const webScrapingApiClient = require('webscrapingapi');
 
 const client = new webScrapingApiClient(process.env.WEBSCRAPER_KEY);
 
-type ScrapingMethod = 'notion' | 'web';
+type URLScrapingMethod = 'notion-private' | 'googledocs' | 'other';
+type WebScrapingMethod = 'readme' | 'stoplight' | 'docusaurus' | 'github' | 'notion-public' | 'confluence-public' | 'web';
 
-const getScrapingMethod = (url: string): ScrapingMethod => {
+type ScrapingMethod = URLScrapingMethod | WebScrapingMethod;
+
+const getScrapingMethod = (url: string): URLScrapingMethod => {
     const urlParsed = new URL(url);
     if (isNotionUrl(urlParsed)) {
-        return 'notion';
+        return 'notion-private';
+    }
+    if (urlParsed.host === 'docs.google.com' && url.includes('/pub')) {
+        return 'googledocs';
+    }
+    return 'other';
+}
+
+const possiblyGetWebScrapingMethod = ($: cheerio.CheerioAPI): WebScrapingMethod => {
+    const readmeVersion = $('meta[name="readme-version"]');
+    if (readmeVersion.length !== 0) {
+        return 'readme';
+    }
+    const stoplightConnect = $('link[href="https://js.stoplight.io"]');
+    if (stoplightConnect.length !== 0) {
+        return 'stoplight';
+    }
+    const githubContent = $('meta[content="GitHub"]');
+    const hasReadmeId = $('#readme');
+    if (githubContent.length !== 0 && hasReadmeId.length !== 0) {
+        return 'github';
+    }
+    const notionApp = $('#notion-app');
+    if (notionApp.length !== 0) {
+        return 'notion-public';
+    }
+    const confluenceId = $('#com-atlassian-confluence');
+    if (confluenceId.length !== 0) {
+        return 'confluence-public';
+    }
+    const docusaurusVersion = $('meta[name="docusaurus_version"]');
+    if (docusaurusVersion.length !== 0) {
+        return 'docusaurus';
     }
     return 'web';
 }
 
-export const getContentFromWebpage = async (url: string, authConnector?: AuthConnectorType): Promise<string> => {
+type ContentData = {
+    method: ScrapingMethod;
+    content: string;
+}
+
+export const getContentFromWebpage = async (url: string, authConnector?: AuthConnectorType): Promise<ContentData> => {
     if (!url) {
         throw 'URL not provided'
     }
@@ -24,10 +64,14 @@ export const getContentFromWebpage = async (url: string, authConnector?: AuthCon
         throw 'Is not valid URL';
     }
 
-    const scrapingMethod = getScrapingMethod(url);
+    let scrapingMethod: ScrapingMethod = getScrapingMethod(url);
     const notionAccessToken = authConnector?.notion.accessToken;
-    if (scrapingMethod === 'notion' && notionAccessToken) {
-        return getNotionContent(url, notionAccessToken)
+    if (scrapingMethod === 'notion-private' && notionAccessToken) {
+        const notionContent = await getNotionContent(url, notionAccessToken);
+        return {
+            method: 'notion-private',
+            content: notionContent
+        }
     }
 
     const response = await client.get(url, {
@@ -44,9 +88,46 @@ export const getContentFromWebpage = async (url: string, authConnector?: AuthCon
         throw 'Error fetching results';
     }
 
-    const content = response.response.data;
-    const $ = cheerio.load(content);
-    const text = $('body').text().trim();
+    const rawContent = response.response.data;
+    const $ = cheerio.load(rawContent);
+    // Only switch scraping method if other from url
+    scrapingMethod = scrapingMethod === 'other' ? possiblyGetWebScrapingMethod($) : scrapingMethod;
 
-    return text;
+    let content = $('body').text().trim();
+
+    if (scrapingMethod === 'readme') {
+        // Remove date
+        $('.DateLine').remove();
+        content = $('body').text().trim();
+    }
+
+    if (scrapingMethod === 'stoplight') {
+        content = $('.Editor').text().trim();
+    }
+
+    if (scrapingMethod === 'docusaurus') {
+        content = $('.markdown').text().trim();
+    }
+
+    if (scrapingMethod === 'github') {
+        content = $('#readme').text().trim();
+    }
+
+    if (scrapingMethod === 'notion-public') {
+        content = $('.notion-app-inner').text().trim();
+    }
+
+    if (scrapingMethod === 'confluence-public') {
+        $('.recently-updated').remove();
+        content = $('#content-body').text().trim();
+    }
+
+    if (scrapingMethod === 'googledocs') {
+        content = $('#contents').text().trim();
+    }
+
+    return {
+        method: scrapingMethod,
+        content
+    };
 }
