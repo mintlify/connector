@@ -31,6 +31,7 @@ v01Router.post('/', async (req, res) => {
     // logging
     const isAlerting = alerts.length > 0;
     const alertEvent = isAlerting ? 'Connect Alert' : 'Connect Not Alert';
+    
     track(owner, alertEvent, {
         numberOfFiles: files.length,
         numberOfAlerts: alerts.length
