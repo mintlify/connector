@@ -1,13 +1,13 @@
 import express from 'express';
 import { getOctokitRequest } from '../services/octokit';
-import { getContentFromWebpage } from '../services/webscraper';
+import { getDataFromWebpage } from '../services/webscraper';
 
 const diffRouter = express.Router();
 
 diffRouter.post('/', async (_, res) => {
   const url = 'https://mintlify.readme.io/reference/start';
 
-  const  { content } = await getContentFromWebpage(url);
+  const  { content } = await getDataFromWebpage(url);
   const octokitRequest = getOctokitRequest('24714487');
 
   await octokitRequest('POST /repos/{owner}/{repo}/pulls/{pull_number}/comments/{comment_id}/replies', {

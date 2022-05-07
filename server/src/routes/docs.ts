@@ -1,6 +1,6 @@
 import express from 'express';
 import Doc from '../models/Doc';
-import { getContentFromWebpage } from '../services/webscraper';
+import { getDataFromWebpage } from '../services/webscraper';
 
 const docsRouter = express.Router();
 
@@ -8,7 +8,7 @@ docsRouter.post('/', async (req, res) => {
   const { url } = req.body;
   const org = 'mintlify';
   try {
-    const { content, method } = await getContentFromWebpage(url);
+    const { content, method, title, favicon } = await getDataFromWebpage(url);
     await Doc.findOneAndUpdate({
       org,
       url
@@ -18,6 +18,8 @@ docsRouter.post('/', async (req, res) => {
       url,
       method,
       content,
+      title,
+      favicon
     },
     {
       upsert: true

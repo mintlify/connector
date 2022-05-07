@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import { AuthConnectorType } from '../models/AuthConnector';
 import { getNotionContent, isNotionUrl } from './notion';
 import validUrl from 'valid-url';
+import axios from 'axios';
 const webScrapingApiClient = require('webscrapingapi');
 
 const client = new webScrapingApiClient(process.env.WEBSCRAPER_KEY);
@@ -53,10 +54,12 @@ const possiblyGetWebScrapingMethod = ($: cheerio.CheerioAPI): WebScrapingMethod 
 
 type ContentData = {
     method: ScrapingMethod;
+    title: string;
+    favicon: string;
     content: string;
 }
 
-export const getContentFromWebpage = async (url: string, authConnector?: AuthConnectorType): Promise<ContentData> => {
+export const getDataFromWebpage = async (url: string, authConnector?: AuthConnectorType): Promise<ContentData> => {
     if (!url) {
         throw 'URL not provided'
     }
@@ -70,6 +73,8 @@ export const getContentFromWebpage = async (url: string, authConnector?: AuthCon
         const notionContent = await getNotionContent(url, notionAccessToken);
         return {
             method: 'notion-private',
+            title: 'title', // to fix
+            favicon: 'https://www.notion.so/images/favicon.ico',
             content: notionContent
         }
     }
@@ -93,6 +98,9 @@ export const getContentFromWebpage = async (url: string, authConnector?: AuthCon
     // Only switch scraping method if other from url
     scrapingMethod = scrapingMethod === 'other' ? possiblyGetWebScrapingMethod($) : scrapingMethod;
 
+    const title = $('title').text().trim();
+    const faviconRes: any = await axios.get(`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}`);
+    const favicon = faviconRes?.request?.res?.responseUrl;
     let content = $('body').text().trim();
 
     if (scrapingMethod === 'readme') {
@@ -128,6 +136,8 @@ export const getContentFromWebpage = async (url: string, authConnector?: AuthCon
 
     return {
         method: scrapingMethod,
+        title,
+        favicon,
         content
     };
 }
