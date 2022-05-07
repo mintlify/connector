@@ -1,10 +1,10 @@
-name: Deploy GitHub app
+name: Deploy Server to Heroku
 on:
   push:
     branches:
       - main
     paths:
-      - github/**
+      - server/**
 
 jobs:
   build:
@@ -15,7 +15,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Install dependencies
-      working-directory: ./github
+      working-directory: ./server
       run: npm install --prefix ./
 
     - name: Deploy to Heroku
@@ -25,4 +25,4 @@ jobs:
         heroku_app_name: mintlify-connect
         team: mintlify
         heroku_email: han@mintlify.com
-        appdir: github
+        appdir: server
