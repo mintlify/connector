@@ -6,20 +6,20 @@ const webScrapingApiClient = require('webscrapingapi');
 
 const client = new webScrapingApiClient(process.env.WEBSCRAPER_KEY);
 
-type URLScrapingMethod = 'notion' | 'googledocs' | 'web';
-type WebScrapingMethod = 'readme' | 'stoplight' | 'web';
+type URLScrapingMethod = 'notion-private' | 'googledocs' | 'other';
+type WebScrapingMethod = 'readme' | 'stoplight' | 'notion-public' | 'confluence-public' | 'web';
 
 type ScrapingMethod = URLScrapingMethod | WebScrapingMethod;
 
 const getScrapingMethod = (url: string): URLScrapingMethod => {
     const urlParsed = new URL(url);
     if (isNotionUrl(urlParsed)) {
-        return 'notion';
+        return 'notion-private';
     }
     if (urlParsed.host === 'docs.google.com' && url.includes('/pub')) {
         return 'googledocs';
     }
-    return 'web';
+    return 'other';
 }
 
 const possiblyGetWebScrapingMethod = ($: cheerio.CheerioAPI): WebScrapingMethod => {
@@ -30,6 +30,14 @@ const possiblyGetWebScrapingMethod = ($: cheerio.CheerioAPI): WebScrapingMethod 
     const stoplightConnect = $('link[href="https://js.stoplight.io"]');
     if (stoplightConnect.length !== 0) {
         return 'stoplight';
+    }
+    const notionApp = $('#notion-app');
+    if (notionApp.length !== 0) {
+        return 'notion-public';
+    }
+    const confluenceId = $('#com-atlassian-confluence');
+    if (confluenceId.length !== 0) {
+        return 'confluence-public';
     }
     return 'web';
 }
@@ -49,10 +57,10 @@ export const getContentFromWebpage = async (url: string, authConnector?: AuthCon
 
     let scrapingMethod: ScrapingMethod = getScrapingMethod(url);
     const notionAccessToken = authConnector?.notion.accessToken;
-    if (scrapingMethod === 'notion' && notionAccessToken) {
+    if (scrapingMethod === 'notion-private' && notionAccessToken) {
         const notionContent = await getNotionContent(url, notionAccessToken);
         return {
-            method: 'notion',
+            method: 'notion-private',
             content: notionContent
         }
     }
@@ -73,8 +81,8 @@ export const getContentFromWebpage = async (url: string, authConnector?: AuthCon
 
     const rawContent = response.response.data;
     const $ = cheerio.load(rawContent);
-    // Only switch scraping method if web
-    scrapingMethod = scrapingMethod === 'web' ? possiblyGetWebScrapingMethod($) : scrapingMethod;
+    // Only switch scraping method if other from url
+    scrapingMethod = scrapingMethod === 'other' ? possiblyGetWebScrapingMethod($) : scrapingMethod;
 
     let content = $('body').text().trim();
 
@@ -86,6 +94,15 @@ export const getContentFromWebpage = async (url: string, authConnector?: AuthCon
 
     if (scrapingMethod === 'stoplight') {
         content = $('.Editor').text().trim();
+    }
+
+    if (scrapingMethod === 'notion-public') {
+        content = $('.notion-app-inner').text().trim();
+    }
+
+    if (scrapingMethod === 'confluence-public') {
+        $('.recently-updated').remove();
+        content = $('#content-body').text().trim();
     }
 
     if (scrapingMethod === 'googledocs') {
