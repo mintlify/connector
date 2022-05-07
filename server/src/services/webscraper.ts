@@ -6,9 +6,12 @@ const webScrapingApiClient = require('webscrapingapi');
 
 const client = new webScrapingApiClient(process.env.WEBSCRAPER_KEY);
 
-type ScrapingMethod = 'notion' | 'web';
+type URLScrapingMethod = 'notion' | 'web';
+type ContentScrapingMethod = 'readme' | 'stoplight' | 'web';
 
-const getScrapingMethod = (url: string): ScrapingMethod => {
+type ScrapingMethod = URLScrapingMethod | ContentScrapingMethod;
+
+const getScrapingMethod = (url: string): URLScrapingMethod => {
     const urlParsed = new URL(url);
     if (isNotionUrl(urlParsed)) {
         return 'notion';
@@ -16,7 +19,24 @@ const getScrapingMethod = (url: string): ScrapingMethod => {
     return 'web';
 }
 
-export const getContentFromWebpage = async (url: string, authConnector?: AuthConnectorType): Promise<string> => {
+const possiblyGetContentScrapingMethod = ($: cheerio.CheerioAPI): ContentScrapingMethod => {
+    const readmeVersion = $('meta[name="readme-version"]');
+    if (readmeVersion.length !== 0) {
+        return 'readme';
+    }
+    const stoplightConnect = $('link[href="https://js.stoplight.io"]');
+    if (stoplightConnect.length !== 0) {
+        return 'stoplight';
+    }
+    return 'web';
+}
+
+type ContentData = {
+    method: ScrapingMethod;
+    content: string;
+}
+
+export const getContentFromWebpage = async (url: string, authConnector?: AuthConnectorType): Promise<ContentData> => {
     if (!url) {
         throw 'URL not provided'
     }
@@ -24,10 +44,14 @@ export const getContentFromWebpage = async (url: string, authConnector?: AuthCon
         throw 'Is not valid URL';
     }
 
-    const scrapingMethod = getScrapingMethod(url);
+    let scrapingMethod: ScrapingMethod = getScrapingMethod(url);
     const notionAccessToken = authConnector?.notion.accessToken;
     if (scrapingMethod === 'notion' && notionAccessToken) {
-        return getNotionContent(url, notionAccessToken)
+        const notionContent = await getNotionContent(url, notionAccessToken);
+        return {
+            method: 'notion',
+            content: notionContent
+        }
     }
 
     const response = await client.get(url, {
@@ -44,9 +68,24 @@ export const getContentFromWebpage = async (url: string, authConnector?: AuthCon
         throw 'Error fetching results';
     }
 
-    const content = response.response.data;
-    const $ = cheerio.load(content);
-    const text = $('body').text().trim();
+    const rawContent = response.response.data;
+    const $ = cheerio.load(rawContent);
+    scrapingMethod = possiblyGetContentScrapingMethod($);
 
-    return text;
+    let content = $('body').text().trim();
+
+    if (scrapingMethod === 'readme') {
+        // Remove date
+        $('.DateLine').remove();
+        content = $('body').text().trim();
+    }
+
+    if (scrapingMethod === 'stoplight') {
+        content = $('.Editor').text().trim();
+    }
+
+    return {
+        method: scrapingMethod,
+        content
+    };
 }
