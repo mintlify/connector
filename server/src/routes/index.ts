@@ -5,6 +5,7 @@ import diffRouter from './diff';
 import notionRouter from './notion';
 import v01Router from './v01';
 import connectRouter from './connect';
+import docsRouter from './docs';
 
 const headRouter = express.Router();
 
@@ -18,10 +19,14 @@ headRouter.get('/', (_, res) => {
   res.send('🌿 Welcome to the Mintlify Connect API')
 });
 
-// Connect
-headRouter.use('/v01', v01Router);
-headRouter.use('/notion', notionRouter);
-headRouter.use('/diff', diffRouter);
+// Primary app
+headRouter.use('/docs', docsRouter);
 headRouter.use('/connect', connectRouter);
+// GitHub
+headRouter.use('/v01', v01Router);
+// Integrations
+headRouter.use('/notion', notionRouter);
+// Cron job
+headRouter.use('/diff', diffRouter);
 
 export default headRouter;
