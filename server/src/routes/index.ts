@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import diffRouter from './diff';
 import notionRouter from './notion';
 import v01Router from './v01';
+import connectRouter from './connect';
 
 const headRouter = express.Router();
 
@@ -21,5 +22,6 @@ headRouter.get('/', (_, res) => {
 headRouter.use('/v01', v01Router);
 headRouter.use('/notion', notionRouter);
 headRouter.use('/diff', diffRouter);
+headRouter.use('/connect', connectRouter);
 
 export default headRouter;
