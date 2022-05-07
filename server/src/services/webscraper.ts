@@ -7,7 +7,7 @@ const webScrapingApiClient = require('webscrapingapi');
 const client = new webScrapingApiClient(process.env.WEBSCRAPER_KEY);
 
 type URLScrapingMethod = 'notion-private' | 'googledocs' | 'other';
-type WebScrapingMethod = 'readme' | 'stoplight' | 'notion-public' | 'confluence-public' | 'web';
+type WebScrapingMethod = 'readme' | 'stoplight' | 'docusaurus' | 'github' | 'notion-public' | 'confluence-public' | 'web';
 
 type ScrapingMethod = URLScrapingMethod | WebScrapingMethod;
 
@@ -31,6 +31,11 @@ const possiblyGetWebScrapingMethod = ($: cheerio.CheerioAPI): WebScrapingMethod 
     if (stoplightConnect.length !== 0) {
         return 'stoplight';
     }
+    const githubContent = $('meta[content="GitHub"]');
+    const hasReadmeId = $('#readme');
+    if (githubContent.length !== 0 && hasReadmeId.length !== 0) {
+        return 'github';
+    }
     const notionApp = $('#notion-app');
     if (notionApp.length !== 0) {
         return 'notion-public';
@@ -38,6 +43,10 @@ const possiblyGetWebScrapingMethod = ($: cheerio.CheerioAPI): WebScrapingMethod 
     const confluenceId = $('#com-atlassian-confluence');
     if (confluenceId.length !== 0) {
         return 'confluence-public';
+    }
+    const docusaurusVersion = $('meta[name="docusaurus_version"]');
+    if (docusaurusVersion.length !== 0) {
+        return 'docusaurus';
     }
     return 'web';
 }
@@ -94,6 +103,14 @@ export const getContentFromWebpage = async (url: string, authConnector?: AuthCon
 
     if (scrapingMethod === 'stoplight') {
         content = $('.Editor').text().trim();
+    }
+
+    if (scrapingMethod === 'docusaurus') {
+        content = $('.markdown').text().trim();
+    }
+
+    if (scrapingMethod === 'github') {
+        content = $('#readme').text().trim();
     }
 
     if (scrapingMethod === 'notion-public') {
