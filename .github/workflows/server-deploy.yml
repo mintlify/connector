@@ -18,6 +18,10 @@ jobs:
       working-directory: ./server
       run: npm install --prefix ./
 
+    - name: Run tests
+      working-directory: ./server
+      run: npm test
+
     - name: Deploy to Heroku
       uses: akhileshns/heroku-deploy@v3.12.12
       with:
