@@ -1,4 +1,4 @@
-import { getDocumentNameFromUrl } from '../src/helpers/alerts';
+import { getDocumentNameFromUrl } from '../src/helpers/routes/alerts';
 
 describe('Extracting title', () => {
   test('Getting page title from Google', async () => {

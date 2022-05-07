@@ -1,4 +1,4 @@
-import { sha512Hash } from '../src/helpers/hash'
+import { sha512Hash } from '../src/helpers/routes/hash'
 
 describe('Consistent hashing', () => {
   test('Simple id', () => {

@@ -1,5 +1,6 @@
-import { createMessage, getAlertsForFile } from '../src/helpers/alerts';
-import { Alert, Change, ConnectFile } from '../src/helpers/types';
+import { createMessage, getAlertsForFile } from '../src/helpers/routes/alerts';
+import { Alert, Change } from '../src/helpers/github/types';
+import { FileInfo } from '../src/helpers/github/patch';
 
 describe('Auth connector', () => {
   const notionAuthConnector = {
@@ -16,7 +17,7 @@ describe('Auth connector', () => {
       content: "console.log('hello world!');"
     }];
   
-    const file: ConnectFile = 
+    const file: FileInfo = 
         {
             filename: 'test.js',
             content: `// https://www.notion.so/mintlify/Laws-of-Documentation-f167f65678e8495e9af7519a87fca13e

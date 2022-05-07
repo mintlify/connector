@@ -1,6 +1,7 @@
-import { createMessage, getAlertsForAllFiles, getAlertsForFile } from '../src/helpers/alerts';
-import { checkIfUrl } from '../src/helpers/links';
-import { ConnectFile, Alert, Change } from '../src/helpers/types';
+import { createMessage, getAlertsForAllFiles, getAlertsForFile } from '../src/helpers/routes/alerts';
+import { checkIfUrl } from '../src/helpers/routes/links';
+import { Alert, Change } from '../src/helpers/github/types';
+import { FileInfo } from '../src/helpers/github/patch';
 
 describe('URL checker', () => {
   test('Simple URL', () => {
@@ -45,7 +46,7 @@ describe('Connect parsing', () => {
             content: "console.log('hello world!');"
         }];
 
-        const file: ConnectFile = 
+        const file: FileInfo = 
           {
               filename: 'test.js',
               content: `// notion.so
@@ -74,7 +75,7 @@ describe('Connect parsing', () => {
             content: "console.log('hello world!');"
         }];
 
-        const file: ConnectFile = 
+        const file: FileInfo = 
           {
               filename: 'test.js',
               content: `/* notion.so */
@@ -103,7 +104,7 @@ describe('Connect parsing', () => {
             content: 'const dataType = isType ? "joe" : "cat";'
         }];
 
-        const file: ConnectFile = 
+        const file: FileInfo = 
           {
               filename: 'joe.js',
               content: `// https://twitter.com/home
@@ -265,7 +266,7 @@ describe('Connect parsing', () => {
           }
         ];
 
-        const files: ConnectFile[] = [{
+        const files: FileInfo[] = [{
             filename: 'src/index.ts',
             changes,
             content: `import { Probot } from "probot";
@@ -439,7 +440,7 @@ describe('Connect parsing', () => {
         content: 'const await createMessage = (link: Link): string => {'
       }];
 
-      const files: ConnectFile[] = [
+      const files: FileInfo[] = [
         {
           filename: 'routes/connect/v01/alerts.ts',
           content: `import { Link, Alert } from './types';
@@ -493,7 +494,7 @@ describe('Connect parsing', () => {
         content: 'const await createMessage = (link: Link): string => {'
       }];
 
-      const files: ConnectFile[] = [
+      const files: FileInfo[] = [
         {
           filename: 'routes/connect/v01/alerts.ts',
           content: `import { Link, Alert } from './types';
@@ -542,7 +543,7 @@ describe('Connect parsing', () => {
         content: '// TODO: Random comment'
       }];
 
-      const files: ConnectFile[] = [
+      const files: FileInfo[] = [
         {
           filename: 'routes/connect/v01/alerts.ts',
           content: `import { Link, Alert } from './types';
@@ -580,7 +581,7 @@ describe('Connect parsing', () => {
           content: '}'
       }];
 
-      const file: ConnectFile = 
+      const file: FileInfo = 
           {
               filename: 'joe.js',
               content: `// https://twitter.com/home

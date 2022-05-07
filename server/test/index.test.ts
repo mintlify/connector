@@ -1,4 +1,4 @@
-import { parsePatch } from '../src/helpers/patch';
+import { parsePatch } from '../src/helpers/github/patch';
 
 describe('Patch to changes', () => {
   test('Simple patch', () => {
