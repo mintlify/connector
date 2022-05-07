@@ -11,7 +11,7 @@ import { classNames } from '../helpers/functions'
 import Layout from '../components/layout'
 import Link from 'next/link'
 
-const sources = [
+const docs = [
   {
     id: '1',
     name: 'API Quickstart',
@@ -114,7 +114,7 @@ const Home: NextPage = () => {
         <div className="bg-white lg:min-w-0 lg:flex-1">
           <div className="pl-4 pr-6 pt-4 pb-4 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
             <div className="flex items-center">
-              <h1 className="flex-1 text-lg font-medium">Sources</h1>
+              <h1 className="flex-1 text-lg font-medium">Documentation</h1>
               <Menu as="div" className="relative">
                 <Menu.Button className="w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50">
                   <SortAscendingIcon className="mr-3 h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -168,12 +168,12 @@ const Home: NextPage = () => {
             </div>
           </div>
           <ul role="list" className="relative z-0">
-            {sources.map((source) => (
+            {docs.map((doc) => (
               <>
               <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div>
               <Link
-                key={source.id}
-                href={source.href}
+                key={doc.id}
+                href={doc.href}
               >
               <li
                 className="relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6 cursor-pointer"
@@ -186,10 +186,10 @@ const Home: NextPage = () => {
                         <h2 className="text-sm font-medium text-gray-700">
                           <div className="flex items-center space-x-2">
                             <div>
-                              <img src={source.icon} alt="Icon" className="h-5 w-5" />
+                              <img src={doc.icon} alt="Icon" className="h-5 w-5" />
                             </div>
                             <div>
-                              {source.name}
+                              {doc.name}
                             </div>
                           </div>
                         </h2>
@@ -203,7 +203,7 @@ const Home: NextPage = () => {
                           </svg>
                         </div>
                         <div>
-                          Last updated {source.lastUpdated}
+                          Last updated {doc.lastUpdated}
                         </div>
                       </span>
                     </a>
@@ -247,7 +247,7 @@ const Home: NextPage = () => {
                     </span>
                     <div className="flex items-center space-x-2">
                       <div className="flex flex-shrink-0">
-                        {source.members.map((member) => (
+                        {doc.members.map((member) => (
                           <img
                             key={member.handle}
                             className="max-w-none h-4 w-4 rounded-full ring-2 ring-white"
@@ -256,9 +256,9 @@ const Home: NextPage = () => {
                           />
                         ))}
                       </div>
-                      {source.members.length > 5 ? (
+                      {doc.members.length > 5 ? (
                         <span className="flex-shrink-0 text-xs leading-5 font-medium">
-                          +{source.members.length - 1}
+                          +{doc.members.length - 1}
                         </span>
                       ) : null}
                     </div>
