@@ -116,19 +116,22 @@ export default function AddRule({ isOpen, setIsOpen }: AddRuleProps) {
 }
 
 function RuleConfig({ onCancel }: { onCancel: () => void }) {
-  return <form className="px-6 py-5">
+  return <form className="px-6 py-6">
   <div className="space-y-5">
-    <div>
-      <h1 className="text-lg leading-6 font-medium text-gray-900">Require documentation update</h1>
-      <p className="mt-1 text-sm text-gray-500">
-        Enforce updates when relevant code changes
-      </p>
+    <div className="flex space-x-4">
+      {getRuleTypeIcon('Update')}
+      <div>
+        <h1 className="text-sm font-medium text-gray-900">Require documentation update</h1>
+        <p className="text-sm text-gray-500">
+          Enforce updates when relevant code changes
+        </p>
+      </div>
     </div>
 
     <div className="space-y-2">
       <div className="space-y-1">
         <label htmlFor="add-team-members" className="block text-sm font-medium text-gray-700">
-          Add Team Members
+          Repository
         </label>
         <p id="add-team-members-helper" className="sr-only">
           Search by email address
@@ -140,7 +143,6 @@ function RuleConfig({ onCancel }: { onCancel: () => void }) {
               name="add-team-members"
               id="add-team-members"
               className="block w-full shadow-sm focus:ring-sky-500 focus:border-sky-500 sm:text-sm border-gray-300 rounded-md"
-              placeholder="Email address"
               aria-describedby="add-team-members-helper"
             />
           </div>
@@ -150,7 +152,7 @@ function RuleConfig({ onCancel }: { onCancel: () => void }) {
               className="bg-white inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
             >
               <PlusIcon className="-ml-2 mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />
-              <span>Add</span>
+              <span>GitHub</span>
             </button>
           </span>
         </div>
