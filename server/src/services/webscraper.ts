@@ -6,20 +6,23 @@ const webScrapingApiClient = require('webscrapingapi');
 
 const client = new webScrapingApiClient(process.env.WEBSCRAPER_KEY);
 
-type URLScrapingMethod = 'notion' | 'web';
-type ContentScrapingMethod = 'readme' | 'stoplight' | 'web';
+type URLScrapingMethod = 'notion' | 'googledocs' | 'web';
+type WebScrapingMethod = 'readme' | 'stoplight' | 'web';
 
-type ScrapingMethod = URLScrapingMethod | ContentScrapingMethod;
+type ScrapingMethod = URLScrapingMethod | WebScrapingMethod;
 
 const getScrapingMethod = (url: string): URLScrapingMethod => {
     const urlParsed = new URL(url);
     if (isNotionUrl(urlParsed)) {
         return 'notion';
     }
+    if (urlParsed.host === 'docs.google.com' && url.includes('/pub')) {
+        return 'googledocs';
+    }
     return 'web';
 }
 
-const possiblyGetContentScrapingMethod = ($: cheerio.CheerioAPI): ContentScrapingMethod => {
+const possiblyGetWebScrapingMethod = ($: cheerio.CheerioAPI): WebScrapingMethod => {
     const readmeVersion = $('meta[name="readme-version"]');
     if (readmeVersion.length !== 0) {
         return 'readme';
@@ -70,7 +73,8 @@ export const getContentFromWebpage = async (url: string, authConnector?: AuthCon
 
     const rawContent = response.response.data;
     const $ = cheerio.load(rawContent);
-    scrapingMethod = possiblyGetContentScrapingMethod($);
+    // Only switch scraping method if web
+    scrapingMethod = scrapingMethod === 'web' ? possiblyGetWebScrapingMethod($) : scrapingMethod;
 
     let content = $('body').text().trim();
 
@@ -82,6 +86,10 @@ export const getContentFromWebpage = async (url: string, authConnector?: AuthCon
 
     if (scrapingMethod === 'stoplight') {
         content = $('.Editor').text().trim();
+    }
+
+    if (scrapingMethod === 'googledocs') {
+        content = $('#contents').text().trim();
     }
 
     return {
