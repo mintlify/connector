@@ -1,7 +1,8 @@
-const webScrapingApiClient = require('webscrapingapi');
 import * as cheerio from 'cheerio';
 import { AuthConnectorType } from '../models/AuthConnector';
 import { getNotionContent, isNotionUrl } from './notion';
+import validUrl from 'valid-url';
+const webScrapingApiClient = require('webscrapingapi');
 
 const client = new webScrapingApiClient(process.env.WEBSCRAPER_KEY);
 
@@ -16,6 +17,13 @@ const getScrapingMethod = (url: string): ScrapingMethod => {
 }
 
 export const getContentFromWebpage = async (url: string, authConnector?: AuthConnectorType): Promise<string> => {
+    if (!url) {
+        throw 'URL not provided'
+    }
+    if (!validUrl.isUri(url)) {
+        throw 'Is not valid URL';
+    }
+
     const scrapingMethod = getScrapingMethod(url);
     const notionAccessToken = authConnector?.notion.accessToken;
     if (scrapingMethod === 'notion' && notionAccessToken) {
@@ -32,13 +40,13 @@ export const getContentFromWebpage = async (url: string, authConnector?: AuthCon
         wait_for: 2000,
     });
     
-    if (response.success) {
-        const content = response.response.data;
-        const $ = cheerio.load(content);
-        const text = $('body').text().trim();
-
-        return text;
-    } else {
-        return '';
+    if (!response.success) {
+        throw 'Error fetching results';
     }
+
+    const content = response.response.data;
+    const $ = cheerio.load(content);
+    const text = $('body').text().trim();
+
+    return text;
 }

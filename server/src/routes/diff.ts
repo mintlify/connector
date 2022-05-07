@@ -1,5 +1,5 @@
 import express from 'express';
-import { getOctokitRequest } from '../services/octokit';
+// import { getOctokitRequest } from '../services/octokit';
 import { getContentFromWebpage } from '../services/webscraper';
 
 const diffRouter = express.Router();
@@ -25,8 +25,12 @@ const diffRouter = express.Router();
 // To be deleted
 diffRouter.post('/content', async (req, res) => {
   const { url } = req.body;
-  const content = await getContentFromWebpage(url);
-  res.send(content);
+  try {
+    const content = await getContentFromWebpage(url);
+    res.send({content});
+  } catch (error) {
+    res.status(500).send({error})
+  }
 })
 
 export default diffRouter;
