@@ -1,5 +1,5 @@
 import { PLConnect, TreeNode } from '../../parsing/types';
-import { Change, Link, LineRange } from './types';
+import { Change, Link, LineRange } from '../github/types';
 
 export const urlify = (str: string): string => {
     let content = str;

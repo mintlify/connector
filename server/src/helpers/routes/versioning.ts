@@ -2,8 +2,8 @@
 import { AuthConnectorType } from "../../models/AuthConnector";
 import VersionTask from "../../models/VersionTask";
 import { getContentFromWebpage } from "../../services/webscraper";
-import { Alert } from "./patch";
-import { AlertsRequest } from "./types";
+import { Alert } from "../github/patch";
+import { AlertsRequest } from "../github/types";
 
 export const createVersionTasks = async (alerts: Alert[], alertsRequest: AlertsRequest, authConnector?: AuthConnectorType): Promise<void> => {
   const contentFromAlertPromises = alerts.map((alert) => {

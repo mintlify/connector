@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { AlertsRequest } from '../helpers/routes/types';
+import { AlertsRequest } from '../helpers/github/types';
 
 const { Schema } = mongoose;
 

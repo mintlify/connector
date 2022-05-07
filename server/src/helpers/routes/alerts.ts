@@ -4,10 +4,10 @@ import { isNotionUrl, isBlock, getNotionBlockContent, getNotionPageTitle } from 
 import { getLanguageIdByFilename } from '../../parsing/filenames';
 import getPL from '../../parsing/languages';
 import { formatCode, getTreeSitterProgram } from '../../parsing';
-import { Alert, Link } from './types';
+import { Alert, Link } from '../github/types';
 import { getLinksInFile } from './links';
 import { AuthConnectorType } from '../../models/AuthConnector';
-import { FileInfo } from './patch';
+import { FileInfo } from '../github/patch';
 
 export const getAlertsForFile = async (file: FileInfo, authConnector?: AuthConnectorType): Promise<Alert[]> => {
     const languageId = getLanguageIdByFilename(file.filename);

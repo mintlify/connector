@@ -1,7 +1,7 @@
 import { Client } from '@notionhq/client';
 import dotenv from 'dotenv';
 import axios from 'axios';
-import { Link } from '../helpers/routes/types';
+import { Link } from '../helpers/github/types';
 import { urlify } from '../helpers/routes/links';
 import { ENDPOINT } from '../helpers/github/octokit';
 

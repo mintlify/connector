@@ -1,6 +1,6 @@
 // https://www.notion.so/mintlify/Connect-d9d337715f974520a793da685b056415
 import express from 'express';
-import { Alert, AlertsRequest } from '../helpers/routes/types';
+import { Alert, AlertsRequest } from '../helpers/github/types';
 import { createNewLinksMessage, getAlertsForAllFiles } from '../helpers/routes/alerts';
 import { track } from '../services/segment';
 import AuthConnector, { AuthConnectorType } from '../models/AuthConnector';
@@ -31,7 +31,7 @@ v01Router.post('/', async (req, res) => {
     // logging
     const isAlerting = alerts.length > 0;
     const alertEvent = isAlerting ? 'Connect Alert' : 'Connect Not Alert';
-    
+
     track(owner, alertEvent, {
         numberOfFiles: files.length,
         numberOfAlerts: alerts.length

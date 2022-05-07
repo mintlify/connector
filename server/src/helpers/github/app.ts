@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Context } from "probot";
-import { Alert, FileInfo, getEncompassingRangeAndSideForAlert, parsePatch, PatchLineRange } from "../routes/patch";
-import { AlertsRequest } from "../routes/types";
+import { Alert, FileInfo, getEncompassingRangeAndSideForAlert, parsePatch, PatchLineRange } from "./patch";
+import { AlertsRequest } from "./types";
 import { ENDPOINT, getReviewComments } from "./octokit";
 
 type FilesPatchLineRangesMap = Record<string, PatchLineRange[]>;
