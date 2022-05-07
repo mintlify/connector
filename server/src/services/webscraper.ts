@@ -99,8 +99,8 @@ export const getDataFromWebpage = async (url: string, authConnector?: AuthConnec
     scrapingMethod = scrapingMethod === 'other' ? possiblyGetWebScrapingMethod($) : scrapingMethod;
 
     const title = $('title').text().trim();
-    const faviconRes: any = await axios.get(`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}`);
-    const favicon = faviconRes?.request?.res?.responseUrl;
+    const faviconRes = await axios.get(`https://s2.googleusercontent.com/s2/favicons?sz=64&domain_url=${url}`);
+    const favicon: string = faviconRes.request.res.responseUrl;
     let content = $('body').text().trim();
 
     if (scrapingMethod === 'readme') {
