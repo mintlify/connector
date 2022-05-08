@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
-import diffRouter from './diff';
+import scanRouter from './scan';
 import notionRouter from './notion';
 import v01Router from './v01';
 import connectRouter from './connect';
@@ -27,6 +27,6 @@ headRouter.use('/v01', v01Router);
 // Integrations
 headRouter.use('/notion', notionRouter);
 // Cron job
-headRouter.use('/diff', diffRouter);
+headRouter.use('/scan', scanRouter);
 
 export default headRouter;

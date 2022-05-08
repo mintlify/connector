@@ -2,9 +2,9 @@ import express from 'express';
 import { getOctokitRequest } from '../services/octokit';
 import { getDataFromWebpage } from '../services/webscraper';
 
-const diffRouter = express.Router();
+const scanRouter = express.Router();
 
-diffRouter.post('/', async (_, res) => {
+scanRouter.post('/', async (_, res) => {
   const url = 'https://mintlify.readme.io/reference/start';
 
   const  { content } = await getDataFromWebpage(url);
@@ -21,4 +21,4 @@ diffRouter.post('/', async (_, res) => {
   res.end();
 });
 
-export default diffRouter;
+export default scanRouter;

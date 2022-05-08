@@ -55,6 +55,7 @@ type ContentData = {
     method: ScrapingMethod;
     title: string;
     content: string;
+    favicon?: string;
 }
 
 export const getDataFromWebpage = async (url: string, authConnector?: AuthConnectorType): Promise<ContentData> => {
@@ -96,6 +97,7 @@ export const getDataFromWebpage = async (url: string, authConnector?: AuthConnec
     scrapingMethod = scrapingMethod === 'other' ? possiblyGetWebScrapingMethod($) : scrapingMethod;
 
     const title = $('title').text().trim();
+    const favicon = $('link[rel="shortcut icon"]').attr('href');
     let content = $('body').text().trim();
 
     if (scrapingMethod === 'readme') {
@@ -132,6 +134,7 @@ export const getDataFromWebpage = async (url: string, authConnector?: AuthConnec
     return {
         method: scrapingMethod,
         title,
-        content
+        content,
+        favicon
     };
 }

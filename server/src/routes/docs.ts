@@ -34,9 +34,17 @@ docsRouter.post('/', async (req, res) => {
   const { url } = req.body;
   const org = 'mintlify';
   try {
-    const { content, method, title } = await getDataFromWebpage(url);
-    const faviconRes = await axios.get(`https://s2.googleusercontent.com/s2/favicons?sz=128&domain_url=${url}`);
-    const favicon: string = faviconRes.request.res.responseUrl;
+    const { content, method, title, favicon } = await getDataFromWebpage(url);
+    let foundFavicon = favicon;
+    if (!foundFavicon) {
+      try {
+        const faviconRes = await axios.get(`https://s2.googleusercontent.com/s2/favicons?sz=128&domain_url=${url}`);
+        foundFavicon = faviconRes.request.res.responseUrl;
+      }
+      catch {
+        foundFavicon = undefined;
+      }
+    }
     await Doc.findOneAndUpdate({
       org,
       url
