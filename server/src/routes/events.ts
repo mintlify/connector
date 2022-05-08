@@ -31,6 +31,11 @@ eventsRouter.get('/', async (req, res) => {
         $set: {
           doc: { $first: "$doc" }
         }
+      },
+      {
+        $sort: {
+          createdAt: -1
+        }
       }
     ]);
 

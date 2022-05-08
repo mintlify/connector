@@ -265,7 +265,7 @@ const Home: NextPage = () => {
                 <li key={event._id} className="py-4">
                   <div className="flex space-x-3">
                     <img
-                      className="h-6 w-6 rounded-sm"
+                      className="h-5 w-5 rounded-sm"
                       src={event.doc.favicon}
                       alt={event.doc.title}
                     />
