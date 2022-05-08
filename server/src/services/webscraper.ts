@@ -84,7 +84,7 @@ export const getDataFromWebpage = async (url: string, authConnector?: AuthConnec
         session: 1,
         timeout: 10000,
         wait_until: 'domcontentloaded',
-        wait_for: 2000,
+        wait_for: 5000,
     });
     
     if (!response.success) {

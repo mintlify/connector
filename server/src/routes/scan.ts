@@ -6,9 +6,23 @@ import { getDataFromWebpage } from '../services/webscraper';
 
 const scanRouter = express.Router();
 
-const getDiff = async (url: string, previousContent: string) => {
+type DiffAndContent = {
+  diff: Diff.Change[],
+  newContent: string,
+}
+
+type DiffAlert = {
+  diff: Diff.Change[],
+  newContent: string,
+  doc: any
+}
+
+const getDiffAndContent = async (url: string, previousContent: string): Promise<DiffAndContent> => {
   const { content } = await getDataFromWebpage(url);
-  return Diff.diffWords(previousContent, content);
+  return {
+    diff: Diff.diffWords(previousContent, content),
+    newContent: content
+  }
 }
 
 scanRouter.post('/', async (req, res) => {
@@ -16,22 +30,24 @@ scanRouter.post('/', async (req, res) => {
   
   const docsFromOrg = await Doc.find({ org });
   const getDifferencePromises = docsFromOrg.map((doc) => {
-    return getDiff(doc.url, doc.content);
+    return getDiffAndContent(doc.url, doc.content);
   });
 
-  const diffs = await Promise.all(getDifferencePromises);
-  const changedDiffsWithDoc: { diff: Diff.Change[], doc: any }[] = [];
-  diffs.forEach((diff, i) => {
+  const diffsAndContent = await Promise.all(getDifferencePromises);
+
+  const diffAlerts: DiffAlert[] = [];
+  diffsAndContent.forEach(({ diff, newContent }, i) => {
     const hasChanges = diff.some((diff) => diff.added || diff.removed);
     if (hasChanges) {
-      changedDiffsWithDoc.push({
+      diffAlerts.push({
         doc: docsFromOrg[i],
+        newContent,
         diff
       })
     }
   });
 
-  res.send({changedDiffsWithDoc});
+  res.send({diffAlerts});
 });
 
 export default scanRouter;
