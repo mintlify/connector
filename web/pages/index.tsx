@@ -29,7 +29,7 @@ const activityItems = [
 
 const listMenu = [
   {
-    name: 'Add Rule',
+    name: 'Add rule',
   },
   {
     name: 'Rename',
@@ -170,7 +170,7 @@ const Home: NextPage = () => {
                           </Menu.Button>
                         </div>
                         <Menu.Items className="origin-top-right absolute right-0 mt-2 z-10 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
-                            <div className="py-1 w-28">
+                            <div className="py-1 w-32">
                               {
                                 listMenu.map((menu) => (
                                   <Menu.Item key={menu.name}>
