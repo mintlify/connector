@@ -8,7 +8,7 @@ const scanRouter = express.Router();
 
 const getDiff = async (url: string, previousContent: string) => {
   const { content } = await getDataFromWebpage(url);
-  return Diff.diffWordsWithSpace(previousContent, content);
+  return Diff.diffWords(previousContent, content);
 }
 
 scanRouter.post('/', async (req, res) => {
@@ -20,9 +20,18 @@ scanRouter.post('/', async (req, res) => {
   });
 
   const diffs = await Promise.all(getDifferencePromises);
-  console.log(diffs);
+  const changedDiffsWithDoc: { diff: Diff.Change[], doc: any }[] = [];
+  diffs.forEach((diff, i) => {
+    const hasChanges = diff.some((diff) => diff.added || diff.removed);
+    if (hasChanges) {
+      changedDiffsWithDoc.push({
+        doc: docsFromOrg[i],
+        diff
+      })
+    }
+  });
 
-  res.end();
+  res.send({changedDiffsWithDoc});
 });
 
 export default scanRouter;

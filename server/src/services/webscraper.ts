@@ -111,6 +111,7 @@ export const getDataFromWebpage = async (url: string, authConnector?: AuthConnec
         $('.DateLine').remove();
         $('nav').remove();
         $('header.rm-Header').remove();
+        $('.PageThumbs').remove();
         content = $('body').text().trim();
     }
 
