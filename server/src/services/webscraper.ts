@@ -107,8 +107,10 @@ export const getDataFromWebpage = async (url: string, authConnector?: AuthConnec
     let content = $('body').text().trim();
 
     if (scrapingMethod === 'readme') {
-        // Remove date
+        // Remove unneeded components
         $('.DateLine').remove();
+        $('nav').remove();
+        $('header.rm-Header').remove();
         content = $('body').text().trim();
     }
 

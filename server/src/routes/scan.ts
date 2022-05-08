@@ -6,11 +6,9 @@ import { getDataFromWebpage } from '../services/webscraper';
 
 const scanRouter = express.Router();
 
-const getDifference = async (url: string, previousContent: string) => {
+const getDiff = async (url: string, previousContent: string) => {
   const { content } = await getDataFromWebpage(url);
-
-  const diff = Diff.diffWordsWithSpace(previousContent, content);
-  console.log(diff);
+  return Diff.diffWordsWithSpace(previousContent, content);
 }
 
 scanRouter.post('/', async (req, res) => {
@@ -18,10 +16,11 @@ scanRouter.post('/', async (req, res) => {
   
   const docsFromOrg = await Doc.find({ org });
   const getDifferencePromises = docsFromOrg.map((doc) => {
-    return getDifference(doc.url, doc.content);
+    return getDiff(doc.url, doc.content);
   });
 
-  await Promise.all(getDifferencePromises);
+  const diffs = await Promise.all(getDifferencePromises);
+  console.log(diffs);
 
   res.end();
 });
