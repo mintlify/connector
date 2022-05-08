@@ -1,4 +1,5 @@
 import type { NextPage } from 'next'
+import axios from 'axios'
 import { Menu } from '@headlessui/react'
 import {
   ChevronDownIcon,
@@ -10,87 +11,17 @@ import Sidebar from '../components/Sidebar'
 import { classNames } from '../helpers/functions'
 import Layout from '../components/layout'
 import Link from 'next/link'
+import { getRuleTypeIcon } from '../helpers/Icons'
+import { useEffect, useState } from 'react'
 
-const docs = [
-  {
-    id: '1',
-    name: 'API Quickstart',
-    lastUpdated: '3 days ago',
-    icon: 'https://files.readme.io/6966a5f-small-In_Rectangle.png',
-    href: 'https://mintlify.readme.io/reference/start',
-    lastDeploy: '3h ago',
-    members: [
-      {
-        name: 'Courtney Henry',
-        handle: 'courtneyhenry',
-        imageUrl:
-          'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      },
-      {
-        name: 'Tom Cook',
-        handle: 'tomcook',
-        imageUrl:
-          'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      },
-    ]
-  },
-  {
-    id: '2',
-    name: 'Mintlify Connect Technical Specs',
-    lastUpdated: '1 hour ago',
-    icon: 'https://cdn.worldvectorlogo.com/logos/notion-logo-1.svg',
-    href: 'https://mintlify.readme.io/reference/start',
-    lastDeploy: '3h ago',
-    members: [
-      {
-        name: 'Dries Vincent',
-        handle: 'driesvincent',
-        imageUrl:
-          'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      },
-      {
-        name: 'Lindsay Walton',
-        handle: 'lindsaywalton',
-        imageUrl:
-          'https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      },
-      {
-        name: 'Courtney Henry',
-        handle: 'courtneyhenry',
-        imageUrl:
-          'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      },
-      {
-        name: 'Tom Cook',
-        handle: 'tomcook',
-        imageUrl:
-          'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      },
-    ]
-  },
-  {
-    id: '3',
-    name: 'Mintlify User Database Model',
-    lastUpdated: '2 hour ago',
-    icon: 'https://cdn.worldvectorlogo.com/logos/notion-logo-1.svg',
-    href: 'https://mintlify.readme.io/reference/start',
-    lastDeploy: '7 days ago',
-    members: [
-      {
-        name: 'Dries Vincent',
-        handle: 'driesvincent',
-        imageUrl:
-          'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      },
-      {
-        name: 'Lindsay Walton',
-        handle: 'lindsaywalton',
-        imageUrl:
-          'https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      },
-    ]
-  },
-]
+type Doc = {
+  id: string,
+  title: string,
+  lastUpdatedAt: string,
+  favicon: string,
+  url: string
+}
+
 const activityItems = [
   { project: 'Workcation', commit: '2d89f0c8', environment: 'production', time: '1h' },
   // More items...
@@ -98,12 +29,28 @@ const activityItems = [
 
 const listMenu = [
   {
+    name: 'Add rule',
+  },
+  {
+    name: 'Rename',
+  },
+  {
     name: 'Delete',
     isRed: true,
   }
 ]
 
 const Home: NextPage = () => {
+  const [docs, setDocs] = useState<Doc[] | null>(null);
+  useEffect(() => {
+    const getDocs = async () => {
+      const docsResponse = await axios.get('http://localhost:5000/routes/docs?org=mintlify');
+      const { docs } = docsResponse.data;
+      setDocs(docs);
+    }
+
+    getDocs();
+  }, [])
   return (
     <Layout>
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
@@ -168,42 +115,43 @@ const Home: NextPage = () => {
             </div>
           </div>
           <ul role="list" className="relative z-0">
-            {docs.map((doc) => (
-              <>
+            {docs?.map((doc) => (
+              <div key={doc.id}>
               <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div>
-              <Link
-                key={doc.id}
-                href={doc.href}
-              >
               <li
                 className="relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6 cursor-pointer"
               >
                 <div className="flex items-center justify-between space-x-4">
                   {/* Repo name and link */}
-                  <div className="min-w-0 space-y-3">
+                  <div className="min-w-0 space-y-2">
                     <div className="flex items-center space-x-3">
                       <span className="block">
                         <h2 className="text-sm font-medium text-gray-700">
                           <div className="flex items-center space-x-2">
                             <div>
-                              <img src={doc.icon} alt="Icon" className="h-5 w-5" />
+                              { doc.favicon && <img src={doc.favicon} alt="favicon" className="h-5 w-5 rounded-sm" /> }
                             </div>
-                            <div>
-                              {doc.name}
-                            </div>
+                            <Link
+                              key={doc.id}
+                              href={doc.url}
+                            >
+                              <a target="_blank" className="decoration-gray-300 hover:underline">
+                                {doc.title}
+                              </a>
+                            </Link>
                           </div>
                         </h2>
                       </span>
                     </div>
                     <a className="relative group flex items-center space-x-2.5">
-                      <span className="flex items-center space-x-2.5 text-sm text-gray-500 group-hover:text-gray-900 truncate">
+                      <span className="flex items-center space-x-2.5 text-sm text-gray-500 truncate">
                         <div>
                           <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" className="w-3 h-3 text-gray-500">
                             <path fill="currentColor" fillRule="evenodd" d="M1.643 3.143L.427 1.927A.25.25 0 000 2.104V5.75c0 .138.112.25.25.25h3.646a.25.25 0 00.177-.427L2.715 4.215a6.5 6.5 0 11-1.18 4.458.75.75 0 10-1.493.154 8.001 8.001 0 101.6-5.684zM7.75 4a.75.75 0 01.75.75v2.992l2.028.812a.75.75 0 01-.557 1.392l-2.5-1A.75.75 0 017 8.25v-3.5A.75.75 0 017.75 4z"></path>
                           </svg>
                         </div>
                         <div>
-                          Last updated {doc.lastUpdated}
+                          Last updated {doc.lastUpdatedAt}
                         </div>
                       </span>
                     </a>
@@ -212,7 +160,7 @@ const Home: NextPage = () => {
                     <ChevronRightIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                   </div>
                   {/* Repo meta info */}
-                  <div className="hidden sm:flex flex-col flex-shrink-0 items-end space-y-3">
+                  <div className="hidden sm:flex flex-col flex-shrink-0 items-end space-y-2">
                     <span className="flex items-center space-x-4">
                       <Menu as="div" className="relative inline-block text-left">
                         <div>
@@ -222,7 +170,7 @@ const Home: NextPage = () => {
                           </Menu.Button>
                         </div>
                         <Menu.Items className="origin-top-right absolute right-0 mt-2 z-10 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
-                            <div className="py-1">
+                            <div className="py-1 w-32">
                               {
                                 listMenu.map((menu) => (
                                   <Menu.Item key={menu.name}>
@@ -232,7 +180,7 @@ const Home: NextPage = () => {
                                         className={classNames(
                                           active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                                           menu.isRed ? 'text-red-500' : '',
-                                          'w-full flex items-center space-x-2 px-4 py-2 text-sm'
+                                          'w-full flex items-center space-x-2 px-3 py-1.5 text-sm'
                                         )}
                                       >
                                         <span>{menu.name}</span>
@@ -246,27 +194,19 @@ const Home: NextPage = () => {
                       </Menu>
                     </span>
                     <div className="flex items-center space-x-2">
-                      <div className="flex flex-shrink-0">
-                        {doc.members.map((member) => (
-                          <img
-                            key={member.handle}
-                            className="max-w-none h-4 w-4 rounded-full ring-2 ring-white"
-                            src={member.imageUrl}
-                            alt={member.name}
-                          />
-                        ))}
+                      <div className="flex flex-shrink-0 space-x-1">
+                        {getRuleTypeIcon('Notification', 6, 4)}
                       </div>
-                      {doc.members.length > 5 ? (
+                      {[].length > 5 ? (
                         <span className="flex-shrink-0 text-xs leading-5 font-medium">
-                          +{doc.members.length - 1}
+                          +1
                         </span>
                       ) : null}
                     </div>
                   </div>
                 </div>
               </li>
-              </Link>
-              </>
+              </div>
             ))}
           </ul>
         </div>
@@ -302,7 +242,7 @@ const Home: NextPage = () => {
             </ul>
             <div className="py-4 text-sm border-t border-gray-200">
               <a href="#" className="text-primary font-semibold hover:text-hover">
-                View all activity <span aria-hidden="true">&rarr;</span>
+                Go to documentation <span aria-hidden="true">&rarr;</span>
               </a>
             </div>
           </div>

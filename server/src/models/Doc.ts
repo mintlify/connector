@@ -14,6 +14,8 @@ const DocSchema = new Schema({
     url: { type: String, required: true },
     method: { type: String, required: true },
     content: { type: String },
+    title: { type: String },
+    favicon: { type: String },
     lastUpdatedAt: { type: Date, default: Date.now },
     createdAt: { type: Date, default: Date.now },
 });

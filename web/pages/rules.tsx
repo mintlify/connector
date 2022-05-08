@@ -1,5 +1,4 @@
-import { ChevronRightIcon, MailIcon } from "@heroicons/react/solid";
-import { BellIcon } from "@heroicons/react/outline";
+import { ChevronRightIcon } from "@heroicons/react/solid";
 import { NextPage } from "next";
 import Sidebar from "../components/Sidebar";
 import { classNames } from "../helpers/functions";
@@ -32,7 +31,7 @@ const rules: Rule[] = [
     active: true,
     type: 'Update',
     source: 'github',
-    sourceName: 'writer - src/models/User.ts',
+    sourceName: 'writer src/models/User.ts',
     sourceHref: '',
     destination: 'doc',
     destinationName: 'User Model',
@@ -52,7 +51,7 @@ const rules: Rule[] = [
     active: true,
     type: 'Notification',
     source: 'github',
-    sourceName: 'writer - src/payments.ts:24-36',
+    sourceName: 'writer src/payments.ts:24-36',
     sourceHref: '',
     destination: 'slack',
     destinationName: '#doc-changes',
@@ -62,7 +61,7 @@ const rules: Rule[] = [
     active: false,
     type: 'Update',
     source: 'github',
-    sourceName: 'connect - server/services/mongoose.ts',
+    sourceName: 'connect server/services/mongoose.ts',
     sourceHref: '',
     destination: 'doc',
     destinationName: 'Mongoose Database',
@@ -89,7 +88,7 @@ const integrations = [
 
 const getDestinationTitle = (ruleType: RuleType) => {
   if (ruleType === 'Update') {
-    return 'Requires updating';
+    return 'Requires reviewing';
   }
 
   return 'Notifies';
@@ -107,7 +106,6 @@ const Rules: NextPage = () => {
           <div className="pl-4 pr-6 pt-4 pb-4 border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
           <div className="px-4 sm:px-0">
               <h2 className="text-lg font-medium text-gray-900">Rules</h2>
-
               {/* Tabs */}
               <div className="sm:hidden">
                 <label htmlFor="tabs" className="sr-only">
@@ -167,20 +165,20 @@ const Rules: NextPage = () => {
                         <div className="flex-shrink-0">
                           {getRuleTypeIcon(rule.type)}
                         </div>
-                        <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-2">
+                        <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
                           <div>
-                            <p className="text-sm truncate">Triggered by changes in</p>
-                            <p className="mt-2 flex items-center text-sm text-gray-500">
+                            <p className="text-sm truncate text-gray-700 font-medium">Trigger</p>
+                            <p className="mt-1 flex items-center text-sm text-gray-500">
                               {getTypeIcon(rule.source, 'flex-shrink-0 mr-1.5 h-4 w-4')}
                               <span className="truncate">{rule.sourceName}</span>
                             </p>
                           </div>
                           <div className="hidden md:block">
                             <div>
-                              <p className="text-sm text-gray-900">
+                              <p className="text-sm truncate text-gray-700 font-medium">
                                 {getDestinationTitle(rule.type)}
                               </p>
-                              <p className="mt-2 flex items-center text-sm text-gray-500">
+                              <p className="mt-1 flex items-center text-sm text-gray-500">
                                 {getTypeIcon(rule.destination, 'flex-shrink-0 mr-1.5 h-4 w-4')}
                                 <span className="truncate">{rule.destinationName}</span>
                               </p>

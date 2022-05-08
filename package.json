@@ -7,7 +7,7 @@
     "node": "16.x"
   },
   "scripts": {
-    "dev": "npm run dev --workspace=server"
+    "dev": "npm run dev --workspace=server & npm run dev --workspace=web"
   },
   "repository": {
     "type": "git",
@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/mintlify/connect#readme",
   "workspaces": [
-    "server"
+    "server",
+    "web"
   ]
 }

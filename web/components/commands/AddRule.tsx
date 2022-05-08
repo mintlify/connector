@@ -16,8 +16,8 @@ const ruleItems: RuleItem[] = [
   {
     id: '1',
     type: 'Update',
-    title: 'Require documentation update',
-    description: 'Enforce updates when relevant code changes',
+    title: 'Require documentation review',
+    description: 'Require reviews when relevant code changes',
   },
   {
     id: '2',

@@ -53,10 +53,12 @@ const possiblyGetWebScrapingMethod = ($: cheerio.CheerioAPI): WebScrapingMethod 
 
 type ContentData = {
     method: ScrapingMethod;
+    title: string;
     content: string;
+    favicon?: string;
 }
 
-export const getContentFromWebpage = async (url: string, authConnector?: AuthConnectorType): Promise<ContentData> => {
+export const getDataFromWebpage = async (url: string, authConnector?: AuthConnectorType): Promise<ContentData> => {
     if (!url) {
         throw 'URL not provided'
     }
@@ -70,6 +72,7 @@ export const getContentFromWebpage = async (url: string, authConnector?: AuthCon
         const notionContent = await getNotionContent(url, notionAccessToken);
         return {
             method: 'notion-private',
+            title: 'title', // to fix
             content: notionContent
         }
     }
@@ -93,6 +96,12 @@ export const getContentFromWebpage = async (url: string, authConnector?: AuthCon
     // Only switch scraping method if other from url
     scrapingMethod = scrapingMethod === 'other' ? possiblyGetWebScrapingMethod($) : scrapingMethod;
 
+    const title = $('title').text().trim();
+    let favicon = $('link[rel="shortcut icon"]').attr('href');
+    if (favicon?.startsWith('/')) {
+        const urlParsed = new URL(url);
+        favicon = `${urlParsed.origin}${favicon}`;
+    }
     let content = $('body').text().trim();
 
     if (scrapingMethod === 'readme') {
@@ -128,6 +137,8 @@ export const getContentFromWebpage = async (url: string, authConnector?: AuthCon
 
     return {
         method: scrapingMethod,
-        content
+        title,
+        content,
+        favicon
     };
 }
