@@ -1,5 +1,6 @@
 import type { NextPage } from 'next'
 import axios from 'axios'
+import TimeAgo from 'javascript-time-ago'
 import { Menu } from '@headlessui/react'
 import {
   ChevronDownIcon,
@@ -13,6 +14,11 @@ import Layout from '../components/layout'
 import Link from 'next/link'
 import { getRuleTypeIcon } from '../helpers/Icons'
 import { useEffect, useState } from 'react'
+
+// TimeAgo
+import en from 'javascript-time-ago/locale/en.json'
+TimeAgo.addDefaultLocale(en)
+const timeAgo = new TimeAgo('en-US')
 
 type Doc = {
   id: string,
@@ -43,10 +49,18 @@ const listMenu = [
 const Home: NextPage = () => {
   const [docs, setDocs] = useState<Doc[] | null>(null);
   useEffect(() => {
-    const getDocs = async () => {
-      const docsResponse = await axios.get('http://localhost:5000/routes/docs?org=mintlify');
-      const { docs } = docsResponse.data;
-      setDocs(docs);
+    const getDocs = () => {
+      axios.get('http://localhost:5000/routes/docs?org=mintlify')
+        .then((docsResponse) => {
+          const { docs } = docsResponse.data;
+          setDocs(docs);
+        });
+      
+      axios.get('http://localhost:5000/routes/events?org=mintlify')
+        .then((eventsResponse) => {
+          const { events } = eventsResponse.data;
+          console.log(events);
+        });
     }
 
     getDocs();
@@ -151,7 +165,7 @@ const Home: NextPage = () => {
                           </svg>
                         </div>
                         <div>
-                          Last updated {doc.lastUpdatedAt}
+                          Last updated {timeAgo.format(Date.parse(doc.lastUpdatedAt))}
                         </div>
                       </span>
                     </a>

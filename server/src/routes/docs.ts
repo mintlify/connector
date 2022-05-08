@@ -1,13 +1,7 @@
-import TimeAgo from 'javascript-time-ago'
 import express from 'express';
 import Doc from '../models/Doc';
 import { getDataFromWebpage } from '../services/webscraper';
-
-// TimeAgo
-import en from 'javascript-time-ago/locale/en.json'
 import axios from 'axios';
-TimeAgo.addDefaultLocale(en)
-const timeAgo = new TimeAgo('en-US')
 
 const docsRouter = express.Router();
 
@@ -19,7 +13,7 @@ docsRouter.get('/', async (req, res) => {
       return {
         id: doc._id,
         title: doc.title,
-        lastUpdatedAt: timeAgo.format(doc.lastUpdatedAt),
+        lastUpdatedAt: doc.lastUpdatedAt,
         favicon: doc.favicon,
         url: doc.url
       }
