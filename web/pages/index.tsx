@@ -118,10 +118,6 @@ const Home: NextPage = () => {
             {docs?.map((doc) => (
               <div key={doc.id}>
               <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div>
-              <Link
-                key={doc.id}
-                href={doc.url}
-              >
               <li
                 className="relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6 cursor-pointer"
               >
@@ -135,15 +131,20 @@ const Home: NextPage = () => {
                             <div>
                               <img src={doc.favicon} alt="favicon" className="h-5 w-5 rounded-sm" />
                             </div>
-                            <div>
-                              {doc.title}
-                            </div>
+                            <Link
+                              key={doc.id}
+                              href={doc.url}
+                            >
+                              <a target="_blank" className="decoration-gray-300 hover:underline">
+                                {doc.title}
+                              </a>
+                            </Link>
                           </div>
                         </h2>
                       </span>
                     </div>
                     <a className="relative group flex items-center space-x-2.5">
-                      <span className="flex items-center space-x-2.5 text-sm text-gray-500 group-hover:text-gray-900 truncate">
+                      <span className="flex items-center space-x-2.5 text-sm text-gray-500 truncate">
                         <div>
                           <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" className="w-3 h-3 text-gray-500">
                             <path fill="currentColor" fillRule="evenodd" d="M1.643 3.143L.427 1.927A.25.25 0 000 2.104V5.75c0 .138.112.25.25.25h3.646a.25.25 0 00.177-.427L2.715 4.215a6.5 6.5 0 11-1.18 4.458.75.75 0 10-1.493.154 8.001 8.001 0 101.6-5.684zM7.75 4a.75.75 0 01.75.75v2.992l2.028.812a.75.75 0 01-.557 1.392l-2.5-1A.75.75 0 017 8.25v-3.5A.75.75 0 017.75 4z"></path>
@@ -205,7 +206,6 @@ const Home: NextPage = () => {
                   </div>
                 </div>
               </li>
-              </Link>
               </div>
             ))}
           </ul>
