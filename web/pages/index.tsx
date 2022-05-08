@@ -129,7 +129,7 @@ const Home: NextPage = () => {
                         <h2 className="text-sm font-medium text-gray-700">
                           <div className="flex items-center space-x-2">
                             <div>
-                              <img src={doc.favicon} alt="favicon" className="h-5 w-5 rounded-sm" />
+                              { doc.favicon && <img src={doc.favicon} alt="favicon" className="h-5 w-5 rounded-sm" /> }
                             </div>
                             <Link
                               key={doc.id}
