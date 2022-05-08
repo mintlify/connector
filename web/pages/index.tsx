@@ -1,12 +1,13 @@
 import type { NextPage } from 'next'
 import axios from 'axios'
-import TimeAgo from 'javascript-time-ago'
 import { Menu } from '@headlessui/react'
 import {
   ChevronDownIcon,
   ChevronRightIcon,
   DotsVerticalIcon,
   SortAscendingIcon,
+  PlusIcon,
+  MinusIcon
 } from '@heroicons/react/solid'
 import Sidebar from '../components/Sidebar'
 import { classNames } from '../helpers/functions'
@@ -14,11 +15,7 @@ import Layout from '../components/layout'
 import Link from 'next/link'
 import { getRuleTypeIcon } from '../helpers/Icons'
 import { useEffect, useState } from 'react'
-
-// TimeAgo
-import en from 'javascript-time-ago/locale/en.json'
-TimeAgo.addDefaultLocale(en)
-const timeAgo = new TimeAgo('en-US')
+import timeAgo from '../services/timeago'
 
 type Doc = {
   id: string,
@@ -28,15 +25,24 @@ type Doc = {
   url: string
 }
 
-const activityItems = [
-  { project: 'Workcation', commit: '2d89f0c8', environment: 'production', time: '1h' },
-  // More items...
-]
+type Change = {
+  removed?: boolean,
+  added?: boolean,
+  count: number,
+  value: string,
+}
+
+type Event = {
+  _id: string,
+  event: string,
+  doc: Doc,
+  createdAt: string,
+  change?: Change[],
+  add?: Object,
+  remove?: Object,
+}
 
 const listMenu = [
-  {
-    name: 'Add rule',
-  },
   {
     name: 'Rename',
   },
@@ -46,8 +52,28 @@ const listMenu = [
   }
 ]
 
+const countTotalChanges = (change: Change[]) => {
+  let totalRemoved = 0;
+  let totalAdded = 0;
+
+  change.forEach((section) => {
+    if (section.removed) {
+      totalRemoved += section.count;
+    }
+    if (section.added) {
+      totalAdded += section.count;
+    }
+  });
+
+  return {
+    removed: totalRemoved,
+    added: totalAdded,
+  }
+}
+
 const Home: NextPage = () => {
   const [docs, setDocs] = useState<Doc[] | null>(null);
+  const [events, setEvents] = useState<Event[] | null>(null);
   useEffect(() => {
     const getDocs = () => {
       axios.get('http://localhost:5000/routes/docs?org=mintlify')
@@ -59,12 +85,14 @@ const Home: NextPage = () => {
       axios.get('http://localhost:5000/routes/events?org=mintlify')
         .then((eventsResponse) => {
           const { events } = eventsResponse.data;
-          console.log(events);
+          setEvents(events);
         });
     }
 
     getDocs();
-  }, [])
+  }, []);
+
+
   return (
     <Layout>
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
@@ -193,7 +221,7 @@ const Home: NextPage = () => {
                                         type="button"
                                         className={classNames(
                                           active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                                          menu.isRed ? 'text-red-500' : '',
+                                          menu.isRed ? 'text-red-700' : '',
                                           'w-full flex items-center space-x-2 px-3 py-1.5 text-sm'
                                         )}
                                       >
@@ -233,22 +261,37 @@ const Home: NextPage = () => {
           </div>
           <div>
             <ul role="list" className="divide-y divide-gray-200">
-              {activityItems.map((item) => (
-                <li key={item.commit} className="py-4">
+              {events?.map((event) => (
+                <li key={event._id} className="py-4">
                   <div className="flex space-x-3">
                     <img
-                      className="h-6 w-6 rounded-full"
-                      src="https://images.unsplash.com/photo-1517365830460-955ce3ccd263?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=256&h=256&q=80"
-                      alt=""
+                      className="h-6 w-6 rounded-sm"
+                      src={event.doc.favicon}
+                      alt={event.doc.title}
                     />
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-medium">You</h3>
-                        <p className="text-sm text-gray-500">{item.time}</p>
+                        <h3 className="text-sm font-medium">{event.doc.title}</h3>
+                        <p className="text-sm text-gray-500">{timeAgo.format(Date.parse(event.createdAt))}</p>
                       </div>
-                      <p className="text-sm text-gray-500">
-                        Deployed {item.project} ({item.commit} in master) to {item.environment}
-                      </p>
+                      {
+                        event.change && (
+                          <div>
+                            <div className="flex items-center space-x-1 text-green-700">
+                              <PlusIcon className="h-4 w-4" />
+                              <p className="text-sm">
+                                {countTotalChanges(event.change).added} {countTotalChanges(event.change).added > 1 ? 'words' : 'word'}
+                              </p>
+                            </div>
+                            <div className="flex items-center space-x-1 text-red-700">
+                              <MinusIcon className="h-4 w-4" />
+                              <p className="text-sm">
+                                {countTotalChanges(event.change).removed} {countTotalChanges(event.change).removed > 1 ? 'words' : 'word'}
+                              </p>
+                            </div>
+                          </div>
+                        )
+                      }
                     </div>
                   </div>
                 </li>
