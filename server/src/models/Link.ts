@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 
 const LinkSchema = new Schema({
-    doc: { type: String, required: true },
+    doc: { type: Schema.Types.ObjectId, required: true },
     url: { type: String },
     sha: { type: String, required: true },
     provider: { type: String, required: true },
