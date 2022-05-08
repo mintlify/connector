@@ -20,34 +20,41 @@ export default function AddDocument({ isOpen, setIsOpen }: AddDocumentProps) {
       shortcut: 'L',
       filter: () => true,
       isLeastPriority: true,
-      onClick: () => setPlaceholder('https://'),
+      onActive: () => setPlaceholder('https://'),
     },
     {
       name: 'Add Notion page',
       icon: (className: string, isActive: boolean) => <NotionIcon className={className} isActive={isActive} />,
       shortcut: 'N',
       filter: (query: string) => !query || query.includes('notion.site'),
-      onClick: () => setPlaceholder('https://notion.site/')
+      onActive: () => setPlaceholder('https://notion.site/')
     },
     {
       name: 'Add Google docs',
       icon: (className: string, isActive: boolean) => <GoogleDocsIcon className={className} isActive={isActive} />,
       shortcut: 'G',
       filter: (query: string) => !query || query.includes('docs.google.com'),
-      onClick: () => setPlaceholder('https://docs.google.com/')
+      onActive: () => setPlaceholder('https://docs.google.com/')
     },
     {
       name: 'Add Confluence page',
       icon: (className: string, isActive: boolean) => <ConfluenceIcon className={className} isActive={isActive} />,
       shortcut: 'C',
       filter: (query: string) => !query || query.includes('atlassian.net'),
-      onClick: () => setPlaceholder('https://.atlassian.net/')
+      onActive: () => setPlaceholder('https://.atlassian.net/')
     },
   ]
 
   let filteredActions = actions.filter(action => action.filter(query));
   if (query && filteredActions.length > 1) {
     filteredActions = filteredActions.filter((action) => !action.isLeastPriority);
+  }
+
+  const onEnter = () => {
+    if (!query) return;
+    
+    console.log('Enter');
+    setIsOpen(false);
   }
 
   return (
@@ -58,7 +65,7 @@ export default function AddDocument({ isOpen, setIsOpen }: AddDocumentProps) {
           enter="ease-out duration-200"
           enterFrom="opacity-0"
           enterTo="opacity-100"
-          leave="ease-in duration-200"
+          leave="ease-in duration-75"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
@@ -71,12 +78,12 @@ export default function AddDocument({ isOpen, setIsOpen }: AddDocumentProps) {
             enter="ease-out duration-200"
             enterFrom="opacity-0 scale-95"
             enterTo="opacity-100 scale-100"
-            leave="ease-in duration-200"
+            leave="ease-in duration-75"
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
             <Dialog.Panel className="mx-auto max-w-2xl transform divide-y divide-gray-100 overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
-              <Combobox onChange={(action: any) => action.onClick()} value={query}>
+              <Combobox onChange={() => onEnter()} value={query}>
                 <div className="relative rounded-xl">
                   <PlusIcon
                     className="pointer-events-none absolute top-3.5 left-4 h-5 w-5 text-gray-400"
@@ -87,6 +94,7 @@ export default function AddDocument({ isOpen, setIsOpen }: AddDocumentProps) {
                     placeholder={placeholder}
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
+                    onKeyDown={({ key }: { key: string }) => key === 'Enter' && onEnter()}
                   />
                 </div>
                 <Combobox.Options static className="max-h-80 scroll-py-2 divide-y divide-gray-100 overflow-y-auto">
@@ -106,6 +114,7 @@ export default function AddDocument({ isOpen, setIsOpen }: AddDocumentProps) {
                         >
                           {({ active }) => (
                             <>
+                              {active && action.onActive()}
                               {action.icon('h-4 w-4 flex-none fill-current', active)}
                               <span className="ml-3 flex-auto truncate">{action.name}</span>
                               <span
@@ -114,8 +123,12 @@ export default function AddDocument({ isOpen, setIsOpen }: AddDocumentProps) {
                                   active ? 'text-indigo-100' : 'text-gray-400'
                                 )}
                               >
-                                <kbd className="font-sans">⌘</kbd>
-                                <kbd className="font-sans">{action.shortcut}</kbd>
+                                {
+                                  !query ? (<>
+                                    <kbd className="font-sans">⌘</kbd>
+                                    <kbd className="font-sans">{action.shortcut}</kbd>
+                                  </>) : <kbd className="font-sans">⏎</kbd>
+                                }
                               </span>
                             </>
                           )}
