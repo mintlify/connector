@@ -1,5 +1,14 @@
 import mongoose, { Schema } from 'mongoose';
 
+export type DocType = {
+    org: string;
+    url: string;
+    method: string;
+    content?: string;
+    lastUpdatedAt: Date;
+    createdAt: Date;
+}
+
 const DocSchema = new Schema({
     org: { type: String, required: true },
     url: { type: String, required: true },

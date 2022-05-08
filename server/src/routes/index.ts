@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import diffRouter from './diff';
 import notionRouter from './notion';
 import v01Router from './v01';
-import connectRouter from './connect';
+import linksRouter from './links';
 import docsRouter from './docs';
 
 const headRouter = express.Router();
@@ -21,7 +21,7 @@ headRouter.get('/', (_, res) => {
 
 // Primary app
 headRouter.use('/docs', docsRouter);
-headRouter.use('/connect', connectRouter);
+headRouter.use('/links', linksRouter);
 // GitHub
 headRouter.use('/v01', v01Router);
 // Integrations
