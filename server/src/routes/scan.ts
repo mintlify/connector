@@ -1,22 +1,27 @@
 import express from 'express';
-import { getOctokitRequest } from '../services/octokit';
+import * as Diff from 'diff';
+import Doc from '../models/Doc';
 import { getDataFromWebpage } from '../services/webscraper';
+// import { getDataFromWebpage } from '../services/webscraper';
 
 const scanRouter = express.Router();
 
-scanRouter.post('/', async (_, res) => {
-  const url = 'https://mintlify.readme.io/reference/start';
+const getDifference = async (url: string, previousContent: string) => {
+  const { content } = await getDataFromWebpage(url);
 
-  const  { content } = await getDataFromWebpage(url);
-  const octokitRequest = getOctokitRequest('24714487');
+  const diff = Diff.diffWordsWithSpace(previousContent, content);
+  console.log(diff);
+}
 
-  await octokitRequest('POST /repos/{owner}/{repo}/pulls/{pull_number}/comments/{comment_id}/replies', {
-      owner: 'mintlify',
-      repo: 'connect',
-      pull_number: 42,
-      comment_id: 862409014,
-      body: content
+scanRouter.post('/', async (req, res) => {
+  const { org } = req.body;
+  
+  const docsFromOrg = await Doc.find({ org });
+  const getDifferencePromises = docsFromOrg.map((doc) => {
+    return getDifference(doc.url, doc.content);
   });
+
+  await Promise.all(getDifferencePromises);
 
   res.end();
 });

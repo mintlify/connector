@@ -102,6 +102,8 @@ export const getDataFromWebpage = async (url: string, authConnector?: AuthConnec
         const urlParsed = new URL(url);
         favicon = `${urlParsed.origin}${favicon}`;
     }
+    // Remove iframes
+    $('iframe').remove();
     let content = $('body').text().trim();
 
     if (scrapingMethod === 'readme') {
