@@ -1,5 +1,4 @@
-import { ChevronRightIcon, MailIcon } from "@heroicons/react/solid";
-import { BellIcon } from "@heroicons/react/outline";
+import { ChevronRightIcon } from "@heroicons/react/solid";
 import { NextPage } from "next";
 import Sidebar from "../components/Sidebar";
 import { classNames } from "../helpers/functions";
@@ -32,7 +31,7 @@ const rules: Rule[] = [
     active: true,
     type: 'Update',
     source: 'github',
-    sourceName: 'writer - src/models/User.ts',
+    sourceName: 'writer src/models/User.ts',
     sourceHref: '',
     destination: 'doc',
     destinationName: 'User Model',
@@ -52,7 +51,7 @@ const rules: Rule[] = [
     active: true,
     type: 'Notification',
     source: 'github',
-    sourceName: 'writer - src/payments.ts:24-36',
+    sourceName: 'writer src/payments.ts:24-36',
     sourceHref: '',
     destination: 'slack',
     destinationName: '#doc-changes',
@@ -62,7 +61,7 @@ const rules: Rule[] = [
     active: false,
     type: 'Update',
     source: 'github',
-    sourceName: 'connect - server/services/mongoose.ts',
+    sourceName: 'connect server/services/mongoose.ts',
     sourceHref: '',
     destination: 'doc',
     destinationName: 'Mongoose Database',
