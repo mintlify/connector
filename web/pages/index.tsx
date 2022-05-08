@@ -11,6 +11,7 @@ import { classNames } from '../helpers/functions'
 import Layout from '../components/layout'
 import Link from 'next/link'
 import { getRuleTypeIcon } from '../helpers/Icons'
+import { useEffect } from 'react'
 
 const docs = [
   {
@@ -51,6 +52,9 @@ const listMenu = [
 ]
 
 const Home: NextPage = () => {
+  useEffect(() => {
+    console.log('Home page loaded')
+  })
   return (
     <Layout>
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
@@ -116,7 +120,7 @@ const Home: NextPage = () => {
           </div>
           <ul role="list" className="relative z-0">
             {docs.map((doc) => (
-              <>
+              <div key={doc.id}>
               <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div>
               <Link
                 key={doc.id}
@@ -127,7 +131,7 @@ const Home: NextPage = () => {
               >
                 <div className="flex items-center justify-between space-x-4">
                   {/* Repo name and link */}
-                  <div className="min-w-0 space-y-3">
+                  <div className="min-w-0 space-y-2">
                     <div className="flex items-center space-x-3">
                       <span className="block">
                         <h2 className="text-sm font-medium text-gray-700">
@@ -159,7 +163,7 @@ const Home: NextPage = () => {
                     <ChevronRightIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                   </div>
                   {/* Repo meta info */}
-                  <div className="hidden sm:flex flex-col flex-shrink-0 items-end space-y-3">
+                  <div className="hidden sm:flex flex-col flex-shrink-0 items-end space-y-2">
                     <span className="flex items-center space-x-4">
                       <Menu as="div" className="relative inline-block text-left">
                         <div>
@@ -194,9 +198,7 @@ const Home: NextPage = () => {
                     </span>
                     <div className="flex items-center space-x-2">
                       <div className="flex flex-shrink-0 space-x-1">
-                        {[1].map(() => (
-                          getRuleTypeIcon('Notification', 5, 3)
-                        ))}
+                        {getRuleTypeIcon('Notification', 6, 4)}
                       </div>
                       {[].length > 5 ? (
                         <span className="flex-shrink-0 text-xs leading-5 font-medium">
@@ -208,7 +210,7 @@ const Home: NextPage = () => {
                 </div>
               </li>
               </Link>
-              </>
+              </div>
             ))}
           </ul>
         </div>

@@ -88,7 +88,7 @@ const integrations = [
 
 const getDestinationTitle = (ruleType: RuleType) => {
   if (ruleType === 'Update') {
-    return 'Requires updating';
+    return 'Requires reviewing';
   }
 
   return 'Notifies';
@@ -106,7 +106,6 @@ const Rules: NextPage = () => {
           <div className="pl-4 pr-6 pt-4 pb-4 border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
           <div className="px-4 sm:px-0">
               <h2 className="text-lg font-medium text-gray-900">Rules</h2>
-
               {/* Tabs */}
               <div className="sm:hidden">
                 <label htmlFor="tabs" className="sr-only">
@@ -168,18 +167,18 @@ const Rules: NextPage = () => {
                         </div>
                         <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
                           <div>
-                            <p className="text-sm truncate">Trigger</p>
-                            <p className="mt-1.5 flex items-center text-xs text-gray-500">
+                            <p className="text-sm truncate text-gray-700 font-medium">Trigger</p>
+                            <p className="mt-1 flex items-center text-sm text-gray-500">
                               {getTypeIcon(rule.source, 'flex-shrink-0 mr-1.5 h-4 w-4')}
                               <span className="truncate">{rule.sourceName}</span>
                             </p>
                           </div>
                           <div className="hidden md:block">
                             <div>
-                              <p className="text-sm text-gray-900">
+                              <p className="text-sm truncate text-gray-700 font-medium">
                                 {getDestinationTitle(rule.type)}
                               </p>
-                              <p className="mt-1.5 flex items-center text-xs text-gray-500">
+                              <p className="mt-1 flex items-center text-sm text-gray-500">
                                 {getTypeIcon(rule.destination, 'flex-shrink-0 mr-1.5 h-4 w-4')}
                                 <span className="truncate">{rule.destinationName}</span>
                               </p>
