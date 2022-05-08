@@ -1,4 +1,5 @@
 import type { NextPage } from 'next'
+import axios from 'axios'
 import { Menu } from '@headlessui/react'
 import {
   ChevronDownIcon,
@@ -11,34 +12,16 @@ import { classNames } from '../helpers/functions'
 import Layout from '../components/layout'
 import Link from 'next/link'
 import { getRuleTypeIcon } from '../helpers/Icons'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
-const docs = [
-  {
-    id: '1',
-    name: 'API Quickstart',
-    lastUpdated: '3 days ago',
-    icon: 'https://files.readme.io/6966a5f-small-In_Rectangle.png',
-    href: 'https://mintlify.readme.io/reference/start',
-    lastDeploy: '3h ago',
-  },
-  {
-    id: '2',
-    name: 'Mintlify Connect Technical Specs',
-    lastUpdated: '1 hour ago',
-    icon: 'https://cdn.worldvectorlogo.com/logos/notion-logo-1.svg',
-    href: 'https://mintlify.readme.io/reference/start',
-    lastDeploy: '3h ago',
-  },
-  {
-    id: '3',
-    name: 'Mintlify User Database Model',
-    lastUpdated: '2 hour ago',
-    icon: 'https://cdn.worldvectorlogo.com/logos/notion-logo-1.svg',
-    href: 'https://mintlify.readme.io/reference/start',
-    lastDeploy: '7 days ago',
-  },
-]
+type Doc = {
+  id: string,
+  title: string,
+  lastUpdatedAt: string,
+  favicon: string,
+  url: string
+}
+
 const activityItems = [
   { project: 'Workcation', commit: '2d89f0c8', environment: 'production', time: '1h' },
   // More items...
@@ -46,15 +29,28 @@ const activityItems = [
 
 const listMenu = [
   {
+    name: 'Add Rule',
+  },
+  {
+    name: 'Rename',
+  },
+  {
     name: 'Delete',
     isRed: true,
   }
 ]
 
 const Home: NextPage = () => {
+  const [docs, setDocs] = useState<Doc[] | null>(null);
   useEffect(() => {
-    console.log('Home page loaded')
-  })
+    const getDocs = async () => {
+      const docsResponse = await axios.get('http://localhost:5000/routes/docs?org=mintlify');
+      const { docs } = docsResponse.data;
+      setDocs(docs);
+    }
+
+    getDocs();
+  }, [])
   return (
     <Layout>
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
@@ -119,12 +115,12 @@ const Home: NextPage = () => {
             </div>
           </div>
           <ul role="list" className="relative z-0">
-            {docs.map((doc) => (
+            {docs?.map((doc) => (
               <div key={doc.id}>
               <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div>
               <Link
                 key={doc.id}
-                href={doc.href}
+                href={doc.url}
               >
               <li
                 className="relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6 cursor-pointer"
@@ -137,10 +133,10 @@ const Home: NextPage = () => {
                         <h2 className="text-sm font-medium text-gray-700">
                           <div className="flex items-center space-x-2">
                             <div>
-                              <img src={doc.icon} alt="Icon" className="h-5 w-5" />
+                              <img src={doc.favicon} alt="favicon" className="h-5 w-5 rounded-sm" />
                             </div>
                             <div>
-                              {doc.name}
+                              {doc.title}
                             </div>
                           </div>
                         </h2>
@@ -154,7 +150,7 @@ const Home: NextPage = () => {
                           </svg>
                         </div>
                         <div>
-                          Last updated {doc.lastUpdated}
+                          Last updated {doc.lastUpdatedAt}
                         </div>
                       </span>
                     </a>
@@ -173,7 +169,7 @@ const Home: NextPage = () => {
                           </Menu.Button>
                         </div>
                         <Menu.Items className="origin-top-right absolute right-0 mt-2 z-10 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
-                            <div className="py-1">
+                            <div className="py-1 w-28">
                               {
                                 listMenu.map((menu) => (
                                   <Menu.Item key={menu.name}>
@@ -183,7 +179,7 @@ const Home: NextPage = () => {
                                         className={classNames(
                                           active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                                           menu.isRed ? 'text-red-500' : '',
-                                          'w-full flex items-center space-x-2 px-4 py-2 text-sm'
+                                          'w-full flex items-center space-x-2 px-3 py-1.5 text-sm'
                                         )}
                                       >
                                         <span>{menu.name}</span>
@@ -246,7 +242,7 @@ const Home: NextPage = () => {
             </ul>
             <div className="py-4 text-sm border-t border-gray-200">
               <a href="#" className="text-primary font-semibold hover:text-hover">
-                View all activity <span aria-hidden="true">&rarr;</span>
+                Go to documentation <span aria-hidden="true">&rarr;</span>
               </a>
             </div>
           </div>
