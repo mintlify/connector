@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Context } from "probot";
-import { Alert, FileInfo, getEncompassingRangeAndSideForAlert, parsePatch, PatchLineRange } from "./patch";
-import { AlertsRequest } from "./types";
+import { FileInfo, getEncompassingRangeAndSideForAlert, parsePatch, PatchLineRange } from "./patch";
+import { AlertsRequest, Alert } from "./types";
 import { ENDPOINT, getReviewComments } from "./octokit";
 
 type FilesPatchLineRangesMap = Record<string, PatchLineRange[]>;
@@ -66,15 +66,17 @@ type AlertsResponse = {
 
 export const getAlerts = async (context: Context, files: FileInfo[]): Promise<AlertsResponse> => {
   const owner = context.payload.repository.owner.login;
-  const alertsRequest: AlertsRequest = { files, owner }
-  const connectPromise = axios.post(`${ENDPOINT}/routes/v01/`, alertsRequest);
+  const repo = context.payload.pull_request.head.repo.name;
+  const alertsRequest: AlertsRequest = { files, owner, repo }
+  const v01Promise = axios.post(`${ENDPOINT}/routes/v01/`, alertsRequest);
   const previousAlertsPromise = getReviewComments(context);
-  const [connectResponse, previousAlerts] = await Promise.all([connectPromise, previousAlertsPromise]);
+  const alertsPromise = axios.post(`${ENDPOINT}/routes/alerts/`, alertsRequest);
+  const [v01Response, previousAlerts, alertsResponse] = await Promise.all([v01Promise, previousAlertsPromise, alertsPromise]);
 
   return {
-    incomingAlerts: connectResponse.data.alerts,
+    incomingAlerts: v01Response.data.alerts.concat(alertsResponse.data.alerts),
     previousAlerts,
-    newLinksMessage: connectResponse.data.newLinksMessage
+    newLinksMessage: v01Response.data.newLinksMessage
   }
 }
 
