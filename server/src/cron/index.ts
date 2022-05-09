@@ -2,9 +2,11 @@
 import cron from 'node-cron';
 import axios from 'axios';
 
-cron.schedule('* * * * *', () => {
+cron.schedule('* * * * *', async () => {
   console.log('running scan');
-  axios.post('http://localhost:5000/routes/scan', {
+  const { diffAlerts }: any = await axios.post('http://localhost:5000/routes/scan', {
     org: 'mintlify'
   });
+
+  console.log(`scan completed. Found ${diffAlerts.length} alerts`);
 });
