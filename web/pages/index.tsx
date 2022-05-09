@@ -237,7 +237,7 @@ const Home: NextPage = () => {
                     </span>
                     <div className="flex items-center space-x-2">
                       <div className="flex flex-shrink-0 space-x-1">
-                        {getAutomationTypeIcon('Notification', 6, 4)}
+                        {getAutomationTypeIcon('code', 6, 4)}
                       </div>
                       {[].length > 5 ? (
                         <span className="flex-shrink-0 text-xs leading-5 font-medium">

@@ -11,16 +11,16 @@ type AutomationData = {
   description: string;
 }
 
-const ruleMap: { Notification: AutomationData, Update: AutomationData } = {
-  Update: {
-    type: 'Update',
-    title: 'Require documentation review',
-    description: 'Require reviews when relevant code changes',
+const automationMap: { doc: AutomationData, code: AutomationData } = {
+  doc: {
+    type: 'doc',
+    title: 'Documentation change',
+    description: 'Get notified when documentation changes',
   },
-  Notification: {
-    type: 'Notification',
-    title: 'Send alert on change',
-    description: 'Be notified when documentation or code changes',
+  code: {
+    type: 'code',
+    title: 'Code changes',
+    description: 'Get notified when significant code changes',
   },
 };
 
@@ -63,12 +63,12 @@ export default function AddAutomation({ isOpen, setIsOpen }: AddAutomationProps)
           >
             <Dialog.Panel className="mx-auto max-w-xl transform divide-y divide-gray-100 rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
               { selectedRuleType && (
-                <RuleConfig ruleType={selectedRuleType} onCancel={onToPrimarySelection} />
+                <RuleConfig automationType={selectedRuleType} onCancel={onToPrimarySelection} />
               ) }
               {
                 selectedRuleType == null && (<Combobox onChange={() => {}} value="">
                   <Combobox.Options static className="max-h-96 scroll-py-3 overflow-y-auto p-3">
-                    {Object.values(ruleMap).map((item) => (
+                    {Object.values(automationMap).map((item) => (
                       <Combobox.Option
                         key={item.type}
                         value={item}
@@ -118,7 +118,7 @@ const repos = [
   { id: 3, name: 'backend' },
 ]
 
-function RuleConfig({ ruleType, onCancel }: { ruleType: AutomationType, onCancel: () => void }) {
+function RuleConfig({ automationType, onCancel }: { automationType: AutomationType, onCancel: () => void }) {
   const [reposQuery, setReposQuery] = useState('')
   const [selectedRepo, setSelectedRepo] = useState()
   const [page, setPage] = useState(1)
@@ -130,7 +130,7 @@ function RuleConfig({ ruleType, onCancel }: { ruleType: AutomationType, onCancel
           return repo.name.toLowerCase().includes(reposQuery.toLowerCase())
         })
 
-  const ruleData = ruleMap[ruleType];
+  const ruleData = automationMap[automationType];
 
   const onBackButton = () => {
     if (page === 1) {
@@ -152,7 +152,7 @@ function RuleConfig({ ruleType, onCancel }: { ruleType: AutomationType, onCancel
   return <div className="px-6 py-6 z-10">
     <div>
       <div className="flex space-x-4">
-        {getAutomationTypeIcon(ruleType)}
+        {getAutomationTypeIcon(automationType)}
         <div>
           <h1 className="text-sm font-medium text-gray-900">{ruleData.title}</h1>
           <p className="text-sm text-gray-500">

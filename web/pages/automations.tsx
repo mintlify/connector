@@ -6,7 +6,7 @@ import { getAutomationTypeIcon, getTypeIcon } from "../helpers/Icons";
 
 export type SourceType = 'github' | 'doc';
 export type DestinationType = 'doc' | 'slack' | 'email';
-export type AutomationType = 'Update' | 'Notification';
+export type AutomationType = 'doc' | 'code';
 
 type Automation = {
   id: string,
@@ -25,7 +25,7 @@ const automations: Automation[] = [
     id: '1',
     active: true,
     name: 'Require documentation review',
-    type: 'Update',
+    type: 'doc',
     source: 'github',
     sourceName: 'writer • src/models/User.ts',
     sourceHref: '',
@@ -36,7 +36,7 @@ const automations: Automation[] = [
     id: '2',
     active: true,
     name: 'Notify technical review',
-    type: 'Notification',
+    type: 'code',
     source: 'doc',
     sourceName: 'Technical Overview',
     sourceHref: '',
@@ -47,7 +47,7 @@ const automations: Automation[] = [
     id: '3',
     active: true,
     name: 'Slack alert on change',
-    type: 'Notification',
+    type: 'code',
     source: 'github',
     sourceName: 'writer • src/payments.ts:24-36',
     sourceHref: '',
@@ -58,7 +58,7 @@ const automations: Automation[] = [
     id: '4',
     active: false,
     name: 'Require documentation update on Mongoose',
-    type: 'Update',
+    type: 'code',
     source: 'github',
     sourceName: 'connect • server/services/mongoose.ts',
     sourceHref: '',
