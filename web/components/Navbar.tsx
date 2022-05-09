@@ -116,7 +116,7 @@ export default function Navbar() {
                         <span className="sr-only">Open user menu</span>
                         <img
                           className="h-8 w-8 rounded-full"
-                          src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                          src="https://res.cloudinary.com/mintlify/image/upload/v1652115323/han_o6mnrb.jpg"
                           alt=""
                         />
                       </Menu.Button>
@@ -176,13 +176,13 @@ export default function Navbar() {
                 <div className="flex-shrink-0">
                   <img
                     className="h-10 w-10 rounded-full"
-                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                    src="https://res.cloudinary.com/mintlify/image/upload/v1652115323/han_o6mnrb.jpg"
                     alt=""
                   />
                 </div>
                 <div className="ml-3">
-                  <div className="text-base font-medium text-white">Tom Cook</div>
-                  <div className="text-sm font-medium text-gray-400">tom@example.com</div>
+                  <div className="text-base font-medium text-white">Han Wang</div>
+                  <div className="text-sm font-medium text-gray-400">han@mintlify.com</div>
                 </div>
               </div>
               <div className="mt-3 px-2 space-y-1">

@@ -28,12 +28,12 @@ export default function Sidebar() {
                 <div className="flex-shrink-0 h-12 w-12">
                   <img
                     className="h-12 w-12 rounded-full"
-                    src="https://images.unsplash.com/photo-1517365830460-955ce3ccd263?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=256&h=256&q=80"
-                    alt=""
+                    src="https://res.cloudinary.com/mintlify/image/upload/v1652115323/han_o6mnrb.jpg"
+                    alt="Profile"
                   />
                 </div>
-                <div className="space-y-1">
-                  <div className="text-sm font-medium text-gray-900">Debbie Lewis</div>
+                <div className="space-y-px">
+                  <div className="text-sm font-medium text-gray-900">Han Wang</div>
                   <a href="#" className="group flex items-center space-x-1 group-hover:text-gray-900">
                     <span className="text-sm text-gray-500 font-medium">
                       Mintlify
