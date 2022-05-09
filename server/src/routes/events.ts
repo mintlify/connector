@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import Event from '../models/Event';
 
 const eventsRouter = express.Router();
@@ -9,10 +10,10 @@ eventsRouter.get('/', async (req, res) => {
       res.send({ error: 'No org specified', events: [] });
     }
 
-    const query: { org: string, doc?: string } = { org } as { org: string };
+    const query: { org: string, doc?: mongoose.Types.ObjectId } = { org } as { org: string };
     
     if (doc) {
-      query.doc = doc as string;
+      query.doc = new mongoose.Types.ObjectId(doc as string)
     }
 
     const events = await Event.aggregate([

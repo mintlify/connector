@@ -84,35 +84,42 @@ const countTotalChanges = (change: Change[]) => {
 }
 
 const Home: NextPage = () => {
-  const [docs, setDocs] = useState<Doc[] | null>(null);
-  const [events, setEvents] = useState<Event[] | null>(null);
+  const [docs, setDocs] = useState<Doc[]>();
+  const [events, setEvents] = useState<Event[]>();
+  const [selectedDoc, setSelectedDoc] = useState<Doc>();
+
   useEffect(() => {
-    const getDocs = () => {
-      axios.get(`${API_ENDPOINT}/routes/docs?org=mintlify`)
-        .then((docsResponse) => {
-          const { docs } = docsResponse.data;
-          setDocs(docs);
-        });
-      
-      axios.get(`${API_ENDPOINT}/routes/events?org=mintlify`)
-        .then((eventsResponse) => {
-          const { events } = eventsResponse.data;
-          setEvents(events);
-        });
-    }
+    axios.get(`${API_ENDPOINT}/routes/docs?org=mintlify`)
+      .then((docsResponse) => {
+        const { docs } = docsResponse.data;
+        setDocs(docs);
+      });
+    
+    let eventsQuery = `${API_ENDPOINT}/routes/events?org=mintlify`;
+    if (selectedDoc) eventsQuery += `&doc=${selectedDoc.id}`;
+    axios.get(eventsQuery)
+      .then((eventsResponse) => {
+        const { events } = eventsResponse.data;
+        setEvents(events);
+      });
+  }, [selectedDoc]);
 
-    getDocs();
-  }, []);
+  const ClearSelectedFrame = () => {
+    if (!selectedDoc) return null;
 
+    return <div className="absolute inset-0" onClick={() => setSelectedDoc(undefined)}></div>
+  }
 
   return (
     <Layout>
+    <ClearSelectedFrame />
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
       {/* Left sidebar & main wrapper */}
       <div className="flex-1 min-w-0 xl:flex">
         <Sidebar />
         {/* Projects List */}
         <div className="bg-white lg:min-w-0 lg:flex-1">
+          <ClearSelectedFrame />
           <div className="pl-4 pr-6 pt-4 pb-4 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
             <div className="flex items-center">
               <h1 className="flex-1 text-lg font-medium">Documentation</h1>
@@ -173,7 +180,8 @@ const Home: NextPage = () => {
               <div key={doc.id}>
               <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div>
               <li
-                className="relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:pl-6 lg:pl-8 xl:pl-6 cursor-pointer"
+                className={classNames("relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:pl-6 lg:pl-8 xl:pl-6 cursor-pointer", doc.id === selectedDoc?.id ? 'bg-gray-50' : '')}
+                onClick={() => setSelectedDoc(doc)}
               >
                 <div className="flex items-center justify-between space-x-4">
                   {/* Repo name and link */}
@@ -281,8 +289,9 @@ const Home: NextPage = () => {
         </div>
       </div>
       {/* Activity feed */}
-      <div className="bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0">
-        <div className="pl-6 lg:w-80">
+      <div className="relative bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0">
+        <ClearSelectedFrame />
+        <div className="relative pl-6 lg:w-80 z-10">
           <div className="pt-6 pb-2">
             <h2 className="text-sm font-semibold">Activity</h2>
           </div>
