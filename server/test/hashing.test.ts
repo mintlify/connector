@@ -1,3 +1,4 @@
+import { expect } from '@jest/globals';
 import { sha512Hash } from '../src/helpers/routes/hash'
 
 describe('Consistent hashing', () => {
