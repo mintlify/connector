@@ -1,3 +1,4 @@
+import { expect } from '@jest/globals';
 import { parsePatch } from '../src/helpers/github/patch';
 
 describe('Patch to changes', () => {

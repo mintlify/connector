@@ -1,4 +1,5 @@
-import { getDocumentNameFromUrl } from '../src/helpers/routes/alerts';
+import { expect } from '@jest/globals';
+import { getDocumentNameFromUrl } from '../src/helpers/routes/messages';
 
 describe('Extracting title', () => {
   test('Getting page title from Google', async () => {
