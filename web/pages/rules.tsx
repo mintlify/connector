@@ -1,4 +1,3 @@
-import { ChevronRightIcon } from "@heroicons/react/solid";
 import { NextPage } from "next";
 import Sidebar from "../components/Sidebar";
 import { classNames } from "../helpers/functions";
@@ -12,6 +11,7 @@ export type RuleType = 'Update' | 'Notification';
 type Rule = {
   id: string,
   active: boolean,
+  name: string,
   type: RuleType,
   source: SourceType,
   sourceName: string,
@@ -20,15 +20,11 @@ type Rule = {
   destinationName: string,
 }
 
-const tabs = [
-  { name: 'Active', href: '#', count: '2', current: true },
-  { name: 'Paused', href: '#', count: '0', current: false },
-]
-
 const rules: Rule[] = [
   {
     id: '1',
     active: true,
+    name: 'Require documentation review',
     type: 'Update',
     source: 'github',
     sourceName: 'writer src/models/User.ts',
@@ -39,6 +35,7 @@ const rules: Rule[] = [
   {
     id: '2',
     active: true,
+    name: 'Notify technical review',
     type: 'Notification',
     source: 'doc',
     sourceName: 'Technical Overview',
@@ -49,9 +46,10 @@ const rules: Rule[] = [
   {
     id: '3',
     active: true,
+    name: 'Slack alert on change',
     type: 'Notification',
     source: 'github',
-    sourceName: 'writer src/payments.ts:24-36',
+    sourceName: 'writer/src/payments.ts:24-36',
     sourceHref: '',
     destination: 'slack',
     destinationName: '#doc-changes',
@@ -59,9 +57,10 @@ const rules: Rule[] = [
   {
     id: '4',
     active: false,
+    name: 'Require documentation update on Mongoose',
     type: 'Update',
     source: 'github',
-    sourceName: 'connect server/services/mongoose.ts',
+    sourceName: 'connect/server/services/mongoose.ts',
     sourceHref: '',
     destination: 'doc',
     destinationName: 'Mongoose Database',
@@ -86,13 +85,13 @@ const integrations = [
   },
 ]
 
-const getDestinationTitle = (ruleType: RuleType) => {
-  if (ruleType === 'Update') {
-    return 'Requires reviewing';
-  }
+// const getDestinationTitle = (ruleType: RuleType) => {
+//   if (ruleType === 'Update') {
+//     return 'Requires reviewing';
+//   }
 
-  return 'Notifies';
-}
+//   return 'Notifies';
+// }
 
 const Rules: NextPage = () => {
   return (
@@ -103,101 +102,46 @@ const Rules: NextPage = () => {
         <Sidebar />
         {/* Projects List */}
         <div className="bg-white lg:min-w-0 lg:flex-1">
-          <div className="pl-4 pr-6 pt-4 pb-4 border-t border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
+          <div className="pl-4 pr-6 pt-4 pb-4 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
           <div className="px-4 sm:px-0">
-              <h2 className="text-lg font-medium text-gray-900">Rules</h2>
-              {/* Tabs */}
-              <div className="sm:hidden">
-                <label htmlFor="tabs" className="sr-only">
-                  Select a tab
-                </label>
-                {/* Use an "onChange" listener to redirect the user to the selected tab URL. */}
-                <select
-                  id="tabs"
-                  name="tabs"
-                  className="mt-4 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md"
-                  defaultValue={tabs.find((tab) => tab.current)?.name}
-                >
-                  {tabs.map((tab) => (
-                    <option key={tab.name}>{tab.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="hidden sm:block">
-                <div className="border-b border-gray-200">
-                  <nav className="mt-2 -mb-px flex space-x-8" aria-label="Tabs">
-                    {tabs.map((tab) => (
-                      <a
-                        key={tab.name}
-                        href={tab.href}
-                        className={classNames(
-                          tab.current
-                            ? 'border-primary text-primary'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200',
-                          'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
-                        )}
-                      >
-                        {tab.name}
-                        {tab.count ? (
-                          <span
-                            className={classNames(
-                              tab.current ? 'bg-green-100 text-primary' : 'bg-gray-100 text-gray-900',
-                              'hidden ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium md:inline-block'
-                            )}
-                          >
-                            {tab.count}
-                          </span>
-                        ) : null}
-                      </a>
-                    ))}
-                  </nav>
-                </div>
-              </div>
-            </div>
-
-            {/* Stacked list */}
-            <ul role="list" className="mt-5 border-t border-gray-200 divide-y divide-gray-200 sm:mt-0 sm:border-t-0">
-              {rules.map((rule) => (
-                <li key={rule.id}>
-                  <a href="#" className="group block">
-                    <div className="flex items-center py-5 px-4 sm:py-6 sm:px-0">
-                      <div className="min-w-0 flex-1 flex items-center">
-                        <div className="flex-shrink-0">
-                          {getRuleTypeIcon(rule.type)}
-                        </div>
-                        <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
-                          <div>
-                            <p className="text-sm truncate text-gray-700 font-medium">Trigger</p>
-                            <p className="mt-1 flex items-center text-sm text-gray-500">
-                              {getTypeIcon(rule.source, 'flex-shrink-0 mr-1.5 h-4 w-4')}
-                              <span className="truncate">{rule.sourceName}</span>
-                            </p>
-                          </div>
-                          <div className="hidden md:block">
-                            <div>
-                              <p className="text-sm truncate text-gray-700 font-medium">
-                                {getDestinationTitle(rule.type)}
-                              </p>
-                              <p className="mt-1 flex items-center text-sm text-gray-500">
-                                {getTypeIcon(rule.destination, 'flex-shrink-0 mr-1.5 h-4 w-4')}
-                                <span className="truncate">{rule.destinationName}</span>
-                              </p>
-                            </div>
-                          </div>
-                        </div>
+            <h2 className="text-lg font-medium text-gray-900">Rules</h2>
+          </div>
+        </div>
+        {/* Stacked list */}
+        <ul role="list">
+            {rules.map((rule) => (
+              <li key={rule.id}>
+                <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div>
+                <a href="#" className="block hover:bg-gray-50">
+                  <div className="px-4 py-5 sm:px-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex space-x-2 items-center">
+                        { getRuleTypeIcon(rule.type, 8, 5) }
+                        <p className="text-sm font-medium text-gray-700 truncate">{rule.name}</p>
                       </div>
-                      <div>
-                        <ChevronRightIcon
-                          className="h-5 w-5 text-gray-400 group-hover:text-gray-700"
-                          aria-hidden="true"
-                        />
+                      <div className="ml-2 flex-shrink-0 flex">
+                        <p className={classNames("px-2 inline-flex text-xs leading-5 font-semibold rounded-full", rule.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600' )}>
+                          {rule.active ? 'On' : 'Off'}
+                        </p>
                       </div>
                     </div>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+                    <div className="mt-2 sm:flex sm:justify-between">
+                      <div className="sm:flex">
+                        <p className="flex items-center text-sm text-gray-500">
+                          { getTypeIcon(rule.source, 'flex-shrink-0 mr-1 h-4 w-4 text-gray-400') }
+                          {rule.sourceName}
+                        </p>
+                        <p className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
+                          { getTypeIcon(rule.destination, 'flex-shrink-0 mr-1 h-4 w-4 text-gray-400') }
+                          {rule.destinationName}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
       {/* Activity feed */}

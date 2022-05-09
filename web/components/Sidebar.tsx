@@ -1,7 +1,5 @@
-import { CogIcon } from '@heroicons/react/outline';
-import {
-  PlusIcon,
-} from '@heroicons/react/solid'
+import { CogIcon, DocumentTextIcon } from '@heroicons/react/outline';
+import { PlusIcon } from '@heroicons/react/solid'
 import Link from 'next/link';
 import { useState } from 'react'
 import AddDocument from './commands/AddDocument'
@@ -50,6 +48,7 @@ export default function Sidebar() {
                   className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-hover xl:w-full"
                   onClick={() => setIsAddDocumentOpen(true)}
                 >
+                  <DocumentTextIcon className="h-4 w-4 mr-1" />
                   Add Documentation
                 </button>
                 <button

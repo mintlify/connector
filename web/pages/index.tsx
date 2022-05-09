@@ -161,7 +161,7 @@ const Home: NextPage = () => {
               <div key={doc.id}>
               <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div>
               <li
-                className="relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6 cursor-pointer"
+                className="relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:pl-6 lg:pl-8 xl:pl-6 cursor-pointer"
               >
                 <div className="flex items-center justify-between space-x-4">
                   {/* Repo name and link */}
