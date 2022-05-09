@@ -6,13 +6,17 @@ import {
   ChevronRightIcon,
   DotsVerticalIcon,
   SortAscendingIcon,
+  PlusIcon,
+  MinusIcon
 } from '@heroicons/react/solid'
 import Sidebar from '../components/Sidebar'
 import { classNames } from '../helpers/functions'
 import Layout from '../components/layout'
 import Link from 'next/link'
-import { getRuleTypeIcon } from '../helpers/Icons'
+import { getAutomationTypeIcon, getConnectionIcon } from '../helpers/Icons'
 import { useEffect, useState } from 'react'
+import timeAgo from '../services/timeago'
+import { API_ENDPOINT } from '../helpers/api'
 
 type Doc = {
   id: string,
@@ -22,17 +26,29 @@ type Doc = {
   url: string
 }
 
-const activityItems = [
-  { project: 'Workcation', commit: '2d89f0c8', environment: 'production', time: '1h' },
-  // More items...
-]
+type Change = {
+  removed?: boolean,
+  added?: boolean,
+  count: number,
+  value: string,
+}
+
+type Event = {
+  _id: string,
+  event: string,
+  doc: Doc,
+  createdAt: string,
+  change?: Change[],
+  add?: Object,
+  remove?: Object,
+}
 
 const listMenu = [
   {
-    name: 'Add rule',
+    name: 'Rename',
   },
   {
-    name: 'Rename',
+    name: 'Edit link',
   },
   {
     name: 'Delete',
@@ -40,17 +56,47 @@ const listMenu = [
   }
 ]
 
+const countTotalChanges = (change: Change[]) => {
+  let totalRemoved = 0;
+  let totalAdded = 0;
+
+  change.forEach((section) => {
+    if (section.removed) {
+      totalRemoved += section.count;
+    }
+    if (section.added) {
+      totalAdded += section.count;
+    }
+  });
+
+  return {
+    removed: totalRemoved,
+    added: totalAdded,
+  }
+}
+
 const Home: NextPage = () => {
   const [docs, setDocs] = useState<Doc[] | null>(null);
+  const [events, setEvents] = useState<Event[] | null>(null);
   useEffect(() => {
-    const getDocs = async () => {
-      const docsResponse = await axios.get('http://localhost:5000/routes/docs?org=mintlify');
-      const { docs } = docsResponse.data;
-      setDocs(docs);
+    const getDocs = () => {
+      axios.get(`${API_ENDPOINT}/routes/docs?org=mintlify`)
+        .then((docsResponse) => {
+          const { docs } = docsResponse.data;
+          setDocs(docs);
+        });
+      
+      axios.get(`${API_ENDPOINT}/routes/events?org=mintlify`)
+        .then((eventsResponse) => {
+          const { events } = eventsResponse.data;
+          setEvents(events);
+        });
     }
 
     getDocs();
-  }, [])
+  }, []);
+
+
   return (
     <Layout>
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
@@ -119,7 +165,7 @@ const Home: NextPage = () => {
               <div key={doc.id}>
               <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div>
               <li
-                className="relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6 cursor-pointer"
+                className="relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:pl-6 lg:pl-8 xl:pl-6 cursor-pointer"
               >
                 <div className="flex items-center justify-between space-x-4">
                   {/* Repo name and link */}
@@ -151,7 +197,7 @@ const Home: NextPage = () => {
                           </svg>
                         </div>
                         <div>
-                          Last updated {doc.lastUpdatedAt}
+                          Last updated {timeAgo.format(Date.parse(doc.lastUpdatedAt))}
                         </div>
                       </span>
                     </a>
@@ -179,7 +225,7 @@ const Home: NextPage = () => {
                                         type="button"
                                         className={classNames(
                                           active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                                          menu.isRed ? 'text-red-500' : '',
+                                          menu.isRed ? 'text-red-700' : '',
                                           'w-full flex items-center space-x-2 px-3 py-1.5 text-sm'
                                         )}
                                       >
@@ -195,7 +241,9 @@ const Home: NextPage = () => {
                     </span>
                     <div className="flex items-center space-x-2">
                       <div className="flex flex-shrink-0 space-x-1">
-                        {getRuleTypeIcon('Notification', 6, 4)}
+                        {getConnectionIcon(6, 4)}
+                        {getConnectionIcon(6, 4)}
+                        {getAutomationTypeIcon('code', 6, 4)}
                       </div>
                       {[].length > 5 ? (
                         <span className="flex-shrink-0 text-xs leading-5 font-medium">
@@ -219,22 +267,37 @@ const Home: NextPage = () => {
           </div>
           <div>
             <ul role="list" className="divide-y divide-gray-200">
-              {activityItems.map((item) => (
-                <li key={item.commit} className="py-4">
+              {events?.map((event) => (
+                <li key={event._id} className="py-4">
                   <div className="flex space-x-3">
                     <img
-                      className="h-6 w-6 rounded-full"
-                      src="https://images.unsplash.com/photo-1517365830460-955ce3ccd263?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=256&h=256&q=80"
-                      alt=""
+                      className="h-5 w-5 rounded-sm"
+                      src={event.doc.favicon}
+                      alt={event.doc.title}
                     />
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-medium">You</h3>
-                        <p className="text-sm text-gray-500">{item.time}</p>
+                        <h3 className="text-sm font-medium">{event.doc.title}</h3>
+                        <p className="text-sm text-gray-500">{timeAgo.format(Date.parse(event.createdAt))}</p>
                       </div>
-                      <p className="text-sm text-gray-500">
-                        Deployed {item.project} ({item.commit} in master) to {item.environment}
-                      </p>
+                      {
+                        event.change && (
+                          <div>
+                            <div className="flex items-center space-x-1 text-green-700">
+                              <PlusIcon className="h-4 w-4" />
+                              <p className="text-sm">
+                                {countTotalChanges(event.change).added} {countTotalChanges(event.change).added > 1 ? 'words' : 'word'}
+                              </p>
+                            </div>
+                            <div className="flex items-center space-x-1 text-red-700">
+                              <MinusIcon className="h-4 w-4" />
+                              <p className="text-sm">
+                                {countTotalChanges(event.change).removed} {countTotalChanges(event.change).removed > 1 ? 'words' : 'word'}
+                              </p>
+                            </div>
+                          </div>
+                        )
+                      }
                     </div>
                   </div>
                 </li>

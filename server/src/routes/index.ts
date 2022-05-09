@@ -4,9 +4,9 @@ import morgan from 'morgan';
 import scanRouter from './scan';
 import notionRouter from './notion';
 import v01Router from './v01';
-import linksRouter from './links';
 import docsRouter from './docs';
 import alertsRouter from './alerts';
+import eventsRouter from './events';
 
 const headRouter = express.Router();
 
@@ -22,8 +22,8 @@ headRouter.get('/', (_, res) => {
 
 // Primary app
 headRouter.use('/docs', docsRouter);
-headRouter.use('/links', linksRouter);
 headRouter.use('/alerts', alertsRouter);
+headRouter.use('/events', eventsRouter);
 // GitHub
 headRouter.use('/v01', v01Router);
 // Integrations
