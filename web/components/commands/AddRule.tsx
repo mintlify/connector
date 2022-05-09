@@ -1,31 +1,28 @@
 import { Fragment, useState } from 'react'
-import { Combobox, Dialog, RadioGroup, Transition } from '@headlessui/react'
+import { Combobox, Dialog, Menu, RadioGroup, Transition } from '@headlessui/react'
 import { classNames } from '../../helpers/functions'
-import { getRuleTypeIcon } from '../../helpers/Icons';
+import { getRuleTypeIcon, getTypeIcon } from '../../helpers/Icons';
 import { RuleType } from '../../pages/rules';
-import { ChevronRightIcon, PlusIcon } from '@heroicons/react/solid';
+import { CheckIcon, ChevronDownIcon, ChevronRightIcon, PlusIcon, SearchIcon, SelectorIcon } from '@heroicons/react/solid';
 
-type RuleItem = {
-  id: string,
-  type: RuleType,
-  title: string,
-  description: string,
+type RuleData = {
+  type: RuleType;
+  title: string;
+  description: string;
 }
 
-const ruleItems: RuleItem[] = [
-  {
-    id: '1',
+const ruleMap: { Notification: RuleData, Update: RuleData } = {
+  Update: {
     type: 'Update',
     title: 'Require documentation review',
     description: 'Require reviews when relevant code changes',
   },
-  {
-    id: '2',
+  Notification: {
     type: 'Notification',
     title: 'Send alert on change',
     description: 'Be notified when documentation or code changes',
   },
-];
+};
 
 type AddRuleProps = {
   isOpen: boolean;
@@ -54,7 +51,7 @@ export default function AddRule({ isOpen, setIsOpen }: AddRuleProps) {
           <div className="fixed inset-0 bg-gray-500 bg-opacity-25 transition-opacity" />
         </Transition.Child>
 
-        <div className="fixed inset-0 z-10 overflow-y-auto p-4 sm:p-6 md:p-20">
+        <div className="fixed inset-0 overflow-y-auto p-4 sm:p-6 md:p-20">
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -64,16 +61,16 @@ export default function AddRule({ isOpen, setIsOpen }: AddRuleProps) {
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <Dialog.Panel className="mx-auto max-w-xl transform divide-y divide-gray-100 overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
+            <Dialog.Panel className="mx-auto max-w-xl transform divide-y divide-gray-100 rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
               { selectedRuleType && (
-                <RuleConfig onCancel={onToPrimarySelection} />
+                <RuleConfig ruleType={selectedRuleType} onCancel={onToPrimarySelection} />
               ) }
               {
                 selectedRuleType == null && (<Combobox onChange={() => {}} value="">
                   <Combobox.Options static className="max-h-96 scroll-py-3 overflow-y-auto p-3">
-                    {ruleItems.map((item) => (
+                    {Object.values(ruleMap).map((item) => (
                       <Combobox.Option
-                        key={item.id}
+                        key={item.type}
                         value={item}
                         className={({ active }) =>
                           classNames('flex items-center cursor-default select-none rounded-xl p-3 hover:cursor-pointer', active ? 'bg-gray-50' : '')
@@ -115,77 +112,187 @@ export default function AddRule({ isOpen, setIsOpen }: AddRuleProps) {
   )
 }
 
-function RuleConfig({ onCancel }: { onCancel: () => void }) {
-  return <form className="px-6 py-6">
-  <div className="space-y-5">
-    <div className="flex space-x-4">
-      {getRuleTypeIcon('Update')}
-      <div>
-        <h1 className="text-sm font-medium text-gray-900">Require documentation update</h1>
-        <p className="text-sm text-gray-500">
-          Enforce updates when relevant code changes
-        </p>
-      </div>
-    </div>
+const repos = [
+  { id: 1, name: 'writer' },
+  { id: 2, name: 'connect' },
+  { id: 3, name: 'backend' },
+]
 
-    <div className="space-y-2">
-      <div className="space-y-1">
-        <label htmlFor="add-team-members" className="block text-sm font-medium text-gray-700">
-          Repository
-        </label>
-        <p id="add-team-members-helper" className="sr-only">
-          Search by email address
-        </p>
-        <div className="flex">
-          <div className="flex-grow">
-            <input
-              type="text"
-              name="add-team-members"
-              id="add-team-members"
-              className="block w-full shadow-sm focus:ring-sky-500 focus:border-sky-500 sm:text-sm border-gray-300 rounded-md"
-              aria-describedby="add-team-members-helper"
-            />
-          </div>
-          <span className="ml-3">
-            <button
-              type="button"
-              className="bg-white inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
-            >
-              <PlusIcon className="-ml-2 mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />
-              <span>GitHub</span>
-            </button>
-          </span>
+function RuleConfig({ ruleType, onCancel }: { ruleType: RuleType, onCancel: () => void }) {
+  const [reposQuery, setReposQuery] = useState('')
+  const [selectedPerson, setSelectedPerson] = useState()
+
+  const filteredRepos =
+    reposQuery === ''
+      ? repos
+      : repos.filter((repo) => {
+          return repo.name.toLowerCase().includes(reposQuery.toLowerCase())
+        })
+
+  const ruleData = ruleMap[ruleType];
+  
+  return <div className="px-6 py-6 z-10">
+    <div className="space-y-5">
+      <div className="flex space-x-4">
+        {getRuleTypeIcon(ruleType)}
+        <div>
+          <h1 className="text-sm font-medium text-gray-900">{ruleData.title}</h1>
+          <p className="text-sm text-gray-500">
+            {ruleData.description}
+          </p>
         </div>
       </div>
-    </div>
 
-    <div>
-      <label htmlFor="tags" className="block text-sm font-medium text-gray-700">
-        Tags
-      </label>
-      <input
-        type="text"
-        name="tags"
-        id="tags"
-        className="mt-1 block w-full shadow-sm focus:ring-sky-500 focus:border-sky-500 sm:text-sm border-gray-300 rounded-md"
-      />
-    </div>
+      <div className="flex space-x-2">
+        <div>
+          <Menu as="div" className="relative w-full inline-block text-left">
+          <div>
+            <Menu.Button className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+              {getTypeIcon('github', 'h-5 w-5 mr-2')}
+              mintlify
+              <ChevronDownIcon className="-mr-1 ml-3 h-5 w-5 text-gray-400" aria-hidden="true" />
+            </Menu.Button>
+          </div>
 
-    <div className="flex justify-end">
-      <button
-        type="button"
-        className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
-        onClick={onCancel}
-      >
-        Back
-      </button>
-      <button
-        type="submit"
-        className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary"
-      >
-        Create Rule
-      </button>
+          <Transition
+            as={Fragment}
+            enter="transition ease-out duration-100"
+            enterFrom="transform opacity-0 scale-95"
+            enterTo="transform opacity-100 scale-100"
+            leave="transition ease-in duration-75"
+            leaveFrom="transform opacity-100 scale-100"
+            leaveTo="transform opacity-0 scale-95"
+          >
+            <Menu.Items className="absolute mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+              <div className="py-1">
+                <Menu.Item>
+                  {({ active }) => (
+                    <a
+                      href="#"
+                      className={classNames(
+                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                        'block px-4 py-2 text-sm'
+                      )}
+                    >
+                      Account settings
+                    </a>
+                  )}
+                </Menu.Item>
+                <Menu.Item>
+                  {({ active }) => (
+                    <a
+                      href="#"
+                      className={classNames(
+                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                        'block px-4 py-2 text-sm'
+                      )}
+                    >
+                      Support
+                    </a>
+                  )}
+                </Menu.Item>
+                <Menu.Item>
+                  {({ active }) => (
+                    <a
+                      href="#"
+                      className={classNames(
+                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                        'block px-4 py-2 text-sm'
+                      )}
+                    >
+                      License
+                    </a>
+                  )}
+                </Menu.Item>
+                <form method="POST" action="#">
+                  <Menu.Item>
+                    {({ active }) => (
+                      <button
+                        type="submit"
+                        className={classNames(
+                          active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                          'block w-full text-left px-4 py-2 text-sm'
+                        )}
+                      >
+                        Sign out
+                      </button>
+                    )}
+                  </Menu.Item>
+                </form>
+              </div>
+            </Menu.Items>
+          </Transition>
+        </Menu>
+        </div>
+        <div className="flex-1">
+          <Combobox as="div" value={selectedPerson} onChange={setSelectedPerson}>
+            <div className="relative rounded-md">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <SearchIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+            </div>
+              <Combobox.Input
+                className="w-full rounded-md border border-gray-300 bg-white py-2 pr-10 shadow-sm pl-10 text-sm focus:ring-0 focus:border-gray-300"
+                onChange={(event) => setReposQuery(event.target.value)}
+                displayValue={(person: any) => person?.name || ''}
+                placeholder="Search repo..."
+              />
+              <Combobox.Button className="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
+                <SelectorIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+              </Combobox.Button>
+
+              {filteredRepos.length > 0 && (
+                <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                  {filteredRepos.map((repo) => (
+                    <Combobox.Option
+                      key={repo.id}
+                      value={repo}
+                      className={({ active }) =>
+                        classNames(
+                          'relative cursor-default select-none py-2 pl-3 pr-9',
+                          active ? 'bg-primary text-white' : 'text-gray-900'
+                        )
+                      }
+                    >
+                      {({ active, selected }) => (
+                        <>
+                          <span className={classNames('block truncate', selected ? 'font-semibold' : '')}>{repo.name}</span>
+
+                          {selected && (
+                            <span
+                              className={classNames(
+                                'absolute inset-y-0 right-0 flex items-center pr-4',
+                                active ? 'text-white' : 'text-primary'
+                              )}
+                            >
+                              <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </Combobox.Option>
+                  ))}
+                </Combobox.Options>
+              )}
+            </div>
+          </Combobox>
+        </div>
+      </div>
+
+      <div className="flex justify-end">
+        <button
+          type="button"
+          className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
+          onClick={onCancel}
+        >
+          Back
+        </button>
+        <button
+          type="submit"
+          className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary"
+        >
+          Create Rule
+        </button>
+      </div>
     </div>
   </div>
-</form>
 }
