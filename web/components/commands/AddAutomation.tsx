@@ -1,12 +1,12 @@
 import { Fragment, useState } from 'react'
-import { Combobox, Dialog, Menu, RadioGroup, Transition } from '@headlessui/react'
+import { Combobox, Dialog, Menu, Transition } from '@headlessui/react'
 import { classNames } from '../../helpers/functions'
-import { getRuleTypeIcon, getTypeIcon } from '../../helpers/Icons';
-import { RuleType } from '../../pages/automations';
-import { CheckIcon, ChevronDownIcon, ChevronRightIcon, PlusIcon, SearchIcon, SelectorIcon } from '@heroicons/react/solid';
+import { getAutomationTypeIcon, getTypeIcon } from '../../helpers/Icons';
+import { AutomationType } from '../../pages/automations';
+import { CheckIcon, ChevronDownIcon, ChevronRightIcon, SearchIcon, SelectorIcon } from '@heroicons/react/solid';
 
 type AutomationData = {
-  type: RuleType;
+  type: AutomationType;
   title: string;
   description: string;
 }
@@ -30,7 +30,7 @@ type AddAutomationProps = {
 }
 
 export default function AddAutomation({ isOpen, setIsOpen }: AddAutomationProps) {
-  const [selectedRuleType, setSelectedRuleType] = useState<RuleType>();
+  const [selectedRuleType, setSelectedRuleType] = useState<AutomationType>();
 
   const onToPrimarySelection = () => {
     setSelectedRuleType(undefined);
@@ -79,7 +79,7 @@ export default function AddAutomation({ isOpen, setIsOpen }: AddAutomationProps)
                       >
                         {({ active }) => (
                           <>
-                            {getRuleTypeIcon(item.type)}
+                            {getAutomationTypeIcon(item.type)}
                             <div className="ml-4 flex-auto">
                               <p
                                 className={classNames(
@@ -118,7 +118,7 @@ const repos = [
   { id: 3, name: 'backend' },
 ]
 
-function RuleConfig({ ruleType, onCancel }: { ruleType: RuleType, onCancel: () => void }) {
+function RuleConfig({ ruleType, onCancel }: { ruleType: AutomationType, onCancel: () => void }) {
   const [reposQuery, setReposQuery] = useState('')
   const [selectedRepo, setSelectedRepo] = useState()
   const [page, setPage] = useState(1)
@@ -152,7 +152,7 @@ function RuleConfig({ ruleType, onCancel }: { ruleType: RuleType, onCancel: () =
   return <div className="px-6 py-6 z-10">
     <div>
       <div className="flex space-x-4">
-        {getRuleTypeIcon(ruleType)}
+        {getAutomationTypeIcon(ruleType)}
         <div>
           <h1 className="text-sm font-medium text-gray-900">{ruleData.title}</h1>
           <p className="text-sm text-gray-500">
