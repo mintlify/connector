@@ -13,7 +13,7 @@ import Sidebar from '../components/Sidebar'
 import { classNames } from '../helpers/functions'
 import Layout from '../components/layout'
 import Link from 'next/link'
-import { getAutomationTypeIcon } from '../helpers/Icons'
+import { getAutomationTypeIcon, getConnectionIcon } from '../helpers/Icons'
 import { useEffect, useState } from 'react'
 import timeAgo from '../services/timeago'
 
@@ -45,6 +45,9 @@ type Event = {
 const listMenu = [
   {
     name: 'Rename',
+  },
+  {
+    name: 'Edit link',
   },
   {
     name: 'Delete',
@@ -237,6 +240,8 @@ const Home: NextPage = () => {
                     </span>
                     <div className="flex items-center space-x-2">
                       <div className="flex flex-shrink-0 space-x-1">
+                        {getConnectionIcon(6, 4)}
+                        {getConnectionIcon(6, 4)}
                         {getAutomationTypeIcon('code', 6, 4)}
                       </div>
                       {[].length > 5 ? (

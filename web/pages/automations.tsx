@@ -3,6 +3,7 @@ import Sidebar from "../components/Sidebar";
 import { classNames } from "../helpers/functions";
 import Layout from "../components/layout";
 import { getAutomationTypeIcon, getTypeIcon } from "../helpers/Icons";
+import { Switch } from "@headlessui/react";
 
 export type SourceType = 'github' | 'doc';
 export type DestinationType = 'doc' | 'slack' | 'email';
@@ -112,9 +113,28 @@ const Automations: NextPage = () => {
                         <p className="text-sm font-medium text-gray-700 truncate">{automation.name}</p>
                       </div>
                       <div className="ml-2 flex-shrink-0 flex">
-                        <p className={classNames("px-2 inline-flex text-xs leading-5 font-semibold rounded-full", automation.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600' )}>
-                          {automation.active ? 'On' : 'Off'}
-                        </p>
+                      <Switch
+                          checked={automation.active}
+                          onChange={() => {}}
+                          className="flex-shrink-0 group relative rounded-full inline-flex items-center justify-center h-4 w-9 cursor-pointer"
+                        >
+                          <span className="sr-only">Use setting</span>
+                          <span aria-hidden="true" className="pointer-events-none absolute bg-white w-full h-full rounded-md" />
+                          <span
+                            aria-hidden="true"
+                            className={classNames(
+                              automation.active ? 'bg-primary' : 'bg-gray-200',
+                              'pointer-events-none absolute h-4 w-9 mx-auto rounded-full transition-colors ease-in-out duration-200'
+                            )}
+                          />
+                          <span
+                            aria-hidden="true"
+                            className={classNames(
+                              automation.active ? 'translate-x-5' : 'translate-x-0',
+                              'pointer-events-none absolute left-0 inline-block h-5 w-5 border border-gray-200 rounded-full bg-white shadow transform ring-0 transition-transform ease-in-out duration-200'
+                            )}
+                          />
+                        </Switch>
                       </div>
                     </div>
                     <div className="mt-2 sm:flex sm:justify-between">
