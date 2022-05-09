@@ -7,6 +7,7 @@ import v01Router from './v01';
 import docsRouter from './docs';
 import alertsRouter from './alerts';
 import eventsRouter from './events';
+import linksRouter from './links';
 
 const headRouter = express.Router();
 
@@ -24,6 +25,7 @@ headRouter.get('/', (_, res) => {
 headRouter.use('/docs', docsRouter);
 headRouter.use('/alerts', alertsRouter);
 headRouter.use('/events', eventsRouter);
+headRouter.use('/links', linksRouter);
 // GitHub
 headRouter.use('/v01', v01Router);
 // Integrations

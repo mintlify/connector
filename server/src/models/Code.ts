@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 
 export type CodeType = {
-    docId: string;
+    doc: string;
     url?: string;
     sha: string;
     provider: string;
