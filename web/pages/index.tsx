@@ -16,6 +16,7 @@ import Link from 'next/link'
 import { getAutomationTypeIcon, getConnectionIcon } from '../helpers/Icons'
 import { useEffect, useState } from 'react'
 import timeAgo from '../services/timeago'
+import { API_ENDPOINT } from '../helpers/api'
 
 type Doc = {
   id: string,
@@ -79,13 +80,13 @@ const Home: NextPage = () => {
   const [events, setEvents] = useState<Event[] | null>(null);
   useEffect(() => {
     const getDocs = () => {
-      axios.get('http://localhost:5000/routes/docs?org=mintlify')
+      axios.get(`${API_ENDPOINT}/routes/docs?org=mintlify`)
         .then((docsResponse) => {
           const { docs } = docsResponse.data;
           setDocs(docs);
         });
       
-      axios.get('http://localhost:5000/routes/events?org=mintlify')
+      axios.get(`${API_ENDPOINT}/routes/events?org=mintlify`)
         .then((eventsResponse) => {
           const { events } = eventsResponse.data;
           setEvents(events);

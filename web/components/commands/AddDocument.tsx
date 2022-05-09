@@ -4,6 +4,7 @@ import { PlusIcon, GlobeIcon } from '@heroicons/react/solid'
 import { classNames } from '../../helpers/functions'
 import { ConfluenceIcon, GoogleDocsIcon, NotionIcon } from '../../helpers/Icons'
 import axios from 'axios'
+import { API_ENDPOINT } from '../../helpers/api'
 
 type AddDocumentProps = {
   isOpen: boolean;
@@ -54,7 +55,7 @@ export default function AddDocument({ isOpen, setIsOpen }: AddDocumentProps) {
   const onEnter = () => {
     if (!query) return;
     
-    axios.post('http://localhost:5000/routes/docs', {
+    axios.post(`${API_ENDPOINT}/routes/docs`, {
       url: query,
     })
     setIsOpen(false);
