@@ -21,7 +21,7 @@ const commentIsUrl = (node: TreeNode, pl: PLConnect): boolean => {
     return checkIfUrl(content);
 }
 
-const getChangesInRange = (changes: Change[], lineRange: LineRange): Change[] => {
+export const getChangesInRange = (changes: Change[], lineRange: LineRange): Change[] => {
     return changes.filter((change) => change.line >= lineRange.start && change.line <= lineRange.end)
 }
 

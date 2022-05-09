@@ -1,6 +1,20 @@
 import mongoose, { Schema } from 'mongoose';
 
-const LinkSchema = new Schema({
+export type CodeType = {
+    docId: string;
+    url?: string;
+    sha: string;
+    provider: string;
+    file: string;
+    org: string;
+    repo: string;
+    type: string;
+    branch?: string;
+    line?: number;
+    endLine?: number;
+}
+
+const CodeSchema = new Schema({
     doc: { type: Schema.Types.ObjectId, required: true },
     url: { type: String },
     sha: { type: String, required: true },
@@ -14,6 +28,6 @@ const LinkSchema = new Schema({
     endLine: { type: Number }
 });
 
-const Link = mongoose.model('Link', LinkSchema, 'links');
+const Code = mongoose.model('Code', CodeSchema, 'code');
 
-export default Link;
+export default Code;

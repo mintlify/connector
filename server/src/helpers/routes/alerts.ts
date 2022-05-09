@@ -1,118 +1,54 @@
-import axios from 'axios';
-import { urlify } from './links';
-import { isNotionUrl, isBlock, getNotionBlockContent, getNotionPageTitle } from '../../services/notion';
-import { getLanguageIdByFilename } from '../../parsing/filenames';
-import getPL from '../../parsing/languages';
-import { formatCode, getTreeSitterProgram } from '../../parsing';
-import { Alert, Link } from '../github/types';
-import { getLinksInFile } from './links';
-import { AuthConnectorType } from '../../models/AuthConnector';
+import { CodeType } from '../../models/Code';
 import { FileInfo } from '../github/patch';
+import Doc, { DocType } from '../../models/Doc';
+import { AuthConnectorType } from '../../models/AuthConnector';
+import { createMessage } from './messages';
+import { Link, Alert, LineRange } from '../github/types';
+import { getChangesInRange } from './links';
 
-export const getAlertsForFile = async (file: FileInfo, authConnector?: AuthConnectorType): Promise<Alert[]> => {
-    const languageId = getLanguageIdByFilename(file.filename);
-    const content = formatCode(languageId, file.content);
-    const pl = getPL(languageId);
-    const tree = getTreeSitterProgram(content, languageId);
-    const links: Link[] = getLinksInFile(tree.root, file.changes, pl);
-    const alertPromises: Promise<Alert>[] = links.map(async (link) => await linkToAlert(link, file.filename, authConnector));
-    const alertResults = await Promise.all(alertPromises) as Alert[];
-    return alertResults;
-}
-
-export const getAlertsForAllFiles = async (files: FileInfo[], authConnector?: AuthConnectorType): Promise<Alert[]> => {
-    const alertPromises = files
-        .filter((file) => file != null)
-        .map(async (file) => {
-            return new Promise((resolve) => {
-                getAlertsForFile(file, authConnector)
-                    .then((alertsForFile) => {
-                        resolve(alertsForFile);
-                    })
-                    .catch(() => {
-                        resolve(null);
-                    })
-            })
-        });
-    const alertsResults = await Promise.all(alertPromises) as Alert[][];
-    const alerts = alertsResults.filter((result) => result != null).reduce((acc: Alert[], alerts: Alert[]) => {
-        acc = acc.concat(alerts)
-        return acc;
-    }, []);
-
-    return alerts;
-}
-
-export const getDocumentNameFromUrl = async (url: string) => {
-    try {
-        const urlWithOutProtocol = url.replace(/(^\w+:|^)\/\//, '');
-        const urlWithHttp = 'http://' + urlWithOutProtocol;
-        const { data: rawText }: { data: string } = await axios.get(urlWithHttp);
-        const matches = rawText.match(/<title>(.+)<\/title>/)
-        const title = matches ? matches[1] : 'this document'
-        return title;
-    }
-    catch {
-        return 'this document';
-    }
-}
-
-const getDocumentTitle = async (link: Link, authConnector?: AuthConnectorType): Promise<string> => {
-    const url = new URL(urlify(link.url));
-    if (isNotionUrl(url) && authConnector?.notion) {
-        const pageTitle = await getNotionPageTitle(link, authConnector.notion.accessToken);
-        return pageTitle;
-    }
-    return getDocumentNameFromUrl(urlify(link.url));
-}
-
-export const createMessageContent = async (link: Link, linkText: string, kind?: string, content?: string): Promise<string> => {
-    const url = urlify(link.url);
-    const contentMessage = content ? `\n> ${content}` : '';
-    if (kind === 'notionPage') {
-        return `Does the page [${linkText}](${url}) need to be updated?`;
-    } else if (kind === 'notionBlock') {
-        return `Does the following block in [${linkText}](${url}) need to be updated?${contentMessage}`
-    }
-
-    return `Does [${linkText}](${url}) need to be updated?${contentMessage}`;
-}
-
-export const createMessage = async (link: Link, authConnector?: AuthConnectorType): Promise<string> => {
-    const linkText = await getDocumentTitle(link, authConnector);
-    const url = new URL(urlify(link.url));
-    if (isNotionUrl(url) && authConnector?.notion) {
-        const isblock = isBlock(url);
-        if (isblock) {
-            const blockContent = await getNotionBlockContent(link.url, authConnector.notion.accessToken);
-            return createMessageContent(link, linkText, 'notionBlock', blockContent);
+const getLineRange = (code: CodeType): LineRange|undefined => {
+    if (code?.line == null) {
+        return undefined;
+    } else {
+        if (code?.endLine == null) {
+            return {
+                start: code?.line,
+                end: code?.line
+            }
         } else {
-            return createMessageContent(link, linkText, 'notionPage');
+            return {
+                start: code?.line,
+                end: code?.endLine
+            }
         }
     }
-    return createMessageContent(link, linkText);
 }
 
-export const linkToAlert = async (link: Link, filename: string, authConnector?: AuthConnectorType): Promise<Alert> => {
-    let message = '';
-    if (link.type !== 'new') {
-        message = await createMessage(link, authConnector);
-    }
+export const codeToAlert = async (code: CodeType, file: FileInfo, authConnector?: AuthConnectorType): Promise<Alert|null> => {
+    const doc: DocType | null = await Doc.findByIdAndUpdate(code.docId, { blocker: true });
+    if (doc == null) return null;
+    const lineRange = getLineRange(code);
+    const link: Link = {
+        url: doc.url,
+        type: code.type,
+        lineRange,
+    };
+    const message = await createMessage(link, authConnector);
     return {
-        ...link,
+        url: doc.url,
         message,
-        filename
+        filename: file.filename,
+        type: code.type,
+        lineRange,
     }
 };
 
-export const createNewLinksMessage = async (alerts: Alert[], authConnector?: AuthConnectorType): Promise<string> => {
-    const documentTitlePromises: Promise<string>[] = alerts.map((link) => getDocumentTitle(link, authConnector) )
-    const documentTitles: string[] = await Promise.all(documentTitlePromises);
-    const urlsFormatted = documentTitles.map((title, i) => {
-        if (title === 'this document') {
-            return `* [${alerts[i].url}](${alerts[i].url})`;
-        }
-        return `* [${title}](${alerts[i].url})`;
-    }).join('\n');
-    return `New link(s) have been detected:\n\n${urlsFormatted}`;
+export const didChange = (code: CodeType, file: FileInfo): boolean => {
+    if (!file.filename.endsWith(code.file) || !code.file.endsWith(file.filename)) {
+        return false;
+    }
+    const lineRange = getLineRange(code);
+    if (lineRange == null) return false;
+    const changesInRange = getChangesInRange(file.changes, lineRange);
+    return changesInRange.length > 0;
 }

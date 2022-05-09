@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Context } from "probot";
-import { Alert, FileInfo, getEncompassingRangeAndSideForAlert, parsePatch, PatchLineRange } from "./patch";
-import { AlertsRequest } from "./types";
+import { FileInfo, getEncompassingRangeAndSideForAlert, parsePatch, PatchLineRange } from "./patch";
+import { AlertsRequest, Alert } from "./types";
 import { ENDPOINT, getReviewComments } from "./octokit";
 
 type FilesPatchLineRangesMap = Record<string, PatchLineRange[]>;
@@ -66,15 +66,17 @@ type AlertsResponse = {
 
 export const getAlerts = async (context: Context, files: FileInfo[]): Promise<AlertsResponse> => {
   const owner = context.payload.repository.owner.login;
-  const alertsRequest: AlertsRequest = { files, owner }
-  const connectPromise = axios.post(`${ENDPOINT}/routes/v01/`, alertsRequest);
+  const repo = context.payload.pull_request.head.repo.name;
+  const alertsRequest: AlertsRequest = { files, owner, repo }
+  const v01Promise = axios.post(`${ENDPOINT}/routes/v01/`, alertsRequest);
   const previousAlertsPromise = getReviewComments(context);
-  const [connectResponse, previousAlerts] = await Promise.all([connectPromise, previousAlertsPromise]);
-
+  // const alertsPromise = axios.post(`${ENDPOINT}/routes/alerts/`, alertsRequest);
+  // const [v01Response, previousAlerts, alertsResponse] = await Promise.all([v01Promise, previousAlertsPromise, alertsPromise]);
+  const [v01Response, previousAlerts] = await Promise.all([v01Promise, previousAlertsPromise]);
   return {
-    incomingAlerts: connectResponse.data.alerts,
+    incomingAlerts: v01Response.data.alerts,
     previousAlerts,
-    newLinksMessage: connectResponse.data.newLinksMessage
+    newLinksMessage: v01Response.data.newLinksMessage
   }
 }
 
@@ -112,20 +114,22 @@ export const createReviewCommentsFromAlerts = async (context: Context, alerts: A
   const reviewCommentPromises = alerts.map((alert) => {
     const patchLineRanges = filesPatchLineRangesMap[alert.filename];
     if (patchLineRanges == null) return null;
-    
-    const encompassedRangeAndSide = getEncompassingRangeAndSideForAlert(patchLineRanges, alert.lineRange);
-    return context.octokit.pulls.createReviewComment({
-      owner,
-      repo,
-      pull_number: pullNumber,
-      commit_id: commitId,
-      body: alert.message,
-      path: alert.filename,
-      start_line: encompassedRangeAndSide.start.line,
-      start_side: encompassedRangeAndSide.start.side,
-      line: encompassedRangeAndSide.end.line,
-      side: encompassedRangeAndSide.end.side
-    })
+    if (alert?.lineRange != null) {
+      const encompassedRangeAndSide = getEncompassingRangeAndSideForAlert(patchLineRanges, alert.lineRange);
+      return context.octokit.pulls.createReviewComment({
+        owner,
+        repo,
+        pull_number: pullNumber,
+        commit_id: commitId,
+        body: alert.message,
+        path: alert.filename,
+        start_line: encompassedRangeAndSide.start.line,
+        start_side: encompassedRangeAndSide.start.side,
+        line: encompassedRangeAndSide.end.line,
+        side: encompassedRangeAndSide.end.side
+      })
+    }
+    return null;
   });
   const reviewComments = await Promise.all(reviewCommentPromises);
   return reviewComments;

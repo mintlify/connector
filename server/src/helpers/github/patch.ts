@@ -15,13 +15,6 @@ export type FileInfo = {
 	changes: Change[]
 }
 
-export type Alert = {
-  url: string;
-  message: string;
-  filename: string;
-  lineRange: LineRange
-}
-
 export type PatchLineRange = {
   minusRange: LineRange,
   addRange: LineRange,
