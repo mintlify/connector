@@ -1,6 +1,6 @@
-import { MailIcon, PencilAltIcon } from "@heroicons/react/solid";
-import { BellIcon, DocumentSearchIcon } from "@heroicons/react/outline";
-import { DestinationType, RuleType, SourceType } from "../pages/rules";
+import { MailIcon, PencilAltIcon, BellIcon as BellIconSolid } from "@heroicons/react/solid";
+import { CodeIcon, DocumentSearchIcon } from "@heroicons/react/outline";
+import { DestinationType, AutomationType, SourceType } from "../pages/automations";
 
 export type SVGIconProps = {
   className: string,
@@ -40,20 +40,28 @@ export const ConfluenceIcon = ({className, isActive}: SVGIconProps) => (
 </svg>
 )
 
-export const getRuleTypeIcon = (type: RuleType, outerSize = 10, innerSize = 6) => {
-  if (type === 'Notification') {
-    return <div className={`h-${outerSize} w-${outerSize} rounded-lg bg-yellow-100 flex items-center justify-center`}>
-      <BellIcon className={`h-${innerSize} w-${innerSize} text-yellow-600`} />
+export const getAutomationTypeIcon = (type: AutomationType, outerSize = 10, innerSize = 6) => {
+  if (type === 'code') {
+    return <div className={`h-${outerSize} w-${outerSize} rounded-lg bg-sky-100 flex items-center justify-center`}>
+      <svg className={`h-${innerSize} w-${innerSize} text-sky-600`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
+        <path d="M476.8 288C461.1 361 397.4 416 320 416C242.6 416 178 361 163.2 288H32C14.33 288 0 273.7 0 256C0 238.3 14.33 224 32 224H163.2C178 150.1 242.6 96 320 96C397.4 96 461.1 150.1 476.8 224H608C625.7 224 640 238.3 640 256C640 273.7 625.7 288 608 288H476.8zM320 336C364.2 336 400 300.2 400 256C400 211.8 364.2 176 320 176C275.8 176 240 211.8 240 256C240 300.2 275.8 336 320 336z" fill="currentColor" />
+      </svg>
     </div>
   }
 
-  if (type === 'Update') {
-    return <div className={`h-${outerSize} w-${outerSize} rounded-lg bg-green-100 flex items-center justify-center`}>
-        <DocumentSearchIcon className={`h-${innerSize} w-${innerSize} text-green-600`} />
+  if (type === 'doc') {
+    return <div className={`h-${outerSize} w-${outerSize} rounded-lg bg-amber-100 flex items-center justify-center`}>
+        <DocumentSearchIcon className={`h-${innerSize} w-${innerSize} text-amber-600`} />
       </div>
   }
 
   return null;
+}
+
+export const getConnectionIcon = (outerSize = 10, innerSize = 6) => {
+  return <div className={`h-${outerSize} w-${outerSize} rounded-lg bg-green-100 flex items-center justify-center`}>
+    <CodeIcon className={`h-${innerSize} w-${innerSize} text-green-600`} />
+  </div>
 }
 
 export const getTypeIcon = (type: SourceType | DestinationType, className: string) => {
@@ -72,12 +80,7 @@ export const getTypeIcon = (type: SourceType | DestinationType, className: strin
   }
 
   if (type === 'slack') {
-    return <svg className={className} xmlns="http://www.w3.org/2000/svg" width="124" height="124" viewBox="0 0 124 124" fill="currentColor">
-    <path d="M33.4173 74.9921C33.4173 80.7401 28.7716 85.3858 23.0236 85.3858C17.2756 85.3858 12.6299 80.7401 12.6299 74.9921C12.6299 69.2441 17.2756 64.5984 23.0236 64.5984H33.4173V74.9921ZM38.6141 74.9921C38.6141 69.2441 43.2598 64.5984 49.0078 64.5984C54.7559 64.5984 59.4015 69.2441 59.4015 74.9921V100.976C59.4015 106.724 54.7559 111.37 49.0078 111.37C43.2598 111.37 38.6141 106.724 38.6141 100.976V74.9921Z" />
-    <path d="M49.0078 33.2598C43.2598 33.2598 38.6141 28.6141 38.6141 22.8661C38.6141 17.1181 43.2598 12.4724 49.0078 12.4724C54.7559 12.4724 59.4015 17.1181 59.4015 22.8661V33.2598H49.0078ZM49.0078 38.5354C54.7559 38.5354 59.4015 43.1811 59.4015 48.9291C59.4015 54.6771 54.7559 59.3228 49.0078 59.3228H22.9448C17.1968 59.3228 12.5511 54.6771 12.5511 48.9291C12.5511 43.1811 17.1968 38.5354 22.9448 38.5354H49.0078Z" />
-    <path d="M90.6614 48.9291C90.6614 43.1811 95.307 38.5354 101.055 38.5354C106.803 38.5354 111.449 43.1811 111.449 48.9291C111.449 54.6771 106.803 59.3228 101.055 59.3228H90.6614V48.9291ZM85.4645 48.9291C85.4645 54.6771 80.8189 59.3228 75.0708 59.3228C69.3228 59.3228 64.6771 54.6771 64.6771 48.9291V22.8661C64.6771 17.1181 69.3228 12.4724 75.0708 12.4724C80.8189 12.4724 85.4645 17.1181 85.4645 22.8661V48.9291V48.9291Z" />
-    <path d="M75.0708 90.5826C80.8189 90.5826 85.4645 95.2283 85.4645 100.976C85.4645 106.724 80.8189 111.37 75.0708 111.37C69.3228 111.37 64.6771 106.724 64.6771 100.976V90.5826H75.0708ZM75.0708 85.3858C69.3228 85.3858 64.6771 80.7401 64.6771 74.9921C64.6771 69.2441 69.3228 64.5984 75.0708 64.5984H101.134C106.882 64.5984 111.528 69.2441 111.528 74.9921C111.528 80.7401 106.882 85.3858 101.134 85.3858H75.0708Z" />
-    </svg>
+    return <BellIconSolid className={className} />
   }
 
   return null;

@@ -15,7 +15,7 @@ export type CodeType = {
 }
 
 const CodeSchema = new Schema({
-    docId: { type: Object, required: true },
+    doc: { type: Schema.Types.ObjectId, required: true },
     url: { type: String },
     sha: { type: String, required: true },
     provider: { type: String, required: true },
