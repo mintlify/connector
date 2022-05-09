@@ -8,16 +8,42 @@ const docsRouter = express.Router();
 docsRouter.get('/', async (req, res) => {
   const { org } = req.query;
   try {
-    const docs = await Doc.find({org});
+    const docs = await Doc.aggregate([
+      {
+        $match: { org }
+      },
+      {
+        $lookup: {
+          from: "code",
+          let: { doc: "$_id" },
+          pipeline: [
+             { $match:
+                { $expr:
+                   { $and:
+                      [
+                        { $eq: [ "$doc",  "$$doc" ] },
+                        { $eq: [ "$org",  org ] },
+                      ]
+                   }
+                }
+             },
+             { $project: { stock_item: 0, _id: 0 } }
+          ],
+          as: "code"
+        }
+      }
+    ]);
     const docsFormatted = docs.map((doc) => {
       return {
         id: doc._id,
         title: doc.title,
         lastUpdatedAt: doc.lastUpdatedAt,
         favicon: doc.favicon,
-        url: doc.url
+        url: doc.url,
+        code: doc.code
       }
-    })
+    });
+
     return res.status(200).send({docs: docsFormatted});
   } catch (error) {
     return res.status(500).send({error, docs: []})

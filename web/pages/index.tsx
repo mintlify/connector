@@ -17,13 +17,21 @@ import { getAutomationTypeIcon, getConnectionIcon } from '../helpers/Icons'
 import { useEffect, useState } from 'react'
 import timeAgo from '../services/timeago'
 import { API_ENDPOINT } from '../helpers/api'
+import Tooltip from '../components/Tooltip'
+
+type Code = {
+  _id: string,
+  file: string,
+  url: string,
+}
 
 type Doc = {
   id: string,
   title: string,
   lastUpdatedAt: string,
   favicon: string,
-  url: string
+  url: string,
+  code: Code[],
 }
 
 type Change = {
@@ -241,9 +249,22 @@ const Home: NextPage = () => {
                     </span>
                     <div className="flex items-center space-x-2">
                       <div className="flex flex-shrink-0 space-x-1">
-                        {getConnectionIcon(6, 4)}
-                        {getConnectionIcon(6, 4)}
-                        {getAutomationTypeIcon('code', 6, 4)}
+                        {doc.code.map((code) => (
+                          <Tooltip key={code._id} message={code.file}>
+                            <Link href={code.url}>
+                              <a className="hover:opacity-75" target="_blank">
+                                {getConnectionIcon(6, 4)}
+                              </a>
+                            </Link>
+                          </Tooltip>
+                        ))}
+                        <Tooltip key="auto" message="Send Slack alert">
+                          <Link href='/automations'>
+                            <a className="hover:opacity-50">
+                            {getAutomationTypeIcon('code', 6, 4)}
+                            </a>
+                          </Link>
+                        </Tooltip>
                       </div>
                       {[].length > 5 ? (
                         <span className="flex-shrink-0 text-xs leading-5 font-medium">
