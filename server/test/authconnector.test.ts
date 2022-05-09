@@ -1,4 +1,5 @@
-import { createMessage, getAlertsForFile } from '../src/helpers/routes/alerts';
+import { createMessage } from '../src/helpers/routes/messages';
+import { getAlertsForFile } from '../src/helpers/routes/v01Alerts';
 import { Alert, Change } from '../src/helpers/github/types';
 import { FileInfo } from '../src/helpers/github/patch';
 

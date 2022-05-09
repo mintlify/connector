@@ -15,19 +15,20 @@ export type Alert = {
     url: string;
     message: string;
     filename: string;
-    lineRange: LineRange;
+    lineRange?: LineRange;
     type: string;
 }
   
 export type Link = {
     url: string;
-    lineRange: LineRange;
+    lineRange?: LineRange;
     type: string;
 }
 
 export type AlertsRequest = {
     files: FileInfo[],
     owner: string,
+    repo: string,
 }
 
 export type TaskRequest = {
