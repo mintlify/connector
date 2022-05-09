@@ -25,7 +25,7 @@ const getLineRange = (code: CodeType): LineRange|undefined => {
 }
 
 export const codeToAlert = async (code: CodeType, file: FileInfo, authConnector?: AuthConnectorType): Promise<Alert|null> => {
-    const doc: DocType | null = await Doc.findByIdAndUpdate(code.docId, { blocker: true });
+    const doc: DocType | null = await Doc.findByIdAndUpdate(code.doc, { blocker: true });
     if (doc == null) return null;
     const lineRange = getLineRange(code);
     const link: Link = {
