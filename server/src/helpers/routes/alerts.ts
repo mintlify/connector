@@ -4,11 +4,11 @@ import Doc, { DocType } from '../../models/Doc';
 import { AuthConnectorType } from '../../models/AuthConnector';
 import { createMessage } from './messages';
 import { Link, Alert, LineRange } from '../github/types';
-import { getChangesInRange } from './links';
+import { getChangesInRange, getLineRange } from './links';
 
-const getLineRange = (code: CodeType): LineRange|undefined => {
+const getLineRangeFromCode = (code: CodeType, file: FileInfo): LineRange => {
     if (code?.line == null) {
-        return undefined;
+        return getLineRange(file.content, file.content);
     } else {
         if (code?.endLine == null) {
             return {
@@ -27,7 +27,7 @@ const getLineRange = (code: CodeType): LineRange|undefined => {
 export const codeToAlert = async (code: CodeType, file: FileInfo, authConnector?: AuthConnectorType): Promise<Alert|null> => {
     const doc: DocType | null = await Doc.findByIdAndUpdate(code.doc, { blocker: true });
     if (doc == null) return null;
-    const lineRange = getLineRange(code);
+    const lineRange = getLineRangeFromCode(code, file);
     const link: Link = {
         url: doc.url,
         type: code.type,
@@ -47,7 +47,7 @@ export const didChange = (code: CodeType, file: FileInfo): boolean => {
     if (!file.filename.endsWith(code.file) || !code.file.endsWith(file.filename)) {
         return false;
     }
-    const lineRange = getLineRange(code);
+    const lineRange = getLineRangeFromCode(code, file);
     if (lineRange == null) return false;
     const changesInRange = getChangesInRange(file.changes, lineRange);
     return changesInRange.length > 0;

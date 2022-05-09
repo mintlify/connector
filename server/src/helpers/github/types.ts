@@ -15,13 +15,13 @@ export type Alert = {
     url: string;
     message: string;
     filename: string;
-    lineRange?: LineRange;
+    lineRange: LineRange;
     type: string;
 }
   
 export type Link = {
     url: string;
-    lineRange?: LineRange;
+    lineRange: LineRange;
     type: string;
 }
 
