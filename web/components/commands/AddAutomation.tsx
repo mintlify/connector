@@ -2,16 +2,16 @@ import { Fragment, useState } from 'react'
 import { Combobox, Dialog, Menu, RadioGroup, Transition } from '@headlessui/react'
 import { classNames } from '../../helpers/functions'
 import { getRuleTypeIcon, getTypeIcon } from '../../helpers/Icons';
-import { RuleType } from '../../pages/rules';
+import { RuleType } from '../../pages/automations';
 import { CheckIcon, ChevronDownIcon, ChevronRightIcon, PlusIcon, SearchIcon, SelectorIcon } from '@heroicons/react/solid';
 
-type RuleData = {
+type AutomationData = {
   type: RuleType;
   title: string;
   description: string;
 }
 
-const ruleMap: { Notification: RuleData, Update: RuleData } = {
+const ruleMap: { Notification: AutomationData, Update: AutomationData } = {
   Update: {
     type: 'Update',
     title: 'Require documentation review',
@@ -24,12 +24,12 @@ const ruleMap: { Notification: RuleData, Update: RuleData } = {
   },
 };
 
-type AddRuleProps = {
+type AddAutomationProps = {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void,
 }
 
-export default function AddRule({ isOpen, setIsOpen }: AddRuleProps) {
+export default function AddAutomation({ isOpen, setIsOpen }: AddAutomationProps) {
   const [selectedRuleType, setSelectedRuleType] = useState<RuleType>();
 
   const onToPrimarySelection = () => {

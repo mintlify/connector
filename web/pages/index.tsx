@@ -13,7 +13,7 @@ import Sidebar from '../components/Sidebar'
 import { classNames } from '../helpers/functions'
 import Layout from '../components/layout'
 import Link from 'next/link'
-import { getRuleTypeIcon } from '../helpers/Icons'
+import { getAutomationTypeIcon } from '../helpers/Icons'
 import { useEffect, useState } from 'react'
 import timeAgo from '../services/timeago'
 
@@ -237,7 +237,7 @@ const Home: NextPage = () => {
                     </span>
                     <div className="flex items-center space-x-2">
                       <div className="flex flex-shrink-0 space-x-1">
-                        {getRuleTypeIcon('Notification', 6, 4)}
+                        {getAutomationTypeIcon('Notification', 6, 4)}
                       </div>
                       {[].length > 5 ? (
                         <span className="flex-shrink-0 text-xs leading-5 font-medium">

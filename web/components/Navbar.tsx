@@ -15,8 +15,8 @@ const navigation = [
     href: '/',
   },
   {
-    name: 'Rules',
-    href: '/rules',
+    name: 'Automations',
+    href: '/automations',
   }
 ]
 

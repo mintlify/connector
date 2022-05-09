@@ -1,6 +1,6 @@
 import { MailIcon, PencilAltIcon, BellIcon as BellIconSolid } from "@heroicons/react/solid";
 import { BellIcon, DocumentSearchIcon } from "@heroicons/react/outline";
-import { DestinationType, RuleType, SourceType } from "../pages/rules";
+import { DestinationType, AutomationType, SourceType } from "../pages/automations";
 
 export type SVGIconProps = {
   className: string,
@@ -40,7 +40,7 @@ export const ConfluenceIcon = ({className, isActive}: SVGIconProps) => (
 </svg>
 )
 
-export const getRuleTypeIcon = (type: RuleType, outerSize = 10, innerSize = 6) => {
+export const getAutomationTypeIcon = (type: AutomationType, outerSize = 10, innerSize = 6) => {
   if (type === 'Notification') {
     return <div className={`h-${outerSize} w-${outerSize} rounded-lg bg-yellow-100 flex items-center justify-center`}>
       <BellIcon className={`h-${innerSize} w-${innerSize} text-yellow-600`} />

@@ -2,17 +2,17 @@ import { NextPage } from "next";
 import Sidebar from "../components/Sidebar";
 import { classNames } from "../helpers/functions";
 import Layout from "../components/layout";
-import { getRuleTypeIcon, getTypeIcon } from "../helpers/Icons";
+import { getAutomationTypeIcon, getTypeIcon } from "../helpers/Icons";
 
 export type SourceType = 'github' | 'doc';
 export type DestinationType = 'doc' | 'slack' | 'email';
-export type RuleType = 'Update' | 'Notification';
+export type AutomationType = 'Update' | 'Notification';
 
-type Rule = {
+type Automation = {
   id: string,
   active: boolean,
   name: string,
-  type: RuleType,
+  type: AutomationType,
   source: SourceType,
   sourceName: string,
   sourceHref: string,
@@ -20,7 +20,7 @@ type Rule = {
   destinationName: string,
 }
 
-const rules: Rule[] = [
+const automations: Automation[] = [
   {
     id: '1',
     active: true,
@@ -85,15 +85,7 @@ const integrations = [
   },
 ]
 
-// const getDestinationTitle = (ruleType: RuleType) => {
-//   if (ruleType === 'Update') {
-//     return 'Requires reviewing';
-//   }
-
-//   return 'Notifies';
-// }
-
-const Rules: NextPage = () => {
+const Automations: NextPage = () => {
   return (
     <Layout>
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
@@ -104,36 +96,36 @@ const Rules: NextPage = () => {
         <div className="bg-white lg:min-w-0 lg:flex-1">
           <div className="pl-4 pr-6 pt-4 pb-4 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
           <div className="px-4 sm:px-0">
-            <h2 className="text-lg font-medium text-gray-900">Rules</h2>
+            <h2 className="text-lg font-medium text-gray-900">Automations</h2>
           </div>
         </div>
         {/* Stacked list */}
         <ul role="list">
-            {rules.map((rule) => (
-              <li key={rule.id}>
+            {automations.map((automation) => (
+              <li key={automation.id}>
                 <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div>
                 <a href="#" className="block hover:bg-gray-50">
                   <div className="px-4 py-5 sm:px-6">
                     <div className="flex items-center justify-between">
                       <div className="flex space-x-2 items-center">
-                        { getRuleTypeIcon(rule.type, 8, 5) }
-                        <p className="text-sm font-medium text-gray-700 truncate">{rule.name}</p>
+                        { getAutomationTypeIcon(automation.type, 8, 5) }
+                        <p className="text-sm font-medium text-gray-700 truncate">{automation.name}</p>
                       </div>
                       <div className="ml-2 flex-shrink-0 flex">
-                        <p className={classNames("px-2 inline-flex text-xs leading-5 font-semibold rounded-full", rule.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600' )}>
-                          {rule.active ? 'On' : 'Off'}
+                        <p className={classNames("px-2 inline-flex text-xs leading-5 font-semibold rounded-full", automation.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600' )}>
+                          {automation.active ? 'On' : 'Off'}
                         </p>
                       </div>
                     </div>
                     <div className="mt-2 sm:flex sm:justify-between">
                       <div className="sm:flex">
                         <p className="flex items-center text-sm text-gray-500">
-                          { getTypeIcon(rule.source, 'flex-shrink-0 mr-1 h-4 w-4 text-gray-400') }
-                          {rule.sourceName}
+                          { getTypeIcon(automation.source, 'flex-shrink-0 mr-1 h-4 w-4 text-gray-400') }
+                          {automation.sourceName}
                         </p>
                         <p className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
-                          { getTypeIcon(rule.destination, 'flex-shrink-0 mr-1 h-4 w-4 text-gray-400') }
-                          {rule.destinationName}
+                          { getTypeIcon(automation.destination, 'flex-shrink-0 mr-1 h-4 w-4 text-gray-400') }
+                          {automation.destinationName}
                         </p>
                       </div>
                     </div>
@@ -176,4 +168,4 @@ const Rules: NextPage = () => {
   )
 };
 
-export default Rules;
+export default Automations;

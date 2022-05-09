@@ -3,20 +3,20 @@ import { PlusIcon } from '@heroicons/react/solid'
 import Link from 'next/link';
 import { useState } from 'react'
 import AddDocument from './commands/AddDocument'
-import AddRule from './commands/AddRule'
+import AddAutomation from './commands/AddAutomation'
 
 export default function Sidebar() {
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
-  const [isAddRuleOpen, setIsAddRuleOpen] = useState(false);
+  const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
   return (
     <>
     <AddDocument
       isOpen={isAddDocumentOpen}
       setIsOpen={setIsAddDocumentOpen}
     />
-    <AddRule
-      isOpen={isAddRuleOpen}
-      setIsOpen={setIsAddRuleOpen}
+    <AddAutomation
+      isOpen={isAddAutomationOpen}
+      setIsOpen={setIsAddAutomationOpen}
     />
     <div className="xl:flex-shrink-0 xl:w-64 xl:border-r xl:border-gray-200">
       <div className="pl-4 pr-6 py-6 sm:pl-6 lg:pl-8 xl:pl-0">
@@ -54,9 +54,9 @@ export default function Sidebar() {
                 <button
                   type="button"
                   className="mt-3 inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full"
-                  onClick={() => setIsAddRuleOpen(true)}
+                  onClick={() => setIsAddAutomationOpen(true)}
                 >
-                  Add Rule
+                  Add Automation
                 </button>
               </div>
             </div>
