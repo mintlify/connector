@@ -120,7 +120,7 @@ export default function AddDocument({ isOpen, setIsOpen }: AddDocumentProps) {
                             <>
                               {active && action.onActive()}
                               {action.icon('h-4 w-4 flex-none fill-current', active)}
-                              <span className="ml-3 flex-auto truncate">{action.name}</span>
+                              <span className="ml-2 flex-auto truncate">{action.name}</span>
                               <span
                                 className={classNames(
                                   'ml-3 flex-none text-xs font-semibold',

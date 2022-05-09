@@ -3,14 +3,31 @@ import { Listbox, Transition } from '@headlessui/react'
 import { classNames } from '../../helpers/functions'
 import { getAutomationTypeIcon } from '../../helpers/Icons';
 import { AutomationType } from '../../pages/automations';
-import { BellIcon, CheckIcon, MailIcon, SelectorIcon } from '@heroicons/react/solid';
+import { BellIcon, CheckIcon, HashtagIcon, LinkIcon, MailIcon, SelectorIcon } from '@heroicons/react/solid';
 import { automationMap } from './AddAutomation';
 
 const repos = [
-  { id: 0, name: 'Select repo', icon: <img src="/assets/integrations/github.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" />, isDefault: true },
-  { id: 1, name: 'writer', icon: <img src="/assets/integrations/github.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" /> },
-  { id: 2, name: 'connect', icon: <img src="/assets/integrations/github.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" /> },
-  { id: 3, name: 'backend', icon: <img src="/assets/integrations/github.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" /> },
+  {
+    id: 0,
+    name: 'Select repo',
+    icon: <img src="/assets/integrations/github.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" />,
+    isDefault: true
+  },
+  {
+    id: 1, name: 'writer',
+    icon: <img src="/assets/integrations/github.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" />
+  },
+  {
+    id: 2,
+    name: 'connect',
+    icon: <img src="/assets/integrations/github.svg" alt="Slack"
+    className="flex-shrink-0 h-4 w-4" />
+  },
+  {
+    id: 3,
+    name: 'backend',
+    icon: <img src="/assets/integrations/github.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" />
+  },
 ]
 
 const alertChannels = [
@@ -19,21 +36,41 @@ const alertChannels = [
     name: 'Select method',
     icon: <BellIcon className="flex-shrink-0 h-4 w-4 text-gray-700" />,
     isDefault: true,
+    destination: { icon: MailIcon },
+    defaultName: 'message',
   },
   {
     id: 1,
     name: 'Email',
     icon: <MailIcon className="flex-shrink-0 h-4 w-4 text-gray-700" />,
+    destination: {
+      title: 'Email address',
+      placeholder: 'you@company.com',
+      icon: MailIcon,
+    },
+    defaultName: 'Send email',
   },
   {
     id: 2,
     name: 'Slack',
     icon: <img src="/assets/integrations/slack.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" />,
+    destination: {
+      title: 'Channel',
+      placeholder: 'doc-updates',
+      icon: HashtagIcon,
+    },
+    defaultName: 'Send Slack message',
   },
   {
     id: 3,
     name: 'Webhook',
-    icon: <img src="/assets/integrations/slack.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" />,
+    icon: <img src="/assets/integrations/webhook.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" />,
+    destination: {
+      title: 'Endpoint URL',
+      placeholder: 'https://example.com/webhook',
+      icon: LinkIcon,
+    },
+    defaultName: 'Call API endpoint',
   }
 ]
 
@@ -42,6 +79,8 @@ export default function AutomationConfig({ automationType, onCancel }: { automat
   const [selectedChannel, setSelectedChannel] = useState(alertChannels[0]);
 
   const ruleData = automationMap[automationType];
+
+  const namePlaceholder = `${selectedChannel.defaultName} when ${selectedRepo.name} changes`;
 
   const onBackButton = () => {
     onCancel();
@@ -68,7 +107,7 @@ export default function AutomationConfig({ automationType, onCancel }: { automat
                 <>
                   <Listbox.Label className="block text-sm font-medium text-gray-700">Trigger</Listbox.Label>
                   <div className="mt-1 relative">
-                    <Listbox.Button className="relative w-full bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-pointer focus:outline-none sm:text-sm">
+                    <Listbox.Button className="relative w-full bg-white hover:bg-gray-50 border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-pointer focus:outline-none sm:text-sm">
                       <span className="flex items-center">
                         {selectedRepo.icon}
                         <span className="ml-3 block truncate">{selectedRepo.name}</span>
@@ -92,7 +131,7 @@ export default function AutomationConfig({ automationType, onCancel }: { automat
                             className={({ active }) =>
                               classNames(
                                 active ? 'text-white bg-primary' : 'text-gray-900',
-                                'cursor-default select-none relative py-2 pl-3 pr-9'
+                                'hover:cursor-pointer select-none relative py-2 pl-3 pr-9'
                               )
                             }
                             value={repo}
@@ -102,7 +141,7 @@ export default function AutomationConfig({ automationType, onCancel }: { automat
                                 <div className="flex items-center">
                                   {repo.icon}
                                   <span
-                                    className={classNames(selected ? 'font-semibold' : 'font-normal', 'ml-3 block truncate')}
+                                    className={classNames(selected ? 'font-medium' : 'font-normal', 'ml-3 block truncate')}
                                   >
                                     {repo.name}
                                   </span>
@@ -111,7 +150,7 @@ export default function AutomationConfig({ automationType, onCancel }: { automat
                                 {selected ? (
                                   <span
                                     className={classNames(
-                                      active ? 'text-white' : 'text-indigo-600',
+                                      active ? 'text-white' : 'text-primary',
                                       'absolute inset-y-0 right-0 flex items-center pr-4'
                                     )}
                                   >
@@ -156,7 +195,7 @@ export default function AutomationConfig({ automationType, onCancel }: { automat
                 <>
                   <Listbox.Label className="block text-sm font-medium text-gray-700">Send alert to</Listbox.Label>
                   <div className="mt-1 relative">
-                    <Listbox.Button className="relative w-full bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-pointer focus:outline-none sm:text-sm">
+                    <Listbox.Button className="relative w-full bg-white hover:bg-gray-50 border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-pointer focus:outline-none sm:text-sm">
                       <span className="flex items-center">
                         {selectedChannel.icon}
                         <span className="ml-3 block truncate">{selectedChannel.name}</span>
@@ -180,7 +219,7 @@ export default function AutomationConfig({ automationType, onCancel }: { automat
                             className={({ active }) =>
                               classNames(
                                 active ? 'text-white bg-primary' : 'text-gray-900',
-                                'cursor-default select-none relative py-2 pl-3 pr-9'
+                                'hover:cursor-pointer select-none relative py-2 pl-3 pr-9'
                               )
                             }
                             value={channel}
@@ -190,7 +229,7 @@ export default function AutomationConfig({ automationType, onCancel }: { automat
                                 <div className="flex items-center">
                                   {channel.icon}
                                   <span
-                                    className={classNames(selected ? 'font-semibold' : 'font-normal', 'ml-3 block truncate')}
+                                    className={classNames(selected ? 'font-medium' : 'font-normal', 'ml-3 block truncate')}
                                   >
                                     {channel.name}
                                   </span>
@@ -199,7 +238,7 @@ export default function AutomationConfig({ automationType, onCancel }: { automat
                                 {selected ? (
                                   <span
                                     className={classNames(
-                                      active ? 'text-white' : 'text-indigo-600',
+                                      active ? 'text-white' : 'text-primary',
                                       'absolute inset-y-0 right-0 flex items-center pr-4'
                                     )}
                                   >
@@ -221,18 +260,16 @@ export default function AutomationConfig({ automationType, onCancel }: { automat
               !selectedChannel?.isDefault && <div>
                 <div className="mt-4">
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email
+                {selectedChannel.destination.title}
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <MailIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                  <selectedChannel.destination.icon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                 </div>
                 <input
-                  type="email"
-                  name="email"
-                  id="email"
+                  type="text"
                   className="block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
-                  placeholder="you@example.com"
+                  placeholder={selectedChannel.destination.placeholder}
                 />
               </div>
             </div>
@@ -250,8 +287,8 @@ export default function AutomationConfig({ automationType, onCancel }: { automat
                   type="text"
                   name="name"
                   id="name"
-                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                  placeholder="Send slack alert when writer changes"
+                  className="shadow-sm focus:ring-primary block w-full sm:text-sm border-gray-300 rounded-md"
+                  placeholder={namePlaceholder}
                 />
               </div>
             </div>
