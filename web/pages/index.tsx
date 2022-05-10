@@ -115,7 +115,7 @@ const Home: NextPage = () => {
     <ClearSelectedFrame />
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
       {/* Left sidebar & main wrapper */}
-      <div className="flex-1 min-w-0 xl:flex">
+      <div className="flex-1 min-w-0 xl:flex z-10">
         <Sidebar />
         {/* Projects List */}
         <div className="bg-white lg:min-w-0 lg:flex-1">
@@ -333,11 +333,7 @@ const Home: NextPage = () => {
                 </li>
               ))}
             </ul>
-            <div className="py-4 text-sm border-t border-gray-200">
-              <a href="#" className="text-primary font-semibold hover:text-hover">
-                Go to documentation <span aria-hidden="true">&rarr;</span>
-              </a>
-            </div>
+            <div className="py-4 text-sm border-t border-gray-200"></div>
           </div>
         </div>
       </div>
