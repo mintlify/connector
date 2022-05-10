@@ -8,7 +8,5 @@ cron.schedule('* * * * *', async () => {
     org: 'mintlify'
   });
 
-  console.log('Changing cron stuffff');
-
   console.log(`scan completed. Found ${diffAlerts.length} alerts`);
 });
