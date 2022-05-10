@@ -25,7 +25,7 @@ export const getChangesInRange = (changes: Change[], lineRange: LineRange): Chan
     return changes.filter((change) => change.line >= lineRange.start && change.line <= lineRange.end)
 }
 
-const getLineRange = (content: string, substring: string): LineRange => {
+export const getLineRange = (content: string, substring: string): LineRange => {
     const indexOfSubstring = content.indexOf(substring);
     const upToindex = content.substring(0, indexOfSubstring);
     const startLine = upToindex.split('\n').length;

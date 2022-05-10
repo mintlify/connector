@@ -70,17 +70,16 @@ export const getAlerts = async (context: Context, files: FileInfo[]): Promise<Al
   const alertsRequest: AlertsRequest = { files, owner, repo }
   const v01Promise = axios.post(`${ENDPOINT}/routes/v01/`, alertsRequest);
   const previousAlertsPromise = getReviewComments(context);
-  // const alertsPromise = axios.post(`${ENDPOINT}/routes/alerts/`, alertsRequest);
-  // const [v01Response, previousAlerts, alertsResponse] = await Promise.all([v01Promise, previousAlertsPromise, alertsPromise]);
-  const [v01Response, previousAlerts] = await Promise.all([v01Promise, previousAlertsPromise]);
+  const alertsPromise = axios.post(`${ENDPOINT}/routes/alerts/`, alertsRequest);
+  const [v01Response, alertsResponse, previousAlerts] = await Promise.all([v01Promise, alertsPromise, previousAlertsPromise]);
   return {
-    incomingAlerts: v01Response.data.alerts,
+    incomingAlerts: v01Response.data.alerts.concat(alertsResponse.data.alerts),
     previousAlerts,
     newLinksMessage: v01Response.data.newLinksMessage
   }
 }
 
-export const potentiallCreateNewLinksComment = async (context: Context, newLinksMessage: string) => {
+export const potentiallyCreateNewLinksComment = async (context: Context, newLinksMessage: string) => {
   if (newLinksMessage == null) {
     return;
   }
@@ -114,22 +113,19 @@ export const createReviewCommentsFromAlerts = async (context: Context, alerts: A
   const reviewCommentPromises = alerts.map((alert) => {
     const patchLineRanges = filesPatchLineRangesMap[alert.filename];
     if (patchLineRanges == null) return null;
-    if (alert?.lineRange != null) {
-      const encompassedRangeAndSide = getEncompassingRangeAndSideForAlert(patchLineRanges, alert.lineRange);
-      return context.octokit.pulls.createReviewComment({
-        owner,
-        repo,
-        pull_number: pullNumber,
-        commit_id: commitId,
-        body: alert.message,
-        path: alert.filename,
-        start_line: encompassedRangeAndSide.start.line,
-        start_side: encompassedRangeAndSide.start.side,
-        line: encompassedRangeAndSide.end.line,
-        side: encompassedRangeAndSide.end.side
-      })
-    }
-    return null;
+    const encompassedRangeAndSide = getEncompassingRangeAndSideForAlert(patchLineRanges, alert.lineRange);
+    return context.octokit.pulls.createReviewComment({
+      owner,
+      repo,
+      pull_number: pullNumber,
+      commit_id: commitId,
+      body: alert.message,
+      path: alert.filename,
+      start_line: encompassedRangeAndSide.start.line,
+      start_side: encompassedRangeAndSide.start.side,
+      line: encompassedRangeAndSide.end.line,
+      side: encompassedRangeAndSide.end.side
+    })
   });
   const reviewComments = await Promise.all(reviewCommentPromises);
   return reviewComments;
