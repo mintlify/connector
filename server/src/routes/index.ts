@@ -22,7 +22,6 @@ headRouter.get('/', (_, res) => {
 });
 
 // Primary app
-headRouter.use('/docs', docsRouter);
 headRouter.use('/alerts', alertsRouter);
 headRouter.use('/events', eventsRouter);
 headRouter.use('/links', linksRouter);
