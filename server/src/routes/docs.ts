@@ -5,6 +5,37 @@ import axios from 'axios';
 
 const docsRouter = express.Router();
 
+export const createDocFromUrl = async (url: string, org: string) => {
+  const { content, method, title, favicon } = await getDataFromWebpage(url);
+  let foundFavicon = favicon;
+  if (!foundFavicon) {
+    try {
+      const faviconRes = await axios.get(`https://s2.googleusercontent.com/s2/favicons?sz=128&domain_url=${url}`);
+      foundFavicon = faviconRes.request.res.responseUrl;
+    }
+    catch {
+      foundFavicon = undefined;
+    }
+  }
+  const doc = await Doc.findOneAndUpdate({
+    org,
+    url
+  },
+  {
+    org,
+    url,
+    method,
+    content,
+    title,
+    favicon
+  },
+  {
+    upsert: true
+  });
+
+  return { content, doc }
+}
+
 docsRouter.get('/', async (req, res) => {
   const { org } = req.query;
   try {
@@ -54,32 +85,7 @@ docsRouter.post('/', async (req, res) => {
   const { url } = req.body;
   const org = 'mintlify';
   try {
-    const { content, method, title, favicon } = await getDataFromWebpage(url);
-    let foundFavicon = favicon;
-    if (!foundFavicon) {
-      try {
-        const faviconRes = await axios.get(`https://s2.googleusercontent.com/s2/favicons?sz=128&domain_url=${url}`);
-        foundFavicon = faviconRes.request.res.responseUrl;
-      }
-      catch {
-        foundFavicon = undefined;
-      }
-    }
-    await Doc.findOneAndUpdate({
-      org,
-      url
-    },
-    {
-      org,
-      url,
-      method,
-      content,
-      title,
-      favicon
-    },
-    {
-      upsert: true
-    });
+    const { content } = await createDocFromUrl(url, org);
     res.send({content});
   } catch (error) {
     res.status(500).send({error})

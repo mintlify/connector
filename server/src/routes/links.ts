@@ -1,19 +1,26 @@
 import express from 'express';
-import Doc, { DocType } from '../models/Doc';
 import Code, { CodeType } from '../models/Code';
+import { createDocFromUrl } from './docs';
 
 const linksRouter = express.Router();
 
-export type Link = {
-    doc: DocType;
-    codes: CodeType[];
-}
+linksRouter.put('/', async (req, res) => {
+    const { docId, codes } = req.body;
+    const codePromises: Promise<CodeType>[] = codes.map((code: CodeType) => {
+        code.doc = docId;
+        return Code.create(code);
+    });
+    await Promise.all(codePromises);
+    return res.send({success: true});
+});
 
 linksRouter.post('/', async (req, res) => {
-    const { doc, codes } = req.body;
-    const docResponse = await Doc.create(doc);
+    const { url, org, codes } = req.body;
+
+    const { doc } = await createDocFromUrl(url, org);
+
     const codePromises: Promise<CodeType>[] = codes.map((code: CodeType) => {
-        code.doc = docResponse.id;
+        code.doc = doc._id;
         return Code.create(code);
     });
     await Promise.all(codePromises);
