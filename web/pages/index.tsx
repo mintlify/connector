@@ -258,7 +258,7 @@ const Home: NextPage = () => {
                     <div className="flex items-center space-x-2">
                       <div className="flex flex-shrink-0 space-x-1">
                         {doc.code.map((code) => (
-                          <Tooltip key={code._id} message={code.file}>
+                          <Tooltip key={code._id} message={`Connected to ${code.file}`}>
                             <Link href={code.url}>
                               <a className="hover:opacity-75" target="_blank">
                                 {getConnectionIcon(6, 4)}
