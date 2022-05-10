@@ -44,6 +44,9 @@ docsRouter.get('/', async (req, res) => {
         $match: { org }
       },
       {
+        $sort: { lastUpdatedAt: -1 },
+      },
+      {
         $lookup: {
           from: "code",
           let: { doc: "$_id" },

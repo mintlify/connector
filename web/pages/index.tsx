@@ -321,13 +321,13 @@ const Home: NextPage = () => {
                             <div className="flex items-center space-x-1 text-green-700">
                               <PlusIcon className="h-4 w-4" />
                               <p className="text-sm">
-                                {countTotalChanges(event.change).added} {countTotalChanges(event.change).added > 1 ? 'words' : 'word'}
+                                {countTotalChanges(event.change).added} {countTotalChanges(event.change).added > 1 ? 'changes' : 'change'}
                               </p>
                             </div>
                             <div className="flex items-center space-x-1 text-red-700">
                               <MinusIcon className="h-4 w-4" />
                               <p className="text-sm">
-                                {countTotalChanges(event.change).removed} {countTotalChanges(event.change).removed > 1 ? 'words' : 'word'}
+                                {countTotalChanges(event.change).removed} {countTotalChanges(event.change).removed > 1 ? 'changes' : 'change'}
                               </p>
                             </div>
                           </div>
