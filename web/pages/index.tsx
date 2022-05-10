@@ -19,6 +19,8 @@ import timeAgo from '../services/timeago'
 import { API_ENDPOINT } from '../helpers/api'
 import Tooltip from '../components/Tooltip'
 import Head from 'next/head'
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 
 type Code = {
   _id: string,
@@ -88,6 +90,7 @@ const Home: NextPage = () => {
   const [docs, setDocs] = useState<Doc[]>();
   const [events, setEvents] = useState<Event[]>();
   const [selectedDoc, setSelectedDoc] = useState<Doc>();
+  const [isAddingDoc, setIsAddingDoc] = useState<boolean>(false);
 
   useEffect(() => {
     axios.get(`${API_ENDPOINT}/routes/docs?org=mintlify`)
@@ -103,7 +106,7 @@ const Home: NextPage = () => {
         const { events } = eventsResponse.data;
         setEvents(events);
       });
-  }, [selectedDoc]);
+  }, [selectedDoc, isAddingDoc]);
 
   const ClearSelectedFrame = () => {
     if (!selectedDoc) return null;
@@ -121,7 +124,10 @@ const Home: NextPage = () => {
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
       {/* Left sidebar & main wrapper */}
       <div className="flex-1 min-w-0 xl:flex z-10">
-        <Sidebar />
+        <Sidebar
+          isAddingDoc={isAddingDoc}
+          setIsAddingDoc={setIsAddingDoc}
+        />
         {/* Projects List */}
         <div className="bg-white lg:min-w-0 lg:flex-1">
           <ClearSelectedFrame />
@@ -181,6 +187,7 @@ const Home: NextPage = () => {
             </div>
           </div>
           <ul role="list" className="relative z-0">
+            { isAddingDoc && <LoadingItem /> }
             {docs?.map((doc) => (
               <div key={doc.id}>
               <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div>
@@ -345,6 +352,41 @@ const Home: NextPage = () => {
     </div>
     </Layout>
     </>
+  )
+}
+
+const LoadingItem = () => {
+  return (
+    <div>
+      <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div>
+      <li
+        className="relative pl-4 pr-6 py-5 bg-gray-50 sm:pl-6 lg:pl-8 xl:pl-6 cursor-pointer"
+      >
+        <div className="flex items-center justify-between space-x-4">
+          {/* Repo name and link */}
+          <div className="min-w-0 space-y-2">
+            <div className="flex items-center space-x-3">
+              <span className="block">
+                <h2 className="text-sm font-medium">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-56">
+                      <Skeleton />
+                    </div>
+                  </div>
+                </h2>
+              </span>
+            </div>
+            <a className="relative group flex items-center space-x-2.5">
+              <span className="flex items-center space-x-2.5 text-sm text-gray-500 truncate">
+                <div className="w-32">
+                  <Skeleton />
+                </div>
+              </span>
+            </a>
+          </div>
+        </div>
+      </li>
+      </div>
   )
 }
 
