@@ -4,6 +4,7 @@ import { classNames } from "../helpers/functions";
 import Layout from "../components/layout";
 import { getAutomationTypeIcon, getTypeIcon } from "../helpers/Icons";
 import { Switch } from "@headlessui/react";
+import Head from "next/head";
 
 export type SourceType = 'github' | 'doc';
 export type DestinationType = 'doc' | 'slack' | 'email';
@@ -88,6 +89,10 @@ const integrations = [
 
 const Automations: NextPage = () => {
   return (
+    <>
+    <Head>
+      <title>Automations</title>
+    </Head>
     <Layout>
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
       {/* Left sidebar & main wrapper */}
@@ -185,6 +190,7 @@ const Automations: NextPage = () => {
       </div>
     </div>
     </Layout>
+    </>
   )
 };
 

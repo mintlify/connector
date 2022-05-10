@@ -18,6 +18,7 @@ import { useEffect, useState } from 'react'
 import timeAgo from '../services/timeago'
 import { API_ENDPOINT } from '../helpers/api'
 import Tooltip from '../components/Tooltip'
+import Head from 'next/head'
 
 type Code = {
   _id: string,
@@ -111,6 +112,10 @@ const Home: NextPage = () => {
   }
 
   return (
+    <>
+    <Head>
+      <title>Mintlify Dashboard</title>
+    </Head>
     <Layout>
     <ClearSelectedFrame />
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
@@ -339,6 +344,7 @@ const Home: NextPage = () => {
       </div>
     </div>
     </Layout>
+    </>
   )
 }
 
