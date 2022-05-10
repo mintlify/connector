@@ -56,6 +56,7 @@ type ContentData = {
     title: string;
     content: string;
     favicon?: string;
+    alessio?: string;
 }
 
 export const getDataFromWebpage = async (url: string, authConnector?: AuthConnectorType): Promise<ContentData> => {
