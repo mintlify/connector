@@ -1,7 +1,20 @@
 import { LockClosedIcon } from '@heroicons/react/solid'
 import Link from 'next/link'
+import axios from 'axios';
+import { useState } from 'react';
 
 export default function SignIn() {
+  const [email, setEmail] = useState('');
+
+  const onSubmit = () => {
+    axios.post('/api/login', { email })
+      .then(res => {
+        console.log(res);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
   return (
     <>
       <div className="min-h-screen flex items-center bg-gray-50 justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -54,6 +67,8 @@ export default function SignIn() {
                   Email address
                 </label>
                 <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   id="email-address"
                   name="email"
                   type="email"
@@ -83,6 +98,7 @@ export default function SignIn() {
               <button
                 type="submit"
                 className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                onClick={onSubmit}
               >
                 <span className="absolute left-0 inset-y-0 flex items-center pl-3">
                   <LockClosedIcon className="h-5 w-5 text-secondary group-hover:text-primary" aria-hidden="true" />

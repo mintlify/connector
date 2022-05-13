@@ -22,7 +22,7 @@ const navigation = [
 
 const userNavigation = [
   { name: 'Settings', href: '/settings' },
-  { name: 'Sign out', href: '/' },
+  { name: 'Sign out', href: '/api/logout' },
 ]
 
 const navButtonClass = (isActive: boolean) => {
@@ -34,7 +34,7 @@ const navButtonClass = (isActive: boolean) => {
 export default function Navbar() {
   const router = useRouter();
   return (
-    <Disclosure as="nav" className="bg-background z-10">
+    <Disclosure as="nav" className="bg-background z-20">
       {({ open }) => (
         <>
           <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
