@@ -29,9 +29,3 @@ export const track = (userId: string, event: string, properties?: Properties) =>
     });
   })
 }
-
-export const trackOpen = (fields: any) => {
-  runIfProduction(() => {
-    analytics.track(fields);
-  });
-}
