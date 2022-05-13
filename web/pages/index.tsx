@@ -1,4 +1,4 @@
-import type { NextPage } from 'next'
+import type { GetServerSideProps, NextPage } from 'next'
 import axios from 'axios'
 import { Menu } from '@headlessui/react'
 import {
@@ -19,8 +19,10 @@ import timeAgo from '../services/timeago'
 import { API_ENDPOINT } from '../helpers/api'
 import Tooltip from '../components/Tooltip'
 import Head from 'next/head'
-import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
+import LoadingItem from '../components/LoadingItem'
+import { withSession } from '../lib/withSession'
+import SignIn from '../components/SignIn'
 
 type Code = {
   _id: string,
@@ -86,7 +88,14 @@ const countTotalChanges = (change: Change[]) => {
   }
 }
 
-const Home: NextPage = () => {
+type HomeProps = {
+  user: {
+    user_id: string
+  }
+}
+
+export default function Home(props: HomeProps) {
+  const { user } = props;
   const [docs, setDocs] = useState<Doc[]>();
   const [events, setEvents] = useState<Event[]>();
   const [selectedDoc, setSelectedDoc] = useState<Doc>();
@@ -107,6 +116,10 @@ const Home: NextPage = () => {
         setEvents(events);
       });
   }, [selectedDoc, isAddingDoc]);
+
+  if (!user) {
+    return <SignIn />
+  }
 
   const ClearSelectedFrame = () => {
     if (!selectedDoc) return null;
@@ -355,39 +368,10 @@ const Home: NextPage = () => {
   )
 }
 
-const LoadingItem = () => {
-  return (
-    <div>
-      <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div>
-      <li
-        className="relative pl-4 pr-6 py-5 bg-gray-50 sm:pl-6 lg:pl-8 xl:pl-6 cursor-pointer"
-      >
-        <div className="flex items-center justify-between space-x-4">
-          {/* Repo name and link */}
-          <div className="min-w-0 space-y-2">
-            <div className="flex items-center space-x-3">
-              <span className="block">
-                <h2 className="text-sm font-medium">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-56">
-                      <Skeleton />
-                    </div>
-                  </div>
-                </h2>
-              </span>
-            </div>
-            <a className="relative group flex items-center space-x-2.5">
-              <span className="flex items-center space-x-2.5 text-sm text-gray-500 truncate">
-                <div className="w-32">
-                  <Skeleton />
-                </div>
-              </span>
-            </a>
-          </div>
-        </div>
-      </li>
-      </div>
-  )
+const getServerSidePropsHandler: GetServerSideProps = async ({req}: any) => {
+  const user = req.session.get('user') ?? null;
+  const props = {user};
+  return {props};
 }
 
-export default Home
+export const getServerSideProps = withSession(getServerSidePropsHandler);
