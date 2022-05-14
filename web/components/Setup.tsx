@@ -2,7 +2,11 @@ import { UserAddIcon } from '@heroicons/react/solid'
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
-export default function Setup() {
+type SetupProps = {
+  email: string
+}
+
+export default function Setup({ email }: SetupProps) {
   const router = useRouter();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -12,7 +16,7 @@ export default function Setup() {
     router.push({
       pathname: '/api/create',
       query: {
-        email: 'han@mintlify.com',
+        email,
         firstName,
         lastName,
         orgName,
@@ -34,7 +38,7 @@ export default function Setup() {
             <p className="mt-2 text-center text-sm text-gray-600">
               Signed in with{' '}
               <a href="#" className="font-medium text-primary hover:text-hover">
-                han@mintlify.com
+                {email}
               </a>
             </p>
           </div>

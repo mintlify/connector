@@ -89,7 +89,8 @@ const countTotalChanges = (change: Change[]) => {
 type HomeProps = {
   user: {
     user_id: string,
-    user: any,
+    email: string,
+    user?: any,
   }
 }
 
@@ -121,7 +122,7 @@ export default function Home(props: HomeProps) {
   }
 
   if (user.user == null) {
-    return <Setup/>;
+    return <Setup email={user.email} />;
   }
 
   const ClearSelectedFrame = () => {
