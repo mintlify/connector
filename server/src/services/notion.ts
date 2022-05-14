@@ -121,9 +121,7 @@ export const getNotionAccessTokenFromCode = async (code: string): Promise<Notion
             { headers: { 'Authorization': `Basic ${encodedToken}` } }
         );
         return { response: data }
-    }
-
-    catch (error: any) {
+    } catch (error: any) {
         return { error }
     }
 }
