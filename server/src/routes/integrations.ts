@@ -1,0 +1,69 @@
+import { Router } from 'express';
+import Org from '../models/Org';
+import { getGitHubAccessTokenFromCode } from '../services/github';
+import { getNotionAccessTokenFromCode, getNotionInstallURL } from '../services/notion';
+
+const integrationsRouter = Router();
+
+integrationsRouter.get('/github/install', (req, res) => {
+  const { org } = req.query;
+  if (!org) {
+    return res.send('Organization ID is required');
+  }
+
+  const state = { org }
+  const encodedState = encodeURIComponent(JSON.stringify(state));
+  const urlParsed = new URL('https://github.com/apps/mintlify/installations/new');
+  urlParsed.searchParams.append('state', encodedState);
+
+  const url = urlParsed.toString();
+  return res.redirect(url);
+})
+
+integrationsRouter.get('/github/authorization', async (req, res) => {
+  const { code, state } = req.query;
+  if (code == null) return res.status(403).send('Invalid or missing grant code');
+  if (state == null) return res.status(403).send('No state provided');
+  const parsedState = JSON.parse(decodeURIComponent(state as string));
+
+  const { response, error } = await getGitHubAccessTokenFromCode(code as string, parsedState);
+
+  if (error) return res.status(403).send('Invalid grant code');
+
+  const { org } = parsedState;
+
+  // Add notion credentials
+  await Org.findByIdAndUpdate(org, { "integrations.github": { ...response }})
+  return res.redirect('https://notion.so');
+});
+
+integrationsRouter.get('/notion/install', (req, res) => {
+  const { org } = req.query;
+  if (!org) {
+    return res.send('Organization ID is required');
+  }
+
+  const state = { org }
+
+  const encodedState = encodeURIComponent(JSON.stringify(state));
+  const url = getNotionInstallURL(encodedState);
+  return res.redirect(url);
+});
+
+integrationsRouter.get('/notion/authorization', async (req, res) => {
+  const { code, state } = req.query;
+  if (code == null) return res.status(403).send('Invalid or missing grant code');
+
+  const { response, error } = await getNotionAccessTokenFromCode(code as string);
+
+  if (error) return res.status(403).send('Invalid grant code')
+  if (state == null) return res.status(403).send('No state provided');
+
+  const  { org } = JSON.parse(decodeURIComponent(state as string));
+
+  // Add notion credentials
+  await Org.findByIdAndUpdate(org, { "integrations.notion": { ...response } })
+  return res.redirect('https://notion.so');
+});
+
+export default integrationsRouter;

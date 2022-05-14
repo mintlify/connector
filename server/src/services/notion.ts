@@ -3,11 +3,12 @@ import dotenv from 'dotenv';
 import axios from 'axios';
 import { Link } from '../helpers/github/types';
 import { urlify } from '../helpers/routes/links';
+import { ENDPOINT } from '../helpers/github/octokit';
 
 dotenv.config();
 
 const clientId = 'ec770c41-07f8-44bd-a4d8-66d30e9786c8';
-const redirectUrl = `https://connect.mintlify.com/routes/notion/authorization`;
+const redirectUrl = `${ENDPOINT}/routes/notion/authorization`;
 
 export const isNotionUrl = (url: URL): boolean => url.host === 'www.notion.so' || url.host === 'notion.so'
 

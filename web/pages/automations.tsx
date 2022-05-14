@@ -82,25 +82,25 @@ export default function Automations({ userSession }: { userSession: UserSession 
       id: 'github',
       name: 'GitHub',
       imageUrl: '/assets/integrations/github.svg',
-      href: `${API_ENDPOINT}/routes/notion/install`,
+      href: `${API_ENDPOINT}/routes/integrations/github/install?org=${user.org._id}`,
     },
     {
       id: 'vscode',
       name: 'VS Code',
       imageUrl: '/assets/integrations/vscode.svg',
-      href: `${API_ENDPOINT}/routes/notion/install`,
+      href: ``,
     },
     {
       id: 'slack',
       name: 'Slack',
       imageUrl: '/assets/integrations/slack.svg',
-      href: `${API_ENDPOINT}/routes/notion/install`,
+      href: ``,
     },
     {
       id: 'notion',
       name: 'Notion',
       imageUrl: '/assets/integrations/notion.svg',
-      href: `${API_ENDPOINT}/routes/notion/install?org=${user.org._id}`,
+      href: `${API_ENDPOINT}/routes/integrations/notion/install?org=${user.org._id}`,
     },
   ]
 

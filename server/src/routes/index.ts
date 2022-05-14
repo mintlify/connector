@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import scanRouter from './scan';
-import notionRouter from './notion';
+import integrationsRouter from './integrations';
 import v01Router from './v01';
 import docsRouter from './docs';
 import alertsRouter from './alerts';
@@ -31,7 +31,7 @@ headRouter.use('/links', linksRouter);
 // GitHub
 headRouter.use('/v01', v01Router);
 // Integrations
-headRouter.use('/notion', notionRouter);
+headRouter.use('/integrations', integrationsRouter);
 // Cron job
 headRouter.use('/scan', scanRouter);
 
