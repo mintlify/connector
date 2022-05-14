@@ -8,6 +8,7 @@ import docsRouter from './docs';
 import alertsRouter from './alerts';
 import eventsRouter from './events';
 import linksRouter from './links';
+import userRouter from './user';
 
 const headRouter = express.Router();
 
@@ -22,6 +23,7 @@ headRouter.get('/', (_, res) => {
 });
 
 // Primary app
+headRouter.use('/user', userRouter);
 headRouter.use('/docs', docsRouter);
 headRouter.use('/alerts', alertsRouter);
 headRouter.use('/events', eventsRouter);

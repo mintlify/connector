@@ -23,6 +23,7 @@ import 'react-loading-skeleton/dist/skeleton.css'
 import LoadingItem from '../components/LoadingItem'
 import { withSession } from '../lib/withSession'
 import SignIn from '../components/SignIn'
+import Setup from '../components/Setup'
 
 type Code = {
   _id: string,
@@ -87,7 +88,8 @@ const countTotalChanges = (change: Change[]) => {
 
 type HomeProps = {
   user: {
-    user_id: string
+    user_id: string,
+    user: any,
   }
 }
 
@@ -116,6 +118,10 @@ export default function Home(props: HomeProps) {
 
   if (!user) {
     return <SignIn />
+  }
+
+  if (user.user == null) {
+    return <Setup/>;
   }
 
   const ClearSelectedFrame = () => {

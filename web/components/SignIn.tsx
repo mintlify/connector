@@ -87,20 +87,6 @@ export default function SignIn() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    className="h-4 w-4 text-primary focus:ring-0 border-gray-300 rounded"
-                  />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                    I agree to the <Link href="#"><span className="text-primary font-medium cursor-pointer">terms and service</span></Link>
-                  </label>
-                </div>
-              </div>
-
               <div>
                 <button
                   type="submit"

@@ -1,4 +1,5 @@
 import { NextApiResponse } from "next";
+import { getUserFromUserId } from "../../../helpers/user";
 import { loadStytch } from "../../../lib/loadStytch";
 import { withSession } from "../../../lib/withSession";
 
@@ -9,9 +10,11 @@ async function handler(req: any, res: NextApiResponse) {
   
   try {
     const response = await client.magicLinks.authenticate(token);
+    const user = await getUserFromUserId(response.user_id);
     req.session.destroy();
     req.session.set('user', {
       user_id: response.user_id,
+      user,
     });
 
     await req.session.save();
