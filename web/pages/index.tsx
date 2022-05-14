@@ -57,14 +57,19 @@ type Event = {
   remove?: Object,
 }
 
-type HomeProps = {
-  user: {
-    user_id: string,
-    email: string,
-    firstName?: string,
-    lastName?: string,
-    user?: any,
-  }
+export type UserSession = {
+  user_id: string,
+  email: string,
+  firstName?: string,
+  lastName?: string,
+  user: User
+}
+
+export type User = {
+  userId: string,
+  email: string,
+  firstName: string,
+  lastName: string,
 }
 
 const listMenu = [
@@ -96,19 +101,18 @@ const countTotalChanges = (change: Change[]) => {
   }
 }
 
-export default function Home(props: HomeProps) {
-  const { user } = props;
+export default function Home({ userSession }: { userSession: UserSession }) {
   const [docs, setDocs] = useState<Doc[]>();
   const [events, setEvents] = useState<Event[]>();
   const [selectedDoc, setSelectedDoc] = useState<Doc>();
   const [isAddingDoc, setIsAddingDoc] = useState<boolean>(false);
 
   useEffect(() => {
-    if (user == null) {
+    if (userSession == null) {
       return;
     }
 
-    const userId = user.user_id;
+    const userId = userSession.user_id;
 
     axios.get(`${API_ENDPOINT}/routes/docs?userId=${userId}`)
       .then((docsResponse) => {
@@ -123,14 +127,14 @@ export default function Home(props: HomeProps) {
         const { events } = eventsResponse.data;
         setEvents(events);
       });
-  }, [user, selectedDoc, isAddingDoc]);
+  }, [userSession, selectedDoc, isAddingDoc]);
 
-  if (!user) {
+  if (!userSession) {
     return <SignIn />
   }
 
-  if (user.user == null) {
-    return <Setup email={user.email} firstName={user.firstName} lastName={user.lastName} />;
+  if (userSession.user == null) {
+    return <Setup email={userSession.email} firstName={userSession.firstName} lastName={userSession.lastName} />;
   }
 
   const ClearSelectedFrame = () => {
@@ -150,7 +154,7 @@ export default function Home(props: HomeProps) {
       {/* Left sidebar & main wrapper */}
       <div className="flex-1 min-w-0 xl:flex z-10">
         <Sidebar
-          userId={user.user_id}
+          user={userSession.user}
           isAddingDoc={isAddingDoc}
           setIsAddingDoc={setIsAddingDoc}
         />
@@ -382,8 +386,8 @@ export default function Home(props: HomeProps) {
 }
 
 const getServerSidePropsHandler: GetServerSideProps = async ({req}: any) => {
-  const user = req.session.get('user') ?? null;
-  const props = {user};
+  const userSession = req.session.get('user') ?? null;
+  const props = {userSession};
   return {props};
 }
 

@@ -4,16 +4,21 @@ import Link from 'next/link';
 import { useState } from 'react'
 import AddDocument from './commands/AddDocument'
 import AddAutomation from './commands/AddAutomation'
+import { User } from '../pages';
 
 type SidebarProps = {
-  userId: string;
+  user: User;
   isAddingDoc?: boolean;
   setIsAddingDoc?: (isAddingDoc: boolean) => void;
 }
 
-export default function Sidebar({ userId, isAddingDoc, setIsAddingDoc }: SidebarProps) {
+export default function Sidebar({ user, isAddingDoc, setIsAddingDoc }: SidebarProps) {
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
   const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
+
+  const userId = user.userId;
+  const fullName = user.firstName + ' ' + user.lastName;
+
   return (
     <>
     <AddDocument
@@ -42,7 +47,7 @@ export default function Sidebar({ userId, isAddingDoc, setIsAddingDoc }: Sidebar
                   />
                 </div>
                 <div className="space-y-px">
-                  <div className="text-sm font-medium text-gray-900">Han Wang</div>
+                  <div className="text-sm font-medium text-gray-900">{fullName}</div>
                   <a href="#" className="group flex items-center space-x-1 group-hover:text-gray-900">
                     <span className="text-sm text-gray-500 font-medium">
                       Mintlify

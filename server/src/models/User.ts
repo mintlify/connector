@@ -7,6 +7,7 @@ const UserSchema = new Schema({
     lastName: { type: String, required: true },
     email: { type: String, required: true },
     org: { type: mongoose.Schema.Types.ObjectId, required: true },
+    profilePicture: { type: String },
     createdAt: { type: Date, default: Date.now },
     role: { type: String },
 });
