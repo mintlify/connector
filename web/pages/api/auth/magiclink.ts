@@ -1,6 +1,6 @@
 import { NextApiResponse } from "next";
-import { loadStytch } from "../../lib/loadStytch";
-import { withSession } from "../../lib/withSession";
+import { loadStytch } from "../../../lib/loadStytch";
+import { withSession } from "../../../lib/withSession";
 
 async function handler(req: any, res: NextApiResponse) {
   const token = req.query.token as string;
