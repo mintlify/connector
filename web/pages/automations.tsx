@@ -7,6 +7,7 @@ import { Switch } from "@headlessui/react";
 import Head from "next/head";
 import { withSession } from "../lib/withSession";
 import { UserSession } from ".";
+import { CheckCircleIcon } from "@heroicons/react/solid";
 import { API_ENDPOINT } from "../helpers/api";
 import Link from "next/link";
 
@@ -78,26 +79,26 @@ export default function Automations({ userSession }: { userSession: UserSession 
 
   const integrations = [
     {
+      id: 'github',
       name: 'GitHub',
-      installed: false,
       imageUrl: '/assets/integrations/github.svg',
       href: `${API_ENDPOINT}/routes/notion/install`,
     },
     {
+      id: 'vscode',
       name: 'VS Code',
-      installed: true,
       imageUrl: '/assets/integrations/vscode.svg',
       href: `${API_ENDPOINT}/routes/notion/install`,
     },
     {
+      id: 'slack',
       name: 'Slack',
-      installed: false,
       imageUrl: '/assets/integrations/slack.svg',
       href: `${API_ENDPOINT}/routes/notion/install`,
     },
     {
+      id: 'notion',
       name: 'Notion',
-      installed: false,
       imageUrl: '/assets/integrations/notion.svg',
       href: `${API_ENDPOINT}/routes/notion/install?org=${user.org._id}`,
     },
@@ -184,7 +185,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {integrations.map((integration) => (
-              <Link key={integration.name} href={integration.href}>
+              <Link key={integration.id} href={integration.href}>
                 <div
                   className="relative rounded-md border border-gray-200 bg-white px-3 py-2 shadow-sm flex items-center space-x-3 hover:bg-gray-50 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary"
                 >
@@ -195,7 +196,10 @@ export default function Automations({ userSession }: { userSession: UserSession 
                     <a href="#" className="focus:outline-none">
                       <span className="absolute inset-0" aria-hidden="true" />
                       <p className="text-sm font-medium text-gray-900">{integration.name}</p>
-                      <p className="text-xs text-gray-500 truncate">{integration.installed ? 'Installed' : 'Not installed'}</p>
+                      <div className="flex space-x-0.5 items-center">
+                        <p className="text-xs text-gray-500 truncate">{user.org.integrations[integration.id] ? 'Installed' : 'Not installed'}</p>
+                        { user.org.integrations[integration.id] && <CheckCircleIcon className="h-3 w-3 text-green-600" /> }
+                      </div>
                     </a>
                   </div>
                 </div>

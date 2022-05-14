@@ -74,6 +74,7 @@ export type User = {
   org: {
     _id: string,
     name: string,
+    integrations: Record<string, boolean>
   }
 }
 

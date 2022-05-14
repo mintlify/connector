@@ -1,4 +1,3 @@
-// https://www.notion.so/mintlify/Connect-d9d337715f974520a793da685b056415
 import express from 'express';
 import { Alert, AlertsRequest } from '../helpers/github/types';
 import { createNewLinksMessage, getAlertsForAllFiles } from '../helpers/routes/v01Alerts';
