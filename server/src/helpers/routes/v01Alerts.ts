@@ -4,28 +4,27 @@ import getPL from '../../parsing/languages';
 import { formatCode, getTreeSitterProgram } from '../../parsing';
 import { Alert, Link } from '../github/types';
 import { getLinksInFile } from './links';
-import { AuthConnectorType } from '../../models/AuthConnector';
 import { FileInfo } from '../github/patch';
 import { createMessage, getDocumentTitle } from './messages';
 
 
-export const getAlertsForFile = async (file: FileInfo, authConnector?: AuthConnectorType): Promise<Alert[]> => {
+export const getAlertsForFile = async (file: FileInfo): Promise<Alert[]> => {
     const languageId = getLanguageIdByFilename(file.filename);
     const content = formatCode(languageId, file.content);
     const pl = getPL(languageId);
     const tree = getTreeSitterProgram(content, languageId);
     const links: Link[] = getLinksInFile(tree.root, file.changes, pl);
-    const alertPromises: Promise<Alert>[] = links.map(async (link) => await linkToAlert(link, file.filename, authConnector));
+    const alertPromises: Promise<Alert>[] = links.map(async (link) => await linkToAlert(link, file.filename));
     const alertResults = await Promise.all(alertPromises) as Alert[];
     return alertResults;
 }
 
-export const getAlertsForAllFiles = async (files: FileInfo[], authConnector?: AuthConnectorType): Promise<Alert[]> => {
+export const getAlertsForAllFiles = async (files: FileInfo[]): Promise<Alert[]> => {
     const alertPromises = files
         .filter((file) => file != null)
         .map(async (file) => {
             return new Promise((resolve) => {
-                getAlertsForFile(file, authConnector)
+                getAlertsForFile(file)
                     .then((alertsForFile) => {
                         resolve(alertsForFile);
                     })
@@ -44,10 +43,10 @@ export const getAlertsForAllFiles = async (files: FileInfo[], authConnector?: Au
 }
 
 
-export const linkToAlert = async (link: Link, filename: string, authConnector?: AuthConnectorType): Promise<Alert> => {
+export const linkToAlert = async (link: Link, filename: string): Promise<Alert> => {
     let message = '';
     if (link.type !== 'new') {
-        message = await createMessage(link, authConnector);
+        message = await createMessage(link);
     }
     return {
         ...link,
@@ -56,8 +55,8 @@ export const linkToAlert = async (link: Link, filename: string, authConnector?: 
     }
 };
 
-export const createNewLinksMessage = async (alerts: Alert[], authConnector?: AuthConnectorType): Promise<string> => {
-    const documentTitlePromises: Promise<string>[] = alerts.map((link) => getDocumentTitle(link, authConnector) )
+export const createNewLinksMessage = async (alerts: Alert[]): Promise<string> => {
+    const documentTitlePromises: Promise<string>[] = alerts.map((link) => getDocumentTitle(link))
     const documentTitles: string[] = await Promise.all(documentTitlePromises);
     const urlsFormatted = documentTitles.map((title, i) => {
         if (title === 'this document') {

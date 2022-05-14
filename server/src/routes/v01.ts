@@ -3,16 +3,8 @@ import express from 'express';
 import { Alert, AlertsRequest } from '../helpers/github/types';
 import { createNewLinksMessage, getAlertsForAllFiles } from '../helpers/routes/v01Alerts';
 import { track } from '../services/segment';
-import AuthConnector, { AuthConnectorType } from '../models/AuthConnector';
-import { sha512Hash } from '../helpers/routes/hash';
 
 const v01Router = express.Router();
-
-export const getAuthConnector = async (sourceId: string): Promise<AuthConnectorType | null> => {
-    const hashedSourceId = sha512Hash(sourceId);
-    const authConnector = await AuthConnector.findOne({hashedSourceId});
-    return authConnector;
-}
 
 v01Router.post('/', async (req, res) => {
     const alertsRequest: AlertsRequest = req.body;
@@ -21,12 +13,11 @@ v01Router.post('/', async (req, res) => {
     if (files == null) return res.status(400).end();
     if (owner == null) return res.status(400).end();
 
-    const authConnector = await getAuthConnector(owner) || undefined;
-    const allAlerts = await getAlertsForAllFiles(files, authConnector);
+    const allAlerts = await getAlertsForAllFiles(files);
     const alerts = allAlerts.filter((alert) => alert.type !== 'new');
 
     const newLinks: Alert[] = allAlerts.filter((alert) => alert.type === 'new');
-    const newLinksMessage = newLinks.length > 0 ? await createNewLinksMessage(newLinks, authConnector) : null;
+    const newLinksMessage = newLinks.length > 0 ? await createNewLinksMessage(newLinks) : null;
 
     // logging
     const isAlerting = alerts.length > 0;

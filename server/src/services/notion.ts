@@ -86,7 +86,7 @@ export const getNotionContent = async (url: string, notionAccessToken: string): 
     }
 }
 
-export const getNotionURL = (state?: string) => {
+export const getNotionInstallURL = (state?: string) => {
     const url = new URL('https://api.notion.com/v1/oauth/authorize');
     url.searchParams.append('owner', 'user');
     url.searchParams.append('client_id', clientId);
