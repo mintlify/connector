@@ -6,8 +6,8 @@ import { userMiddleware } from './user';
 
 const docsRouter = express.Router();
 
-export const createDocFromUrl = async (url: string, org: string) => {
-  const { content, method, title, favicon } = await getDataFromWebpage(url);
+export const createDocFromUrl = async (url: string, orgId: string) => {
+  const { content, method, title, favicon } = await getDataFromWebpage(url, orgId);
   let foundFavicon = favicon;
   if (!foundFavicon) {
     try {
@@ -19,11 +19,11 @@ export const createDocFromUrl = async (url: string, org: string) => {
     }
   }
   const doc = await Doc.findOneAndUpdate({
-    org,
+    org: orgId,
     url
   },
   {
-    org,
+    org: orgId,
     url,
     method,
     content,

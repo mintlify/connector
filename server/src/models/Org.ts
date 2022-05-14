@@ -1,5 +1,25 @@
 import mongoose, { Schema } from 'mongoose';
 
+export type OrgType = {
+    name: string,
+    createdAt: Date,
+    integrations: {
+        slack?: {
+            accessToken: string,
+        },
+        notion?: {
+            accessToken: string,
+            botId?: string,
+            workspaceId?: string,
+            workspaceName?: string,
+            workspaceIcon?: string,
+        },
+        github?: {
+            id: string
+        }
+    }
+}
+
 const SlackIntegrationSchema = new Schema({
     accessToken: { type: String, required: true },
 })
@@ -24,6 +44,6 @@ const OrgSchema = new Schema({
     integrations: { type: IntegrationsSchema, default: {} },
 });
 
-const Org = mongoose.model('Org', OrgSchema, 'orgs');
+const Org = mongoose.model<OrgType>('Org', OrgSchema, 'orgs');
 
 export default Org;
