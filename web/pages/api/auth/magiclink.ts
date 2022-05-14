@@ -10,12 +10,14 @@ async function handler(req: any, res: NextApiResponse) {
   
   try {
     const response = await client.magicLinks.authenticate(token);
-    const { emails: [{ email }] } = await client.users.get(response.user_id);
+    const { name: { first_name, last_name }, emails: [{ email }] } = await client.users.get(response.user_id);
     const user = await getUserFromUserId(response.user_id);
     req.session.destroy();
     req.session.set('user', {
       user_id: response.user_id,
       email,
+      firstName: first_name,
+      lastName: last_name,
       user,
     });
 

@@ -57,6 +57,16 @@ type Event = {
   remove?: Object,
 }
 
+type HomeProps = {
+  user: {
+    user_id: string,
+    email: string,
+    firstName?: string,
+    lastName?: string,
+    user?: any,
+  }
+}
+
 const listMenu = [
   {
     name: 'Rename',
@@ -83,14 +93,6 @@ const countTotalChanges = (change: Change[]) => {
   return {
     removed: totalRemoved,
     added: totalAdded,
-  }
-}
-
-type HomeProps = {
-  user: {
-    user_id: string,
-    email: string,
-    user?: any,
   }
 }
 
@@ -128,7 +130,7 @@ export default function Home(props: HomeProps) {
   }
 
   if (user.user == null) {
-    return <Setup email={user.email} />;
+    return <Setup email={user.email} firstName={user.firstName} lastName={user.lastName} />;
   }
 
   const ClearSelectedFrame = () => {

@@ -18,6 +18,8 @@ async function handler(req: any, res: NextApiResponse) {
   req.session.set('user', {
     user_id,
     email,
+    firstName,
+    lastName,
     user,
   });
   await req.session.save();

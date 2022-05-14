@@ -1,15 +1,18 @@
 import { UserAddIcon } from '@heroicons/react/solid'
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
 type SetupProps = {
-  email: string
+  email: string,
+  firstName?: string,
+  lastName?: string,
 }
 
-export default function Setup({ email }: SetupProps) {
+export default function Setup({ email, firstName: initialFirstName, lastName: initialLastName }: SetupProps) {
   const router = useRouter();
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [firstName, setFirstName] = useState(initialFirstName || '');
+  const [lastName, setLastName] = useState(initialLastName || '');
   const [orgName, setOrgName] = useState('');
 
   const onSubmit = () => {
@@ -105,6 +108,11 @@ export default function Setup({ email }: SetupProps) {
               </span>
               Create Account
             </button>
+          </div>
+          <div className='mt-7 text-center'>
+            <Link href="/api/logout">
+              <a className="text-sm text-gray-600 underline decoration-dashed decoration-gray-300">Sign in with a different email</a>
+            </Link>
           </div>
         </div>
       </div>

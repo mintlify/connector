@@ -23,8 +23,16 @@ export const userMiddleware = async (req: express.Request, res: express.Response
   return;
 }
 
-userRouter.get('/', userMiddleware, async (_, res) => {
-    return res.send({user: res.locals.user});
+userRouter.get('/', async (req, res) => {
+  const { userId } = req.query;
+
+  if (!userId) {
+    return res.status(400).send({ error: 'userId not provided' });
+  }
+
+  const user = await User.findOne({ userId });
+
+  return res.send({user})
 });
 
 userRouter.post('/', async (req, res) => {
