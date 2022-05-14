@@ -61,9 +61,6 @@ const listMenu = [
     name: 'Rename',
   },
   {
-    name: 'Edit link',
-  },
-  {
     name: 'Delete',
     isRed: true,
   }
