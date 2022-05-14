@@ -73,34 +73,36 @@ const automations: Automation[] = [
   },
 ]
 
-const integrations = [
-  {
-    name: 'GitHub',
-    installed: false,
-    imageUrl: '/assets/integrations/github.svg',
-    href: `${API_ENDPOINT}/routes/notion/install`,
-  },
-  {
-    name: 'VS Code',
-    installed: true,
-    imageUrl: '/assets/integrations/vscode.svg',
-    href: `${API_ENDPOINT}/routes/notion/install`,
-  },
-  {
-    name: 'Slack',
-    installed: false,
-    imageUrl: '/assets/integrations/slack.svg',
-    href: `${API_ENDPOINT}/routes/notion/install`,
-  },
-  {
-    name: 'Notion',
-    installed: false,
-    imageUrl: '/assets/integrations/notion.svg',
-    href: `${API_ENDPOINT}/routes/notion/install`,
-  },
-]
-
 export default function Automations({ userSession }: { userSession: UserSession }) {
+  const user = userSession.user;
+
+  const integrations = [
+    {
+      name: 'GitHub',
+      installed: false,
+      imageUrl: '/assets/integrations/github.svg',
+      href: `${API_ENDPOINT}/routes/notion/install`,
+    },
+    {
+      name: 'VS Code',
+      installed: true,
+      imageUrl: '/assets/integrations/vscode.svg',
+      href: `${API_ENDPOINT}/routes/notion/install`,
+    },
+    {
+      name: 'Slack',
+      installed: false,
+      imageUrl: '/assets/integrations/slack.svg',
+      href: `${API_ENDPOINT}/routes/notion/install`,
+    },
+    {
+      name: 'Notion',
+      installed: false,
+      imageUrl: '/assets/integrations/notion.svg',
+      href: `${API_ENDPOINT}/routes/notion/install?org=${user.org._id}`,
+    },
+  ]
+
   return (
     <>
     <Head>

@@ -1,5 +1,6 @@
 // https://www.notion.so/mintlify/Connect-d9d337715f974520a793da685b056415
 import { Router } from 'express';
+import Org from '../models/Org';
 import { getNotionAccessTokenFromCode, getNotionInstallURL } from '../services/notion';
 
 const notionRouter = Router();
@@ -28,26 +29,16 @@ notionRouter.get('/authorization', async (req, res) => {
 
   const  { org } = JSON.parse(decodeURIComponent(state as string));
 
-  // const credentials = {
-  //   source: stateParsed.source,
-  //   sourceId,
-  //   hashedSourceId: sha512Hash(sourceId)
-  // }
-
-  const notionAuth = {
-    // ...credentials,
-    notion: {
+  // Add notion credentials
+  await Org.findByIdAndUpdate(org, {
+    "integrations.notion": {
       accessToken: response?.access_token,
       botId: response?.bot_id,
       workspaceName: response?.workspace_name,
       workspaceIcon: response?.workspace_icon,
       workspaceId: response?.workspace_id,
     }
-  };
-  console.log({org})
-  console.log(notionAuth);
-  // Add notion credentials
-  // await AuthConnector.findOneAndUpdate(credentials, notionAuth, { upsert: true });
+  })
   return res.redirect('https://notion.so');
 });
 
