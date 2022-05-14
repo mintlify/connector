@@ -2,7 +2,6 @@ import axios from 'axios';
 import { urlify } from './links';
 import { isNotionUrl, isBlock, getNotionBlockContent, getNotionPageTitle } from '../../services/notion';
 import { Link } from '../github/types';
-import { AuthConnectorType } from '../../models/AuthConnector';
 
 export const getDocumentNameFromUrl = async (url: string) => {
     try {
@@ -18,10 +17,11 @@ export const getDocumentNameFromUrl = async (url: string) => {
     }
 }
 
-export const getDocumentTitle = async (link: Link, authConnector?: AuthConnectorType): Promise<string> => {
+export const getDocumentTitle = async (link: Link): Promise<string> => {
     const url = new URL(urlify(link.url));
-    if (isNotionUrl(url) && authConnector?.notion) {
-        const pageTitle = await getNotionPageTitle(link, authConnector.notion.accessToken);
+    const notionAccessToken = 'PLACEHOLDER'; // TODO: Add notion access token
+    if (isNotionUrl(url)) {
+        const pageTitle = await getNotionPageTitle(link, notionAccessToken);
         if (pageTitle !== '') {
             return pageTitle;
         }
@@ -41,13 +41,14 @@ export const createMessageContent = async (link: Link, linkText: string, kind?: 
     return `Does [${linkText}](${url}) need to be updated?${contentMessage}`;
 }
 
-export const createMessage = async (link: Link, authConnector?: AuthConnectorType): Promise<string> => {
-    const linkText = await getDocumentTitle(link, authConnector);
+export const createMessage = async (link: Link): Promise<string> => {
+    const linkText = await getDocumentTitle(link);
     const url = new URL(urlify(link.url));
-    if (isNotionUrl(url) && authConnector?.notion) {
+    if (isNotionUrl(url)) {
         const isblock = isBlock(url);
         if (isblock) {
-            const blockContent = await getNotionBlockContent(link.url, authConnector.notion.accessToken);
+            const notionAccessToken = 'PLACEHOLDER'; // TODO: Add notion access token
+            const blockContent = await getNotionBlockContent(link.url, notionAccessToken);
             return createMessageContent(link, linkText, 'notionBlock', blockContent);
         } else {
             return createMessageContent(link, linkText, 'notionPage');

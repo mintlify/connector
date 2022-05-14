@@ -7,6 +7,9 @@ import { Switch } from "@headlessui/react";
 import Head from "next/head";
 import { withSession } from "../lib/withSession";
 import { UserSession } from ".";
+import { CheckCircleIcon } from "@heroicons/react/solid";
+import { API_ENDPOINT } from "../helpers/api";
+import Link from "next/link";
 
 export type SourceType = 'github' | 'doc';
 export type DestinationType = 'doc' | 'slack' | 'email';
@@ -71,25 +74,36 @@ const automations: Automation[] = [
   },
 ]
 
-const integrations = [
-  {
-    name: 'GitHub',
-    role: 'Not installed',
-    imageUrl: '/assets/integrations/github.svg',
-  },
-  {
-    name: 'VS Code',
-    role: 'Installed',
-    imageUrl: '/assets/integrations/vscode.svg',
-  },
-  {
-    name: 'Slack',
-    role: 'Not installed',
-    imageUrl: '/assets/integrations/slack.svg',
-  },
-]
-
 export default function Automations({ userSession }: { userSession: UserSession }) {
+  const user = userSession.user;
+
+  const integrations = [
+    {
+      id: 'github',
+      name: 'GitHub',
+      imageUrl: '/assets/integrations/github.svg',
+      href: `${API_ENDPOINT}/routes/notion/install`,
+    },
+    {
+      id: 'vscode',
+      name: 'VS Code',
+      imageUrl: '/assets/integrations/vscode.svg',
+      href: `${API_ENDPOINT}/routes/notion/install`,
+    },
+    {
+      id: 'slack',
+      name: 'Slack',
+      imageUrl: '/assets/integrations/slack.svg',
+      href: `${API_ENDPOINT}/routes/notion/install`,
+    },
+    {
+      id: 'notion',
+      name: 'Notion',
+      imageUrl: '/assets/integrations/notion.svg',
+      href: `${API_ENDPOINT}/routes/notion/install?org=${user.org._id}`,
+    },
+  ]
+
   return (
     <>
     <Head>
@@ -171,21 +185,25 @@ export default function Automations({ userSession }: { userSession: UserSession 
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {integrations.map((integration) => (
-              <div
-                key={integration.name}
-                className="relative rounded-md border border-gray-200 bg-white px-3 py-2 shadow-sm flex items-center space-x-3 hover:bg-gray-50 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary"
-              >
-                <div className="flex-shrink-0">
-                  <img className="h-6 w-6" src={integration.imageUrl} alt="" />
+              <Link key={integration.id} href={integration.href}>
+                <div
+                  className="relative rounded-md border border-gray-200 bg-white px-3 py-2 shadow-sm flex items-center space-x-3 hover:bg-gray-50 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary"
+                >
+                  <div className="flex-shrink-0">
+                    <img className="h-6 w-6" src={integration.imageUrl} alt="" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <a href="#" className="focus:outline-none">
+                      <span className="absolute inset-0" aria-hidden="true" />
+                      <p className="text-sm font-medium text-gray-900">{integration.name}</p>
+                      <div className="flex space-x-0.5 items-center">
+                        <p className="text-xs text-gray-500 truncate">{user.org.integrations[integration.id] ? 'Installed' : 'Not installed'}</p>
+                        { user.org.integrations[integration.id] && <CheckCircleIcon className="h-3 w-3 text-green-600" /> }
+                      </div>
+                    </a>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <a href="#" className="focus:outline-none">
-                    <span className="absolute inset-0" aria-hidden="true" />
-                    <p className="text-sm font-medium text-gray-900">{integration.name}</p>
-                    <p className="text-xs text-gray-500 truncate">{integration.role}</p>
-                  </a>
-                </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

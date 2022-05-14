@@ -1,7 +1,6 @@
 import { CodeType } from '../../models/Code';
 import { FileInfo } from '../github/patch';
 import Doc, { DocType } from '../../models/Doc';
-import { AuthConnectorType } from '../../models/AuthConnector';
 import { createMessage } from './messages';
 import { Link, Alert, LineRange } from '../github/types';
 import { getChangesInRange, getLineRange } from './links';
@@ -24,7 +23,7 @@ const getLineRangeFromCode = (code: CodeType, file: FileInfo): LineRange => {
     }
 }
 
-export const codeToAlert = async (code: CodeType, file: FileInfo, authConnector?: AuthConnectorType): Promise<Alert|null> => {
+export const codeToAlert = async (code: CodeType, file: FileInfo): Promise<Alert|null> => {
     const doc: DocType | null = await Doc.findByIdAndUpdate(code.doc, { blocker: true });
     if (doc == null) return null;
     const lineRange = getLineRangeFromCode(code, file);
@@ -33,7 +32,7 @@ export const codeToAlert = async (code: CodeType, file: FileInfo, authConnector?
         type: code.type,
         lineRange,
     };
-    const message = await createMessage(link, authConnector);
+    const message = await createMessage(link);
     return {
         url: doc.url,
         message,

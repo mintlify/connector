@@ -1,16 +1,18 @@
-import { NextPage } from "next";
 import { classNames } from "../helpers/functions";
 import Layout from "../components/layout";
 import { UserCircleIcon, UserGroupIcon } from '@heroicons/react/outline'
+import { GetServerSideProps } from "next";
+import { withSession } from "../lib/withSession";
+import { UserSession } from ".";
 
 const navigation = [
   { name: 'Profile', href: '#', icon: UserCircleIcon, current: true },
   { name: 'Team Settings', href: '#', icon: UserGroupIcon, current: false },
 ]
 
-const Settings: NextPage = () => {
+export default function Settings({ userSession }: { userSession: UserSession }) {
   return (
-    <Layout>
+    <Layout user={userSession.user}>
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
     <div className="my-6 lg:grid lg:grid-cols-12 lg:gap-x-5">
       <aside className="py-0 px-2 sm:px-6 lg:px-0 lg:col-span-4">
@@ -405,4 +407,10 @@ const Settings: NextPage = () => {
   )
 };
 
-export default Settings;
+const getServerSidePropsHandler: GetServerSideProps = async ({req}: any) => {
+  const userSession = req.session.get('user') ?? null;
+  const props = {userSession};
+  return {props};
+}
+
+export const getServerSideProps = withSession(getServerSidePropsHandler);

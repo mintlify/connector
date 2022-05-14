@@ -50,7 +50,7 @@ export default function Sidebar({ user, isAddingDoc, setIsAddingDoc }: SidebarPr
                   <div className="text-sm font-medium text-gray-900">{fullName}</div>
                   <a href="#" className="group flex items-center space-x-1 group-hover:text-gray-900">
                     <span className="text-sm text-gray-500 font-medium">
-                      Mintlify
+                      {user.org.name}
                     </span>
                   </a>
                 </div>

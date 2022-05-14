@@ -1,7 +1,7 @@
 import * as cheerio from 'cheerio';
-import { AuthConnectorType } from '../models/AuthConnector';
 import { getNotionContent, isNotionUrl } from './notion';
 import validUrl from 'valid-url';
+import Org from '../models/Org';
 const webScrapingApiClient = require('webscrapingapi');
 
 const client = new webScrapingApiClient(process.env.WEBSCRAPER_KEY);
@@ -58,7 +58,7 @@ type ContentData = {
     favicon?: string;
 }
 
-export const getDataFromWebpage = async (url: string, authConnector?: AuthConnectorType): Promise<ContentData> => {
+export const getDataFromWebpage = async (url: string, orgId: string): Promise<ContentData> => {
     if (!url) {
         throw 'URL not provided'
     }
@@ -67,8 +67,9 @@ export const getDataFromWebpage = async (url: string, authConnector?: AuthConnec
     }
 
     let scrapingMethod: ScrapingMethod = getScrapingMethod(url);
-    const notionAccessToken = authConnector?.notion.accessToken;
-    if (scrapingMethod === 'notion-private' && notionAccessToken) {
+    const org = await Org.findById(orgId);
+    if (scrapingMethod === 'notion-private' && org?.integrations?.notion) {
+        const notionAccessToken = org.integrations.notion.accessToken;
         const notionContent = await getNotionContent(url, notionAccessToken);
         return {
             method: 'notion-private',
