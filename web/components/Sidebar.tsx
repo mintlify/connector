@@ -5,7 +5,12 @@ import { useState } from 'react'
 import AddDocument from './commands/AddDocument'
 import AddAutomation from './commands/AddAutomation'
 
-export default function Sidebar() {
+type SidebarProps = {
+  isAddingDoc?: boolean;
+  setIsAddingDoc?: (isAddingDoc: boolean) => void;
+}
+
+export default function Sidebar({ isAddingDoc, setIsAddingDoc }: SidebarProps) {
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
   const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
   return (
@@ -13,6 +18,8 @@ export default function Sidebar() {
     <AddDocument
       isOpen={isAddDocumentOpen}
       setIsOpen={setIsAddDocumentOpen}
+      isAddingDoc={isAddingDoc}
+      setIsAddingDoc={setIsAddingDoc}
     />
     <AddAutomation
       isOpen={isAddAutomationOpen}
