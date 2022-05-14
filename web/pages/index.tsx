@@ -71,6 +71,10 @@ export type User = {
   firstName: string,
   lastName: string,
   profilePicture?: string,
+  org: {
+    _id: string,
+    name: string,
+  }
 }
 
 const listMenu = [

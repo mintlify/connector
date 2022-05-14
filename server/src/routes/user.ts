@@ -30,7 +30,31 @@ userRouter.get('/', async (req, res) => {
     return res.status(400).send({ error: 'userId not provided' });
   }
 
-  const user = await User.findOne({ userId });
+  const users = await User.aggregate([
+    {
+      $match: {
+        userId
+      }
+    },
+    {
+      $lookup: {
+        from: 'orgs',
+        localField: 'org',
+        foreignField: '_id',
+        as: 'org'
+      }
+    },
+    {
+      $set: {
+        org: { $first: "$org" },
+      }
+    },
+    {
+      $unset: ['org.integrations']
+    }
+  ]);
+
+  const user = users[0];
 
   return res.send({user})
 });

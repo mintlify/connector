@@ -3,7 +3,6 @@ import * as Diff from 'diff';
 import Doc from '../models/Doc';
 import Event from '../models/Event';
 import { getDataFromWebpage } from '../services/webscraper';
-// import { getDataFromWebpage } from '../services/webscraper';
 
 const scanRouter = express.Router();
 
@@ -18,8 +17,8 @@ type DiffAlert = {
   doc: any
 }
 
-const getDiffAndContent = async (url: string, previousContent: string): Promise<DiffAndContent> => {
-  const { content } = await getDataFromWebpage(url);
+const getDiffAndContent = async (url: string, previousContent: string, orgId: string): Promise<DiffAndContent> => {
+  const { content } = await getDataFromWebpage(url, orgId);
   return {
     diff: Diff.diffWords(previousContent, content),
     newContent: content
@@ -32,7 +31,7 @@ scanRouter.post('/', async (req, res) => {
   try {
     const docsFromOrg = await Doc.find({ org });
     const getDifferencePromises = docsFromOrg.map((doc) => {
-      return getDiffAndContent(doc.url, doc.content);
+      return getDiffAndContent(doc.url, doc.content, org);
     });
 
     const diffsAndContent = await Promise.all(getDifferencePromises);
