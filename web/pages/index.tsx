@@ -70,6 +70,7 @@ export type User = {
   email: string,
   firstName: string,
   lastName: string,
+  profilePicture?: string,
 }
 
 const listMenu = [
@@ -148,7 +149,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     <Head>
       <title>Mintlify Dashboard</title>
     </Head>
-    <Layout>
+    <Layout user={userSession.user}>
     <ClearSelectedFrame />
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
       {/* Left sidebar & main wrapper */}

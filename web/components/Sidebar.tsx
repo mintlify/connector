@@ -5,6 +5,7 @@ import { useState } from 'react'
 import AddDocument from './commands/AddDocument'
 import AddAutomation from './commands/AddAutomation'
 import { User } from '../pages';
+import ProfilePicture from './ProfilePicture';
 
 type SidebarProps = {
   user: User;
@@ -40,10 +41,9 @@ export default function Sidebar({ user, isAddingDoc, setIsAddingDoc }: SidebarPr
               {/* Profile */}
               <div className="flex items-center space-x-3">
                 <div className="flex-shrink-0 h-12 w-12">
-                  <img
-                    className="h-12 w-12 rounded-full"
-                    src="https://res.cloudinary.com/mintlify/image/upload/v1652115323/han_o6mnrb.jpg"
-                    alt="Profile"
+                  <ProfilePicture
+                    size={12}
+                    user={user}
                   />
                 </div>
                 <div className="space-y-px">
