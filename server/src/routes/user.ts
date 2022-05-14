@@ -4,11 +4,27 @@ import User from '../models/User';
 
 const userRouter = express.Router();
 
-userRouter.get('/', async (req, res) => {
-    const { userId } = req.query;
+export const userMiddleware = async (req: express.Request, res: express.Response, next: () => void) => {
+  const { userId } = req.query;
 
-    const user = await User.findOne({ userId });
-    return res.send({user});
+  if (!userId) {
+    return res.status(400).send({ error: 'userId not provided' });
+  }
+
+  const user = await User.findOne({ userId });
+
+  if (user == null) {
+    return res.status(400).send({ error: 'Invalid userId' });
+  }
+
+  res.locals.user = user;
+
+  next();
+  return;
+}
+
+userRouter.get('/', userMiddleware, async (_, res) => {
+    return res.send({user: res.locals.user});
 });
 
 userRouter.post('/', async (req, res) => {

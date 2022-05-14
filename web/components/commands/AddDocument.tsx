@@ -7,13 +7,14 @@ import axios from 'axios'
 import { API_ENDPOINT } from '../../helpers/api'
 
 type AddDocumentProps = {
+  userId: string;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void,
   isAddingDoc?: boolean;
   setIsAddingDoc?: (isAddingDoc: boolean) => void,
 }
 
-export default function AddDocument({ isOpen, setIsOpen, setIsAddingDoc }: AddDocumentProps) {
+export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc }: AddDocumentProps) {
   const [query, setQuery] = useState('');
   const [placeholder, setPlaceholder] = useState('Add link');
 
@@ -60,7 +61,7 @@ export default function AddDocument({ isOpen, setIsOpen, setIsAddingDoc }: AddDo
     if (setIsAddingDoc) {
       setIsAddingDoc(true);
     }
-    axios.post(`${API_ENDPOINT}/routes/docs`, {
+    axios.post(`${API_ENDPOINT}/routes/docs?userId=${userId}`, {
       url: query,
     }).then(() => {
       if (setIsAddingDoc) {

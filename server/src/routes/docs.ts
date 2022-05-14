@@ -2,6 +2,7 @@ import express from 'express';
 import Doc from '../models/Doc';
 import { getDataFromWebpage } from '../services/webscraper';
 import axios from 'axios';
+import { userMiddleware } from './user';
 
 const docsRouter = express.Router();
 
@@ -36,8 +37,8 @@ export const createDocFromUrl = async (url: string, org: string) => {
   return { content, doc }
 }
 
-docsRouter.get('/', async (req, res) => {
-  const { org } = req.query;
+docsRouter.get('/', userMiddleware, async (_, res) => {
+  const org = res.locals.user.org;
   try {
     const docs = await Doc.aggregate([
       {
@@ -84,9 +85,9 @@ docsRouter.get('/', async (req, res) => {
   }
 })
 
-docsRouter.post('/', async (req, res) => {
+docsRouter.post('/', userMiddleware, async (req, res) => {
   const { url } = req.body;
-  const org = 'mintlify';
+  const org = res.locals.user.org;
   try {
     const { content } = await createDocFromUrl(url, org);
     res.send({content});

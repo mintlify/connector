@@ -6,16 +6,18 @@ import AddDocument from './commands/AddDocument'
 import AddAutomation from './commands/AddAutomation'
 
 type SidebarProps = {
+  userId: string;
   isAddingDoc?: boolean;
   setIsAddingDoc?: (isAddingDoc: boolean) => void;
 }
 
-export default function Sidebar({ isAddingDoc, setIsAddingDoc }: SidebarProps) {
+export default function Sidebar({ userId, isAddingDoc, setIsAddingDoc }: SidebarProps) {
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
   const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
   return (
     <>
     <AddDocument
+      userId={userId}
       isOpen={isAddDocumentOpen}
       setIsOpen={setIsAddDocumentOpen}
       isAddingDoc={isAddingDoc}

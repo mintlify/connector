@@ -102,20 +102,26 @@ export default function Home(props: HomeProps) {
   const [isAddingDoc, setIsAddingDoc] = useState<boolean>(false);
 
   useEffect(() => {
-    axios.get(`${API_ENDPOINT}/routes/docs?org=mintlify`)
+    if (user == null) {
+      return;
+    }
+
+    const userId = user.user_id;
+
+    axios.get(`${API_ENDPOINT}/routes/docs?userId=${userId}`)
       .then((docsResponse) => {
         const { docs } = docsResponse.data;
         setDocs(docs);
       });
     
-    let eventsQuery = `${API_ENDPOINT}/routes/events?org=mintlify`;
+    let eventsQuery = `${API_ENDPOINT}/routes/events?userId=${userId}`;
     if (selectedDoc) eventsQuery += `&doc=${selectedDoc.id}`;
     axios.get(eventsQuery)
       .then((eventsResponse) => {
         const { events } = eventsResponse.data;
         setEvents(events);
       });
-  }, [selectedDoc, isAddingDoc]);
+  }, [user, selectedDoc, isAddingDoc]);
 
   if (!user) {
     return <SignIn />
@@ -142,6 +148,7 @@ export default function Home(props: HomeProps) {
       {/* Left sidebar & main wrapper */}
       <div className="flex-1 min-w-0 xl:flex z-10">
         <Sidebar
+          userId={user.user_id}
           isAddingDoc={isAddingDoc}
           setIsAddingDoc={setIsAddingDoc}
         />

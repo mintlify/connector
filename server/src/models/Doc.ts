@@ -10,7 +10,7 @@ export type DocType = {
 }
 
 const DocSchema = new Schema({
-    org: { type: String, required: true },
+    org: { type: Schema.Types.ObjectId, required: true },
     url: { type: String, required: true },
     method: { type: String, required: true },
     content: { type: String },
