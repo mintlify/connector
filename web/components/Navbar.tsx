@@ -8,6 +8,8 @@ import { XIcon } from '@heroicons/react/outline'
 import { classNames } from '../helpers/functions'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import ProfilePicture from './ProfilePicture'
+import { User } from '../pages'
 
 const navigation = [
   {
@@ -31,8 +33,11 @@ const navButtonClass = (isActive: boolean) => {
     : 'text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer'
 }
 
-export default function Navbar() {
+export default function Navbar({ user }: { user: User }) {
   const router = useRouter();
+
+  const fullName = `${user.firstName} ${user.lastName}`;
+  
   return (
     <Disclosure as="nav" className="bg-background z-20">
       {({ open }) => (
@@ -114,10 +119,9 @@ export default function Navbar() {
                     <div>
                       <Menu.Button className="bg-gray-800 rounded-full flex text-sm text-white">
                         <span className="sr-only">Open user menu</span>
-                        <img
-                          className="h-8 w-8 rounded-full"
-                          src="https://res.cloudinary.com/mintlify/image/upload/v1652115323/han_o6mnrb.jpg"
-                          alt=""
+                        <ProfilePicture
+                          size={8}
+                          user={user}
                         />
                       </Menu.Button>
                     </div>
@@ -174,15 +178,14 @@ export default function Navbar() {
             <div className="pt-4 pb-3 border-t border-gray-700">
               <div className="flex items-center px-5">
                 <div className="flex-shrink-0">
-                  <img
-                    className="h-10 w-10 rounded-full"
-                    src="https://res.cloudinary.com/mintlify/image/upload/v1652115323/han_o6mnrb.jpg"
-                    alt=""
+                  <ProfilePicture
+                    size={10}
+                    user={user}
                   />
                 </div>
                 <div className="ml-3">
-                  <div className="text-base font-medium text-white">Han Wang</div>
-                  <div className="text-sm font-medium text-gray-400">han@mintlify.com</div>
+                  <div className="text-base font-medium text-white">{fullName}</div>
+                  <div className="text-sm font-medium text-gray-400">{user.email}</div>
                 </div>
               </div>
               <div className="mt-3 px-2 space-y-1">

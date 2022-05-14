@@ -1,10 +1,12 @@
-import { NextPage } from "next";
+import { GetServerSideProps, NextPage } from "next";
 import Sidebar from "../components/Sidebar";
 import { classNames } from "../helpers/functions";
 import Layout from "../components/layout";
 import { getAutomationTypeIcon, getTypeIcon } from "../helpers/Icons";
 import { Switch } from "@headlessui/react";
 import Head from "next/head";
+import { withSession } from "../lib/withSession";
+import { UserSession } from ".";
 
 export type SourceType = 'github' | 'doc';
 export type DestinationType = 'doc' | 'slack' | 'email';
@@ -87,17 +89,17 @@ const integrations = [
   },
 ]
 
-const Automations: NextPage = () => {
+export default function Automations({ userSession }: { userSession: UserSession }) {
   return (
     <>
     <Head>
       <title>Automations</title>
     </Head>
-    <Layout>
+    <Layout user={userSession.user}>
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
       {/* Left sidebar & main wrapper */}
       <div className="flex-1 min-w-0 xl:flex">
-        <Sidebar />
+        <Sidebar user={userSession.user} />
         {/* Projects List */}
         <div className="bg-white lg:min-w-0 lg:flex-1">
           <div className="pl-4 pr-6 pt-4 pb-4 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
@@ -194,4 +196,10 @@ const Automations: NextPage = () => {
   )
 };
 
-export default Automations;
+const getServerSidePropsHandler: GetServerSideProps = async ({req}: any) => {
+  const userSession = req.session.get('user') ?? null;
+  const props = {userSession};
+  return {props};
+}
+
+export const getServerSideProps = withSession(getServerSidePropsHandler);

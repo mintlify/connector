@@ -4,18 +4,26 @@ import Link from 'next/link';
 import { useState } from 'react'
 import AddDocument from './commands/AddDocument'
 import AddAutomation from './commands/AddAutomation'
+import { User } from '../pages';
+import ProfilePicture from './ProfilePicture';
 
 type SidebarProps = {
+  user: User;
   isAddingDoc?: boolean;
   setIsAddingDoc?: (isAddingDoc: boolean) => void;
 }
 
-export default function Sidebar({ isAddingDoc, setIsAddingDoc }: SidebarProps) {
+export default function Sidebar({ user, isAddingDoc, setIsAddingDoc }: SidebarProps) {
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
   const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
+
+  const userId = user.userId;
+  const fullName = user.firstName + ' ' + user.lastName;
+
   return (
     <>
     <AddDocument
+      userId={userId}
       isOpen={isAddDocumentOpen}
       setIsOpen={setIsAddDocumentOpen}
       isAddingDoc={isAddingDoc}
@@ -33,14 +41,13 @@ export default function Sidebar({ isAddingDoc, setIsAddingDoc }: SidebarProps) {
               {/* Profile */}
               <div className="flex items-center space-x-3">
                 <div className="flex-shrink-0 h-12 w-12">
-                  <img
-                    className="h-12 w-12 rounded-full"
-                    src="https://res.cloudinary.com/mintlify/image/upload/v1652115323/han_o6mnrb.jpg"
-                    alt="Profile"
+                  <ProfilePicture
+                    size={12}
+                    user={user}
                   />
                 </div>
                 <div className="space-y-px">
-                  <div className="text-sm font-medium text-gray-900">Han Wang</div>
+                  <div className="text-sm font-medium text-gray-900">{fullName}</div>
                   <a href="#" className="group flex items-center space-x-1 group-hover:text-gray-900">
                     <span className="text-sm text-gray-500 font-medium">
                       Mintlify

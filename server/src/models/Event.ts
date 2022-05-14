@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 
 const EventSchema = new Schema({
-    org: { type: String, required: true },
+    org: { type: Schema.Types.ObjectId, required: true },
     doc: { type: Schema.Types.ObjectId, required: true },
     event: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },

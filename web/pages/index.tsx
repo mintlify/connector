@@ -23,6 +23,7 @@ import 'react-loading-skeleton/dist/skeleton.css'
 import LoadingItem from '../components/LoadingItem'
 import { withSession } from '../lib/withSession'
 import SignIn from '../components/SignIn'
+import Setup from '../components/Setup'
 
 type Code = {
   _id: string,
@@ -56,12 +57,25 @@ type Event = {
   remove?: Object,
 }
 
+export type UserSession = {
+  user_id: string,
+  email: string,
+  firstName?: string,
+  lastName?: string,
+  user: User
+}
+
+export type User = {
+  userId: string,
+  email: string,
+  firstName: string,
+  lastName: string,
+  profilePicture?: string,
+}
+
 const listMenu = [
   {
     name: 'Rename',
-  },
-  {
-    name: 'Edit link',
   },
   {
     name: 'Delete',
@@ -88,37 +102,40 @@ const countTotalChanges = (change: Change[]) => {
   }
 }
 
-type HomeProps = {
-  user: {
-    user_id: string
-  }
-}
-
-export default function Home(props: HomeProps) {
-  const { user } = props;
+export default function Home({ userSession }: { userSession: UserSession }) {
   const [docs, setDocs] = useState<Doc[]>();
   const [events, setEvents] = useState<Event[]>();
   const [selectedDoc, setSelectedDoc] = useState<Doc>();
   const [isAddingDoc, setIsAddingDoc] = useState<boolean>(false);
 
   useEffect(() => {
-    axios.get(`${API_ENDPOINT}/routes/docs?org=mintlify`)
+    if (userSession == null) {
+      return;
+    }
+
+    const userId = userSession.user_id;
+
+    axios.get(`${API_ENDPOINT}/routes/docs?userId=${userId}`)
       .then((docsResponse) => {
         const { docs } = docsResponse.data;
         setDocs(docs);
       });
     
-    let eventsQuery = `${API_ENDPOINT}/routes/events?org=mintlify`;
+    let eventsQuery = `${API_ENDPOINT}/routes/events?userId=${userId}`;
     if (selectedDoc) eventsQuery += `&doc=${selectedDoc.id}`;
     axios.get(eventsQuery)
       .then((eventsResponse) => {
         const { events } = eventsResponse.data;
         setEvents(events);
       });
-  }, [selectedDoc, isAddingDoc]);
+  }, [userSession, selectedDoc, isAddingDoc]);
 
-  if (!user) {
+  if (!userSession) {
     return <SignIn />
+  }
+
+  if (userSession.user == null) {
+    return <Setup email={userSession.email} firstName={userSession.firstName} lastName={userSession.lastName} />;
   }
 
   const ClearSelectedFrame = () => {
@@ -132,12 +149,13 @@ export default function Home(props: HomeProps) {
     <Head>
       <title>Mintlify Dashboard</title>
     </Head>
-    <Layout>
+    <Layout user={userSession.user}>
     <ClearSelectedFrame />
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
       {/* Left sidebar & main wrapper */}
       <div className="flex-1 min-w-0 xl:flex z-10">
         <Sidebar
+          user={userSession.user}
           isAddingDoc={isAddingDoc}
           setIsAddingDoc={setIsAddingDoc}
         />
@@ -369,8 +387,8 @@ export default function Home(props: HomeProps) {
 }
 
 const getServerSidePropsHandler: GetServerSideProps = async ({req}: any) => {
-  const user = req.session.get('user') ?? null;
-  const props = {user};
+  const userSession = req.session.get('user') ?? null;
+  const props = {userSession};
   return {props};
 }
 

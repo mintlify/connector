@@ -1,14 +1,13 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import Event from '../models/Event';
+import { userMiddleware } from './user';
 
 const eventsRouter = express.Router();
 
-eventsRouter.get('/', async (req, res) => {
-    const { org, doc } = req.query;
-    if (!org) {
-      res.send({ error: 'No org specified', events: [] });
-    }
+eventsRouter.get('/', userMiddleware, async (req, res) => {
+    const { doc } = req.query;
+    const org = res.locals.user.org;
 
     const query: { org: string, doc?: mongoose.Types.ObjectId } = { org } as { org: string };
     
