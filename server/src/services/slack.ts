@@ -5,7 +5,7 @@ dotenv.config();
 
 const channelName = 'docs';
 const clientId = '2329388587911.3498023797925';
-const redirectUri = 'https://localhost:5000/routes/slack/authorization';
+const redirectUri = 'https://connect.mintlify.com/routes/integrations/slack/authorization';
 
 export const publishMessage = async (text: string) => {
   const slackToken = process.env.SLACK_TOKEN;
@@ -53,6 +53,7 @@ export const getSlackAccessTokenFromCode = async (code: string): Promise<any> =>
       client_secret: process.env.SLACK_CLIENT_SECRET,
       code
     });
+    console.log({response});
     return { response }
   } catch (error: any) {
     return { error };

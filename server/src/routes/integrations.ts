@@ -69,7 +69,7 @@ integrationsRouter.get('/notion/authorization', async (req, res) => {
   return res.redirect('https://notion.so');
 });
 
-integrationsRouter.get('slack/install', async (req, res) => {
+integrationsRouter.get('/slack/install', async (req, res) => {
   const { org } = req.query;
   if (!org) {
       return res.send('Organization ID is required');
@@ -82,7 +82,7 @@ integrationsRouter.get('slack/install', async (req, res) => {
   return res.redirect(url);
 });
 
-integrationsRouter.get('slack/authorization', async (req, res) => {
+integrationsRouter.get('/slack/authorization', async (req, res) => {
   const { code, state } = req.query;
   if (code == null) return res.status(403).send('Invalid or missing grant code');
 

@@ -82,7 +82,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
       id: 'github',
       name: 'GitHub',
       imageUrl: '/assets/integrations/github.svg',
-      href: `${API_ENDPOINT}/routes/integrations/github/install?org=${user.org._id}`,
+      href: `${API_ENDPOINT}/routes/integrations/github/install?org=${user.org}`,
     },
     {
       id: 'vscode',
@@ -94,13 +94,13 @@ export default function Automations({ userSession }: { userSession: UserSession 
       id: 'slack',
       name: 'Slack',
       imageUrl: '/assets/integrations/slack.svg',
-      href: ``,
+      href: `${API_ENDPOINT}/routes/integrations/slack/install?org=${user.org}`,
     },
     {
       id: 'notion',
       name: 'Notion',
       imageUrl: '/assets/integrations/notion.svg',
-      href: `${API_ENDPOINT}/routes/integrations/notion/install?org=${user.org._id}`,
+      href: `${API_ENDPOINT}/routes/integrations/notion/install?org=${user.org}`,
     },
   ]
 
