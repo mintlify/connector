@@ -1,43 +1,37 @@
 import { Router } from 'express';
-import axios from 'axios';
 import dotenv from 'dotenv';
-import AuthConnector from '../models/AuthConnector';
+import { getSlackAccessTokenFromCode, getSlackAuthUrl } from '../services/slack';
+import Org from '../models/Org';
 
 dotenv.config();
 
 const slackRouter = Router();
 slackRouter.get('/install', async (req, res) => {
-    const { github } = req.query;
-    if (!github) {
-        return res.send('Github ID is required');
+    const { org } = req.query;
+    if (!org) {
+        return res.send('Organization ID is required');
     }
 
-    const state = {
-        source: 'github',
-        id: github
-    };
+    const state = { org };
 
     const encodedState = encodeURIComponent(JSON.stringify(state));
-    // const url = getSlackURL
+    const url = getSlackAuthUrl(encodedState);
+    return res.redirect(url);
 });
 
 slackRouter.get('/authorization', async (req, res) => {
-    const { github, code } = req.query;
-    if (!github) {
-        return res.send('Github ID is required');
-    }
+    const { code, state } = req.query;
+    if (code == null) return res.status(403).send('Invalid or missing grant code');
 
-    const url = 'https://slack.com/api/oauth.v2.access';
-    const response = await axios.post(url, {
-        client_id: '2329388587911.3498023797925',
-        client_secret: process.env.SLACK_CLIENT_SECRET,
-        code
-    });
+    const { response, error } = await getSlackAccessTokenFromCode(code as string);
 
+    if (error) return res.status(403).send('Invalid grant code');
+    if ( state == null) return res.status(403).send('No state provided');
+
+    const { org } = JSON.parse(decodeURIComponent(state as string));
     const accessToken = response.data.access_token;
-    const credentials = {
-        source: 'github',
-
-    }
-    await AuthConnector.findOneAndUpdate()
+    await Org.findByIdAndUpdate(org, {
+        "integration.slack.accessToken": accessToken
+    });
+    return res.redirect('slack://open');
 });
