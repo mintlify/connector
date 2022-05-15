@@ -43,7 +43,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
       id: 'github',
       name: 'GitHub',
       imageUrl: '/assets/integrations/github.svg',
-      href: `${API_ENDPOINT}/routes/integrations/github/install?org=${user.org._id}`,
+      href: `${API_ENDPOINT}/routes/integrations/github/install?org=${user.org}`,
     },
     {
       id: 'vscode',
@@ -55,13 +55,13 @@ export default function Automations({ userSession }: { userSession: UserSession 
       id: 'slack',
       name: 'Slack',
       imageUrl: '/assets/integrations/slack.svg',
-      href: ``,
+      href: `${API_ENDPOINT}/routes/integrations/slack/install?org=${user.org}`,
     },
     {
       id: 'notion',
       name: 'Notion',
       imageUrl: '/assets/integrations/notion.svg',
-      href: `${API_ENDPOINT}/routes/integrations/notion/install?org=${user.org._id}`,
+      href: `${API_ENDPOINT}/routes/integrations/notion/install?org=${user.org}`,
     },
   ]
 
@@ -167,8 +167,8 @@ export default function Automations({ userSession }: { userSession: UserSession 
                       <span className="absolute inset-0" aria-hidden="true" />
                       <p className="text-sm font-medium text-gray-900">{integration.name}</p>
                       <div className="flex space-x-0.5 items-center">
-                        <p className="text-xs text-gray-500 truncate">{user.org?.integrations?.hasOwnProperty(integration.id) ? 'Installed' : 'Not installed'}</p>
-                        { user.org?.integrations?.hasOwnProperty(integration.id)   && <CheckCircleIcon className="h-3 w-3 text-green-600" /> }
+                        <p className="text-xs text-gray-500 truncate">{user.org?.integrations[integration.id] ? 'Installed' : 'Not installed'}</p>
+                        { user.org?.integrations[integration.id]   && <CheckCircleIcon className="h-3 w-3 text-green-600" /> }
                       </div>
                     </a>
                   </div>
