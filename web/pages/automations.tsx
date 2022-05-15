@@ -10,71 +10,32 @@ import { UserSession } from ".";
 import { CheckCircleIcon } from "@heroicons/react/solid";
 import { API_ENDPOINT } from "../helpers/api";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-export type SourceType = 'github' | 'doc';
-export type DestinationType = 'doc' | 'slack' | 'email';
+export type DestinationType = 'slack' | 'email' | 'webhook';
 export type AutomationType = 'doc' | 'code';
 
 type Automation = {
-  id: string,
-  active: boolean,
-  name: string,
+  _id: string;
+  org: string,
   type: AutomationType,
-  source: SourceType,
-  sourceName: string,
-  sourceHref: string,
-  destination: DestinationType,
-  destinationName: string,
+  source: {
+    doc?: string, // used for doc
+    repo?: string // used for code
+  },
+  destination: {
+    type: 'email' | 'slack' | 'webhook',
+    value: string,
+  },
+  name: string,
+  isActive: boolean,
+  createdAt: Date,
+  createdBy: string,
 }
 
-const automations: Automation[] = [
-  {
-    id: '1',
-    active: true,
-    name: 'Require documentation review',
-    type: 'doc',
-    source: 'github',
-    sourceName: 'writer',
-    sourceHref: '',
-    destination: 'doc',
-    destinationName: 'User Model',
-  },
-  {
-    id: '2',
-    active: true,
-    name: 'Notify technical review',
-    type: 'code',
-    source: 'doc',
-    sourceName: 'Technical Overview',
-    sourceHref: '',
-    destination: 'email',
-    destinationName: 'hi@mintlify.com',
-  },
-  {
-    id: '3',
-    active: true,
-    name: 'Slack alert on change',
-    type: 'code',
-    source: 'github',
-    sourceName: 'writer',
-    sourceHref: '',
-    destination: 'slack',
-    destinationName: '#doc-changes',
-  },
-  {
-    id: '4',
-    active: false,
-    name: 'Require documentation update on Mongoose',
-    type: 'code',
-    source: 'github',
-    sourceName: 'connect',
-    sourceHref: '',
-    destination: 'doc',
-    destinationName: 'Mongoose Database',
-  },
-]
-
 export default function Automations({ userSession }: { userSession: UserSession }) {
+  const [automations, setAutomations] = useState<Automation[]>([]);
   const user = userSession.user;
 
   const integrations = [
@@ -104,6 +65,14 @@ export default function Automations({ userSession }: { userSession: UserSession 
     },
   ]
 
+  useEffect(() => {
+    axios.get(`${API_ENDPOINT}/routes/automations?userId=${user.userId}`)
+      .then(({ data }) => {
+        const { automations } = data;
+        setAutomations(automations);
+      })
+  }, [user])
+
   return (
     <>
     <Head>
@@ -124,7 +93,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
         {/* Stacked list */}
         <ul role="list">
             {automations.map((automation) => (
-              <li key={automation.id}>
+              <li key={automation._id}>
                 <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div>
                 <a href="#" className="block hover:bg-gray-50">
                   <div className="px-4 py-5 sm:px-6">
@@ -135,7 +104,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
                       </div>
                       <div className="ml-2 flex-shrink-0 flex">
                       <Switch
-                          checked={automation.active}
+                          checked={automation.isActive}
                           onChange={() => {}}
                           className="flex-shrink-0 group relative rounded-full inline-flex items-center justify-center h-4 w-9 cursor-pointer"
                         >
@@ -144,14 +113,14 @@ export default function Automations({ userSession }: { userSession: UserSession 
                           <span
                             aria-hidden="true"
                             className={classNames(
-                              automation.active ? 'bg-primary' : 'bg-gray-200',
+                              automation.isActive ? 'bg-primary' : 'bg-gray-200',
                               'pointer-events-none absolute h-4 w-9 mx-auto rounded-full transition-colors ease-in-out duration-200'
                             )}
                           />
                           <span
                             aria-hidden="true"
                             className={classNames(
-                              automation.active ? 'translate-x-5' : 'translate-x-0',
+                              automation.isActive ? 'translate-x-5' : 'translate-x-0',
                               'pointer-events-none absolute left-0 inline-block h-5 w-5 border border-gray-200 rounded-full bg-white shadow transform ring-0 transition-transform ease-in-out duration-200'
                             )}
                           />
@@ -161,12 +130,13 @@ export default function Automations({ userSession }: { userSession: UserSession 
                     <div className="mt-2 sm:flex sm:justify-between">
                       <div className="sm:flex">
                         <p className="flex items-center text-sm text-gray-500">
-                          { getTypeIcon(automation.source, 'flex-shrink-0 mr-1 h-4 w-4 text-gray-400') }
-                          {automation.sourceName}
+                          { getTypeIcon(automation.type, 'flex-shrink-0 mr-1 h-4 w-4 text-gray-400') }
+                          {automation.type === 'code' && automation.source.repo}
+                          {automation.type === 'doc' && automation.source.doc}
                         </p>
                         <p className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
-                          { getTypeIcon(automation.destination, 'flex-shrink-0 mr-1 h-4 w-4 text-gray-400') }
-                          {automation.destinationName}
+                          { getTypeIcon(automation.destination.type, 'flex-shrink-0 mr-1 h-4 w-4 text-gray-400') }
+                          {automation.destination.value}
                         </p>
                       </div>
                     </div>

@@ -6,10 +6,12 @@ import { userMiddleware } from './user';
 
 const automationsRouter = express.Router();
 
-// automationsRouter.get('/', userMiddleware, async (req, res) => {
-//   const org = res.locals.user.org;
-//     return res.send({success: true});
-// });
+automationsRouter.get('/', userMiddleware, async (_, res) => {
+  const org = res.locals.user.org;
+
+  const automations = await Automation.find({org});
+  return res.send({automations});
+});
 
 automationsRouter.post('/', userMiddleware, async (req, res) => {
   const { type, sourceValue, destinationType, destinationValue, name } = req.body;
