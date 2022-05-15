@@ -31,3 +31,17 @@ export const getGitHubAccessTokenFromCode = async (code: string, state: Object):
     return { error };
   }
 }
+
+export const getGitHubInstallations = async (accessToken: string) => {
+  try {
+    const { data: { installations } }: { data: { installations: Object[] } }  = await axios.get('https://api.github.com/user/installations', {
+      headers: {
+        'Authorization': `token ${accessToken}`
+      }
+    })
+
+    return installations
+  } catch (error: any) {
+    return []
+  }
+}

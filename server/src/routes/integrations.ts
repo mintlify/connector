@@ -2,7 +2,7 @@ import { Router } from 'express';
 import queryString from 'query-string';
 import { ISDEV } from '../helpers/github/octokit';
 import Org from '../models/Org';
-import { getGitHubAccessTokenFromCode, GitHubAuthResponse } from '../services/github';
+import { getGitHubAccessTokenFromCode, getGitHubInstallations, GitHubAuthResponse } from '../services/github';
 import { getNotionAccessTokenFromCode, getNotionInstallURL } from '../services/notion';
 
 const integrationsRouter = Router();
@@ -33,7 +33,11 @@ integrationsRouter.get('/github/authorization', async (req, res) => {
   
   const { org } = parsedState;
   const response = queryString.parse(rawResponse) as unknown as GitHubAuthResponse;
-  await Org.findByIdAndUpdate(org, { "integrations.github": { ...response }})
+  const { access_token } = response;
+
+  const installations = await getGitHubInstallations(access_token);
+
+  await Org.findByIdAndUpdate(org, { "integrations.github": { ...response, installations }})
   return res.redirect('https://notion.so');
 });
 
