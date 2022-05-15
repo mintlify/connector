@@ -7,16 +7,17 @@ import { BellIcon, CheckIcon, HashtagIcon, LinkIcon, MailIcon, SelectorIcon, Doc
 import { automationMap } from './AddAutomation';
 import axios from 'axios';
 import { API_ENDPOINT } from '../../helpers/api';
+import { Doc } from '../../pages';
 
 type Source = {
-  id: string;
+  _id: string;
   name: string;
   icon: ReactElement<any, any>;
   isDefault?: boolean
 }
 
 const defaultDoc: Source = {
-  id: '0',
+  _id: '0',
   name: 'Select document',
   icon: <DocumentTextIcon className="flex-shrink-0 h-4 w-4" />,
   isDefault: true
@@ -24,23 +25,23 @@ const defaultDoc: Source = {
 
 const repos: Source[] = [
   {
-    id: '0',
+    _id: '0',
     name: 'Select repo',
     icon: <img src="/assets/integrations/github.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" />,
     isDefault: true
   },
   {
-    id: '1',
+    _id: '1',
     name: 'writer',
     icon: <img src="/assets/integrations/github.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" />
   },
   {
-    id: '2',
+    _id: '2',
     name: 'connect',
     icon: <img src="/assets/integrations/github.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" />
   },
   {
-    id: '3',
+    _id: '3',
     name: 'backend',
     icon: <img src="/assets/integrations/github.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" />
   },
@@ -111,9 +112,9 @@ export default function AutomationConfig({ userId, automationType, onCancel, set
     axios.get(`${API_ENDPOINT}/routes/docs?userId=${userId}`)
         .then((docsResponse) => {
           const { docs } = docsResponse.data;
-          const formattedDocs = docs.map((doc: any) => {
+          const formattedDocs = docs.map((doc: Doc) => {
             return {
-              id: doc._id,
+              _id: doc._id,
               name: doc.title,
               icon: <img src={doc.favicon} alt="Slack" className="flex-shrink-0 h-4 w-4 rounded-sm" />
             }
@@ -123,6 +124,8 @@ export default function AutomationConfig({ userId, automationType, onCancel, set
           setDocs(formattedDocs);
         });
   }, [userId])
+
+  console.log(docs);
 
   const onBackButton = () => {
     onCancel();
@@ -143,7 +146,7 @@ export default function AutomationConfig({ userId, automationType, onCancel, set
     setIsAddAutomationOpen(false);
     await axios.post(`${API_ENDPOINT}/routes/automations?userId=${userId}`, {
       type: automationType,
-      sourceValue: automationType === 'code' ? selectedRepo.name : selectedDoc.id,
+      sourceValue: automationType === 'code' ? selectedRepo.name : selectedDoc._id,
       destinationType: selectedDestinationType.id,
       destinationValue,
       name: name ? name : namePlaceholder
@@ -187,7 +190,7 @@ export default function AutomationConfig({ userId, automationType, onCancel, set
                       <Listbox.Options className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-56 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
                         {sourceOptions.map((sourceOption) => (
                           <Listbox.Option
-                            key={sourceOption.id}
+                            key={sourceOption._id}
                             className={({ active }) =>
                               classNames(
                                 active ? 'text-white bg-primary' : 'text-gray-900',

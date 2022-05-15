@@ -31,8 +31,8 @@ type Code = {
   url: string,
 }
 
-type Doc = {
-  id: string,
+export type Doc = {
+  _id: string,
   title: string,
   lastUpdatedAt: string,
   favicon: string,
@@ -127,7 +127,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       });
     
     let eventsQuery = `${API_ENDPOINT}/routes/events?userId=${userId}`;
-    if (selectedDoc) eventsQuery += `&doc=${selectedDoc.id}`;
+    if (selectedDoc) eventsQuery += `&doc=${selectedDoc._id}`;
     axios.get(eventsQuery)
       .then((eventsResponse) => {
         const { events } = eventsResponse.data;
@@ -225,10 +225,10 @@ export default function Home({ userSession }: { userSession: UserSession }) {
           <ul role="list" className="relative z-0">
             { isAddingDoc && <LoadingItem /> }
             {docs?.map((doc) => (
-              <div key={doc.id}>
+              <div key={doc._id}>
               <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div>
               <li
-                className={classNames("relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:pl-6 lg:pl-8 xl:pl-6 cursor-pointer", doc.id === selectedDoc?.id ? 'bg-gray-50' : '')}
+                className={classNames("relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:pl-6 lg:pl-8 xl:pl-6 cursor-pointer", doc._id === selectedDoc?._id ? 'bg-gray-50' : '')}
                 onClick={() => setSelectedDoc(doc)}
               >
                 <div className="flex items-center justify-between space-x-4">
@@ -242,7 +242,6 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                               { doc.favicon && <img src={doc.favicon} alt="favicon" className="h-5 w-5 rounded-sm" /> }
                             </div>
                             <Link
-                              key={doc.id}
                               href={doc.url}
                             >
                               <a target="_blank" className="decoration-gray-300 hover:underline">

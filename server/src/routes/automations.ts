@@ -9,7 +9,26 @@ const automationsRouter = express.Router();
 automationsRouter.get('/', userMiddleware, async (_, res) => {
   const org = res.locals.user.org;
 
-  const automations = await Automation.find({org});
+  const automations = await Automation.aggregate([
+    { $match: { org } },
+    { $lookup: {
+        from: "docs",
+        localField: "source.doc",
+        foreignField: "_id",
+        as: "source.doc"
+    } },
+    {
+      $set: {
+        "source.doc": { $first: "$source.doc" }
+      }
+    },
+    {
+      $set: {
+        "source.doc": "$source.doc.title"
+      }
+    }
+  ]);
+
   return res.send({automations});
 });
 
@@ -22,7 +41,7 @@ automationsRouter.post('/', userMiddleware, async (req, res) => {
     source.doc = new mongoose.Types.ObjectId(sourceValue);
   }
   else if (type === 'code') {
-    source.repo = sourceValue
+    source.repo = sourceValue;
   }
 
   const automation = await Automation.create({

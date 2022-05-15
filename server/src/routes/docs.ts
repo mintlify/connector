@@ -71,18 +71,7 @@ docsRouter.get('/', userMiddleware, async (_, res) => {
         }
       }
     ]);
-    const docsFormatted = docs.map((doc) => {
-      return {
-        id: doc._id,
-        title: doc.title,
-        lastUpdatedAt: doc.lastUpdatedAt,
-        favicon: doc.favicon,
-        url: doc.url,
-        code: doc.code
-      }
-    });
-
-    return res.status(200).send({docs: docsFormatted});
+    return res.status(200).send({docs});
   } catch (error) {
     return res.status(500).send({error, docs: []})
   }

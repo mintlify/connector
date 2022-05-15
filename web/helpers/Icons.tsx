@@ -80,7 +80,7 @@ export const getTypeIcon = (type: AutomationType | DestinationType, className: s
   }
 
   if (type === 'slack') {
-    return <BellIconSolid className={className} />
+    return <><BellIconSolid className={className} />#</>
   }
 
   if (type === 'webhook') {
