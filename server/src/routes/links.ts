@@ -1,10 +1,11 @@
 import express from 'express';
 import Code, { CodeType } from '../models/Code';
 import { createDocFromUrl } from './docs';
+import { userMiddleware } from './user';
 
 const linksRouter = express.Router();
 
-linksRouter.put('/', async (req, res) => {
+linksRouter.put('/', userMiddleware, async (req, res) => {
     const { docId, codes } = req.body;
     const codePromises: Promise<CodeType>[] = codes.map((code: CodeType) => {
         code.doc = docId;
@@ -14,11 +15,10 @@ linksRouter.put('/', async (req, res) => {
     return res.send({success: true});
 });
 
-linksRouter.post('/', async (req, res) => {
+linksRouter.post('/', userMiddleware, async (req, res) => {
     const { url, org, codes } = req.body;
 
-    const { doc } = await createDocFromUrl(url, org);
-
+    const { doc } = await createDocFromUrl(url, org, res.locals.user._id);
     const codePromises: Promise<CodeType>[] = codes.map((code: CodeType) => {
         code.doc = doc._id;
         return Code.create(code);

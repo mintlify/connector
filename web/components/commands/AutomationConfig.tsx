@@ -213,30 +213,7 @@ export default function AutomationConfig({ automationType, onCancel }: { automat
             </Listbox>
 
             {!selectedSource?.isDefault && (
-              <div>
-                {
-                  automationType === 'code' && (
-                    <fieldset className="space-y-3">
-                    <legend className="sr-only">Notifications</legend>
-                    <div className="relative flex items-start">
-                      <div className="flex items-center h-5">
-                        <input
-                          id="comments"
-                          aria-describedby="comments-description"
-                          name="comments"
-                          type="checkbox"
-                          className="focus:ring-0 h-4 w-4 text-primary border-gray-300 rounded"
-                        />
-                      </div>
-                    <div className="ml-3 text-sm">
-                      <span id="comments-description" className="text-gray-500">
-                        Only get triggered by <span className="underline decoration-dashed decoration-gray-300">connected code</span>
-                      </span>
-                    </div>
-                    </div>
-                    </fieldset>
-                  )
-                }
+            <div>
             <div className="mt-4">
             <Listbox value={selectedChannel} onChange={setSelectedChannel}>
               {({ open }) => (

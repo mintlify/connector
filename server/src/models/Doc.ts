@@ -18,6 +18,7 @@ const DocSchema = new Schema({
     favicon: { type: String },
     lastUpdatedAt: { type: Date, default: Date.now },
     createdAt: { type: Date, default: Date.now },
+    createdBy: { type: mongoose.Schema.Types.ObjectId },
 });
 
 const Doc = mongoose.model('Doc', DocSchema, 'docs');

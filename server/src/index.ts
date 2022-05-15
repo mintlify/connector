@@ -1,8 +1,6 @@
-// https://www.notion.so/mintlify/Installation-37aab83daa5e48b88cde8bd3891fa181
 import { ApplicationFunctionOptions, Context, Probot } from "probot";
 import './services/mongoose';
-import { getReviewComments, checkIfAllAlertsAreResolve,
-  createSuccessCheck, createActionRequiredCheck, createInProgressCheck } from "./helpers/github/octokit";
+import { getReviewComments, checkIfAllAlertsAreResolve, createSuccessCheck, createActionRequiredCheck, createInProgressCheck } from "./helpers/github/octokit";
 import headRouter from "./routes";
 import { createReviewCommentsFromAlerts, filterNewAlerts, getAlerts, getAllFilesAndMap, potentiallyCreateNewLinksComment } from "./helpers/github/app";
 
