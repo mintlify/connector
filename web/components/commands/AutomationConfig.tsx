@@ -52,9 +52,9 @@ const destinations = [
     id: 0,
     name: 'Select method',
     icon: <BellIcon className="flex-shrink-0 h-4 w-4 text-gray-700" />,
-    isDefault: true,
     destination: { icon: MailIcon },
     defaultName: 'message',
+    isDefault: true,
   },
   {
     id: 'email',
@@ -109,23 +109,25 @@ export default function AutomationConfig({ userId, automationType, onCancel, set
   const ruleData = automationMap[automationType];
   
   useEffect(() => {
+    if (automationType !== 'doc') {
+      return;
+    }
+
     axios.get(`${API_ENDPOINT}/routes/docs?userId=${userId}`)
-        .then((docsResponse) => {
-          const { docs } = docsResponse.data;
-          const formattedDocs = docs.map((doc: Doc) => {
-            return {
-              _id: doc._id,
-              name: doc.title,
-              icon: <img src={doc.favicon} alt="Slack" className="flex-shrink-0 h-4 w-4 rounded-sm" />
-            }
-          });
-          formattedDocs.unshift(defaultDoc);
-
-          setDocs(formattedDocs);
+      .then((docsResponse) => {
+        const { docs } = docsResponse.data;
+        const formattedDocs = docs.map((doc: Doc) => {
+          return {
+            _id: doc._id,
+            name: doc.title,
+            icon: <img src={doc.favicon} alt="Slack" className="flex-shrink-0 h-4 w-4 rounded-sm" />
+          }
         });
-  }, [userId])
+        formattedDocs.unshift(defaultDoc);
 
-  console.log(docs);
+        setDocs(formattedDocs);
+      });
+  }, [userId, automationType])
 
   const onBackButton = () => {
     onCancel();
@@ -152,6 +154,8 @@ export default function AutomationConfig({ userId, automationType, onCancel, set
       name: name ? name : namePlaceholder
     })
   }
+
+  const isCompletedForm = (automationType === 'doc' && selectedDoc.isDefault !== true && selectedDestinationType.isDefault !== true && destinationValue !== '') || (automationType === 'code' && selectedRepo.isDefault !== true && selectedDestinationType.isDefault !== true && destinationValue !== '');
   
   return <div className="px-6 py-6 z-10">
     <div>
@@ -356,7 +360,9 @@ export default function AutomationConfig({ userId, automationType, onCancel, set
         </button>
         <button
           type="submit"
-          className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary"
+          disabled={!isCompletedForm}
+          className={classNames("ml-3 inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white",
+          isCompletedForm ? "bg-primary hover:bg-hover" : "bg-gray-300 cursor-default")}
           onClick={onCreateButton}
         >
           Create Automation
