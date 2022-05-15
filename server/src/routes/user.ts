@@ -52,9 +52,9 @@ userRouter.get('/', async (req, res) => {
     {
       // Convert integration keys to boolean
       $set: {
-        'org.integrations.notion': { $ne: ['org.integrations.notion', undefined] },
-        'org.integrations.github': { $ne: ['org.integrations.github', undefined] },
-        'org.integrations.slack': { $ne: ['org.integrations.slack', undefined] },
+        'org.integrations.notion': { $gt: ['$org.integrations.notion', null] },
+        'org.integrations.github': { $gt: ['$org.integrations.github', null] },
+        'org.integrations.slack': { $gt: ['$org.integrations.slack', null] },
       }
     }
   ]);
