@@ -19,21 +19,17 @@ export type AutomationType = {
   createdBy: Types.ObjectId
 }
 
-const SourceSchema = new Schema({
-  doc: { type: Schema.Types.ObjectId },
-  repo: { type: String },
-});
-
-const DestinationSchema = new Schema({
-  type: { type: String, required: true },
-  value: { type: String },
-})
-
 const AutomationSchema = new Schema({
   org: { type: mongoose.Schema.Types.ObjectId, required: true },
   type: { type: String, required: true },
-  source: { type: SourceSchema, required: true },
-  destination: { type: DestinationSchema, required: true },
+  source: {
+    doc: { type: Schema.Types.ObjectId },
+    repo: { type: String },
+  },
+  destination: {
+    type: { type: String, required: true },
+    value: { type: String },
+  },
   name: { type: String, required: true },
   isActive: { type: String, default: true },
   createdAt: { type: Date, default: Date.now },
