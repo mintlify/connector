@@ -46,7 +46,7 @@ const repos: Source[] = [
   },
 ]
 
-const alertChannels = [
+const destinations = [
   {
     id: 0,
     name: 'Select method',
@@ -56,7 +56,7 @@ const alertChannels = [
     defaultName: 'message',
   },
   {
-    id: 1,
+    id: 'email',
     name: 'Email',
     icon: <MailIcon className="flex-shrink-0 h-4 w-4 text-gray-700" />,
     destination: {
@@ -67,7 +67,7 @@ const alertChannels = [
     defaultName: 'Send email',
   },
   {
-    id: 2,
+    id: 'slack',
     name: 'Slack',
     icon: <img src="/assets/integrations/slack.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" />,
     destination: {
@@ -78,7 +78,7 @@ const alertChannels = [
     defaultName: 'Send Slack message',
   },
   {
-    id: 3,
+    id: 'webhook',
     name: 'Webhook',
     icon: <img src="/assets/integrations/webhook.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" />,
     destination: {
@@ -90,16 +90,25 @@ const alertChannels = [
   }
 ]
 
-export default function AutomationConfig({ automationType, onCancel }: { automationType: AutomationType, onCancel: () => void }) {
+type AutomationConfig = {
+  userId: string,
+  automationType: AutomationType,
+  onCancel: () => void,
+  setIsAddAutomationOpen: (isOpen: boolean) => void,
+}
+
+export default function AutomationConfig({ userId, automationType, onCancel, setIsAddAutomationOpen }: AutomationConfig) {
   const [docs, setDocs] = useState<Source[]>([defaultDoc]);
   const [selectedDoc, setSelectedDoc] = useState(docs[0])
   const [selectedRepo, setSelectedRepo] = useState(repos[0])
-  const [selectedChannel, setSelectedChannel] = useState(alertChannels[0]);
+  const [selectedDestinationType, setSelectedDestinationType] = useState(destinations[0]);
+  const [destinationValue, setDestinationValue] = useState('');
+  const [name, setName] = useState('');
 
   const ruleData = automationMap[automationType];
   
   useEffect(() => {
-    axios.get(`${API_ENDPOINT}/routes/docs?org=mintlify`)
+    axios.get(`${API_ENDPOINT}/routes/docs?userId=${userId}`)
         .then((docsResponse) => {
           const { docs } = docsResponse.data;
           const formattedDocs = docs.map((doc: any) => {
@@ -113,14 +122,10 @@ export default function AutomationConfig({ automationType, onCancel }: { automat
 
           setDocs(formattedDocs);
         });
-  }, [])
+  }, [userId])
 
   const onBackButton = () => {
     onCancel();
-  }
-
-  const onCreateButton = () => {
-    // Submit form
   }
 
   let sourceOptions = docs;
@@ -132,7 +137,18 @@ export default function AutomationConfig({ automationType, onCancel }: { automat
     setSelectedSource = setSelectedRepo;
   }
 
-  const namePlaceholder = `${selectedChannel.defaultName} when ${selectedSource.name} changes`;
+  const namePlaceholder = `${selectedDestinationType.defaultName} when ${selectedSource.name} changes`;
+
+  const onCreateButton = async () => {
+    setIsAddAutomationOpen(false);
+    await axios.post(`${API_ENDPOINT}/routes/automations?userId=${userId}`, {
+      type: automationType,
+      sourceValue: automationType === 'code' ? selectedRepo.name : selectedDoc.id,
+      destinationType: selectedDestinationType.id,
+      destinationValue,
+      name: name ? name : namePlaceholder
+    })
+  }
   
   return <div className="px-6 py-6 z-10">
     <div>
@@ -215,15 +231,15 @@ export default function AutomationConfig({ automationType, onCancel }: { automat
             {!selectedSource?.isDefault && (
             <div>
             <div className="mt-4">
-            <Listbox value={selectedChannel} onChange={setSelectedChannel}>
+            <Listbox value={selectedDestinationType} onChange={setSelectedDestinationType}>
               {({ open }) => (
                 <>
                   <Listbox.Label className="block text-sm font-medium text-gray-700">Send alert to</Listbox.Label>
                   <div className="mt-1 relative">
                     <Listbox.Button className="relative w-full bg-white hover:bg-gray-50 border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-pointer focus:outline-none sm:text-sm">
                       <span className="flex items-center">
-                        {selectedChannel.icon}
-                        <span className="ml-3 block truncate">{selectedChannel.name}</span>
+                        {selectedDestinationType.icon}
+                        <span className="ml-3 block truncate">{selectedDestinationType.name}</span>
                       </span>
                       <span className="ml-3 absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                         <SelectorIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -238,7 +254,7 @@ export default function AutomationConfig({ automationType, onCancel }: { automat
                       leaveTo="opacity-0"
                     >
                       <Listbox.Options className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-56 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-                        {alertChannels.map((channel) => (
+                        {destinations.map((channel) => (
                           <Listbox.Option
                             key={channel.id}
                             className={({ active }) =>
@@ -282,19 +298,21 @@ export default function AutomationConfig({ automationType, onCancel }: { automat
             </Listbox>
             </div>
             {
-              !selectedChannel?.isDefault && <div>
+              !selectedDestinationType?.isDefault && <div>
                 <div className="mt-4">
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                {selectedChannel.destination.title}
+                {selectedDestinationType.destination.title}
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <selectedChannel.destination.icon className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                  <selectedDestinationType.destination.icon className="h-4 w-4 text-gray-400" aria-hidden="true" />
                 </div>
                 <input
                   type="text"
                   className="block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
-                  placeholder={selectedChannel.destination.placeholder}
+                  placeholder={selectedDestinationType.destination.placeholder}
+                  value={destinationValue}
+                  onChange={(e) => setDestinationValue(e.target.value)}
                 />
               </div>
             </div>
@@ -312,8 +330,10 @@ export default function AutomationConfig({ automationType, onCancel }: { automat
                   type="text"
                   name="name"
                   id="name"
-                  className="shadow-sm focus:ring-primary block w-full sm:text-sm border-gray-300 rounded-md"
+                  className="shadow-sm block w-full sm:text-sm border-gray-300 rounded-md"
                   placeholder={namePlaceholder}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                 />
               </div>
             </div>
@@ -336,7 +356,7 @@ export default function AutomationConfig({ automationType, onCancel }: { automat
           className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary"
           onClick={onCreateButton}
         >
-          Create Rule
+          Create Automation
         </button>
       </div>
     </div>

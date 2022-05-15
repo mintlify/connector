@@ -81,7 +81,6 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
     const response = await client.get(url, {
         render_js: 1,
         proxy_type: 'datacenter',
-        country: 'us',
         session: 1,
         timeout: 10000,
         wait_until: 'domcontentloaded',

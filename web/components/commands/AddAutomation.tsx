@@ -26,11 +26,12 @@ export const automationMap: { doc: AutomationData, code: AutomationData } = {
 };
 
 type AddAutomationProps = {
+  userId: string;
   isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void,
+  setIsOpen: (isOpen: boolean) => void;
 }
 
-export default function AddAutomation({ isOpen, setIsOpen }: AddAutomationProps) {
+export default function AddAutomation({ userId, isOpen, setIsOpen }: AddAutomationProps) {
   const [selectedRuleType, setSelectedRuleType] = useState<AutomationType>();
 
   const onToPrimarySelection = () => {
@@ -64,7 +65,12 @@ export default function AddAutomation({ isOpen, setIsOpen }: AddAutomationProps)
           >
             <Dialog.Panel className="mx-auto max-w-xl transform divide-y divide-gray-100 rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
               { selectedRuleType && (
-                <AutomationConfig automationType={selectedRuleType} onCancel={onToPrimarySelection} />
+                <AutomationConfig
+                  userId={userId}
+                  automationType={selectedRuleType}
+                  onCancel={onToPrimarySelection}
+                  setIsAddAutomationOpen={setIsOpen}
+                />
               ) }
               {
                 selectedRuleType == null && (<Combobox onChange={() => {}} value="">

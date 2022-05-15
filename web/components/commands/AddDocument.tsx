@@ -135,7 +135,7 @@ export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc 
                               <span
                                 className={classNames(
                                   'ml-3 flex-none text-xs font-semibold',
-                                  active ? 'text-indigo-100' : 'text-gray-400'
+                                  active ? 'text-green-100' : 'text-gray-400'
                                 )}
                               >
                                 {
