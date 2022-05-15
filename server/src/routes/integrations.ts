@@ -38,7 +38,7 @@ integrationsRouter.get('/github/authorization', async (req, res) => {
   const installations = await getGitHubInstallations(access_token);
 
   await Org.findByIdAndUpdate(org, { "integrations.github": { ...response, installations }})
-  return res.redirect('https://notion.so');
+  return res.redirect('https://github.com');
 });
 
 integrationsRouter.get('/notion/install', (req, res) => {
