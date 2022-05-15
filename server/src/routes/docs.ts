@@ -1,4 +1,5 @@
 import express from 'express';
+import { Types } from 'mongoose';
 import Doc from '../models/Doc';
 import { getDataFromWebpage } from '../services/webscraper';
 import axios from 'axios';
@@ -6,7 +7,8 @@ import { userMiddleware } from './user';
 
 const docsRouter = express.Router();
 
-export const createDocFromUrl = async (url: string, orgId: string) => {
+// userId is the _id of the user not `userId`
+export const createDocFromUrl = async (url: string, orgId: string, userId: Types.ObjectId) => {
   const { content, method, title, favicon } = await getDataFromWebpage(url, orgId);
   let foundFavicon = favicon;
   if (!foundFavicon) {
@@ -28,7 +30,8 @@ export const createDocFromUrl = async (url: string, orgId: string) => {
     method,
     content,
     title,
-    favicon
+    favicon,
+    createdBy: userId,
   },
   {
     upsert: true
@@ -89,7 +92,7 @@ docsRouter.post('/', userMiddleware, async (req, res) => {
   const { url } = req.body;
   const org = res.locals.user.org;
   try {
-    const { content } = await createDocFromUrl(url, org);
+    const { content } = await createDocFromUrl(url, org, res.locals.user._id);
     res.send({content});
   } catch (error) {
     res.status(500).send({error})

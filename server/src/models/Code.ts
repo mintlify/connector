@@ -2,7 +2,6 @@ import mongoose, { Schema } from 'mongoose';
 
 export type CodeType = {
     doc: string;
-    url?: string;
     sha: string;
     provider: string;
     file: string;
@@ -16,7 +15,6 @@ export type CodeType = {
 
 const CodeSchema = new Schema({
     doc: { type: Schema.Types.ObjectId, required: true },
-    url: { type: String },
     sha: { type: String, required: true },
     provider: { type: String, required: true },
     file: { type: String, required: true },
@@ -25,7 +23,8 @@ const CodeSchema = new Schema({
     type: { type: String, required: true },
     branch: { type: String },
     line: { type: Number },
-    endLine: { type: Number }
+    endLine: { type: Number },
+    createdBy: { type: mongoose.Schema.Types.ObjectId },
 });
 
 const Code = mongoose.model('Code', CodeSchema, 'code');
