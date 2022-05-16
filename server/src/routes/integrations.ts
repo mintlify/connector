@@ -2,7 +2,7 @@ import { Router } from 'express';
 import queryString from 'query-string';
 import { ISDEV } from '../helpers/github/octokit';
 import Org from '../models/Org';
-import { getGitHubAccessTokenFromCode, getGitHubInstallations, GitHubAuthResponse } from '../services/github';
+import { getGitHubAccessTokenFromCode, getGitHubInstallations, getInstallationRepositories, GitHubAuthResponse } from '../services/github';
 import { getNotionAccessTokenFromCode, getNotionInstallURL } from '../services/notion';
 import { getSlackAccessTokenFromCode, getSlackAuthUrl } from '../services/slack';
 
@@ -37,8 +37,15 @@ integrationsRouter.get('/github/authorization', async (req, res) => {
   const { access_token } = response;
 
   const installations = await getGitHubInstallations(access_token);
+  const repositories = await getInstallationRepositories(access_token, installations);
+  const installationsWithRepositories = installations.map((installation, i) => {
+    return {
+      ...installation,
+      repositories: repositories[i]
+    }
+  })
 
-  await Org.findByIdAndUpdate(org, { "integrations.github": { ...response, installations }})
+  await Org.findByIdAndUpdate(org, { "integrations.github": { ...response, installations: installationsWithRepositories }})
   return res.redirect('https://github.com');
 });
 

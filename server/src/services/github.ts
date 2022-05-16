@@ -45,3 +45,25 @@ export const getGitHubInstallations = async (accessToken: string) => {
     return []
   }
 }
+
+export const getInstallationRepositories = async (accessToken: string, installations: any[]) => {
+  try {
+    const getInstalledRepoPromises = installations.map((installation) => {
+      return axios.get(`https://api.github.com/user/installations/${installation.id}/repositories`, {
+        headers: {
+          'Authorization': `token ${accessToken}`
+        }
+      });
+    });
+
+    const installedReposRes = await Promise.all(getInstalledRepoPromises);
+    const installedRepos = installedReposRes.map(({ data: { repositories } }) => {
+      return repositories;
+    });
+
+    return installedRepos;
+
+  } catch (error: any) {
+    return []
+  }
+}
