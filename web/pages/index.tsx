@@ -2,10 +2,8 @@ import type { GetServerSideProps, NextPage } from 'next'
 import axios from 'axios'
 import { Menu } from '@headlessui/react'
 import {
-  ChevronDownIcon,
   ChevronRightIcon,
   DotsVerticalIcon,
-  SortAscendingIcon,
   PlusIcon,
   MinusIcon
 } from '@heroicons/react/solid'
