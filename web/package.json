@@ -19,6 +19,7 @@
     "react": "18.1.0",
     "react-dom": "18.1.0",
     "react-loading-skeleton": "^3.1.0",
+    "react-toastify": "^9.0.1",
     "stytch": "^5.1.4"
   },
   "devDependencies": {
