@@ -51,7 +51,7 @@ type Change = {
 
 type Event = {
   _id: string,
-  event: string,
+  type: string,
   doc: Doc,
   createdAt: string,
   change?: Change[],

@@ -1,7 +1,7 @@
 import express from 'express';
 import * as Diff from 'diff';
 import Doc from '../models/Doc';
-import Event from '../models/Event';
+import Event, { EventType } from '../models/Event';
 import { getDataFromWebpage } from '../services/webscraper';
 
 const scanRouter = express.Router();
@@ -61,11 +61,11 @@ scanRouter.post('/', async (req, res) => {
       ordered: false
     });
 
-    const newEvents = diffAlerts.map((alert) => {
+    const newEvents: EventType[] = diffAlerts.map((alert) => {
       return {
         org,
         doc: alert.doc._id,
-        event: 'change',
+        type: 'change',
         change: alert.diff,
       }
     });

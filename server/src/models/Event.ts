@@ -1,9 +1,9 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Types } from 'mongoose';
 
 export type EventType = {
-    org: string;
-    doc: string;
-    event: string;
+    org: Types.ObjectId;
+    doc: Types.ObjectId;
+    type: string;
     change?: Object;
     add?: Object;
     remove?: Object;
@@ -12,7 +12,7 @@ export type EventType = {
 const EventSchema = new Schema({
     org: { type: Schema.Types.ObjectId, required: true },
     doc: { type: Schema.Types.ObjectId, required: true },
-    event: { type: String, required: true },
+    type: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
     change: Object, // only for change events
     add: Object, // only for add events
