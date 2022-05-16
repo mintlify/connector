@@ -23,8 +23,8 @@ export const userMiddleware = async (req: express.Request, res: express.Response
   return;
 }
 
-userRouter.get('/', async (req, res) => {
-  const { userId } = req.query;
+userRouter.get('/:userId', async (req, res) => {
+  const { userId } = req.params;
 
   if (!userId) {
     return res.status(400).send({ error: 'userId not provided' });
@@ -81,8 +81,8 @@ userRouter.post('/', async (req, res) => {
   return res.send({user});
 });
 
-userRouter.put('/firstname', async (req, res) => {
-  const { userId } = req.query;
+userRouter.put('/:userId/firstname', async (req, res) => {
+  const { userId } = req.params;
   const { firstName } = req.body;
 
   if (!firstName) {
@@ -98,8 +98,8 @@ userRouter.put('/firstname', async (req, res) => {
   }
 });
 
-userRouter.put('/lastname', async (req, res) => {
-  const { userId } = req.query;
+userRouter.put('/:userId/lastname', async (req, res) => {
+  const { userId } = req.params;
   const { lastName } = req.body;
 
   if (!lastName) {

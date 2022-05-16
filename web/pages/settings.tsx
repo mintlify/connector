@@ -5,6 +5,8 @@ import { withSession } from "../lib/withSession";
 import { UserSession } from ".";
 import { useState } from "react";
 import Link from "next/link";
+import axios from "axios";
+import { API_ENDPOINT } from "../helpers/api";
 
 const navigation = [
   { name: 'Account', href: '#', icon: UserCircleIcon },
@@ -26,9 +28,34 @@ const people = [
 ]
 
 export default function Settings({ userSession }: { userSession: UserSession }) {
-  const [firstName, setFirstName] = useState(userSession.user.firstName);
-  const [lastName, setLastName] = useState(userSession.user.lastName);
-  const [orgName, setOrgName] = useState(userSession.user.org.name);
+  const user = userSession.user;
+  const [firstName, setFirstName] = useState(user.firstName);
+  const [lastName, setLastName] = useState(user.lastName);
+  const [orgName, setOrgName] = useState(user.org.name);
+
+  const onBlurFirstNameInput = () => {
+    if (firstName !== user.firstName) {
+      axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/firstname`, {
+        firstName,
+      });
+    }
+  }
+
+  const onBlurLastNameInput = () => {
+    if (lastName !== user.lastName) {
+      axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/lastname`, {
+        lastName,
+      });
+    }
+  }
+
+  const onBlurOrgNameInput = () => {
+    if (orgName !== user.org.name) {
+      axios.put(`${API_ENDPOINT}/routes/org/${user.org._id}/name?userId=${user.userId}`, {
+        name: orgName,
+      });
+    }
+  }
 
   return (
     <Layout user={userSession.user}>
@@ -76,6 +103,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
+                    onBlur={onBlurFirstNameInput}
                   />
                 </div>
 
@@ -91,6 +119,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
+                    onBlur={onBlurLastNameInput}
                   />
                 </div>
 
@@ -145,6 +174,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                       className="focus:ring-indigo-500 focus:border-indigo-500 flex-grow block w-full min-w-0 rounded-md sm:text-sm border-gray-300"
                       value={orgName}
                       onChange={(e) => setOrgName(e.target.value)}
+                      onBlur={onBlurOrgNameInput}
                     />
                   </div>
                 </div>
