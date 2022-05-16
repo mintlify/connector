@@ -94,19 +94,25 @@ integrationsRouter.get('/slack/authorization', async (req, res) => {
   if (code == null) return res.status(403).send('Invalid or missing grant code');
 
   const { response, error } = await getSlackAccessTokenFromCode(code as string);
-  console.log('yuhhhh');
-  console.log('response.data: ', response.data);
-  console.log('response.data.team', response.data.team);
   if (error) return res.status(403).send('Invalid grant code');
   if ( state == null) return res.status(403).send('No state provided');
+  if (response.data.ok) {
+    const { org } = JSON.parse(decodeURIComponent(state as string));
 
-  const { org } = JSON.parse(decodeURIComponent(state as string));
-  console.log({org});
-
-  const accessToken = response.data?.access_token;
-  await Org.findByIdAndUpdate(org, {
-      "integration.slack.accessToken": accessToken
-  });
+    const { data } = response;
+    const webhookData = data?.incoming_webhook;
+    await Org.findByIdAndUpdate(org, {
+        "integrations.slack": {
+          accessToken: data?.access_token,
+          appId: data?.app_id,
+          team: data?.team,
+          channel: webhookData?.channel,
+          channelId: webhookData?.channel_id,
+          configurationUrl: webhookData?.configuration_url
+        }
+    });
+  }
+  // TODO: redirect to channel
   return res.redirect('slack://open');
 });
 

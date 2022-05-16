@@ -6,6 +6,15 @@ export type OrgType = {
     integrations: {
         slack?: {
             accessToken: string,
+            appId: string,
+            team: {
+                id: string,
+                name: string
+            },
+            channel: string,
+            channelId: string,
+            configurationUrl: string,
+            url: string
         },
         notion?: {
             accessToken: string,
@@ -25,6 +34,14 @@ const OrgSchema = new Schema({
         github: Object,
         slack: {
             accessToken: { type: String },
+            appId: { type: String },
+            team: {
+                id: { type: String },
+                name: { type: String } 
+            },
+            channel: { type: String },
+            channelId: { type: String },
+            configurationUrl: { type: String }
         },
         notion: {
             accessToken: { type: String },
