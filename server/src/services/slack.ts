@@ -1,5 +1,6 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
+import qs from 'qs';
 
 dotenv.config();
 
@@ -49,13 +50,15 @@ export const getSlackAccessTokenFromCode = async (code: string): Promise<any> =>
   try {
     console.log({code});
     const url = 'https://slack.com/api/oauth.v2.access';
-    const response = await axios.post(url, {
-      client_id: '2329388587911.3498023797925',
-      client_secret: process.env.SLACK_CLIENT_SECRET,
-      redirect_uri: redirectUri,
-      grant_type: 'authorization_code',
-      code
-    });
+    const response = await axios.post(url,
+      qs.stringify({
+        client_id: clientId,
+        client_secret: process.env.SLACK_CLIENT_SECRET,
+        redirect_uri: redirectUri,
+        grant_type: 'authorization_code',
+        code
+      })
+    );
     console.log({response});
     return { response }
   } catch (error: any) {
