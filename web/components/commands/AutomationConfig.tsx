@@ -7,7 +7,7 @@ import { BellIcon, CheckIcon, HashtagIcon, LinkIcon, MailIcon, SelectorIcon, Doc
 import { automationMap } from './AddAutomation';
 import axios from 'axios';
 import { API_ENDPOINT } from '../../helpers/api';
-import { Doc } from '../../pages';
+import { Doc, User } from '../../pages';
 
 type Source = {
   _id: string;
@@ -30,58 +30,58 @@ const defaultRepo: Source = {
   isDefault: true
 }
 
-const destinations = [
-  {
-    id: 0,
-    name: 'Select method',
-    icon: <BellIcon className="flex-shrink-0 h-4 w-4 text-gray-700" />,
-    destination: { icon: MailIcon },
-    defaultName: 'message',
-    isDefault: true,
-  },
-  {
-    id: 'email',
-    name: 'Email',
-    icon: <MailIcon className="flex-shrink-0 h-4 w-4 text-gray-700" />,
-    destination: {
-      title: 'Email address',
-      placeholder: 'you@company.com',
-      icon: MailIcon,
-    },
-    defaultName: 'Send email',
-  },
-  {
-    id: 'slack',
-    name: 'Slack',
-    icon: <img src="/assets/integrations/slack.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" />,
-    destination: {
-      title: 'Channel',
-      placeholder: 'doc-updates',
-      icon: HashtagIcon,
-    },
-    defaultName: 'Send Slack message',
-  },
-  {
-    id: 'webhook',
-    name: 'Webhook',
-    icon: <img src="/assets/integrations/webhook.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" />,
-    destination: {
-      title: 'Endpoint URL',
-      placeholder: 'https://example.com/webhook',
-      icon: LinkIcon,
-    },
-    defaultName: 'Call API endpoint',
-  }
-]
-
 type AutomationConfig = {
-  userId: string,
+  user: User,
   automationType: AutomationType,
   onCancel: () => void,
   setIsAddAutomationOpen: (isOpen: boolean) => void,
 }
 
-export default function AutomationConfig({ userId, automationType, onCancel, setIsAddAutomationOpen }: AutomationConfig) {
+export default function AutomationConfig({ user, automationType, onCancel, setIsAddAutomationOpen }: AutomationConfig) {
+  const destinations = [
+    {
+      id: 0,
+      name: 'Select method',
+      icon: <BellIcon className="flex-shrink-0 h-4 w-4 text-gray-700" />,
+      destination: { icon: MailIcon },
+      defaultName: 'message',
+      isDefault: true,
+    },
+    {
+      id: 'email',
+      name: 'Email',
+      icon: <MailIcon className="flex-shrink-0 h-4 w-4 text-gray-700" />,
+      destination: {
+        title: 'Email address',
+        placeholder: user.email,
+        icon: MailIcon,
+      },
+      defaultName: 'Send email',
+    },
+    {
+      id: 'slack',
+      name: 'Slack',
+      icon: <img src="/assets/integrations/slack.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" />,
+      destination: {
+        title: 'Channel',
+        placeholder: 'doc-updates',
+        icon: HashtagIcon,
+      },
+      defaultName: 'Send Slack message',
+    },
+    {
+      id: 'webhook',
+      name: 'Webhook',
+      icon: <img src="/assets/integrations/webhook.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" />,
+      destination: {
+        title: 'Endpoint URL',
+        placeholder: 'https://example.com/webhook',
+        icon: LinkIcon,
+      },
+      defaultName: 'Call API endpoint',
+    }
+  ]
+
   const [docs, setDocs] = useState<Source[]>([defaultDoc]);
   const [selectedDoc, setSelectedDoc] = useState(docs[0]);
   const [repos, setRepos] = useState<Source[]>([defaultRepo]);
@@ -94,7 +94,7 @@ export default function AutomationConfig({ userId, automationType, onCancel, set
   
   useEffect(() => {
     if (automationType === 'doc') {
-      axios.get(`${API_ENDPOINT}/routes/docs?userId=${userId}`)
+      axios.get(`${API_ENDPOINT}/routes/docs?userId=${user.userId}`)
         .then((docsResponse) => {
           const { docs } = docsResponse.data;
           const formattedDocs = docs.map((doc: Doc) => {
@@ -111,7 +111,7 @@ export default function AutomationConfig({ userId, automationType, onCancel, set
     }
 
     else if (automationType === 'code') {
-      axios.get(`${API_ENDPOINT}/routes/org/repos?userId=${userId}`)
+      axios.get(`${API_ENDPOINT}/routes/org/repos?userId=${user.userId}`)
         .then((reposResponse) => {
           const { repos } = reposResponse.data;
           const formattedRepos= repos.map((repo: string) => {
@@ -125,7 +125,7 @@ export default function AutomationConfig({ userId, automationType, onCancel, set
           setRepos(formattedRepos);
         });
     }
-  }, [userId, automationType])
+  }, [user, automationType])
 
   const onBackButton = () => {
     onCancel();
@@ -144,7 +144,7 @@ export default function AutomationConfig({ userId, automationType, onCancel, set
 
   const onCreateButton = async () => {
     setIsAddAutomationOpen(false);
-    await axios.post(`${API_ENDPOINT}/routes/automations?userId=${userId}`, {
+    await axios.post(`${API_ENDPOINT}/routes/automations?userId=${user.userId}`, {
       type: automationType,
       sourceValue: automationType === 'code' ? selectedRepo.name : selectedDoc._id,
       destinationType: selectedDestinationType.id,

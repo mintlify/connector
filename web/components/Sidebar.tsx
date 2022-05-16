@@ -30,7 +30,7 @@ export default function Sidebar({ user, isAddingDoc, setIsAddingDoc }: SidebarPr
       setIsAddingDoc={setIsAddingDoc}
     />
     <AddAutomation
-      userId={userId}
+      user={user}
       isOpen={isAddAutomationOpen}
       setIsOpen={setIsAddAutomationOpen}
     />
