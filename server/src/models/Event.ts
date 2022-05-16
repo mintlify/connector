@@ -1,5 +1,14 @@
 import mongoose, { Schema } from 'mongoose';
 
+export type EventType = {
+    org: string;
+    doc: string;
+    event: string;
+    change?: Object;
+    add?: Object;
+    remove?: Object;
+};
+
 const EventSchema = new Schema({
     org: { type: Schema.Types.ObjectId, required: true },
     doc: { type: Schema.Types.ObjectId, required: true },

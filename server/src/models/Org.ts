@@ -13,8 +13,7 @@ export type OrgType = {
             },
             channel: string,
             channelId: string,
-            configurationUrl: string,
-            url: string
+            configurationUrl: string
         },
         notion?: {
             accessToken: string,
