@@ -73,6 +73,20 @@ export default function Automations({ userSession }: { userSession: UserSession 
       })
   }, [user])
 
+  /**
+   * It takes an automationId and isActive boolean, and then it makes a PUT request to the API endpoint
+   * to update the automation's isActive property
+   * @param {string} automationId - The id of the automation that we want to toggle
+   * @param {boolean} isActive - boolean - This is the new state of the switch.
+   */
+  const handleToggleSwitch = async (automationId: string, isActive: boolean) => {
+    axios.put(`${API_ENDPOINT}/routes/automations/active?userId=${user.userId}`, { automationId, isActive })
+      .then(() => {
+        const newAutomations = automations.map(automation => (automation._id === automationId) ? {...automation, isActive} : automation);
+        setAutomations(newAutomations);
+      })
+  }
+
   return (
     <>
     <Head>
@@ -105,7 +119,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
                       <div className="ml-2 flex-shrink-0 flex">
                       <Switch
                           checked={automation.isActive}
-                          onChange={() => {}}
+                          onChange={() => handleToggleSwitch(automation._id, !automation.isActive)}
                           className="flex-shrink-0 group relative rounded-full inline-flex items-center justify-center h-4 w-9 cursor-pointer"
                         >
                           <span className="sr-only">Use setting</span>
