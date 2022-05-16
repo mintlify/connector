@@ -47,10 +47,13 @@ export const getSlackAuthUrl = (state?: string) => {
 
 export const getSlackAccessTokenFromCode = async (code: string): Promise<any> => {
   try {
+    console.log({code});
     const url = 'https://slack.com/api/oauth.v2.access';
     const response = await axios.post(url, {
       client_id: '2329388587911.3498023797925',
       client_secret: process.env.SLACK_CLIENT_SECRET,
+      redirect_uri: redirectUri,
+      grant_type: 'authorization_code',
       code
     });
     console.log({response});

@@ -84,7 +84,6 @@ integrationsRouter.get('/slack/install', async (req, res) => {
 
 integrationsRouter.get('/slack/authorization', async (req, res) => {
   const { code, state } = req.query;
-  console.log(req.query);
   if (code == null) return res.status(403).send('Invalid or missing grant code');
 
   const { response, error } = await getSlackAccessTokenFromCode(code as string);
@@ -94,7 +93,9 @@ integrationsRouter.get('/slack/authorization', async (req, res) => {
   if ( state == null) return res.status(403).send('No state provided');
 
   const { org } = JSON.parse(decodeURIComponent(state as string));
-  const accessToken = response.data.access_token;
+  console.log({org});
+
+  const accessToken = response.data?.access_token;
   await Org.findByIdAndUpdate(org, {
       "integration.slack.accessToken": accessToken
   });
