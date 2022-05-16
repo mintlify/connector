@@ -79,16 +79,16 @@ integrationsRouter.get('/slack/install', async (req, res) => {
 
   const encodedState = encodeURIComponent(JSON.stringify(state));
   const url = getSlackAuthUrl(encodedState);
-  console.log({url});
   return res.redirect(url);
 });
 
 integrationsRouter.get('/slack/authorization', async (req, res) => {
   const { code, state } = req.query;
-  console.log({req});
+  console.log(req.query);
   if (code == null) return res.status(403).send('Invalid or missing grant code');
 
   const { response, error } = await getSlackAccessTokenFromCode(code as string);
+  console.log({response});
 
   if (error) return res.status(403).send('Invalid grant code');
   if ( state == null) return res.status(403).send('No state provided');
