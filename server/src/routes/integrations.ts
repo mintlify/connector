@@ -79,6 +79,7 @@ integrationsRouter.get('/slack/install', async (req, res) => {
 
   const encodedState = encodeURIComponent(JSON.stringify(state));
   const url = getSlackAuthUrl(encodedState);
+  console.log({url});
   return res.redirect(url);
 });
 
