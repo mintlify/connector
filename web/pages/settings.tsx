@@ -52,7 +52,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
       </aside>
 
       <div className="space-y-8 sm:px-6 lg:px-0 lg:col-span-5">
-      <form action="#" method="POST">
+      <form id="setting-account" action="#" method="POST">
           <div className="shadow sm:rounded-md sm:overflow-hidden">
             <div className="bg-white pt-6 pb-8 px-4 space-y-5 sm:px-6">
               <div>
@@ -118,7 +118,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
           </div>
         </form>
 
-        <form action="#" method="POST">
+        <form id="setting-organization" action="#" method="POST">
           <div className="shadow sm:rounded-md sm:overflow-hidden">
             <div className="bg-white pt-6 pb-8 px-4 space-y-5 sm:px-6">
               <div>
@@ -217,7 +217,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
           </div>
         </form>
 
-        <form action="#" method="POST">
+        <form id="setting-notifications" action="#" method="POST">
           <div className="shadow sm:rounded-md sm:overflow-hidden">
             <div className="bg-white pt-6 pb-8 px-4 space-y-5 sm:px-6">
               <div>
