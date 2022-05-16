@@ -31,7 +31,7 @@ const AutomationSchema = new Schema({
     value: { type: String },
   },
   name: { type: String, required: true },
-  isActive: { type: String, default: true },
+  isActive: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },
   createdBy: { type: mongoose.Schema.Types.ObjectId },
 });

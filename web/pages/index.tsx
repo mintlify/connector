@@ -24,6 +24,7 @@ import LoadingItem from '../components/LoadingItem'
 import { withSession } from '../lib/withSession'
 import SignIn from '../components/SignIn'
 import Setup from '../components/Setup'
+import { Automation } from './automations'
 
 type Code = {
   _id: string,
@@ -38,6 +39,7 @@ export type Doc = {
   favicon: string,
   url: string,
   code: Code[],
+  automations: Automation[]
 }
 
 type Change = {
@@ -254,6 +256,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                     </span>
                     <div className="flex items-center space-x-2">
                       <div className="flex flex-shrink-0 space-x-1">
+                        <div className="h-6 w-6"></div>
                         {doc.code.map((code) => (
                           <Tooltip key={code._id} message={`Connected to ${code.file}`}>
                             <Link href={code.url}>
@@ -263,13 +266,17 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                             </Link>
                           </Tooltip>
                         ))}
-                        <Tooltip key="auto" message="Send Slack alert">
-                          <Link href='/automations'>
-                            <a className="hover:opacity-50">
-                            {getAutomationTypeIcon('code', 6, 4)}
-                            </a>
-                          </Link>
-                        </Tooltip>
+                        {
+                          doc.automations.map((automation) => (
+                            <Tooltip key="auto" message={automation.name}>
+                              <Link href='/automations'>
+                                <a className="hover:opacity-50">
+                                {getAutomationTypeIcon(automation.type, 6, 4)}
+                                </a>
+                              </Link>
+                            </Tooltip>
+                          ))
+                        }
                       </div>
                       {[].length > 5 ? (
                         <span className="flex-shrink-0 text-xs leading-5 font-medium">

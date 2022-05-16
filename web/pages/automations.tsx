@@ -16,7 +16,7 @@ import axios from "axios";
 export type DestinationType = 'slack' | 'email' | 'webhook';
 export type AutomationType = 'doc' | 'code';
 
-type Automation = {
+export type Automation = {
   _id: string;
   org: string,
   type: AutomationType,
