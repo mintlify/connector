@@ -5,7 +5,7 @@ import queryString from 'query-string';
 import { ENDPOINT, ISDEV } from "../../helpers/github/octokit"
 import Org from '../../models/Org';
 
-export type GitHubAuthResponse = {
+type GitHubAuthResponse = {
   access_token: string,
   expires_in: number,
   refresh_token: string,
