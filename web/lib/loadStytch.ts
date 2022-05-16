@@ -1,4 +1,5 @@
 import * as stytch from 'stytch'
+import { ISDEV } from '../helpers/api';
 
 let client: stytch.Client;
 
@@ -7,7 +8,7 @@ export const loadStytch = () => {
     client = new stytch.Client({
       project_id: process.env.STYTCH_PROJECT_ID || '',
       secret: process.env.STYTCH_SECRET || '',
-      env: stytch.envs.test,
+      env: ISDEV ? stytch.envs.test : stytch.envs.live,
     });
   }
 
