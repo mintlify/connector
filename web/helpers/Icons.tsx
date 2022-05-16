@@ -96,6 +96,5 @@ export const getTypeIcon = (type: AutomationType | DestinationType, className: s
     </svg>
     
   }
-
   return null;
 }
