@@ -88,8 +88,8 @@ integrationsRouter.get('/slack/authorization', async (req, res) => {
 
   const { response, error } = await getSlackAccessTokenFromCode(code as string);
   console.log('yuhhhh');
-  console.log({response});
-
+  console.log('response.data: ', response.data);
+  console.log('response.data.team', response.data.team);
   if (error) return res.status(403).send('Invalid grant code');
   if ( state == null) return res.status(403).send('No state provided');
 
