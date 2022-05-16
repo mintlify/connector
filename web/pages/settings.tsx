@@ -3,6 +3,7 @@ import { BellIcon, UserCircleIcon, UserGroupIcon } from '@heroicons/react/outlin
 import { GetServerSideProps } from "next";
 import { withSession } from "../lib/withSession";
 import { UserSession } from ".";
+import { useState } from "react";
 
 const navigation = [
   { name: 'Account', href: '#', icon: UserCircleIcon },
@@ -24,6 +25,10 @@ const people = [
 ]
 
 export default function Settings({ userSession }: { userSession: UserSession }) {
+  const [firstName, setFirstName] = useState(userSession.user.firstName);
+  const [lastName, setLastName] = useState(userSession.user.lastName);
+  const [orgName, setOrgName] = useState(userSession.user.org.name);
+
   return (
     <Layout user={userSession.user}>
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
@@ -68,6 +73,8 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                     id="first-name"
                     autoComplete="given-name"
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
                   />
                 </div>
 
@@ -81,6 +88,8 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                     id="last-name"
                     autoComplete="family-name"
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
                   />
                 </div>
 
@@ -93,8 +102,16 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                     name="email-address"
                     id="email-address"
                     autoComplete="email"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    disabled
+                    value={userSession.user.email}
+                    className="mt-1 block w-full border border-gray-300 bg-gray-100 text-gray-400 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                   />
+                  <p className="text-sm mt-2 text-gray-500">
+                    <span className="text-primary font-medium">
+                      Contact support
+                    </span>
+                    {' '}to change emails
+                  </p>
                 </div>
               </div>
             </div>
@@ -123,6 +140,8 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                       id="organization"
                       autoComplete="organization"
                       className="focus:ring-indigo-500 focus:border-indigo-500 flex-grow block w-full min-w-0 rounded-md sm:text-sm border-gray-300"
+                      value={orgName}
+                      onChange={(e) => setOrgName(e.target.value)}
                     />
                   </div>
                 </div>
@@ -204,12 +223,12 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
               <div>
                 <h3 className="text-lg leading-6 font-medium text-gray-900">Notifications</h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  Provide basic informtion about the job. Be specific with the job title.
+                  Manage notification preferences
                 </p>
               </div>
 
               <fieldset>
-                <legend className="text-base font-medium text-gray-900">By Email</legend>
+                <legend className="text-base font-medium text-gray-900">Email notifications</legend>
                 <div className="mt-4 space-y-4">
                   <div className="flex items-start">
                     <div className="h-5 flex items-center">
@@ -222,9 +241,9 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                     </div>
                     <div className="ml-3 text-sm">
                       <label htmlFor="comments" className="font-medium text-gray-700">
-                        Comments
+                        Monthly documentation digest
                       </label>
-                      <p className="text-gray-500">Get notified when someones posts a comment on a posting.</p>
+                      <p className="text-gray-500">Get a detailed report on the monthly documentation changes</p>
                     </div>
                   </div>
                   <div>
@@ -239,27 +258,9 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                       </div>
                       <div className="ml-3 text-sm">
                         <label htmlFor="candidates" className="font-medium text-gray-700">
-                          Candidates
+                          Newsletter
                         </label>
-                        <p className="text-gray-500">Get notified when a candidate applies for a job.</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex items-start">
-                      <div className="h-5 flex items-center">
-                        <input
-                          id="offers"
-                          name="offers"
-                          type="checkbox"
-                          className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                        />
-                      </div>
-                      <div className="ml-3 text-sm">
-                        <label htmlFor="offers" className="font-medium text-gray-700">
-                          Offers
-                        </label>
-                        <p className="text-gray-500">Get notified when a candidate accepts or rejects an offer.</p>
+                        <p className="text-gray-500">Be notified on product updates and special offers</p>
                       </div>
                     </div>
                   </div>
