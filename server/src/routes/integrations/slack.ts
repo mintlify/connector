@@ -39,7 +39,7 @@ const getSlackAccessTokenFromCode = async (code: string): Promise<any> => {
 
 const slackRouter = Router();
 
-slackRouter.get('/slack/install', async (req, res) => {
+slackRouter.get('/install', async (req, res) => {
     const { org } = req.query;
     if (!org) {
         return res.send('Organization ID is required');
@@ -52,7 +52,7 @@ slackRouter.get('/slack/install', async (req, res) => {
     return res.redirect(url);
   });
   
-  slackRouter.get('/slack/authorization', async (req, res) => {
+  slackRouter.get('/authorization', async (req, res) => {
     const { code, state } = req.query;
     if (code == null) return res.status(403).send('Invalid or missing grant code');
   
@@ -64,6 +64,8 @@ slackRouter.get('/slack/install', async (req, res) => {
   
       const { data } = response;
       const webhookData = data?.incoming_webhook;
+      console.log('AYOO');
+      console.log(data);
       await Org.findByIdAndUpdate(org, {
           "integrations.slack": {
             accessToken: data?.access_token,
