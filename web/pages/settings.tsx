@@ -1,13 +1,26 @@
-import { classNames } from "../helpers/functions";
 import Layout from "../components/layout";
-import { UserCircleIcon, UserGroupIcon } from '@heroicons/react/outline'
+import { BellIcon, UserCircleIcon, UserGroupIcon } from '@heroicons/react/outline'
 import { GetServerSideProps } from "next";
 import { withSession } from "../lib/withSession";
 import { UserSession } from ".";
 
 const navigation = [
-  { name: 'Profile', href: '#', icon: UserCircleIcon, current: true },
-  { name: 'Team Settings', href: '#', icon: UserGroupIcon, current: false },
+  { name: 'Account', href: '#', icon: UserCircleIcon },
+  { name: 'Organization', href: '#', icon: UserGroupIcon },
+  { name: 'Notifications', href: '#', icon: BellIcon },
+]
+
+const people = [
+  {
+    name: 'Lindsay Walton',
+    title: 'Front-end Developer',
+    department: 'Optimization',
+    email: 'lindsay.walton@example.com',
+    role: 'Member',
+    image:
+      'https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+  },
+  // More people...
 ]
 
 export default function Settings({ userSession }: { userSession: UserSession }) {
@@ -16,26 +29,15 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
     <div className="my-6 lg:grid lg:grid-cols-12 lg:gap-x-5">
       <aside className="py-0 px-2 sm:px-6 lg:px-0 lg:col-span-4">
-        <nav className="space-y-1 lg:ml-24">
+        <nav className="space-y-1 lg:ml-40">
           {navigation.map((item) => (
             <a
               key={item.name}
               href={item.href}
-              className={classNames(
-                item.current
-                  ? 'bg-gray-50 text-primary hover:text-primary hover:bg-white'
-                  : 'text-gray-900 hover:text-gray-900 hover:bg-gray-50',
-                'group rounded-md px-3 py-2 flex items-center text-sm font-medium'
-              )}
-              aria-current={item.current ? 'page' : undefined}
+              className="text-gray-700 hover:text-gray-800 hover:bg-white group rounded-md px-3 py-2 flex items-center text-sm font-medium"
             >
               <item.icon
-                className={classNames(
-                  item.current
-                    ? 'text-primary group-hover:text-primary'
-                    : 'text-gray-400 group-hover:text-gray-500',
-                  'flex-shrink-0 -ml-1 mr-3 h-6 w-6'
-                )}
+                className="text-primary group-hover:text-primary flex-shrink-0 -ml-1 mr-3 h-6 w-6"
                 aria-hidden="true"
               />
               <span className="truncate">{item.name}</span>
@@ -44,123 +46,15 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
         </nav>
       </aside>
 
-      <div className="space-y-6 sm:px-6 lg:px-0 lg:col-span-8">
-        <form action="#" method="POST">
+      <div className="space-y-8 sm:px-6 lg:px-0 lg:col-span-5">
+      <form action="#" method="POST">
           <div className="shadow sm:rounded-md sm:overflow-hidden">
-            <div className="bg-white py-6 px-4 space-y-6 sm:p-6">
+            <div className="bg-white pt-6 pb-8 px-4 space-y-5 sm:px-6">
               <div>
-                <h3 className="text-lg leading-6 font-medium text-gray-900">Profile</h3>
+                <h3 className="text-lg leading-6 font-medium text-gray-900">Account</h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  This information will be displayed publicly so be careful what you share.
+                  Your personal account information
                 </p>
-              </div>
-
-              <div className="grid grid-cols-3 gap-6">
-                <div className="col-span-3 sm:col-span-2">
-                  <label htmlFor="company-website" className="block text-sm font-medium text-gray-700">
-                    Username
-                  </label>
-                  <div className="mt-1 rounded-md shadow-sm flex">
-                    <span className="bg-gray-50 border border-r-0 border-gray-300 rounded-l-md px-3 inline-flex items-center text-gray-500 sm:text-sm">
-                      workcation.com/
-                    </span>
-                    <input
-                      type="text"
-                      name="username"
-                      id="username"
-                      autoComplete="username"
-                      className="focus:ring-indigo-500 focus:border-indigo-500 flex-grow block w-full min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300"
-                    />
-                  </div>
-                </div>
-
-                <div className="col-span-3">
-                  <label htmlFor="about" className="block text-sm font-medium text-gray-700">
-                    About
-                  </label>
-                  <div className="mt-1">
-                    <textarea
-                      id="about"
-                      name="about"
-                      rows={3}
-                      className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md"
-                      placeholder="you@example.com"
-                      defaultValue={''}
-                    />
-                  </div>
-                  <p className="mt-2 text-sm text-gray-500">
-                    Brief description for your profile. URLs are hyperlinked.
-                  </p>
-                </div>
-
-                <div className="col-span-3">
-                  <label className="block text-sm font-medium text-gray-700">Photo</label>
-                  <div className="mt-1 flex items-center">
-                    <span className="inline-block bg-gray-100 rounded-full overflow-hidden h-12 w-12">
-                      <svg className="h-full w-full text-gray-300" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-                      </svg>
-                    </span>
-                    <button
-                      type="button"
-                      className="ml-5 bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Change
-                    </button>
-                  </div>
-                </div>
-
-                <div className="col-span-3">
-                  <label className="block text-sm font-medium text-gray-700">Cover photo</label>
-                  <div className="mt-1 border-2 border-gray-300 border-dashed rounded-md px-6 pt-5 pb-6 flex justify-center">
-                    <div className="space-y-1 text-center">
-                      <svg
-                        className="mx-auto h-12 w-12 text-gray-400"
-                        stroke="currentColor"
-                        fill="none"
-                        viewBox="0 0 48 48"
-                        aria-hidden="true"
-                      >
-                        <path
-                          d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                          strokeWidth={2}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                      <div className="flex text-sm text-gray-600">
-                        <label
-                          htmlFor="file-upload"
-                          className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
-                        >
-                          <span>Upload a file</span>
-                          <input id="file-upload" name="file-upload" type="file" className="sr-only" />
-                        </label>
-                        <p className="pl-1">or drag and drop</p>
-                      </div>
-                      <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
-              <button
-                type="submit"
-                className="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </form>
-
-        <form action="#" method="POST">
-          <div className="shadow sm:rounded-md sm:overflow-hidden">
-            <div className="bg-white py-6 px-4 space-y-6 sm:p-6">
-              <div>
-                <h3 className="text-lg leading-6 font-medium text-gray-900">Personal Information</h3>
-                <p className="mt-1 text-sm text-gray-500">Use a permanent address where you can recieve mail.</p>
               </div>
 
               <div className="grid grid-cols-6 gap-6">
@@ -190,7 +84,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                   />
                 </div>
 
-                <div className="col-span-6 sm:col-span-4">
+                <div className="col-span-6">
                   <label htmlFor="email-address" className="block text-sm font-medium text-gray-700">
                     Email address
                   </label>
@@ -202,90 +96,111 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                   />
                 </div>
-
-                <div className="col-span-6 sm:col-span-3">
-                  <label htmlFor="country" className="block text-sm font-medium text-gray-700">
-                    Country
-                  </label>
-                  <select
-                    id="country"
-                    name="country"
-                    autoComplete="country-name"
-                    className="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  >
-                    <option>United States</option>
-                    <option>Canada</option>
-                    <option>Mexico</option>
-                  </select>
-                </div>
-
-                <div className="col-span-6">
-                  <label htmlFor="street-address" className="block text-sm font-medium text-gray-700">
-                    Street address
-                  </label>
-                  <input
-                    type="text"
-                    name="street-address"
-                    id="street-address"
-                    autoComplete="street-address"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  />
-                </div>
-
-                <div className="col-span-6 sm:col-span-6 lg:col-span-2">
-                  <label htmlFor="city" className="block text-sm font-medium text-gray-700">
-                    City
-                  </label>
-                  <input
-                    type="text"
-                    name="city"
-                    id="city"
-                    autoComplete="address-level2"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  />
-                </div>
-
-                <div className="col-span-6 sm:col-span-3 lg:col-span-2">
-                  <label htmlFor="region" className="block text-sm font-medium text-gray-700">
-                    State / Province
-                  </label>
-                  <input
-                    type="text"
-                    name="region"
-                    id="region"
-                    autoComplete="address-level1"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  />
-                </div>
-
-                <div className="col-span-6 sm:col-span-3 lg:col-span-2">
-                  <label htmlFor="postal-code" className="block text-sm font-medium text-gray-700">
-                    ZIP / Postal code
-                  </label>
-                  <input
-                    type="text"
-                    name="postal-code"
-                    id="postal-code"
-                    autoComplete="postal-code"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  />
-                </div>
               </div>
-            </div>
-            <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
-              <button
-                type="submit"
-                className="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Save
-              </button>
             </div>
           </div>
         </form>
 
         <form action="#" method="POST">
           <div className="shadow sm:rounded-md sm:overflow-hidden">
-            <div className="bg-white py-6 px-4 space-y-6 sm:p-6">
+            <div className="bg-white pt-6 pb-8 px-4 space-y-5 sm:px-6">
+              <div>
+                <h3 className="text-lg leading-6 font-medium text-gray-900">Organization</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Settings for your organization and team members
+                </p>
+              </div>
+
+              <div className="grid grid-cols-3 gap-6">
+                <div className="col-span-3">
+                  <label htmlFor="company-website" className="block text-sm font-medium text-gray-700">
+                    Name
+                  </label>
+                  <div className="mt-1 rounded-md shadow-sm flex">
+                    <input
+                      type="text"
+                      name="organization"
+                      id="organization"
+                      autoComplete="organization"
+                      className="focus:ring-indigo-500 focus:border-indigo-500 flex-grow block w-full min-w-0 rounded-md sm:text-sm border-gray-300"
+                    />
+                  </div>
+                </div>
+
+                <div className="col-span-3">
+                <div>
+                  <div className="sm:flex sm:items-center">
+                    <div className="sm:flex-auto">
+                      <h1 className="text-lg leading-6 font-medium text-gray-900">Members</h1>
+                      <p className="mt-2 text-sm text-gray-500">
+                        Manage members of your organization here
+                      </p>
+                    </div>
+                    <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+                      <button
+                        type="button"
+                        className="inline-flex items-center justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-hover focus:outline-none focus:ring-0 focus:ring-offset-2 sm:w-auto"
+                      >
+                        Add member
+                      </button>
+                    </div>
+                  </div>
+                  <div className="mt-8 flex flex-col">
+                    <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                      <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                        <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                          <table className="min-w-full divide-y divide-gray-300">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                                  Name
+                                </th>
+                                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                  Role
+                                </th>
+                                <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                  <span className="sr-only">Edit</span>
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200 bg-white">
+                              {people.map((person) => (
+                                <tr key={person.email}>
+                                  <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
+                                    <div className="flex items-center">
+                                      <div className="h-10 w-10 flex-shrink-0">
+                                        <img className="h-10 w-10 rounded-full" src={person.image} alt="" />
+                                      </div>
+                                      <div className="ml-4">
+                                        <div className="font-medium text-gray-900">{person.name}</div>
+                                        <div className="text-gray-500">{person.email}</div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{person.role}</td>
+                                  <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                    <a href="#" className="text-primary hover:text-hover">
+                                      Edit<span className="sr-only">, {person.name}</span>
+                                    </a>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <form action="#" method="POST">
+          <div className="shadow sm:rounded-md sm:overflow-hidden">
+            <div className="bg-white pt-6 pb-8 px-4 space-y-5 sm:px-6">
               <div>
                 <h3 className="text-lg leading-6 font-medium text-gray-900">Notifications</h3>
                 <p className="mt-1 text-sm text-gray-500">
@@ -350,53 +265,6 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                   </div>
                 </div>
               </fieldset>
-              <fieldset className="mt-6">
-                <legend className="text-base font-medium text-gray-900">Push Notifications</legend>
-                <p className="text-sm text-gray-500">These are delivered via SMS to your mobile phone.</p>
-                <div className="mt-4 space-y-4">
-                  <div className="flex items-center">
-                    <input
-                      id="push-everything"
-                      name="push-notifications"
-                      type="radio"
-                      className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                    />
-                    <label htmlFor="push-everything" className="ml-3">
-                      <span className="block text-sm font-medium text-gray-700">Everything</span>
-                    </label>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      id="push-email"
-                      name="push-notifications"
-                      type="radio"
-                      className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                    />
-                    <label htmlFor="push-email" className="ml-3">
-                      <span className="block text-sm font-medium text-gray-700">Same as email</span>
-                    </label>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      id="push-nothing"
-                      name="push-notifications"
-                      type="radio"
-                      className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                    />
-                    <label htmlFor="push-nothing" className="ml-3">
-                      <span className="block text-sm font-medium text-gray-700">No push notifications</span>
-                    </label>
-                  </div>
-                </div>
-              </fieldset>
-            </div>
-            <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
-              <button
-                type="submit"
-                className="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600"
-              >
-                Save
-              </button>
             </div>
           </div>
         </form>
