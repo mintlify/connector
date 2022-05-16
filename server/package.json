@@ -17,7 +17,8 @@
     "start": "npm run build && probot run ./lib/index.js",
     "cron": "npm run build && node ./lib/cron/index.js",
     "dev": "nodemon -e ts,js --exec npm start",
-    "test": "jest"
+    "test": "jest",
+    "ts-node": "ts-node -T -P tsconfig.json"
   },
   "dependencies": {
     "@mintlify/grove": "^1.0.13",
