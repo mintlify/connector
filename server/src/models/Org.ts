@@ -22,7 +22,9 @@ export type OrgType = {
             workspaceName?: string,
             workspaceIcon?: string,
         },
-        github?: Object
+        github?: {
+            installations: Object[]
+        }
     }
 }
 

@@ -23,29 +23,12 @@ const defaultDoc: Source = {
   isDefault: true
 }
 
-const repos: Source[] = [
-  {
-    _id: '0',
-    name: 'Select repo',
-    icon: <img src="/assets/integrations/github.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" />,
-    isDefault: true
-  },
-  {
-    _id: '1',
-    name: 'writer',
-    icon: <img src="/assets/integrations/github.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" />
-  },
-  {
-    _id: '2',
-    name: 'connect',
-    icon: <img src="/assets/integrations/github.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" />
-  },
-  {
-    _id: '3',
-    name: 'backend',
-    icon: <img src="/assets/integrations/github.svg" alt="Slack" className="flex-shrink-0 h-4 w-4" />
-  },
-]
+const defaultRepo: Source = {
+  _id: '0',
+  name: 'Select repo',
+  icon: <img src="/assets/integrations/github.svg" alt="GitHub" className="flex-shrink-0 h-4 w-4" />,
+  isDefault: true
+}
 
 const destinations = [
   {
@@ -100,7 +83,8 @@ type AutomationConfig = {
 
 export default function AutomationConfig({ userId, automationType, onCancel, setIsAddAutomationOpen }: AutomationConfig) {
   const [docs, setDocs] = useState<Source[]>([defaultDoc]);
-  const [selectedDoc, setSelectedDoc] = useState(docs[0])
+  const [selectedDoc, setSelectedDoc] = useState(docs[0]);
+  const [repos, setRepos] = useState<Source[]>([defaultRepo]);
   const [selectedRepo, setSelectedRepo] = useState(repos[0])
   const [selectedDestinationType, setSelectedDestinationType] = useState(destinations[0]);
   const [destinationValue, setDestinationValue] = useState('');
@@ -109,24 +93,38 @@ export default function AutomationConfig({ userId, automationType, onCancel, set
   const ruleData = automationMap[automationType];
   
   useEffect(() => {
-    if (automationType !== 'doc') {
-      return;
+    if (automationType === 'doc') {
+      axios.get(`${API_ENDPOINT}/routes/docs?userId=${userId}`)
+        .then((docsResponse) => {
+          const { docs } = docsResponse.data;
+          const formattedDocs = docs.map((doc: Doc) => {
+            return {
+              _id: doc._id,
+              name: doc.title,
+              icon: <img src={doc.favicon} alt="Slack" className="flex-shrink-0 h-4 w-4 rounded-sm" />
+            }
+          });
+          formattedDocs.unshift(defaultDoc);
+
+          setDocs(formattedDocs);
+        });
     }
 
-    axios.get(`${API_ENDPOINT}/routes/docs?userId=${userId}`)
-      .then((docsResponse) => {
-        const { docs } = docsResponse.data;
-        const formattedDocs = docs.map((doc: Doc) => {
-          return {
-            _id: doc._id,
-            name: doc.title,
-            icon: <img src={doc.favicon} alt="Slack" className="flex-shrink-0 h-4 w-4 rounded-sm" />
-          }
+    else if (automationType === 'code') {
+      axios.get(`${API_ENDPOINT}/routes/org/repos?userId=${userId}`)
+        .then((reposResponse) => {
+          const { repos } = reposResponse.data;
+          const formattedRepos= repos.map((repo: string) => {
+            return {
+              _id: repo,
+              name: repo,
+              icon: <img src="/assets/integrations/github.svg" alt="GitHub" className="flex-shrink-0 h-4 w-4" />
+            }
+          });
+          formattedRepos.unshift(defaultRepo);
+          setRepos(formattedRepos);
         });
-        formattedDocs.unshift(defaultDoc);
-
-        setDocs(formattedDocs);
-      });
+    }
   }, [userId, automationType])
 
   const onBackButton = () => {
