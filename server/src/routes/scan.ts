@@ -57,7 +57,7 @@ scanRouter.post('/', async (req, res) => {
       }
     })
 
-    const bulWriteDocsPromise = Doc.bulkWrite(docUpdateQueries, {
+    const bulkWriteDocsPromise = Doc.bulkWrite(docUpdateQueries, {
       ordered: false
     });
 
@@ -68,9 +68,9 @@ scanRouter.post('/', async (req, res) => {
         event: 'change',
         change: alert.diff,
       }
-    })
+    });
     const insertManyEventsPromise = Event.insertMany(newEvents);
-    await Promise.all([bulWriteDocsPromise, insertManyEventsPromise]);
+    await Promise.all([bulkWriteDocsPromise, insertManyEventsPromise]);
 
     res.send({diffAlerts});
   }
