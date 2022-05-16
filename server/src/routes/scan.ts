@@ -1,8 +1,8 @@
 import express from 'express';
+import * as Diff from 'diff';
 import Doc from '../models/Doc';
 import Event from '../models/Event';
 import { getDataFromWebpage } from '../services/webscraper';
-const Diff: any = require('diff');
 
 const scanRouter = express.Router();
 
