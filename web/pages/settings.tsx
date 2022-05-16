@@ -4,6 +4,7 @@ import { GetServerSideProps } from "next";
 import { withSession } from "../lib/withSession";
 import { UserSession } from ".";
 import { useState } from "react";
+import Link from "next/link";
 
 const navigation = [
   { name: 'Account', href: '#', icon: UserCircleIcon },
@@ -107,10 +108,12 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                     className="mt-1 block w-full border border-gray-300 bg-gray-100 text-gray-400 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                   />
                   <p className="text-sm mt-2 text-gray-500">
-                    <span className="text-primary font-medium">
-                      Contact support
-                    </span>
-                    {' '}to change emails
+                    <Link href="mailto:hi@mintlify.com">
+                      <span className="text-primary font-medium cursor-pointer">
+                        Contact support
+                      </span>
+                    </Link>
+                    {' '}to change your primary email
                   </p>
                 </div>
               </div>

@@ -79,6 +79,40 @@ userRouter.post('/', async (req, res) => {
       org: org._id
    });
   return res.send({user});
+});
+
+userRouter.put('/firstname', async (req, res) => {
+  const { userId } = req.query;
+  const { firstName } = req.body;
+
+  if (!firstName) {
+    return res.status(400).send({error: 'First name not provided'});
+  }
+
+  try {
+    await User.findOneAndUpdate({ userId }, { firstName });
+    return res.end();
+  }
+  catch (error) {
+    return res.status(500).send({error});
+  }
+});
+
+userRouter.put('/lastname', async (req, res) => {
+  const { userId } = req.query;
+  const { lastName } = req.body;
+
+  if (!lastName) {
+    return res.status(400).send({error: 'Last name not provided'});
+  }
+
+  try {
+    await User.findOneAndUpdate({ userId }, { lastName });
+    return res.end();
+  }
+  catch (error) {
+    return res.status(500).send({error});
+  }
 })
 
 export default userRouter;
