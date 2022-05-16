@@ -64,7 +64,7 @@ userRouter.get('/', async (req, res) => {
   return res.send({user})
 });
 
-userRouter.post('/', async (req, res) => {
+userRouter.post('/', async (req: express.Request, res: express.Response) => {
   const { userId, email, firstName, lastName, orgName } = req.body;
 
   const org = await Org.create({
@@ -79,6 +79,31 @@ userRouter.post('/', async (req, res) => {
       org: org._id
    });
   return res.send({user});
+})
+
+/**
+ * Given emails as an array of strings & orgId as a string from the request body,
+ * invite the users with the provided emails to the org through stytch.
+ * Return the new array users through the response.
+*/
+userRouter.post('/invite-to-org', async (req: express.Request, res: express.Response) => {
+  const { emails, orgId } = req.body;
+
+  let inviteUsers:any = []
+  
+  // Create users as `pending: true` under the database
+  emails.map((email: string) => inviteUsers.push(User.create({email, org: orgId, pending: true})))
+
+  let users: any[]= []
+
+  await Promise.allSettled(inviteUsers).then(results => {
+    results.forEach((result:any) => {
+      if (result.status !== "fulfilled") return res.status(500).json({error: result.reason})
+      users.push(result.value)
+    })
+  })
+
+  return res.status(200).json({users});
 })
 
 export default userRouter;
