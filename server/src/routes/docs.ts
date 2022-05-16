@@ -69,6 +69,14 @@ docsRouter.get('/', userMiddleware, async (_, res) => {
           ],
           as: "code"
         }
+      },
+      {
+        $lookup: {
+          from: "automations",
+          foreignField: "source.doc",
+          localField: "_id",
+          as: "automations"
+        }
       }
     ]);
     return res.status(200).send({docs});

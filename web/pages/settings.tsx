@@ -236,7 +236,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                         id="comments"
                         name="comments"
                         type="checkbox"
-                        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                        className="focus:ring-primary h-4 w-4 text-primary border-gray-300 rounded"
                       />
                     </div>
                     <div className="ml-3 text-sm">
@@ -253,7 +253,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                           id="candidates"
                           name="candidates"
                           type="checkbox"
-                          className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                          className="focus:ring-primary h-4 w-4 text-primary border-gray-300 rounded"
                         />
                       </div>
                       <div className="ml-3 text-sm">
