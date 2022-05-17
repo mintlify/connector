@@ -1,11 +1,9 @@
-import type { GetServerSideProps, NextPage } from 'next'
+import type { GetServerSideProps } from 'next'
 import axios from 'axios'
 import { Menu } from '@headlessui/react'
 import {
   ChevronRightIcon,
   DotsVerticalIcon,
-  PlusIcon,
-  MinusIcon
 } from '@heroicons/react/solid'
 import Sidebar from '../components/Sidebar'
 import { classNames } from '../helpers/functions'
@@ -24,6 +22,7 @@ import SignIn from '../components/SignIn'
 import Setup from '../components/Setup'
 import { Automation } from './automations'
 import { DocumentTextIcon } from '@heroicons/react/outline'
+import EventItem, { Event } from '../components/Event'
 
 type Code = {
   _id: string,
@@ -39,23 +38,6 @@ export type Doc = {
   url: string,
   code: Code[],
   automations: Automation[]
-}
-
-type Change = {
-  removed?: boolean,
-  added?: boolean,
-  count: number,
-  value: string,
-}
-
-type Event = {
-  _id: string,
-  type: string,
-  doc: Doc,
-  createdAt: string,
-  change?: Change[],
-  add?: Object,
-  remove?: Object,
 }
 
 export type UserSession = {
@@ -88,25 +70,6 @@ const listMenu = [
     isRed: true,
   }
 ]
-
-const countTotalChanges = (change: Change[]) => {
-  let totalRemoved = 0;
-  let totalAdded = 0;
-
-  change.forEach((section) => {
-    if (section.removed) {
-      totalRemoved += section.count;
-    }
-    if (section.added) {
-      totalAdded += section.count;
-    }
-  });
-
-  return {
-    removed: totalRemoved,
-    added: totalAdded,
-  }
-}
 
 export default function Home({ userSession }: { userSession: UserSession }) {
   const [docs, setDocs] = useState<Doc[]>();
@@ -326,39 +289,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
           <div>
             <ul role="list" className="divide-y divide-gray-200">
               {events?.map((event) => (
-                <li key={event._id} className="py-4">
-                  <div className="flex space-x-3">
-                    <img
-                      className="h-5 w-5 rounded-sm"
-                      src={event.doc.favicon}
-                      alt={event.doc.title}
-                    />
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-medium">{event.doc.title}</h3>
-                        <p className="text-sm text-gray-500">{timeAgo.format(Date.parse(event.createdAt))}</p>
-                      </div>
-                      {
-                        event.change && (
-                          <div>
-                            <div className="flex items-center space-x-1 text-green-700">
-                              <PlusIcon className="h-4 w-4" />
-                              <p className="text-sm">
-                                {countTotalChanges(event.change).added} {countTotalChanges(event.change).added > 1 ? 'changes' : 'change'}
-                              </p>
-                            </div>
-                            <div className="flex items-center space-x-1 text-red-700">
-                              <MinusIcon className="h-4 w-4" />
-                              <p className="text-sm">
-                                {countTotalChanges(event.change).removed} {countTotalChanges(event.change).removed > 1 ? 'changes' : 'change'}
-                              </p>
-                            </div>
-                          </div>
-                        )
-                      }
-                    </div>
-                  </div>
-                </li>
+                <EventItem key={event._id} event={event} />
               ))}
             </ul>
             <div className="py-4 text-sm border-t border-gray-200"></div>

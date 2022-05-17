@@ -96,6 +96,18 @@ docsRouter.post('/', userMiddleware, async (req, res) => {
   } catch (error) {
     res.status(500).send({error})
   }
+});
+
+docsRouter.delete('/:docsId', userMiddleware, async (req, res) => {
+  const { docsId } = req.params;
+  const { org } = res.locals.user.org;
+  
+  try {
+    await Doc.findOneAndDelete({ _id: docsId, org });
+    res.end();
+  } catch (error) {
+    res.status(500).send({error})
+  }
 })
 
 export default docsRouter;

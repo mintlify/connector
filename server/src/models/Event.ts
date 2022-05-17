@@ -1,6 +1,6 @@
 import mongoose, { Schema, Types } from 'mongoose';
 
-export type EventTypeMeta = 'add' | 'change' | 'remove';
+export type EventTypeMeta = 'add' | 'change';
 
 export type EventType = {
     org: Types.ObjectId;
@@ -8,7 +8,6 @@ export type EventType = {
     type: EventTypeMeta;
     change?: Object;
     add?: Object;
-    remove?: Object;
 };
 
 const EventSchema = new Schema({
@@ -18,7 +17,6 @@ const EventSchema = new Schema({
     createdAt: { type: Date, default: Date.now },
     change: Object, // only for change events
     add: Object, // only for add events
-    remove: Object, // only for remove events
 });
 
 const Event = mongoose.model('Event', EventSchema, 'events');

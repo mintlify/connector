@@ -19,9 +19,6 @@ export const createEvent = (org: Types.ObjectId, doc: Types.ObjectId, type: Even
     case 'change':
       event.change = data;
       break;
-    case 'remove':
-      event.remove = data;
-      break;
     default:
       return;
   }
