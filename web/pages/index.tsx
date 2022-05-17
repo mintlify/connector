@@ -23,6 +23,7 @@ import { withSession } from '../lib/withSession'
 import SignIn from '../components/SignIn'
 import Setup from '../components/Setup'
 import { Automation } from './automations'
+import { DocumentTextIcon } from '@heroicons/react/outline'
 
 type Code = {
   _id: string,
@@ -175,17 +176,26 @@ export default function Home({ userSession }: { userSession: UserSession }) {
           <ClearSelectedFrame />
           <div className="pl-4 pr-6 pt-4 pb-4 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
             <div className="flex items-center">
-              {hasDocs && <h1 className="flex-1 text-lg font-medium">Documentation</h1> } 
+              {hasDocs && <h1 className="flex-1 text-lg font-medium text-gray-800">Documentation</h1> } 
             </div>
           </div>
           {
             !hasDocs && !isLoading && <div>
               <div className="flex items-center justify-center">
-                <img className="w-32 h-32" src="/assets/empty/docs.svg" alt="No documentations" />
+                <img className="w-24 h-24 opacity-80" src="/assets/empty/docs.svg" alt="No documentations" />
               </div>
-              <p className="text-center mt-6 text-gray-300 text-sm">
-                No documentation found
+              <p className="text-center mt-6 text-gray-600 font-medium">
+                No documentation connected
               </p>
+              <p className="mt-1 text-center text-sm text-gray-400">
+                Add one to get started
+              </p>
+              <div className="mt-4 flex justify-center">
+                <button className="inline-flex items-center justify-center text-sm bg-primary text-white rounded-md shadow-sm py-2 font-medium px-8 hover:bg-hover">
+                  <DocumentTextIcon className="h-4 w-4 mr-1" />
+                  Add Documentation
+                </button>
+              </div>
             </div>
           }
           <ul role="list" className="relative z-0">

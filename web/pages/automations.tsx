@@ -107,17 +107,25 @@ export default function Automations({ userSession }: { userSession: UserSession 
         <div className="bg-white lg:min-w-0 lg:flex-1">
           <div className="pl-4 pr-6 pt-4 pb-4 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
           <div className="px-4 sm:px-0">
-            { hasAutomations && <h2 className="text-lg font-medium text-gray-900">Automations</h2> }
+            { hasAutomations && <h2 className="text-lg font-medium text-gray-800">Automations</h2> }
           </div>
         </div>
         {
             !hasAutomations && !isLoading && <div>
               <div className="flex items-center justify-center">
-                <img className="w-32 h-32" src="/assets/empty/automations.svg" alt="Empty Automations" />
+                <img className="w-24 h-24 opacity-80" src="/assets/empty/automations.svg" alt="Empty Automations" />
               </div>
-              <p className="text-center mt-6 text-gray-300 text-sm">
-                No automations created yet
+              <p className="text-center mt-6 text-gray-600 font-medium">
+                No automations created
               </p>
+              <p className="mt-1 text-center text-sm text-gray-400">
+                Add one to get started
+              </p>
+              <div className="mt-4 flex justify-center">
+                <button className="inline-flex items-center justify-center text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 shadow-sm py-2 px-8 font-medium">
+                  Add Documentation
+                </button>
+              </div>
             </div>
           }
         {/* Stacked list */}
