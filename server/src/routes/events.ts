@@ -60,7 +60,11 @@ eventsRouter.get('/', userMiddleware, async (req, res) => {
       }
     ]);
 
-    return res.send({ events });
+    const eventsWithNoDocsFilteredOut = events.filter((event) => {
+      return event.doc != null
+    })
+
+    return res.send({ events: eventsWithNoDocsFilteredOut });
 });
 
 export default eventsRouter;
