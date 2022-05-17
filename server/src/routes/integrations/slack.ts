@@ -65,7 +65,7 @@ slackRouter.get('/install', async (req, res) => {
       const webhookData = data?.incoming_webhook;
       console.log('AYOO');
       console.log(data);
-      await Org.findByIdAndUpdate(org, {
+      const orgUpdateResponse = await Org.findByIdAndUpdate(org, {
           "integrations.slack": {
             accessToken: data?.access_token,
             appId: data?.app_id,
@@ -75,7 +75,9 @@ slackRouter.get('/install', async (req, res) => {
             configurationUrl: webhookData?.configuration_url
           }
       });
+      console.log({orgUpdateResponse});
     }
+
     // TODO: redirect to channel
     return res.redirect('slack://open');
   });
