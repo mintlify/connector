@@ -6,6 +6,7 @@ import vscode, {
 	Webview } from "vscode";
 import { Code } from "../utils/git";
 import { LINK } from '../utils/api';
+import { openGitHubLogin } from './authentication';
 
 export type Doc = {
 	org: string;
@@ -23,7 +24,6 @@ export type Link = {
 
 export class ViewProvider implements WebviewViewProvider {
     public static readonly viewType = 'mintlify.connect';
-
     private _view?: WebviewView;
 
     constructor(private readonly _extensionUri: Uri) { }
@@ -43,6 +43,9 @@ export class ViewProvider implements WebviewViewProvider {
 
 		webviewView.webview.onDidReceiveMessage(async message => {
 			switch (message.command) {
+				case 'login-github':
+					openGitHubLogin();
+					break;
 				case 'link-submit':
 					{
 						const { docId, title, url, org, isNewDoc, codes } = message.args;

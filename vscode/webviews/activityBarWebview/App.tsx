@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import ReactTooltip from 'react-tooltip';
 import { CheckIcon, LockClosedIcon, SelectorIcon } from '@heroicons/react/solid';
 import { vscode } from '../common/message';
-import { InfoCircle, CodeSymbol, X } from '../common/svgs';
+import { InfoCircleIcon, CodeSymbolIcon, XIcon } from '../common/svgs';
 
 export type Doc = {
   id: string;
@@ -112,7 +112,7 @@ const App = () => {
       <div className='flex flex-row justify-between'>
         <div className='flex flex-row'>
           <div className='mr-1 flex flex-col justify-center'>
-            <CodeSymbol />
+            <CodeSymbolIcon />
           </div>
           {props.code.file}
         </div>
@@ -120,7 +120,7 @@ const App = () => {
           className='flex flex-col justify-center cursor-pointer'
           onClick={deleteCode}
         >
-          <X />
+          <XIcon />
         </div>
       </div>
     );
@@ -134,6 +134,10 @@ const App = () => {
         {props.codes?.map((code: Code) => <CodeContent code={code} />)}
       </div>
     );
+  };
+
+  const onClickSignInWithGitHub = () => {
+    vscode.postMessage({ command: 'login-github' });
   };
 
   const user = null;
@@ -151,7 +155,11 @@ const App = () => {
           Sign in to your account to continue
         </p>
         <div>
-          <button type="submit" className="mt-2 relative submit">
+          <button
+            type="button"
+            className="mt-2 relative submit"
+            onClick={onClickSignInWithGitHub}
+          >
             Sign in with GitHub
           </button>
           <div className="my-4 relative">
@@ -257,7 +265,7 @@ const App = () => {
           <div className='flex flex-row mt-3'>
             Select Relevant Code<span className='text-red-500'>*</span>
             <div className='ml-1 flex flex-col justify-center' data-tip data-for="registerTip">
-              <InfoCircle />
+              <InfoCircleIcon />
             </div>
             <ReactTooltip
               id="registerTip"
