@@ -145,7 +145,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
           {
             !hasDocs && !isLoading && <div>
               <div className="flex items-center justify-center">
-                <img className="w-24 h-24 opacity-80" src="/assets/empty/docs.svg" alt="No documentations" />
+                <img className="w-24 h-24" src="/assets/empty/docs.svg" alt="No documentations" />
               </div>
               <p className="text-center mt-6 text-gray-600 font-medium">
                 No documentation found

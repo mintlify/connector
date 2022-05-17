@@ -113,7 +113,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
         {
             !hasAutomations && !isLoading && <div>
               <div className="flex items-center justify-center">
-                <img className="w-24 h-24 opacity-80" src="/assets/empty/automations.svg" alt="Empty Automations" />
+                <img className="w-24 h-24" src="/assets/empty/automations.svg" alt="Empty Automations" />
               </div>
               <p className="text-center mt-6 text-gray-600 font-medium">
                 No automations created
