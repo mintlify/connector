@@ -112,6 +112,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
   const [events, setEvents] = useState<Event[]>();
   const [selectedDoc, setSelectedDoc] = useState<Doc>();
   const [isAddingDoc, setIsAddingDoc] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (userSession == null) {
@@ -124,7 +125,10 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       .then((docsResponse) => {
         const { docs } = docsResponse.data;
         setDocs(docs);
-      });
+      })
+      .finally(() => {
+        setIsLoading(false);
+      })
     
     let eventsQuery = `${API_ENDPOINT}/routes/events?userId=${userId}`;
     if (selectedDoc) eventsQuery += `&doc=${selectedDoc._id}`;
@@ -149,6 +153,8 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     return <div className="absolute inset-0" onClick={() => setSelectedDoc(undefined)}></div>
   }
 
+  const hasDocs = (docs && docs.length > 0) || isAddingDoc;
+
   return (
     <>
     <Head>
@@ -169,9 +175,19 @@ export default function Home({ userSession }: { userSession: UserSession }) {
           <ClearSelectedFrame />
           <div className="pl-4 pr-6 pt-4 pb-4 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
             <div className="flex items-center">
-              <h1 className="flex-1 text-lg font-medium">Documentation</h1>
+              {hasDocs && <h1 className="flex-1 text-lg font-medium">Documentation</h1> } 
             </div>
           </div>
+          {
+            !hasDocs && !isLoading && <div>
+              <div className="flex items-center justify-center">
+                <img className="w-32 h-32" src="/assets/empty/docs.svg" alt="No documentations" />
+              </div>
+              <p className="text-center mt-6 text-gray-300 text-sm">
+                No documentation found
+              </p>
+            </div>
+          }
           <ul role="list" className="relative z-0">
             { isAddingDoc && <LoadingItem /> }
             {docs?.map((doc) => (

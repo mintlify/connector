@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react'
 import { Combobox, Dialog, Transition } from '@headlessui/react'
-import { PlusIcon, GlobeIcon } from '@heroicons/react/solid'
+import { PlusIcon, LinkIcon } from '@heroicons/react/solid'
 import { classNames } from '../../helpers/functions'
 import { ConfluenceIcon, GoogleDocsIcon, NotionIcon } from '../../helpers/Icons'
 import axios from 'axios'
@@ -21,8 +21,7 @@ export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc 
   const actions = [
     {
       name: 'Add web page',
-      icon: (className: string) => <GlobeIcon className={classNames(className, 'h-5 w-5')} aria-hidden="true" />,
-      shortcut: 'L',
+      icon: (className: string) => <LinkIcon className={classNames(className, 'h-5 w-5')} aria-hidden="true" />,
       filter: () => true,
       isLeastPriority: true,
       onActive: () => setPlaceholder('https://'),
@@ -30,21 +29,18 @@ export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc 
     {
       name: 'Add Notion page',
       icon: (className: string, isActive: boolean) => <NotionIcon className={className} isActive={isActive} />,
-      shortcut: 'N',
       filter: (query: string) => !query || query.includes('notion.site'),
       onActive: () => setPlaceholder('https://notion.site/')
     },
     {
       name: 'Add Google docs',
       icon: (className: string, isActive: boolean) => <GoogleDocsIcon className={className} isActive={isActive} />,
-      shortcut: 'G',
       filter: (query: string) => !query || query.includes('docs.google.com'),
       onActive: () => setPlaceholder('https://docs.google.com/')
     },
     {
       name: 'Add Confluence page',
       icon: (className: string, isActive: boolean) => <ConfluenceIcon className={className} isActive={isActive} />,
-      shortcut: 'C',
       filter: (query: string) => !query || query.includes('atlassian.net'),
       onActive: () => setPlaceholder('https://.atlassian.net/')
     },
@@ -118,7 +114,7 @@ export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc 
                     <ul className="text-sm text-gray-700">
                       {filteredActions.map((action) => (
                         <Combobox.Option
-                          key={action.shortcut}
+                          key={action.name}
                           value={action}
                           className={({ active }) =>
                             classNames(
@@ -139,10 +135,7 @@ export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc 
                                 )}
                               >
                                 {
-                                  !query ? (<>
-                                    <kbd className="font-sans">⌘</kbd>
-                                    <kbd className="font-sans">{action.shortcut}</kbd>
-                                  </>) : <kbd className="font-sans">⏎</kbd>
+                                  query && <kbd className="font-sans">⏎</kbd>
                                 }
                               </span>
                             </>

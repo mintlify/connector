@@ -36,6 +36,7 @@ export type Automation = {
 
 export default function Automations({ userSession }: { userSession: UserSession }) {
   const [automations, setAutomations] = useState<Automation[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const user = userSession.user;
 
   const integrations = [
@@ -71,7 +72,10 @@ export default function Automations({ userSession }: { userSession: UserSession 
         const { automations } = data;
         setAutomations(automations);
       })
-  }, [user])
+      .finally(() => {
+        setIsLoading(false);
+      })
+  }, [user]);
 
   /**
    * It takes an automationId and isActive boolean, and then it makes a PUT request to the API endpoint
@@ -87,6 +91,8 @@ export default function Automations({ userSession }: { userSession: UserSession 
       })
   }
 
+  const hasAutomations = automations.length > 0;
+
   return (
     <>
     <Head>
@@ -101,9 +107,19 @@ export default function Automations({ userSession }: { userSession: UserSession 
         <div className="bg-white lg:min-w-0 lg:flex-1">
           <div className="pl-4 pr-6 pt-4 pb-4 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
           <div className="px-4 sm:px-0">
-            <h2 className="text-lg font-medium text-gray-900">Automations</h2>
+            { hasAutomations && <h2 className="text-lg font-medium text-gray-900">Automations</h2> }
           </div>
         </div>
+        {
+            !hasAutomations && !isLoading && <div>
+              <div className="flex items-center justify-center">
+                <img className="w-32 h-32" src="/assets/empty/automations.svg" alt="Empty Automations" />
+              </div>
+              <p className="text-center mt-6 text-gray-300 text-sm">
+                No automations created yet
+              </p>
+            </div>
+          }
         {/* Stacked list */}
         <ul role="list">
             {automations.map((automation) => (
