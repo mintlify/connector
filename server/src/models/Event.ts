@@ -1,9 +1,11 @@
 import mongoose, { Schema, Types } from 'mongoose';
 
+export type EventTypeMeta = 'add' | 'change' | 'remove';
+
 export type EventType = {
     org: Types.ObjectId;
     doc: Types.ObjectId;
-    type: string;
+    type: EventTypeMeta;
     change?: Object;
     add?: Object;
     remove?: Object;

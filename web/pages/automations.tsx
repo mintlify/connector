@@ -185,7 +185,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
           </ul>
         </div>
       </div>
-      {/* Activity feed */}
+      {/* Integrations */}
       <div className="bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0">
         <div className="pl-6 lg:w-80">
           <div className="pt-6 pb-2">
