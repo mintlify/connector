@@ -185,7 +185,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                 <img className="w-24 h-24 opacity-80" src="/assets/empty/docs.svg" alt="No documentations" />
               </div>
               <p className="text-center mt-6 text-gray-600 font-medium">
-                No documentation connected
+                No documentation found
               </p>
               <p className="mt-1 text-center text-sm text-gray-400">
                 Add one to get started
