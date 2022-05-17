@@ -135,115 +135,134 @@ const App = () => {
     );
   };
 
+  const user = null;
+
   const style = getComputedStyle(document.body);
 
   return (
-    <div>
+    <div className="space-y-1">
       <h1 className="text-lg font-bold">
-        Mintlify Connect
+        Mintlify
       </h1>
-      <p className="mt-1">
-        Link your code to documentation.{'\n'}
-        <a href="https://mintlify.com">Open dashboard</a>
-      </p>
-      <form className="mt-3" onSubmit={handleSubmit}>
-        <label htmlFor="url" className="block">
-          Documentation<span className='text-red-500'>*</span>
-        </label>
-        <div className="mt-1">
-        <Listbox value={selectedDoc} onChange={setSelectedDoc}>
-          {({ open }) => (
-            <>
-              <div className="mt-1 relative">
-                <Listbox.Button className="relative w-full pl-3 pr-10 py-2 text-left code">
-                  <span className="block truncate">{selectedDoc.title}</span>
-                  <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                    <SelectorIcon className="h-5 w-5" aria-hidden="true" />
-                  </span>
-                </Listbox.Button>
-                  <Listbox.Options className="absolute mt-1 z-10 w-full shadow-lg code py-1 overflow-auto">
-                    {docs.map((doc) => (
-                      <Listbox.Option
-                        key={doc.id}
-                        className={({ active }) =>
-                          classNames(
-                            active ? 'text-white active' : '',
-                            'cursor-pointer relative py-2 pl-3 pr-9'
-                          )
-                        }
-                        value={doc}
-                      >
-                        {({ selected, active }) => (
-                          <>
-                            <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'block truncate')}>
-                              {doc.title}
-                            </span>
-
-                            {selected ? (
-                              <span
-                                className={classNames(
-                                  active ? 'text-white' : '',
-                                  'absolute inset-y-0 right-0 flex items-center pr-4'
-                                )}
-                              >
-                                <CheckIcon className="h-5 w-5" aria-hidden="true" />
+      {
+        user == null && <>
+        <p className="mt-1">
+          You must sign in to your account to continue
+        </p>
+        <p>
+          <a href="https://mintlify.com">Open Dashboard</a>
+        </p>
+        <button type="submit" className="submit">Login to Mintlify</button>
+        </>
+      }
+      {
+        user != null && <>
+        <p className="mt-1">
+          Link your code to documentation
+        </p>
+        <p>
+          <a href="https://mintlify.com">Open Dashboard</a>
+        </p>
+        <form className="mt-3" onSubmit={handleSubmit}>
+          <label htmlFor="url" className="block">
+            Documentation<span className='text-red-500'>*</span>
+          </label>
+          <div className="mt-1">
+          <Listbox value={selectedDoc} onChange={setSelectedDoc}>
+            {({ open }) => (
+              <>
+                <div className="mt-1 relative">
+                  <Listbox.Button className="relative w-full pl-3 pr-10 py-2 text-left code">
+                    <span className="block truncate">{selectedDoc.title}</span>
+                    <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                      <SelectorIcon className="h-5 w-5" aria-hidden="true" />
+                    </span>
+                  </Listbox.Button>
+                    <Listbox.Options className="absolute mt-1 z-10 w-full shadow-lg code py-1 overflow-auto">
+                      {docs.map((doc) => (
+                        <Listbox.Option
+                          key={doc.id}
+                          className={({ active }) =>
+                            classNames(
+                              active ? 'text-white active' : '',
+                              'cursor-pointer relative py-2 pl-3 pr-9'
+                            )
+                          }
+                          value={doc}
+                        >
+                          {({ selected, active }) => (
+                            <>
+                              <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'block truncate')}>
+                                {doc.title}
                               </span>
-                            ) : null}
-                          </>
-                        )}
-                      </Listbox.Option>
-                    ))}
-                  </Listbox.Options>
-              </div>
-            </>
-          )}
-        </Listbox>
-        {
-          selectedDoc.isAdd && (
-            <input
-              type="text"
-              name="url"
-              id="url"
-              className="block mt-2 w-full text-sm"
-              placeholder="www.example.com"
-              value={state.doc.url}
-              onChange={handleChange}
-            />
-          )
-        }
-        </div>
-        <div className='flex flex-row mt-3'>
-          Select Relevant Code<span className='text-red-500'>*</span>
-          <div className='ml-1 flex flex-col justify-center' data-tip data-for="registerTip">
-            <InfoCircle />
+
+                              {selected ? (
+                                <span
+                                  className={classNames(
+                                    active ? 'text-white' : '',
+                                    'absolute inset-y-0 right-0 flex items-center pr-4'
+                                  )}
+                                >
+                                  <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                </span>
+                              ) : null}
+                            </>
+                          )}
+                        </Listbox.Option>
+                      ))}
+                    </Listbox.Options>
+                </div>
+              </>
+            )}
+          </Listbox>
+          {
+            selectedDoc.isAdd && (
+              <input
+                type="text"
+                name="url"
+                id="url"
+                className="block mt-2 w-full text-sm"
+                placeholder="www.example.com"
+                value={state.doc.url}
+                onChange={handleChange}
+              />
+            )
+          }
           </div>
-          <ReactTooltip
-            id="registerTip"
-            place="bottom"
-            effect="solid"
-            className='tool-tip shadow-sm'
-            arrowColor={style.getPropertyValue('--vscode-editor-background')}
-          >
-            <div className='text-left'>
-              <div className='font-bold'>Code Snippets</div>
-              <p>
-                1. Highlight code in the editor <br/>
-                2. Right click <br/>
-                3. Select “Link code to doc” <br/>
-              </p>
-              <div className='font-bold mt-1'>Folder/File</div>
-              <p>
-                1. Right click on a folder or file in the explorer <br/>
-                2. Select “Link folder/file to doc”
-              </p>
+          <div className='flex flex-row mt-3'>
+            Select Relevant Code<span className='text-red-500'>*</span>
+            <div className='ml-1 flex flex-col justify-center' data-tip data-for="registerTip">
+              <InfoCircle />
             </div>
-          </ReactTooltip>
-        </div>
-        <div className='code'>
-          <CodesContent codes={state.codes} />
-        </div>
-        <button type="submit" className="submit">Submit</button>
-      </form>
+            <ReactTooltip
+              id="registerTip"
+              place="bottom"
+              effect="solid"
+              className='tool-tip shadow-sm'
+              arrowColor={style.getPropertyValue('--vscode-editor-background')}
+            >
+              <div className='text-left'>
+                <div className='font-bold'>Code Snippets</div>
+                <p>
+                  1. Highlight code in the editor <br/>
+                  2. Right click <br/>
+                  3. Select “Link code to doc” <br/>
+                </p>
+                <div className='font-bold mt-1'>Folder/File</div>
+                <p>
+                  1. Right click on a folder or file in the explorer <br/>
+                  2. Select “Link folder/file to doc”
+                </p>
+              </div>
+            </ReactTooltip>
+          </div>
+          <div className='code'>
+            <CodesContent codes={state.codes} />
+          </div>
+          <button type="submit" className="submit">Submit</button>
+        </form>
+        </>
+      }
     </div>
   );
 };
