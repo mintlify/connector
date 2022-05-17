@@ -8,9 +8,16 @@ import { PlusIcon } from "@heroicons/react/solid";
 import { GetServerSideProps } from "next";
 import { withSession } from "../lib/withSession";
 import { UserSession } from ".";
+<<<<<<< HEAD
 import { useState, useEffect } from "react";
 import { API_ENDPOINT } from "../helpers/api";
 import axios from "axios"
+=======
+import { useState } from "react";
+import Link from "next/link";
+import axios from "axios";
+import { API_ENDPOINT } from "../helpers/api";
+>>>>>>> main
 
 const navigation = [
   { name: "Account", href: "#", icon: UserCircleIcon },
@@ -31,6 +38,7 @@ const people = [
   // More people...
 ];
 
+<<<<<<< HEAD
 export default function Settings({
   userSession,
 }: {
@@ -54,6 +62,37 @@ export default function Settings({
     if (userSession.user && userSession.user.org)
       getOrgName()
   })
+=======
+export default function Settings({ userSession }: { userSession: UserSession }) {
+  const user = userSession.user;
+  const [firstName, setFirstName] = useState(user.firstName);
+  const [lastName, setLastName] = useState(user.lastName);
+  const [orgName, setOrgName] = useState(user.org.name);
+
+  const onBlurFirstNameInput = () => {
+    if (firstName !== user.firstName) {
+      axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/firstname`, {
+        firstName,
+      });
+    }
+  }
+
+  const onBlurLastNameInput = () => {
+    if (lastName !== user.lastName) {
+      axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/lastname`, {
+        lastName,
+      });
+    }
+  }
+
+  const onBlurOrgNameInput = () => {
+    if (orgName !== user.org.name) {
+      axios.put(`${API_ENDPOINT}/routes/org/${user.org._id}/name?userId=${user.userId}`, {
+        name: orgName,
+      });
+    }
+  }
+>>>>>>> main
 
   return (
     <Layout user={userSession.user}>
@@ -90,6 +129,7 @@ export default function Settings({
                     </p>
                   </div>
 
+<<<<<<< HEAD
                   <div className="grid grid-cols-6 gap-6">
                     <div className="col-span-6 sm:col-span-3">
                       <label
@@ -151,10 +191,67 @@ export default function Settings({
                       </p>
                     </div>
                   </div>
+=======
+              <div className="grid grid-cols-6 gap-6">
+                <div className="col-span-6 sm:col-span-3">
+                  <label htmlFor="first-name" className="block text-sm font-medium text-gray-700">
+                    First name
+                  </label>
+                  <input
+                    type="text"
+                    name="first-name"
+                    id="first-name"
+                    autoComplete="given-name"
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    onBlur={onBlurFirstNameInput}
+                  />
+                </div>
+
+                <div className="col-span-6 sm:col-span-3">
+                  <label htmlFor="last-name" className="block text-sm font-medium text-gray-700">
+                    Last name
+                  </label>
+                  <input
+                    type="text"
+                    name="last-name"
+                    id="last-name"
+                    autoComplete="family-name"
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    onBlur={onBlurLastNameInput}
+                  />
+                </div>
+
+                <div className="col-span-6">
+                  <label htmlFor="email-address" className="block text-sm font-medium text-gray-700">
+                    Email address
+                  </label>
+                  <input
+                    type="text"
+                    name="email-address"
+                    id="email-address"
+                    autoComplete="email"
+                    disabled
+                    value={userSession.user.email}
+                    className="mt-1 block w-full border border-gray-300 bg-gray-100 text-gray-400 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                  <p className="text-sm mt-2 text-gray-500">
+                    <Link href="mailto:hi@mintlify.com">
+                      <span className="text-primary font-medium cursor-pointer">
+                        Contact support
+                      </span>
+                    </Link>
+                    {' '}to change your primary email
+                  </p>
+>>>>>>> main
                 </div>
               </div>
             </form>
 
+<<<<<<< HEAD
             <form id="setting-organization" action="#" method="POST">
               <div className="shadow sm:rounded-md sm:overflow-hidden">
                 <div className="bg-white pt-6 pb-8 px-4 space-y-5 sm:px-6">
@@ -165,6 +262,24 @@ export default function Settings({
                     <p className="mt-1 text-sm text-gray-500">
                       Settings for your organization and team members
                     </p>
+=======
+              <div className="grid grid-cols-3 gap-6">
+                <div className="col-span-3">
+                  <label htmlFor="company-website" className="block text-sm font-medium text-gray-700">
+                    Name
+                  </label>
+                  <div className="mt-1 rounded-md shadow-sm flex">
+                    <input
+                      type="text"
+                      name="organization"
+                      id="organization"
+                      autoComplete="organization"
+                      className="focus:ring-indigo-500 focus:border-indigo-500 flex-grow block w-full min-w-0 rounded-md sm:text-sm border-gray-300"
+                      value={orgName}
+                      onChange={(e) => setOrgName(e.target.value)}
+                      onBlur={onBlurOrgNameInput}
+                    />
+>>>>>>> main
                   </div>
 
                   <div className="grid grid-cols-3 gap-6">

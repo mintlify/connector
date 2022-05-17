@@ -23,8 +23,8 @@ export const userMiddleware = async (req: express.Request, res: express.Response
   return;
 }
 
-userRouter.get('/', async (req: express.Request, res: express.Response) => {
-  const { userId } = req.query;
+userRouter.get('/:userId', async (req, res) => {
+  const { userId } = req.params;
 
   if (!userId) {
     return res.status(400).send({ error: 'userId not provided' });
@@ -79,6 +79,40 @@ userRouter.post('/', async (req: express.Request, res: express.Response) => {
       org: org._id
    });
   return res.send({user});
+});
+
+userRouter.put('/:userId/firstname', async (req, res) => {
+  const { userId } = req.params;
+  const { firstName } = req.body;
+
+  if (!firstName) {
+    return res.status(400).send({error: 'First name not provided'});
+  }
+
+  try {
+    await User.findOneAndUpdate({ userId }, { firstName });
+    return res.end();
+  }
+  catch (error) {
+    return res.status(500).send({error});
+  }
+});
+
+userRouter.put('/:userId/lastname', async (req, res) => {
+  const { userId } = req.params;
+  const { lastName } = req.body;
+
+  if (!lastName) {
+    return res.status(400).send({error: 'Last name not provided'});
+  }
+
+  try {
+    await User.findOneAndUpdate({ userId }, { lastName });
+    return res.end();
+  }
+  catch (error) {
+    return res.status(500).send({error});
+  }
 })
 
 /**

@@ -1,22 +1,23 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Types } from 'mongoose';
+import * as Diff from 'diff';
+
+export type EventTypeMeta = 'add' | 'change';
 
 export type EventType = {
-    org: string;
-    doc: string;
-    event: string;
-    change?: Object;
+    org: Types.ObjectId;
+    doc: Types.ObjectId;
+    type: EventTypeMeta;
+    change?: Array<Diff.Change>;
     add?: Object;
-    remove?: Object;
 };
 
 const EventSchema = new Schema({
     org: { type: Schema.Types.ObjectId, required: true },
     doc: { type: Schema.Types.ObjectId, required: true },
-    event: { type: String, required: true },
+    type: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
-    change: Object, // only for change events
+    change: Array, // only for change events
     add: Object, // only for add events
-    remove: Object, // only for remove events
 });
 
 const Event = mongoose.model('Event', EventSchema, 'events');

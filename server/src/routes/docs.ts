@@ -4,6 +4,8 @@ import Doc from '../models/Doc';
 import { getDataFromWebpage } from '../services/webscraper';
 import axios from 'axios';
 import { userMiddleware } from './user';
+import { createEvent } from './events';
+import Event from '../models/Event';
 
 const docsRouter = express.Router();
 
@@ -89,8 +91,22 @@ docsRouter.post('/', userMiddleware, async (req, res) => {
   const { url } = req.body;
   const org = res.locals.user.org;
   try {
-    const { content } = await createDocFromUrl(url, org, res.locals.user._id);
+    const { content, doc } = await createDocFromUrl(url, org, res.locals.user._id);
+    await createEvent(org, doc._id, 'add', {});
     res.send({content});
+  } catch (error) {
+    res.status(500).send({error})
+  }
+});
+
+docsRouter.delete('/:docsId', userMiddleware, async (req, res) => {
+  const { docsId } = req.params;
+  const { org } = res.locals.user.org;
+  
+  try {
+    await Doc.findOneAndDelete({ _id: docsId, org });
+    await Event.deleteMany({ doc: docsId });
+    res.end();
   } catch (error) {
     res.status(500).send({error})
   }

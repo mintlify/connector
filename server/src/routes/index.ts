@@ -11,6 +11,7 @@ import linksRouter from './links';
 import userRouter from './user';
 import orgRouter from "./org";
 import automationsRouter from './automations';
+import orgRouter from './org';
 
 const headRouter = express.Router();
 
