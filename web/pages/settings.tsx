@@ -8,7 +8,7 @@ import { PlusIcon } from "@heroicons/react/solid";
 import { GetServerSideProps } from "next";
 import { withSession } from "../lib/withSession";
 import { UserSession } from ".";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios"
 
 const navigation = [
@@ -37,13 +37,22 @@ export default function Settings({
 }) {
   const [firstName, setFirstName] = useState(userSession.user.firstName);
   const [lastName, setLastName] = useState(userSession.user.lastName);
-  const [orgName, setOrgName] = useState(userSession.user.org.name);
+  const [orgName, setOrgName] = useState("");
   const [invitedEmail, setInvitedEmail] = useState("");
 
   const inviteMember = async (email: string) => {
     setInvitedEmail("");
     await axios.post('/api/login/magiclink', {email})
   }
+
+  useEffect(() => {
+    async function getOrgName() {
+      await axios.get(`/api/get-org?orgId=${userSession.user.org}`).then(res => setOrgName(res.data.org.name))
+    }
+
+    if (userSession.user && userSession.user.org)
+      getOrgName()
+  })
 
   return (
     <Layout user={userSession.user}>
