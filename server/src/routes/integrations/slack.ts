@@ -34,7 +34,6 @@ const getSlackAccessTokenFromCode = async (code: string): Promise<any> => {
     } catch (error: any) {
       return { error };
     }
-    
 };
 
 const slackRouter = Router();
@@ -64,8 +63,6 @@ slackRouter.get('/install', async (req, res) => {
   
       const { data } = response;
       const webhookData = data?.incoming_webhook;
-      console.log('AYOO');
-      console.log(data);
       await Org.findByIdAndUpdate(org, {
           "integrations.slack": {
             accessToken: data?.access_token,
@@ -77,6 +74,7 @@ slackRouter.get('/install', async (req, res) => {
           }
       });
     }
+
     // TODO: redirect to channel
     return res.redirect('slack://open');
   });
