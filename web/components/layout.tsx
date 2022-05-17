@@ -1,5 +1,7 @@
 import { User } from "../pages";
 import Navbar from "./Navbar";
+import 'react-toastify/dist/ReactToastify.css';
+import {ToastContainer} from 'react-toastify'
 
 export default function Layout({ children, user }: { children: React.ReactNode, user: User }) {
   return (
@@ -10,6 +12,8 @@ export default function Layout({ children, user }: { children: React.ReactNode, 
       <main className="relative min-h-screen flex flex-col">
         <Navbar user={user} />
         {children}
+        {/* ToastContainer using react-toastify to handle toast triggers */}
+        <ToastContainer />
       </main>
     </>
   )
