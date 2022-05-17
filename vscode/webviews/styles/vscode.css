@@ -103,10 +103,18 @@ textarea::placeholder {
 	color: var(--vscode-input-foreground) !important;
 }
 
-.code {
-	background-color: var(--vscode-editor-background);
-}
-
 .svg {
 	fill: var(--vscode-foreground);
+}
+
+.bg-vscode {
+	background-color: var(--vscode-sideBar-background);
+}
+
+.text-placeholder-vscode {
+	color: var(--vscode-input-placeholderForeground);
+}
+
+.border-placeholder-vscode {
+	border-color: var(--vscode-input-placeholderForeground);
 }
