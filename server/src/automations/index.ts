@@ -15,7 +15,7 @@ export const triggerAutomationsForEvents = async (orgId: string, events: EventTy
 
 export const triggerAutomations = async (event: EventType, automations: AutomationType[], org: OrgType) => {
     automations.filter((automation) => {
-        const isDocEvent = (event.type === 'change' || event.type === 'add' || event.type === 'remove') && automation.type === 'doc';
+        const isDocEvent = (event.type === 'change' || event.type === 'add') && automation.type === 'doc';
         if (isDocEvent) {
             const isSameDocObj = event.doc === automation.source?.doc;
             if (isSameDocObj) {
