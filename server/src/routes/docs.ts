@@ -5,6 +5,7 @@ import { getDataFromWebpage } from '../services/webscraper';
 import axios from 'axios';
 import { userMiddleware } from './user';
 import { createEvent } from './events';
+import Event from '../models/Event';
 
 const docsRouter = express.Router();
 
@@ -104,6 +105,7 @@ docsRouter.delete('/:docsId', userMiddleware, async (req, res) => {
   
   try {
     await Doc.findOneAndDelete({ _id: docsId, org });
+    await Event.deleteMany({ doc: docsId });
     res.end();
   } catch (error) {
     res.status(500).send({error})
