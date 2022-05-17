@@ -1,11 +1,9 @@
 import axios from 'axios';
 import vscode, {
-    WebviewViewProvider, 
-    WebviewView, 
-    Uri, 
-    WebviewViewResolveContext, 
-    CancellationToken,
-    Webview } from "vscode";
+	WebviewViewProvider, 
+	WebviewView, 
+	Uri,
+	Webview } from "vscode";
 import { Code } from "../utils/git";
 import { LINK } from '../utils/api';
 
@@ -28,21 +26,14 @@ export class ViewProvider implements WebviewViewProvider {
 
     private _view?: WebviewView;
 
-    constructor(
-        private readonly _extensionUri: Uri,
-        private readonly _extensionPath: string
-    ) { }
-
-    public resolveWebviewView(
-        webviewView: WebviewView,
-        context: WebviewViewResolveContext<unknown>,
-        token: CancellationToken): void | Thenable<void> 
-	{
+    constructor(private readonly _extensionUri: Uri) { }
+		
+    public resolveWebviewView(webviewView: WebviewView): void | Thenable<void> 
+			{
 
         webviewView.webview.options = {
             // Allow scripts in the webview
             enableScripts: true,
-
             localResourceRoots: [
                 this._extensionUri
             ]
