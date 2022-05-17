@@ -23,7 +23,7 @@ export const userMiddleware = async (req: express.Request, res: express.Response
   return;
 }
 
-userRouter.get('/', async (req, res) => {
+userRouter.get('/', async (req: express.Request, res: express.Response) => {
   const { userId } = req.query;
 
   if (!userId) {

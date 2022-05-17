@@ -2,7 +2,8 @@ import { UserAddIcon } from "@heroicons/react/solid";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
-import axios from "axios"
+import axios from "axios";
+import { API_ENDPOINT } from "../helpers/api";
 
 type SetupProps = {
 	email: string;
@@ -31,11 +32,11 @@ export default function Setup({ email, firstName: initialFirstName, lastName: in
 
   useEffect(() => {
     async function getOrgName() {
-      const { data } = await axios.get(`/api/get-org?orgId=${orgId}`);
+      const { data } = await axios.get(`${API_ENDPOINT}/routes/org?orgId=${orgId}`);
       setOrgName(data.name);
     }
 
-    getOrgName();
+    orgId && getOrgName();
   })
 
 	return (

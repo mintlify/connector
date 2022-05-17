@@ -73,7 +73,11 @@ export type User = {
 	firstName: string;
 	lastName: string;
 	profilePicture?: string;
-	org?: string;
+	org: {
+    _id: string,
+    name: string,
+    integrations: Record<string, boolean>
+  };
 	pending?: boolean;
 };
 
@@ -117,6 +121,8 @@ export default function Home({ userSession }: { userSession: UserSession }) {
 			return;
 		}
 
+    console.log('userSession: ', userSession);
+
 		const userId = userSession.user_id;
 
 		axios.get(`${API_ENDPOINT}/routes/docs?userId=${userId}`).then((docsResponse) => {
@@ -144,7 +150,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
 				email={userSession.email}
 				firstName={userSession.firstName}
 				lastName={userSession.lastName}
-				orgId={userSession.user.org}
+				orgId={userSession.user.org._id}
 			/>
 		);
 

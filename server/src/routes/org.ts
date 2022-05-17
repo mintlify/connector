@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 const orgRouter = express.Router();
 
 // Given an orgId from the request query, return the organization object that matches the id
-orgRouter.get('/', async (req: express.Request, res: express.Response) => {
+orgRouter.get('/', async (req: any, res: express.Response) => {
   const {orgId} = req.query
 
   if (!orgId)
@@ -20,7 +20,7 @@ orgRouter.get('/', async (req: express.Request, res: express.Response) => {
 })
 
 // Given an orgId from the request query, return all the user objects within that organization
-orgRouter.get('/list-users', async (req: express.Request, res: express.Response) => {
+orgRouter.get('/list-users', async (req: any, res: express.Response) => {
   const { orgId } = req.query;
 
   if (!orgId)

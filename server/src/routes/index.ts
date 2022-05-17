@@ -26,7 +26,7 @@ headRouter.get('/', (_, res) => {
 
 // Primary app
 headRouter.use('/user', userRouter);
-headRouter.use('/org', orgRouter)
+headRouter.use('/org', orgRouter);
 headRouter.use('/docs', docsRouter);
 headRouter.use('/automations', automationsRouter);
 headRouter.use('/alerts', alertsRouter);

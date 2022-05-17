@@ -9,6 +9,7 @@ import { GetServerSideProps } from "next";
 import { withSession } from "../lib/withSession";
 import { UserSession } from ".";
 import { useState, useEffect } from "react";
+import { API_ENDPOINT } from "../helpers/api";
 import axios from "axios"
 
 const navigation = [
@@ -47,7 +48,7 @@ export default function Settings({
 
   useEffect(() => {
     async function getOrgName() {
-      await axios.get(`/api/get-org?orgId=${userSession.user.org}`).then(res => setOrgName(res.data.org.name))
+      await axios.get(`${API_ENDPOINT}/routes/org?orgId=${userSession.user.org}`).then(res => setOrgName(res.data.org.name))
     }
 
     if (userSession.user && userSession.user.org)
