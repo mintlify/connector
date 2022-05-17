@@ -143,7 +143,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
             </div>
           </div>
           {
-            !hasDocs && !isLoading && <div>
+            !hasDocs && !isLoading && <div className="pb-8">
               <div className="flex items-center justify-center">
                 <img className="w-24 h-24" src="/assets/empty/docs.svg" alt="No documentations" />
               </div>
