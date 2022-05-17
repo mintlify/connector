@@ -1,7 +1,8 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Types } from 'mongoose';
 
 export type CodeType = {
-    doc: string;
+    _id: Types.ObjectId;
+    doc: Types.ObjectId;
     sha: string;
     provider: string;
     file: string;

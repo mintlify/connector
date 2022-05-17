@@ -3,6 +3,8 @@ import { Alert, AlertsRequest } from '../helpers/github/types';
 import Code, { CodeType } from '../models/Code';
 import { codeToAlert, didChange } from '../helpers/routes/alerts';
 import { FileInfo } from '../helpers/github/patch';
+import Event, { EventType } from '../models/Event';
+import Org from '../models/Org';
 
 const alertsRouter = express.Router();
 
@@ -18,12 +20,14 @@ alertsRouter.post('/', async (req, res) => {
     }
 
     const alertPromises: Promise<Alert|null>[] = [];
-    codes.map((code: CodeType) => {
+    const codesWithAlerts: CodeType[] = codes.filter((code: CodeType) => {
+        let hasAlert = false;
         switch (code.type) {
             case 'file':
                 files.map((file) => {
                     if (file.filename.endsWith(code.file) || code.file.endsWith(file.filename)) {
                         alertPromises.push(codeToAlert(code, file));
+                        hasAlert = true;
                     }
                 });
                 break;
@@ -31,6 +35,7 @@ alertsRouter.post('/', async (req, res) => {
                 files.map((file) => {
                     if (file.filename.includes(code.file)) {
                         alertPromises.push(codeToAlert(code, file));
+                        hasAlert = true;
                     }
                 });
                 break;
@@ -38,15 +43,30 @@ alertsRouter.post('/', async (req, res) => {
                 files.map((file: FileInfo) => {
                     if (didChange(code, file)) {
                         alertPromises.push(codeToAlert(code, file));
+                        hasAlert = true;
                     }
                 });
                 break;
         }
+        return hasAlert;
     });
 
     const alertResponses = await Promise.all(alertPromises);
     const alerts = alertResponses.filter((alert) => alert != null);
-
+    const org = await Org.find({ 'integrations.github.installations[0].account.login': owner });
+    if (org) {
+        const events: EventType[] = codesWithAlerts.map((code) => {
+            const event: EventType = {
+                org: org[0]._id,
+                doc: code.doc,
+                type: 'code',
+                code: code._id
+            };
+            return event;
+        });
+        await Event.insertMany(events);
+    }
+    
     return res.status(200).send({alerts});
 });
 
