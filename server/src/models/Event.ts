@@ -1,4 +1,5 @@
 import mongoose, { Schema, Types } from 'mongoose';
+import * as Diff from 'diff';
 
 export type EventTypeMeta = 'add' | 'change';
 
@@ -6,7 +7,7 @@ export type EventType = {
     org: Types.ObjectId;
     doc: Types.ObjectId;
     type: EventTypeMeta;
-    change?: Object;
+    change?: Array<Diff.Change>;
     add?: Object;
 };
 
@@ -15,7 +16,7 @@ const EventSchema = new Schema({
     doc: { type: Schema.Types.ObjectId, required: true },
     type: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
-    change: Object, // only for change events
+    change: Array, // only for change events
     add: Object, // only for add events
 });
 
