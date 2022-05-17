@@ -3,19 +3,25 @@ import { NextApiResponse } from "next";
 import { API_ENDPOINT } from "../../helpers/api";
 import { withSession } from "../../lib/withSession";
 
+// verify users after they haven't accepted the join invite
 async function handler(req: any, res: NextApiResponse) {
-  const { email, firstName, lastName, orgName } = req.query;
-  const { user: { user_id } } = req.session.get();
+  const { email, firstName, lastName } = req.query;
+  const {
+    user: { user_id },
+  } = req.session.get();
 
-  const { data: { user } } = await axios.post(`${API_ENDPOINT}/routes/user`, {
+  const {
+    data: { user },
+  } = await axios.put(`${API_ENDPOINT}/routes/user/verify`, {
     userId: user_id,
     email,
     firstName,
     lastName,
-    orgName,
   });
 
-  req.session.set('user', {
+  console.log("user = ", user);
+
+  req.session.set("user", {
     user_id,
     email,
     firstName,
@@ -24,7 +30,7 @@ async function handler(req: any, res: NextApiResponse) {
   });
   await req.session.save();
 
-  res.redirect('/');
+  res.redirect("/");
 }
 
 export default withSession(handler);
