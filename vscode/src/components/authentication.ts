@@ -18,5 +18,5 @@ export const registerAuthRoute = () => {
 };
 
 export const openGitHubLogin = () => {
-  return vscode.env.openExternal(vscode.Uri.parse('http://localhost:3000/api/login/github'));
+  return vscode.env.openExternal(vscode.Uri.parse('http://localhost:3000/api/login/github?source=vscode'));
 };

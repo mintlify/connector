@@ -5,7 +5,7 @@ import { loadStytch } from "../../../lib/loadStytch";
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { email } = req.body;
   const client = loadStytch();
-  const redirectUrl = `${PROTOCOL}://${req.headers.host}/api/auth/magiclink`;
+  const redirectUrl = `${PROTOCOL}://${req.headers.host}/api/auth?state=magiclink`;
 
   const response = await client.magicLinks.email.loginOrCreate({
     email,
