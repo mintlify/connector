@@ -3,6 +3,7 @@ import * as Diff from 'diff';
 import Doc from '../models/Doc';
 import Event, { EventType } from '../models/Event';
 import { getDataFromWebpage } from '../services/webscraper';
+import { triggerAutomationsForEvents } from '../automations';
 
 const scanRouter = express.Router();
 
@@ -70,8 +71,8 @@ scanRouter.post('/', async (req, res) => {
       }
     });
     const insertManyEventsPromise = Event.insertMany(newEvents);
-    await Promise.all([bulkWriteDocsPromise, insertManyEventsPromise]);
-
+    const [_, insertManyEventsRes] = await Promise.all([bulkWriteDocsPromise, insertManyEventsPromise]);
+    await triggerAutomationsForEvents(org, insertManyEventsRes);
     res.send({diffAlerts});
   }
 

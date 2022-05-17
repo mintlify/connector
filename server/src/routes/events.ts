@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose, { Types } from 'mongoose';
 import Event, { EventType, EventTypeMeta } from '../models/Event';
 import { userMiddleware } from './user';
+import * as Diff from 'diff';
 
 const eventsRouter = express.Router();
 
@@ -17,7 +18,7 @@ export const createEvent = (org: Types.ObjectId, doc: Types.ObjectId, type: Even
       event.add = data;
       break;
     case 'change':
-      event.change = data;
+      event.change = data as Diff.Change[];
       break;
     default:
       return;

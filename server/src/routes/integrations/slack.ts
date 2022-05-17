@@ -34,7 +34,6 @@ const getSlackAccessTokenFromCode = async (code: string): Promise<any> => {
     } catch (error: any) {
       return { error };
     }
-    
 };
 
 const slackRouter = Router();
