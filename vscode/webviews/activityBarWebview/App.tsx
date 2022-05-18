@@ -38,13 +38,6 @@ const initialDoc: Doc = {
   url: '',
 };
 
-const addDoc: Doc = {
-  id: 'add',
-  title: '+ New documentation',
-  url: '',
-  isAdd: true,
-};
-
 const initialState: State = {
   doc: initialDoc,
   codes: []
@@ -60,13 +53,16 @@ const App = () => {
   const [state, setState] = useState<State>(vscode.getState() || initialState);
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/routes/docs?org=mintlify`)
+    console.log(state.user);
+    if (!state.user?.userId) {
+      return;
+    }
+    axios.get(`http://localhost:5000/routes/docs?userId=${state.user.userId}`)
       .then((res) => {
         const { data: { docs } } = res;
-        docs.push(addDoc);
         setDocs(docs);
       });
-  }, []);
+  }, [state]);
 
   const updateState = (state: any) => {
     setState(state);
@@ -76,6 +72,7 @@ const App = () => {
   const handleSubmit = event => {
     event.preventDefault();
     const args = {
+      userId: state.user.userId,
       docId: selectedDoc.id,
       title: selectedDoc.title,
       org: state.codes[0].org,

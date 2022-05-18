@@ -9,7 +9,7 @@ export const redirectToUser = (res: NextApiResponse, user: User) => {
 
 async function handler(req: any, res: NextApiResponse) {  
   try {
-    const user = req.session.get('user');
+    const user = req.session.get('user')?.user;
     if (user == null) {
       req.session.set('authSource', {
         source: 'vscode'
