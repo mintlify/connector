@@ -91,7 +91,7 @@ export type Code = {
     sha: string;
     provider: string;
     file: string;
-    org: string;
+    gitOrg: string;
     repo: string;
     type: string;
     branch: string;
@@ -108,7 +108,7 @@ export const getGitData = async (fileFsPath: string, viewProvider: ViewProvider,
         sha: '',
         provider: '',
         file: '',
-        org: '',
+        gitOrg: '',
         repo: '',
         branch: '',
         type
@@ -161,7 +161,7 @@ export const getGitData = async (fileFsPath: string, viewProvider: ViewProvider,
             let subdir = repoDir !== fileFsPath ? '/' + formattedFilePath : '';
             if (provider !== null && provider !== undefined) {
                 code.provider = provider.name;
-                code.org = provider.gitUrl.organization;
+                code.gitOrg = provider.gitUrl.organization;
                 code.repo = provider.gitUrl.name;
                 if (lines) {
                     if (lines[0] === lines[1]) {

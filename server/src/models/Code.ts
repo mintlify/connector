@@ -19,7 +19,7 @@ const CodeSchema = new Schema({
     sha: { type: String, required: true },
     provider: { type: String, required: true },
     file: { type: String, required: true },
-    org: { type: Schema.Types.ObjectId, required: true },
+    gitOrg: { type: String, required: true },
     repo: { type: String, required: true },
     type: { type: String, required: true },
     branch: { type: String },

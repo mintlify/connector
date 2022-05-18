@@ -7,7 +7,7 @@ import { vscode } from '../common/message';
 import { InfoCircleIcon, CodeSymbolIcon, XIcon } from '../common/svgs';
 
 export type Doc = {
-  id: string;
+  _id: string;
   title: string;
   url: string;
   isAdd?: boolean;
@@ -33,7 +33,7 @@ export type State = {
 };
 
 const initialDoc: Doc = {
-  id: '0',
+  _id: 'initial',
   title: 'Select documentation',
   url: '',
 };
@@ -73,7 +73,7 @@ const App = () => {
     event.preventDefault();
     const args = {
       userId: state.user.userId,
-      docId: selectedDoc.id,
+      docId: selectedDoc._id,
       title: selectedDoc.title,
       org: state.codes[0].org,
       codes: state.codes,
@@ -127,7 +127,7 @@ const App = () => {
       <div className='italic'>No code selected</div>
     ) : (
       <div>
-        {props.codes?.map((code: Code) => <CodeContent code={code} />)}
+        {props.codes?.map((code: Code) => <CodeContent code={code} key={code.sha} />)}
       </div>
     );
   };
@@ -188,7 +188,7 @@ const App = () => {
                     <Listbox.Options className="absolute mt-1 z-10 w-full shadow-lg code py-1 overflow-auto">
                       {docs.map((doc) => (
                         <Listbox.Option
-                          key={doc.id}
+                          key={doc._id}
                           className={({ active }) =>
                             classNames(
                               active ? 'text-vscode active' : '',
