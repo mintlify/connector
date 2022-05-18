@@ -2,7 +2,12 @@
   "name": "connector",
   "publisher": "mintlify",
   "displayName": "Mintlify",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "icon": "assets/logo.png",
+  "galleryBanner": {
+    "color": "#041811",
+    "theme": "dark"
+  },
   "repository": {
     "url": "https://github.com/mintlify/connect"
   },
@@ -70,7 +75,7 @@
         {
           "id": "primary",
           "title": "Mintlify",
-          "icon": "assets/logo.png"
+          "icon": "assets/icon.png"
         }
       ]
     }
