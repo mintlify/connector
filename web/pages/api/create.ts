@@ -2,6 +2,7 @@ import axios from "axios";
 import { NextApiResponse } from "next";
 import { API_ENDPOINT } from "../../helpers/api";
 import { withSession } from "../../lib/withSession";
+import { redirectToUser } from "./login/vscode";
 
 async function handler(req: any, res: NextApiResponse) {
   const { email, firstName, lastName, orgName } = req.query;
@@ -26,7 +27,7 @@ async function handler(req: any, res: NextApiResponse) {
   await req.session.save();
 
   if (req.session.get('authSource')?.source === 'vscode') {
-    return res.redirect('vscode://mintlify.connect/auth');
+    redirectToUser(res, user);
   }
 
   return res.redirect('/');

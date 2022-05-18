@@ -28,12 +28,12 @@ export class ViewProvider implements WebviewViewProvider {
 
     constructor(private readonly _extensionUri: Uri) { }
 
-		public authenticate(user: any) {
-			return this._view?.webview.postMessage({ command: 'auth', args: user });
+		public authenticate(user: any): void {
+			this._view?.webview.postMessage({ command: 'auth', args: user });
 		}
 
-		public logout() {
-			return this._view?.webview.postMessage({ command: 'logout' });
+		public logout(): void {
+			this._view?.webview.postMessage({ command: 'logout' });
 		}
 		
     public resolveWebviewView(webviewView: WebviewView): void | Thenable<void> {
@@ -53,26 +53,15 @@ export class ViewProvider implements WebviewViewProvider {
 						break;
 					case 'link-submit':
 						{
-							const { docId, title, url, org, isNewDoc, codes } = message.args;
-							if (isNewDoc) {
-								vscode.window.withProgress({
-									location: vscode.ProgressLocation.Notification,
-									title: 'Creating documentation',
-								}, () => new Promise(async (resolve) => {
-									await axios.post(LINK, { url, org, codes });
-									vscode.window.showInformationMessage(`Successfully connected code with ${url}`);
-									resolve(null);
-								}));
-							} else {
-								vscode.window.withProgress({
-									location: vscode.ProgressLocation.Notification,
-									title: 'Connecting documentation with code',
-								}, () => new Promise(async (resolve) => {
-									await axios.put(LINK, { docId, codes });
-									vscode.window.showInformationMessage(`Successfully connected code with ${title}`);
-									resolve(null);
-								}));
-							}
+							const { docId, title, codes } = message.args;
+							vscode.window.withProgress({
+								location: vscode.ProgressLocation.Notification,
+								title: 'Connecting documentation with code',
+							}, () => new Promise(async (resolve) => {
+								await axios.put(LINK, { docId, codes });
+								vscode.window.showInformationMessage(`Successfully connected code with ${title}`);
+								resolve(null);
+							}));
 							break;
 						}
 				}

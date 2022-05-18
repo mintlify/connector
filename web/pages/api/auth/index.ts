@@ -2,6 +2,7 @@ import { NextApiResponse } from "next";
 import { getUserFromUserId } from "../../../helpers/user";
 import { loadStytch } from "../../../lib/loadStytch";
 import { withSession } from "../../../lib/withSession";
+import { redirectToUser } from "../login/vscode";
 
 async function handler(req: any, res: NextApiResponse) {
   const token = req.query.token as string;
@@ -39,7 +40,7 @@ async function handler(req: any, res: NextApiResponse) {
     await req.session.save();
 
     if (authSource?.source === 'vscode') {
-      return res.redirect('vscode://mintlify.connect/auth');
+      redirectToUser(res, user);
     }
 
     return res.redirect('/');

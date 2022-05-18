@@ -73,22 +73,13 @@ const App = () => {
     vscode.setState(state);
   };
 
-  const handleChange = event => {
-    const {name, value} = event.target;
-    const { doc } = state;
-    const newDoc = { ...doc, [name]: value };
-    updateState({...state, doc: newDoc });
-  };
-
   const handleSubmit = event => {
     event.preventDefault();
     const args = {
       docId: selectedDoc.id,
       title: selectedDoc.title,
-      url: state.doc.url,
       org: state.codes[0].org,
       codes: state.codes,
-      isNewDoc: selectedDoc.isAdd,
     };
     vscode.postMessage({ command: 'link-submit', args });
     updateState({...initialState, user: state.user});
@@ -234,19 +225,6 @@ const App = () => {
               </>
             )}
           </Listbox>
-          {
-            selectedDoc.isAdd && (
-              <input
-                type="text"
-                name="url"
-                id="url"
-                className="block mt-2 w-full text-sm"
-                placeholder="www.example.com"
-                value={state.doc.url}
-                onChange={handleChange}
-              />
-            )
-          }
           </div>
           <div className='flex flex-row mt-3'>
             Select Relevant Code<span className='text-red-500'>*</span>
