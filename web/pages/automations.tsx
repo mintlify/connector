@@ -111,7 +111,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
           </div>
         </div>
         {
-            !hasAutomations && !isLoading && <div>
+            !hasAutomations && !isLoading && <div className="pb-8">
               <div className="flex items-center justify-center">
                 <img className="w-24 h-24" src="/assets/empty/automations.svg" alt="Empty Automations" />
               </div>

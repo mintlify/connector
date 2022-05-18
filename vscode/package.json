@@ -1,7 +1,7 @@
 {
   "name": "connect",
   "publisher": "mintlify",
-  "displayName": "Mintlify Connector",
+  "displayName": "Mintlify",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.66.0"
@@ -56,8 +56,8 @@
       "activitybar": [
         {
           "id": "connect",
-          "title": "Mintlify Connect",
-          "icon": "assets/logo.svg"
+          "title": "Mintlify",
+          "icon": "assets/logo.png"
         }
       ]
     }
