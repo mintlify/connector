@@ -21,8 +21,12 @@ export const registerAuthRoute = (provider: ViewProvider) => {
       }
     }
   });
+
+  vscode.commands.registerCommand('mintlify.logout', () => {
+    provider.logout();
+  });
 };
 
-export const openGitHubLogin = () => {
+export const openLogin = () => {
   return vscode.env.openExternal(vscode.Uri.parse('http://localhost:3000/api/login/vscode'));
 };

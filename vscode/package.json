@@ -27,9 +27,19 @@
       {
         "command": "mintlify.link-dir",
         "title": "Link folder/file to documentation"
+      },
+      {
+        "command": "mintlify.logout",
+        "title": "Logout of Mintlify"
       }
     ],
     "menus": {
+      "view/title": [
+        {
+					"command": "mintlify.logout",
+					"when": "view == mintlify.connect"
+				}
+			],
       "editor/context": [
         {
           "command": "mintlify.link-code",

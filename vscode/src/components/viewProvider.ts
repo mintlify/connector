@@ -6,7 +6,7 @@ import vscode, {
 	Webview } from "vscode";
 import { Code } from "../utils/git";
 import { LINK } from '../utils/api';
-import { openGitHubLogin } from './authentication';
+import { openLogin } from './authentication';
 
 export type Doc = {
 	org: string;
@@ -29,11 +29,11 @@ export class ViewProvider implements WebviewViewProvider {
     constructor(private readonly _extensionUri: Uri) { }
 
 		public authenticate(user: any) {
-			if (!this._view) {
-				return;
-			}
-
 			return this._view?.webview.postMessage({ command: 'auth', args: user });
+		}
+
+		public logout() {
+			return this._view?.webview.postMessage({ command: 'logout' });
 		}
 		
     public resolveWebviewView(webviewView: WebviewView): void | Thenable<void> {
@@ -48,8 +48,8 @@ export class ViewProvider implements WebviewViewProvider {
 			webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 			webviewView.webview.onDidReceiveMessage(async message => {
 				switch (message.command) {
-					case 'login-github':
-						openGitHubLogin();
+					case 'login':
+						openLogin();
 						break;
 					case 'link-submit':
 						{
