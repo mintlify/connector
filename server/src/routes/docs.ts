@@ -63,7 +63,6 @@ docsRouter.get('/', userMiddleware, async (_, res) => {
                    { $and:
                       [
                         { $eq: [ "$doc",  "$$doc" ] },
-                        { $eq: [ "$org",  org ] },
                       ]
                    }
                 }

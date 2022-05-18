@@ -9,6 +9,7 @@ export type CodeType = {
     org: string;
     repo: string;
     type: string;
+    url: string;
     branch?: string;
     line?: number;
     endLine?: number;
@@ -22,6 +23,7 @@ const CodeSchema = new Schema({
     gitOrg: { type: String, required: true },
     repo: { type: String, required: true },
     type: { type: String, required: true },
+    url: { type: String, required: true },
     branch: { type: String },
     line: { type: Number },
     endLine: { type: Number },
