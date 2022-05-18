@@ -61,8 +61,6 @@ orgRouter.put("/:orgId/name", userMiddleware, async (req, res) => {
 orgRouter.get("/repos", userMiddleware, async (_, res) => {
   const orgId = res.locals.user.org.toString();
 
-  console.log("Hey there");
-
   try {
     const org = await Org.findById(orgId);
     if (org?.integrations?.github?.installations == null) {

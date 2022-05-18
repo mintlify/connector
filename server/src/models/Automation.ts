@@ -3,7 +3,7 @@ import mongoose, { Schema, Types } from 'mongoose';
 export type AutomationSourceType = {
   doc?: Types.ObjectId, // used for doc
   repo?: string // used for code
-}
+};
 
 export type AutomationType = {
   org: Types.ObjectId,
@@ -17,7 +17,7 @@ export type AutomationType = {
   isActive: boolean,
   createdAt: Date,
   createdBy: Types.ObjectId
-}
+};
 
 const AutomationSchema = new Schema({
   org: { type: mongoose.Schema.Types.ObjectId, required: true },

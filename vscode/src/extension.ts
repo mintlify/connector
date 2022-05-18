@@ -10,5 +10,5 @@ export function activate(context: vscode.ExtensionContext) {
 		linkCodeCommand(provider),
 		linkDirCommand(provider)
 	);
-	registerAuthRoute();
+	registerAuthRoute(provider);
 }

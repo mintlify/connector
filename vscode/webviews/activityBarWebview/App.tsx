@@ -7,7 +7,7 @@ import { vscode } from '../common/message';
 import { InfoCircleIcon, CodeSymbolIcon, XIcon } from '../common/svgs';
 
 export type Doc = {
-  id: string;
+  _id: string;
   title: string;
   url: string;
   isAdd?: boolean;
@@ -26,25 +26,19 @@ export type Code = {
   endLine?: number;
 };
 
-export type Link = {
+export type State = {
+  user?: any,
   doc: Doc;
   codes: Code[];
 };
 
 const initialDoc: Doc = {
-  id: '0',
+  _id: 'initial',
   title: 'Select documentation',
   url: '',
 };
 
-const addDoc: Doc = {
-  id: 'add',
-  title: '+ New documentation',
-  url: '',
-  isAdd: true,
-};
-
-const initialLink: Link = {
+const initialState: State = {
   doc: initialDoc,
   codes: []
 };
@@ -54,57 +48,59 @@ function classNames(...classes) {
 }
 
 const App = () => {
-  const initialState: Link = vscode.getState() || initialLink;
-  const [email, setEmail] = useState('');
   const [docs, setDocs] = useState([initialDoc]);
   const [selectedDoc, setSelectedDoc] = useState(docs[0]);
-  const [state, setState] = useState(initialState);
+  const [state, setState] = useState<State>(vscode.getState() || initialState);
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/routes/docs?org=mintlify`)
+    console.log(state.user);
+    if (!state.user?.userId) {
+      return;
+    }
+    axios.get(`http://localhost:5000/routes/docs?userId=${state.user.userId}`)
       .then((res) => {
         const { data: { docs } } = res;
-        docs.push(addDoc);
         setDocs(docs);
       });
-  }, []);
+  }, [state]);
 
-  const handleChange = event => {
-    const {name, value} = event.target;
-    const { doc } = state;
-    const newDoc = { ...doc, [name]: value };
-    setState({...state, doc: newDoc });
-    vscode.setState({...state, doc: newDoc });
+  const updateState = (state: any) => {
+    setState(state);
+    vscode.setState(state);
   };
 
   const handleSubmit = event => {
     event.preventDefault();
     const args = {
-      docId: selectedDoc.id,
+      userId: state.user.userId,
+      docId: selectedDoc._id,
       title: selectedDoc.title,
-      url: state.doc.url,
       org: state.codes[0].org,
       codes: state.codes,
-      isNewDoc: selectedDoc.isAdd,
     };
     vscode.postMessage({ command: 'link-submit', args });
-    setState(initialLink);
-    vscode.setState(initialLink);
+    updateState({...initialState, user: state.user});
   };
 
   window.addEventListener('message', event => {
     const message = event.data;
     switch (message.command) {
+      case 'auth':
+        const user = message.args;
+        updateState({...state, user});
+        break;
       case 'post-code':
         const code = message.args;
-        setState({...state, codes: [code]});
-        vscode.setState({...state, codes: [code]});
+        updateState({...state, codes: [code]});
+        break;
+      case 'logout':
+        onLogout();
+        break;
     }
   });
 
   const deleteCode = () => {
-    setState({...state, codes: []});
-    vscode.setState({...state, codes: []});
+    updateState({...state, codes: []});
   };
 
   const CodeContent = (props: { code: Code }) => {
@@ -131,16 +127,18 @@ const App = () => {
       <div className='italic'>No code selected</div>
     ) : (
       <div>
-        {props.codes?.map((code: Code) => <CodeContent code={code} />)}
+        {props.codes?.map((code: Code) => <CodeContent code={code} key={code.sha} />)}
       </div>
     );
   };
 
-  const onClickSignInWithGitHub = () => {
-    vscode.postMessage({ command: 'login-github' });
+  const onClickSignIn = () => {
+    vscode.postMessage({ command: 'login' });
   };
 
-  const user = null;
+  const onLogout = () => {
+    updateState({...initialState, user: undefined});
+  };
 
   const style = getComputedStyle(document.body);
 
@@ -150,51 +148,27 @@ const App = () => {
         Mintlify
       </h1>
       {
-        user == null && <>
+        state.user == null && <>
         <p className="mt-1">
           Sign in to your account to continue
         </p>
-        <div>
-          <button
-            type="button"
-            className="mt-2 relative submit"
-            onClick={onClickSignInWithGitHub}
-          >
-            Sign in with GitHub
-          </button>
-          <div className="my-4 relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-placeholder-vscode" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-vscode text-placeholder-vscode">Or continue with</span>
-            </div>
-          </div>
-          <input
-            type="text"
-            name="email"
-            id="email"
-            className="block w-full text-sm"
-            placeholder="Email address"
-            value={email}
-            onChange={event => setEmail(event.target.value)}
-          />
-          <button type="submit" className="relative submit mt-2">
-            <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-              <LockClosedIcon className="h-4 w-4" aria-hidden="true" />
-            </span>
-            Sign in
-          </button>
-        </div>
+        <button
+          type="submit"
+          className="flex items-center justify-center submit mt-2"
+          onClick={onClickSignIn}
+        >
+          <LockClosedIcon className="mr-1 h-4 w-4" aria-hidden="true" />
+          Sign in with Mintlify
+        </button>
         </>
       }
       {
-        user != null && <>
+        state.user != null && <>
         <p className="mt-1">
           Link your code to documentation
         </p>
         <p>
-          <a href="https://mintlify.com">Open Dashboard</a>
+          <a className="cursor-pointer" href="https://mintlify.com">Open Dashboard</a>
         </p>
         <form className="mt-3" onSubmit={handleSubmit}>
           <label htmlFor="url" className="block">
@@ -205,19 +179,19 @@ const App = () => {
             {() => (
               <>
                 <div className="mt-1 relative">
-                  <Listbox.Button className="relative w-full pl-3 pr-10 py-2 text-left bg-vscode">
+                  <Listbox.Button className="relative w-full pl-3 pr-10 py-2 text-left code">
                     <span className="block truncate">{selectedDoc.title}</span>
                     <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                       <SelectorIcon className="h-5 w-5" aria-hidden="true" />
                     </span>
                   </Listbox.Button>
-                    <Listbox.Options className="absolute mt-1 z-10 w-full shadow-lg bg-vscode py-1 overflow-auto">
+                    <Listbox.Options className="absolute mt-1 z-10 w-full shadow-lg code py-1 overflow-auto">
                       {docs.map((doc) => (
                         <Listbox.Option
-                          key={doc.id}
+                          key={doc._id}
                           className={({ active }) =>
                             classNames(
-                              active ? 'text-white active' : '',
+                              active ? 'text-vscode active' : '',
                               'cursor-pointer relative py-2 pl-3 pr-9'
                             )
                           }
@@ -225,7 +199,7 @@ const App = () => {
                         >
                           {({ selected, active }) => (
                             <>
-                              <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'block truncate')}>
+                              <span className='font-normal block truncate'>
                                 {doc.title}
                               </span>
 
@@ -248,19 +222,6 @@ const App = () => {
               </>
             )}
           </Listbox>
-          {
-            selectedDoc.isAdd && (
-              <input
-                type="text"
-                name="url"
-                id="url"
-                className="block mt-2 w-full text-sm"
-                placeholder="www.example.com"
-                value={state.doc.url}
-                onChange={handleChange}
-              />
-            )
-          }
           </div>
           <div className='flex flex-row mt-3'>
             Select Relevant Code<span className='text-red-500'>*</span>
@@ -289,12 +250,12 @@ const App = () => {
               </div>
             </ReactTooltip>
           </div>
-          <div className='bg-vscode'>
+          <div className='code'>
             <CodesContent codes={state.codes} />
           </div>
           <button type="submit" className="submit">Submit</button>
         </form>
-        </>
+      </>
       }
     </div>
   );
