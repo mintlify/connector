@@ -19,11 +19,13 @@ linksRouter.post('/', userMiddleware, async (req, res) => {
     const { url, org, codes } = req.body;
 
     const { doc } = await createDocFromUrl(url, org, res.locals.user._id);
-    const codePromises: Promise<CodeType>[] = codes.map((code: CodeType) => {
-        code.doc = doc._id;
-        return Code.create(code);
-    });
-    await Promise.all(codePromises);
+    if (doc) {
+        const codePromises: Promise<CodeType>[] = codes.map((code: CodeType) => {
+            code.doc = doc._id;
+            return Code.create(code);
+        });
+        await Promise.all(codePromises);
+    }
     return res.send({success: true});
 });
 
