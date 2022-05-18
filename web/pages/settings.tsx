@@ -3,10 +3,11 @@ import { BellIcon, UserCircleIcon, UserGroupIcon } from "@heroicons/react/outlin
 import { GetServerSideProps } from "next";
 import { withSession } from "../lib/withSession";
 import { UserSession } from ".";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import axios from "axios";
 import { API_ENDPOINT } from "../helpers/api";
+import { User } from ".";
 
 const navigation = [
   { name: "Account", href: "#", icon: UserCircleIcon },
@@ -34,15 +35,32 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
   const [orgName, setOrgName] = useState(user.org.name);
   const [invitedEmail, setInvitedEmail] = useState("");
   const [isSendingInvite, setIsSendingInvite] = useState(false);
+  const [members, setMembers] = useState<User[]>([]);
+
+  // get all members of the organization
+  useEffect(() => {
+    console.log("user = ", user);
+    axios.get(`${API_ENDPOINT}/routes/org/list-users?orgId=${user.org}`).then((res) => {
+      setMembers(res.data.users);
+    });
+  }, [user]);
 
   const inviteMember = async (email: string) => {
     // disable the add member button before sending the invitation
     setIsSendingInvite(true);
     setInvitedEmail("");
     // create a pending account by calling the invitation API
-    await axios.post(`${API_ENDPOINT}/routes/user/invite-to-org`, { emails: [email], orgId: user.org._id }).catch((err) => {
-      console.log(err);
-    });
+    await axios
+      .post(`${API_ENDPOINT}/routes/user/invite-to-org`, {
+        emails: [email],
+        orgId: user.org.hasOwnProperty("_id") ? user.org._id : user.org,
+      })
+      .then((res) => {
+        setMembers(members.concat(res.data.users));
+      })
+      .catch((err) => {
+        console.log(err);
+      });
     // send login invitation
     await axios.post("/api/login/magiclink", { email }).catch((err) => console.log(err));
     setIsSendingInvite(false);
@@ -246,23 +264,39 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                                     </tr>
                                   </thead>
                                   <tbody className="divide-y divide-gray-200 bg-white">
-                                    {people.map((person) => (
-                                      <tr key={person.email}>
+                                    {members.map((member) => (
+                                      <tr key={member.email}>
                                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
                                           <div className="flex items-center">
-                                            <div className="h-10 w-10 flex-shrink-0">
-                                              <img className="h-10 w-10 rounded-full" src={person.image} alt="" />
-                                            </div>
+                                            {member.pending ? (
+                                              <span className="inline-block h-10 w-10 rounded-full overflow-hidden bg-gray-100">
+                                                <svg
+                                                  className="h-full w-full text-gray-300"
+                                                  fill="currentColor"
+                                                  viewBox="0 0 24 24"
+                                                >
+                                                  <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                                                </svg>
+                                              </span>
+                                            ) : (
+                                              <div className="h-10 w-10 flex-shrink-0 border border-gray-3 bg-hover text-white flex items-center justify-center rounded-full">
+                                                <p className={"text-xs"}>{member.firstName[0] + member.lastName[0]}</p>
+                                              </div>
+                                            )}
                                             <div className="ml-4">
-                                              <div className="font-medium text-gray-900">{person.name}</div>
-                                              <div className="text-gray-500">{person.email}</div>
+                                              <div className="font-medium text-gray-900">
+                                                {member.pending ? "Pending User" : `${member.firstName} ${member.lastName}`}
+                                              </div>
+                                              <div className="text-gray-500">{member.email}</div>
                                             </div>
                                           </div>
                                         </td>
-                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{person.role}</td>
+                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                          {member.pending ? "Pending" : "Member"}
+                                        </td>
                                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                           <a href="#" className="text-primary hover:text-hover">
-                                            Edit<span className="sr-only">, {person.name}</span>
+                                            Edit<span className="sr-only">, {`${member.firstName} ${member.lastName}`}</span>
                                           </a>
                                         </td>
                                       </tr>

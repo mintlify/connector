@@ -56,6 +56,7 @@ export type User = {
     name: string;
     integrations: Record<string, boolean>;
   };
+  pending?: boolean;
 };
 
 const listMenu = [

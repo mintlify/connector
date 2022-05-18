@@ -72,6 +72,9 @@ userRouter.post(
 
     let inviteUsers: any = [];
 
+    console.log("emails = ", emails);
+    console.log("orgId = ", orgId);
+
     // Create users as `pending: true` under the database
     emails.map((email: string) =>
       inviteUsers.push(User.create({ email, org: orgId, pending: true }))
@@ -87,6 +90,7 @@ userRouter.post(
         });
       });
     } catch (err) {
+      console.log(err);
       return res.status(500).json({ err });
     }
 
