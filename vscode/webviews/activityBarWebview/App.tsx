@@ -10,7 +10,7 @@ export type Doc = {
   _id: string;
   title: string;
   url: string;
-  isAdd?: boolean;
+  isDefault?: boolean;
 };
 
 export type Code = {
@@ -36,6 +36,7 @@ const initialDoc: Doc = {
   _id: 'initial',
   title: 'Select documentation',
   url: '',
+  isDefault: true,
 };
 
 const initialState: State = {
@@ -141,6 +142,8 @@ const App = () => {
   };
 
   const style = getComputedStyle(document.body);
+
+  const hasDocSelected = selectedDoc.isDefault !== true;
 
   return (
     <div className="space-y-1">
@@ -253,7 +256,13 @@ const App = () => {
           <div className='code'>
             <CodesContent codes={state.codes} />
           </div>
-          <button type="submit" className="submit">Submit</button>
+          <button
+            type="submit"
+            className={classNames("submit", hasDocSelected ? 'opacity-100 hover:cursor-pointer' : 'opacity-50 hover:cursor-default')}
+            disabled={!hasDocSelected}
+          >
+            Submit
+          </button>
         </form>
       </>
       }
