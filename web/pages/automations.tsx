@@ -53,7 +53,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
       id: 'vscode',
       name: 'VS Code',
       imageUrl: '/assets/integrations/vscode.svg',
-      href: ``,
+      href: 'vscode:extension/mintlify.connector',
     },
     {
       id: 'slack',
