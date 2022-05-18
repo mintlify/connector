@@ -108,7 +108,7 @@ docsRouter.post('/', userMiddleware, async (req, res) => {
 
 docsRouter.delete('/:docsId', userMiddleware, async (req, res) => {
   const { docsId } = req.params;
-  const { org } = res.locals.user.org;
+  const { org } = res.locals.user;
   
   try {
     await Doc.findOneAndDelete({ _id: docsId, org });
