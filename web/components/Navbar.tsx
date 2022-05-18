@@ -1,15 +1,13 @@
 import { Fragment } from 'react'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
-import {
-  SearchIcon,
-  MenuIcon
-} from '@heroicons/react/solid'
+import { MenuIcon } from '@heroicons/react/solid'
 import { XIcon } from '@heroicons/react/outline'
 import { classNames } from '../helpers/functions'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import ProfilePicture from './ProfilePicture'
 import { User } from '../pages'
+import AlgoliaSearch from './AlgoliaSearch'
 
 const navigation = [
   {
@@ -81,23 +79,7 @@ export default function Navbar({ user }: { user: User }) {
                   <label htmlFor="search" className="sr-only">
                     Search
                   </label>
-                  <div className="relative cursor-pointer">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <SearchIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                    </div>
-                    <input
-                      id="search"
-                      name="search"
-                      className="block w-full pl-10 pr-3 py-2 border border-transparent rounded-md leading-5 bg-gray-700 text-gray-300 placeholder-gray-400 focus:outline-none hover:bg-gray-600 sm:text-sm cursor-pointer"
-                      placeholder="Search"
-                      disabled
-                    />
-                    <div className="absolute inset-y-0 right-0 flex py-1.5 pr-1.5">
-                      <kbd className="inline-flex items-center border border-gray-200 border-opacity-60 rounded px-2 text-sm font-sans font-medium text-gray-400">
-                        ⌘K
-                      </kbd>
-                    </div>
-                  </div>
+                  <AlgoliaSearch />
                 </div>
               </div>
               <div className="flex lg:hidden">
