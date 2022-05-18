@@ -26,13 +26,26 @@ orgRouter.get("/list-users", async (req: any, res: express.Response) => {
 
   if (!orgId) return res.status(400).json({ error: "orgId not provided" });
 
-  const users = await User.find({
-    org: orgId.toString(),
-  })
-    .exec()
-    .catch((err) => {
-      return res.status(500).json({ error: err });
-    });
+  const users = await User.aggregate([
+    {
+      $match: {
+        org: new mongoose.Types.ObjectId(orgId.toString()),
+      },
+    },
+    {
+      $lookup: {
+        from: "orgs",
+        localField: "org",
+        foreignField: "_id",
+        as: "org",
+      },
+    },
+    {
+      $set: {
+        org: { $first: "$org" },
+      },
+    },
+  ]);
 
   return res.status(200).json({ users });
 });

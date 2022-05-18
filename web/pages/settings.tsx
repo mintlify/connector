@@ -7,25 +7,13 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import axios from "axios";
 import { API_ENDPOINT } from "../helpers/api";
+import { classNames } from "../helpers/functions";
 import { User } from ".";
 
 const navigation = [
-  { name: "Account", href: "#", icon: UserCircleIcon },
-  { name: "Organization", href: "#", icon: UserGroupIcon },
-  { name: "Notifications", href: "#", icon: BellIcon },
-];
-
-const people = [
-  {
-    name: "Lindsay Walton",
-    title: "Front-end Developer",
-    department: "Optimization",
-    email: "lindsay.walton@example.com",
-    role: "Member",
-    image:
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-  },
-  // More people...
+  { name: "Account", href: "#setting-account", icon: UserCircleIcon },
+  { name: "Organization", href: "#setting-organization", icon: UserGroupIcon },
+  { name: "Notifications", href: "#setting-notifications", icon: BellIcon },
 ];
 
 export default function Settings({ userSession }: { userSession: UserSession }) {
@@ -39,8 +27,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
 
   // get all members of the organization
   useEffect(() => {
-    console.log("user = ", user);
-    axios.get(`${API_ENDPOINT}/routes/org/list-users?orgId=${user.org}`).then((res) => {
+    axios.get(`${API_ENDPOINT}/routes/org/list-users?orgId=${user.org._id}`).then((res) => {
       setMembers(res.data.users);
     });
   }, [user]);
@@ -53,7 +40,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
     await axios
       .post(`${API_ENDPOINT}/routes/user/invite-to-org`, {
         emails: [email],
-        orgId: user.org.hasOwnProperty("_id") ? user.org._id : user.org,
+        orgId: user.org._id,
       })
       .then((res) => {
         setMembers(members.concat(res.data.users));
@@ -285,7 +272,12 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                                               </div>
                                             )}
                                             <div className="ml-4">
-                                              <div className="font-medium text-gray-900">
+                                              <div
+                                                className={classNames(
+                                                  "font-medium text-gray-900",
+                                                  member.pending ? "italic" : ""
+                                                )}
+                                              >
                                                 {member.pending ? "Pending User" : `${member.firstName} ${member.lastName}`}
                                               </div>
                                               <div className="text-gray-500">{member.email}</div>
