@@ -5,7 +5,7 @@ import vscode, {
 	Uri,
 	Webview } from "vscode";
 import { Code } from "../utils/git";
-import { LINK } from '../utils/api';
+import { API_ENDPOINT } from '../utils/api';
 import { openLogin } from './authentication';
 
 export type Doc = {
@@ -53,12 +53,12 @@ export class ViewProvider implements WebviewViewProvider {
 						break;
 					case 'link-submit':
 						{
-							const { docId, title, codes } = message.args;
+							const { userId, docId, title, codes } = message.args;
 							vscode.window.withProgress({
 								location: vscode.ProgressLocation.Notification,
 								title: 'Connecting documentation with code',
 							}, () => new Promise(async (resolve) => {
-								await axios.put(LINK, { docId, codes });
+								await axios.put(`${API_ENDPOINT}/links?userId=${userId}`, { docId, codes });
 								vscode.window.showInformationMessage(`Successfully connected code with ${title}`);
 								resolve(null);
 							}));
