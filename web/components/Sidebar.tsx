@@ -11,11 +11,21 @@ type SidebarProps = {
   user: User;
   isAddingDoc?: boolean;
   setIsAddingDoc?: (isAddingDoc: boolean) => void;
+  isAddDocumentOpen: boolean;
+  setIsAddDocumentOpen: (isAddingAutomation: boolean) => void;
+  isAddAutomationOpen: boolean;
+  setIsAddAutomationOpen: (isAddingAutomation: boolean) => void;
 }
 
-export default function Sidebar({ user, isAddingDoc, setIsAddingDoc }: SidebarProps) {
-  const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
-  const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
+export default function Sidebar({
+  user,
+  isAddingDoc,
+  setIsAddingDoc,
+  isAddAutomationOpen,
+  isAddDocumentOpen,
+  setIsAddAutomationOpen,
+  setIsAddDocumentOpen
+}: SidebarProps) {
 
   const userId = user.userId;
   const fullName = user.firstName + ' ' + user.lastName;

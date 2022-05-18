@@ -37,8 +37,10 @@ export type Automation = {
 export default function Automations({ userSession }: { userSession: UserSession }) {
   const [automations, setAutomations] = useState<Automation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const user = userSession.user;
+  const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
+  const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
 
+  const user = userSession.user;
   const integrations = [
     {
       id: 'github',
@@ -102,7 +104,13 @@ export default function Automations({ userSession }: { userSession: UserSession 
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
       {/* Left sidebar & main wrapper */}
       <div className="flex-1 min-w-0 xl:flex">
-        <Sidebar user={userSession.user} />
+        <Sidebar
+          user={userSession.user}
+          isAddAutomationOpen={isAddAutomationOpen}
+          setIsAddAutomationOpen={setIsAddAutomationOpen}
+          isAddDocumentOpen={isAddDocumentOpen}
+          setIsAddDocumentOpen={setIsAddDocumentOpen}
+        />
         {/* Projects List */}
         <div className="bg-white lg:min-w-0 lg:flex-1">
           <div className="pl-4 pr-6 pt-4 pb-4 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
@@ -122,8 +130,11 @@ export default function Automations({ userSession }: { userSession: UserSession 
                 Add one to get started
               </p>
               <div className="mt-4 flex justify-center">
-                <button className="inline-flex items-center justify-center text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 shadow-sm py-2 px-8 font-medium">
-                  Add Documentation
+                <button
+                  className="inline-flex items-center justify-center text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 shadow-sm py-2 px-8 font-medium"
+                  onClick={() => setIsAddAutomationOpen(true)}
+                >
+                  Add Automation
                 </button>
               </div>
             </div>

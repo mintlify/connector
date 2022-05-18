@@ -67,6 +67,8 @@ export default function Home({ userSession }: { userSession: UserSession }) {
   const [selectedDoc, setSelectedDoc] = useState<Doc>();
   const [isAddingDoc, setIsAddingDoc] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
+  const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
 
   const listMenu = [
     {
@@ -134,6 +136,10 @@ export default function Home({ userSession }: { userSession: UserSession }) {
           user={userSession.user}
           isAddingDoc={isAddingDoc}
           setIsAddingDoc={setIsAddingDoc}
+          isAddAutomationOpen={isAddAutomationOpen}
+          setIsAddAutomationOpen={setIsAddAutomationOpen}
+          isAddDocumentOpen={isAddDocumentOpen}
+          setIsAddDocumentOpen={setIsAddDocumentOpen}
         />
         {/* Projects List */}
         <div className="bg-white lg:min-w-0 lg:flex-1">
@@ -155,7 +161,10 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                 Add one to get started
               </p>
               <div className="mt-4 flex justify-center">
-                <button className="inline-flex items-center justify-center text-sm bg-primary text-white rounded-md shadow-sm py-2 font-medium px-8 hover:bg-hover">
+                <button
+                  className="inline-flex items-center justify-center text-sm bg-primary text-white rounded-md shadow-sm py-2 font-medium px-8 hover:bg-hover"
+                  onClick={() => setIsAddDocumentOpen(true)}
+                >
                   <DocumentTextIcon className="h-4 w-4 mr-1" />
                   Add Documentation
                 </button>
