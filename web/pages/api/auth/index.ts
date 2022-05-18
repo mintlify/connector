@@ -2,7 +2,7 @@ import { NextApiResponse } from "next";
 import { getUserFromUserId } from "../../../helpers/user";
 import { loadStytch } from "../../../lib/loadStytch";
 import { withSession } from "../../../lib/withSession";
-import { redirectToUser } from "../login/vscode";
+import { redirectToVSCode } from "../login/vscode";
 
 async function handler(req: any, res: NextApiResponse) {
   const token = req.query.token as string;
@@ -40,7 +40,7 @@ async function handler(req: any, res: NextApiResponse) {
     await req.session.save();
 
     if (authSource?.source === 'vscode') {
-      redirectToUser(res, user);
+      redirectToVSCode(res, user);
     }
 
     return res.redirect('/');
