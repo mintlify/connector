@@ -34,12 +34,11 @@ const getSlackAccessTokenFromCode = async (code: string): Promise<any> => {
     } catch (error: any) {
       return { error };
     }
-    
 };
 
 const slackRouter = Router();
 
-slackRouter.get('/slack/install', async (req, res) => {
+slackRouter.get('/install', async (req, res) => {
     const { org } = req.query;
     if (!org) {
         return res.send('Organization ID is required');
@@ -52,7 +51,7 @@ slackRouter.get('/slack/install', async (req, res) => {
     return res.redirect(url);
   });
   
-  slackRouter.get('/slack/authorization', async (req, res) => {
+  slackRouter.get('/authorization', async (req, res) => {
     const { code, state } = req.query;
     if (code == null) return res.status(403).send('Invalid or missing grant code');
   
@@ -75,6 +74,7 @@ slackRouter.get('/slack/install', async (req, res) => {
           }
       });
     }
+
     // TODO: redirect to channel
     return res.redirect('slack://open');
   });

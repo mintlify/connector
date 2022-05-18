@@ -1,13 +1,9 @@
-import type { GetServerSideProps, NextPage } from 'next'
+import type { GetServerSideProps } from 'next'
 import axios from 'axios'
 import { Menu } from '@headlessui/react'
 import {
-  ChevronDownIcon,
   ChevronRightIcon,
   DotsVerticalIcon,
-  SortAscendingIcon,
-  PlusIcon,
-  MinusIcon
 } from '@heroicons/react/solid'
 import Sidebar from '../components/Sidebar'
 import { classNames } from '../helpers/functions'
@@ -25,6 +21,8 @@ import { withSession } from '../lib/withSession'
 import SignIn from '../components/SignIn'
 import Setup from '../components/Setup'
 import { Automation } from './automations'
+import { DocumentTextIcon } from '@heroicons/react/outline'
+import EventItem, { Event } from '../components/Event'
 
 type Code = {
   _id: string,
@@ -40,23 +38,6 @@ export type Doc = {
   url: string,
   code: Code[],
   automations: Automation[]
-}
-
-type Change = {
-  removed?: boolean,
-  added?: boolean,
-  count: number,
-  value: string,
-}
-
-type Event = {
-  _id: string,
-  event: string,
-  doc: Doc,
-  createdAt: string,
-  change?: Change[],
-  add?: Object,
-  remove?: Object,
 }
 
 export type UserSession = {
@@ -90,30 +71,12 @@ const listMenu = [
   }
 ]
 
-const countTotalChanges = (change: Change[]) => {
-  let totalRemoved = 0;
-  let totalAdded = 0;
-
-  change.forEach((section) => {
-    if (section.removed) {
-      totalRemoved += section.count;
-    }
-    if (section.added) {
-      totalAdded += section.count;
-    }
-  });
-
-  return {
-    removed: totalRemoved,
-    added: totalAdded,
-  }
-}
-
 export default function Home({ userSession }: { userSession: UserSession }) {
   const [docs, setDocs] = useState<Doc[]>();
   const [events, setEvents] = useState<Event[]>();
   const [selectedDoc, setSelectedDoc] = useState<Doc>();
   const [isAddingDoc, setIsAddingDoc] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (userSession == null) {
@@ -126,7 +89,10 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       .then((docsResponse) => {
         const { docs } = docsResponse.data;
         setDocs(docs);
-      });
+      })
+      .finally(() => {
+        setIsLoading(false);
+      })
     
     let eventsQuery = `${API_ENDPOINT}/routes/events?userId=${userId}`;
     if (selectedDoc) eventsQuery += `&doc=${selectedDoc._id}`;
@@ -151,6 +117,8 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     return <div className="absolute inset-0" onClick={() => setSelectedDoc(undefined)}></div>
   }
 
+  const hasDocs = (docs && docs.length > 0) || isAddingDoc;
+
   return (
     <>
     <Head>
@@ -171,9 +139,28 @@ export default function Home({ userSession }: { userSession: UserSession }) {
           <ClearSelectedFrame />
           <div className="pl-4 pr-6 pt-4 pb-4 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
             <div className="flex items-center">
-              <h1 className="flex-1 text-lg font-medium">Documentation</h1>
+              {hasDocs && <h1 className="flex-1 text-lg font-medium text-gray-800">Documentation</h1> } 
             </div>
           </div>
+          {
+            !hasDocs && !isLoading && <div className="pb-8">
+              <div className="flex items-center justify-center">
+                <img className="w-24 h-24" src="/assets/empty/docs.svg" alt="No documentations" />
+              </div>
+              <p className="text-center mt-6 text-gray-600 font-medium">
+                No documentation found
+              </p>
+              <p className="mt-1 text-center text-sm text-gray-400">
+                Add one to get started
+              </p>
+              <div className="mt-4 flex justify-center">
+                <button className="inline-flex items-center justify-center text-sm bg-primary text-white rounded-md shadow-sm py-2 font-medium px-8 hover:bg-hover">
+                  <DocumentTextIcon className="h-4 w-4 mr-1" />
+                  Add Documentation
+                </button>
+              </div>
+            </div>
+          }
           <ul role="list" className="relative z-0">
             { isAddingDoc && <LoadingItem /> }
             {docs?.map((doc) => (
@@ -302,39 +289,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
           <div>
             <ul role="list" className="divide-y divide-gray-200">
               {events?.map((event) => (
-                <li key={event._id} className="py-4">
-                  <div className="flex space-x-3">
-                    <img
-                      className="h-5 w-5 rounded-sm"
-                      src={event.doc.favicon}
-                      alt={event.doc.title}
-                    />
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-medium">{event.doc.title}</h3>
-                        <p className="text-sm text-gray-500">{timeAgo.format(Date.parse(event.createdAt))}</p>
-                      </div>
-                      {
-                        event.change && (
-                          <div>
-                            <div className="flex items-center space-x-1 text-green-700">
-                              <PlusIcon className="h-4 w-4" />
-                              <p className="text-sm">
-                                {countTotalChanges(event.change).added} {countTotalChanges(event.change).added > 1 ? 'changes' : 'change'}
-                              </p>
-                            </div>
-                            <div className="flex items-center space-x-1 text-red-700">
-                              <MinusIcon className="h-4 w-4" />
-                              <p className="text-sm">
-                                {countTotalChanges(event.change).removed} {countTotalChanges(event.change).removed > 1 ? 'changes' : 'change'}
-                              </p>
-                            </div>
-                          </div>
-                        )
-                      }
-                    </div>
-                  </div>
-                </li>
+                <EventItem key={event._id} event={event} />
               ))}
             </ul>
             <div className="py-4 text-sm border-t border-gray-200"></div>

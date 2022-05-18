@@ -2,10 +2,11 @@ import axios from "axios";
 import { NextApiResponse } from "next";
 import { API_ENDPOINT } from "../../helpers/api";
 import { withSession } from "../../lib/withSession";
+import { redirectToUser } from "./login/vscode";
 
 async function handler(req: any, res: NextApiResponse) {
   const { email, firstName, lastName, orgName } = req.query;
-  const { user: { user_id } } = req.session.get();
+  const { user_id } = req.session.get('user');
 
   const { data: { user } } = await axios.post(`${API_ENDPOINT}/routes/user`, {
     userId: user_id,
@@ -15,6 +16,7 @@ async function handler(req: any, res: NextApiResponse) {
     orgName,
   });
 
+  req.session.destroy();
   req.session.set('user', {
     user_id,
     email,
@@ -24,7 +26,11 @@ async function handler(req: any, res: NextApiResponse) {
   });
   await req.session.save();
 
-  res.redirect('/');
+  if (req.session.get('authSource')?.source === 'vscode') {
+    redirectToUser(res, user);
+  }
+
+  return res.redirect('/');
 }
 
 export default withSession(handler);

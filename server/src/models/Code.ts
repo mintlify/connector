@@ -1,7 +1,8 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Types } from 'mongoose';
 
 export type CodeType = {
-    doc: string;
+    _id: Types.ObjectId;
+    doc: Types.ObjectId;
     sha: string;
     provider: string;
     file: string;
@@ -11,7 +12,7 @@ export type CodeType = {
     branch?: string;
     line?: number;
     endLine?: number;
-}
+};
 
 const CodeSchema = new Schema({
     doc: { type: Schema.Types.ObjectId, required: true },
@@ -24,9 +25,9 @@ const CodeSchema = new Schema({
     branch: { type: String },
     line: { type: Number },
     endLine: { type: Number },
-    createdBy: { type: mongoose.Schema.Types.ObjectId },
+    createdBy: { type: Schema.Types.ObjectId },
 });
 
-const Code = mongoose.model('Code', CodeSchema, 'code');
+const Code = mongoose.model<CodeType>('Code', CodeSchema, 'code');
 
 export default Code;

@@ -1,8 +1,10 @@
 import express from 'express';
 import * as Diff from 'diff';
 import Doc from '../models/Doc';
-import Event from '../models/Event';
+import Event, { EventType } from '../models/Event';
 import { getDataFromWebpage } from '../services/webscraper';
+import { triggerAutomationsForEvents } from '../automations';
+import { updateDocContentForSearch } from '../services/algolia';
 
 const scanRouter = express.Router();
 
@@ -31,7 +33,7 @@ scanRouter.post('/', async (req, res) => {
   try {
     const docsFromOrg = await Doc.find({ org });
     const getDifferencePromises = docsFromOrg.map((doc) => {
-      return getDiffAndContent(doc.url, doc.content, org);
+      return getDiffAndContent(doc.url, doc.content ?? '', org);
     });
 
     const diffsAndContent = await Promise.all(getDifferencePromises);
@@ -44,7 +46,7 @@ scanRouter.post('/', async (req, res) => {
           doc: docsFromOrg[i],
           newContent,
           diff
-        })
+        });
       }
     });
 
@@ -61,17 +63,21 @@ scanRouter.post('/', async (req, res) => {
       ordered: false
     });
 
-    const newEvents = diffAlerts.map((alert) => {
+    const newEvents: EventType[] = diffAlerts.map((alert) => {
       return {
         org,
         doc: alert.doc._id,
-        event: 'change',
+        type: 'change',
         change: alert.diff,
       }
     });
     const insertManyEventsPromise = Event.insertMany(newEvents);
-    await Promise.all([bulkWriteDocsPromise, insertManyEventsPromise]);
-
+    const updateSearchDocRecordsPromises: Promise<void>[] = diffAlerts.map(({ doc, newContent}) => {
+      return updateDocContentForSearch(doc, newContent);
+    });
+    const [_, insertManyEventsRes] = await Promise.all([bulkWriteDocsPromise, insertManyEventsPromise, updateSearchDocRecordsPromises]);
+    await triggerAutomationsForEvents(org, insertManyEventsRes);
+   
     res.send({diffAlerts});
   }
 

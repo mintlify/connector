@@ -5,6 +5,7 @@ import { getAutomationTypeIcon } from '../../helpers/Icons';
 import { AutomationType } from '../../pages/automations';
 import { ChevronRightIcon } from '@heroicons/react/solid';
 import AutomationConfig from './AutomationConfig';
+import { User } from '../../pages';
 
 type AutomationData = {
   type: AutomationType;
@@ -26,12 +27,12 @@ export const automationMap: { doc: AutomationData, code: AutomationData } = {
 };
 
 type AddAutomationProps = {
-  userId: string;
+  user: User;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 }
 
-export default function AddAutomation({ userId, isOpen, setIsOpen }: AddAutomationProps) {
+export default function AddAutomation({ user, isOpen, setIsOpen }: AddAutomationProps) {
   const [selectedRuleType, setSelectedRuleType] = useState<AutomationType>();
 
   const onToPrimarySelection = () => {
@@ -66,7 +67,7 @@ export default function AddAutomation({ userId, isOpen, setIsOpen }: AddAutomati
             <Dialog.Panel className="mx-auto max-w-xl transform divide-y divide-gray-100 rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
               { selectedRuleType && (
                 <AutomationConfig
-                  userId={userId}
+                  user={user}
                   automationType={selectedRuleType}
                   onCancel={onToPrimarySelection}
                   setIsAddAutomationOpen={setIsOpen}

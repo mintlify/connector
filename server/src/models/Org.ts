@@ -1,6 +1,7 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Types } from 'mongoose';
 
 export type OrgType = {
+    _id: Types.ObjectId,
     name: string,
     createdAt: Date,
     integrations: {
@@ -22,7 +23,9 @@ export type OrgType = {
             workspaceName?: string,
             workspaceIcon?: string,
         },
-        github?: Object
+        github?: {
+            installations: Object[]
+        }
     }
 }
 

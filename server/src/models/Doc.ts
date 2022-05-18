@@ -1,13 +1,15 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Types } from 'mongoose';
 
 export type DocType = {
+    _id: Types.ObjectId;
     org: string;
     url: string;
     method: string;
     content?: string;
+    title?: string;
     lastUpdatedAt: Date;
     createdAt: Date;
-}
+};
 
 const DocSchema = new Schema({
     org: { type: Schema.Types.ObjectId, required: true },
@@ -18,9 +20,9 @@ const DocSchema = new Schema({
     favicon: { type: String },
     lastUpdatedAt: { type: Date, default: Date.now },
     createdAt: { type: Date, default: Date.now },
-    createdBy: { type: mongoose.Schema.Types.ObjectId },
+    createdBy: { type: Schema.Types.ObjectId },
 });
 
-const Doc = mongoose.model('Doc', DocSchema, 'docs');
+const Doc = mongoose.model<DocType>('Doc', DocSchema, 'docs');
 
 export default Doc;
