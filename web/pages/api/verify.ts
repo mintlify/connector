@@ -19,8 +19,6 @@ async function handler(req: any, res: NextApiResponse) {
     lastName,
   });
 
-  console.log("user = ", user);
-
   req.session.set("user", {
     user_id,
     email,

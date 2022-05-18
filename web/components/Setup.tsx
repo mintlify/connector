@@ -2,9 +2,8 @@ import { UserAddIcon } from "@heroicons/react/solid";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
-import axios from "axios";
-import { API_ENDPOINT } from "../helpers/api";
 import { getUserFromUserEmail } from "../helpers/user";
+import { classNames } from "../helpers/functions";
 
 type SetupProps = {
   email: string;
@@ -23,7 +22,6 @@ export default function Setup({ email, firstName: initialFirstName, lastName: in
   const onSubmit = () => {
     // don't create user if it already exists, update the user info instead.
     if (didUserExist) {
-      console.log("User exists, updating user info");
       router.push({
         pathname: "/api/verify",
         query: {
@@ -32,11 +30,6 @@ export default function Setup({ email, firstName: initialFirstName, lastName: in
           lastName,
         },
       });
-      // console.log({
-      //   email,
-      //   firstName,
-      //   lastName,
-      // });
     } else {
       router.push({
         pathname: "/api/create",
@@ -54,10 +47,9 @@ export default function Setup({ email, firstName: initialFirstName, lastName: in
     async function getUserData() {
       const user = await getUserFromUserEmail(email);
       if (user) {
-        console.log("User from useEffect within Setup: ", user);
         setOrgName(user.org.name);
         setDidUserExist(true);
-      } else console.log("No user found with email: ", email);
+      }
     }
 
     getUserData();
@@ -121,7 +113,12 @@ export default function Setup({ email, firstName: initialFirstName, lastName: in
                   type="text"
                   name="organization"
                   id="organization"
-                  className="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 rounded-md placeholder-gray-400"
+                  className={classNames(
+                    "shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 rounded-md placeholder-gray-400",
+                    didUserExist
+                      ? "mt-1 block w-full border border-gray-300 bg-gray-100 text-gray-400 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-not-allowed"
+                      : ""
+                  )}
                   placeholder="Pied Piper"
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}

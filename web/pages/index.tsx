@@ -100,8 +100,6 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     });
   }, [userSession, selectedDoc, isAddingDoc]);
 
-  console.log("userSession = ", userSession);
-
   if (!userSession) {
     return <SignIn />;
   }

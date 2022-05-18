@@ -109,7 +109,8 @@ userRouter.put(
     try {
       const user = await User.findOneAndUpdate(
         { email },
-        { userId, firstName, lastName, pending: false }
+        { userId, firstName, lastName, pending: false },
+        { new: true }
       );
       return res.status(200).json({ user });
     } catch (error) {
