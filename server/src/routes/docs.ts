@@ -1,11 +1,12 @@
+import axios from 'axios';
 import express from 'express';
 import { Types } from 'mongoose';
-import Doc from '../models/Doc';
-import { getDataFromWebpage } from '../services/webscraper';
-import axios from 'axios';
 import { userMiddleware } from './user';
 import { createEvent } from './events';
+import Doc from '../models/Doc';
 import Event from '../models/Event';
+import { getDataFromWebpage } from '../services/webscraper';
+import { indexDocForSearch } from '../services/algolia';
 
 const docsRouter = express.Router();
 
@@ -83,7 +84,7 @@ docsRouter.get('/', userMiddleware, async (_, res) => {
     ]);
     return res.status(200).send({docs});
   } catch (error) {
-    return res.status(500).send({error, docs: []})
+    return res.status(500).send({error, docs: []});
   }
 })
 
@@ -92,7 +93,10 @@ docsRouter.post('/', userMiddleware, async (req, res) => {
   const org = res.locals.user.org;
   try {
     const { content, doc } = await createDocFromUrl(url, org, res.locals.user._id);
-    await createEvent(org, doc._id, 'add', {});
+    if (doc != null) {
+      await createEvent(org, doc._id, 'add', {});
+      await indexDocForSearch(doc)
+    }
     res.send({content});
   } catch (error) {
     res.status(500).send({error})
