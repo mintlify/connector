@@ -26,7 +26,8 @@ export type Code = {
   endLine?: number;
 };
 
-export type Link = {
+export type State = {
+  user?: any,
   doc: Doc;
   codes: Code[];
 };
@@ -44,7 +45,7 @@ const addDoc: Doc = {
   isAdd: true,
 };
 
-const initialLink: Link = {
+const initialState: State = {
   doc: initialDoc,
   codes: []
 };
@@ -54,11 +55,9 @@ function classNames(...classes) {
 }
 
 const App = () => {
-  const initialState: Link = vscode.getState() || initialLink;
-  const [email, setEmail] = useState('');
   const [docs, setDocs] = useState([initialDoc]);
   const [selectedDoc, setSelectedDoc] = useState(docs[0]);
-  const [state, setState] = useState(initialState);
+  const [state, setState] = useState<State>(vscode.getState() || initialState);
 
   useEffect(() => {
     axios.get(`http://localhost:5000/routes/docs?org=mintlify`)
@@ -69,12 +68,16 @@ const App = () => {
       });
   }, []);
 
+  const updateState = (state: any) => {
+    setState(state);
+    vscode.setState(state);
+  };
+
   const handleChange = event => {
     const {name, value} = event.target;
     const { doc } = state;
     const newDoc = { ...doc, [name]: value };
-    setState({...state, doc: newDoc });
-    vscode.setState({...state, doc: newDoc });
+    updateState({...state, doc: newDoc });
   };
 
   const handleSubmit = event => {
@@ -88,23 +91,24 @@ const App = () => {
       isNewDoc: selectedDoc.isAdd,
     };
     vscode.postMessage({ command: 'link-submit', args });
-    setState(initialLink);
-    vscode.setState(initialLink);
+    updateState({...initialState, user: state.user});
   };
 
   window.addEventListener('message', event => {
     const message = event.data;
     switch (message.command) {
+      case 'auth':
+        const user = message.args;
+        updateState({...state, user});
+        break;
       case 'post-code':
         const code = message.args;
-        setState({...state, codes: [code]});
-        vscode.setState({...state, codes: [code]});
+        updateState({...state, codes: [code]});
     }
   });
 
   const deleteCode = () => {
-    setState({...state, codes: []});
-    vscode.setState({...state, codes: []});
+    updateState({...state, codes: []});
   };
 
   const CodeContent = (props: { code: Code }) => {
@@ -140,8 +144,6 @@ const App = () => {
     vscode.postMessage({ command: 'login-github' });
   };
 
-  const user = null;
-
   const style = getComputedStyle(document.body);
 
   return (
@@ -150,7 +152,7 @@ const App = () => {
         Mintlify
       </h1>
       {
-        user == null && <>
+        state.user == null && <>
         <p className="mt-1">
           Sign in to your account to continue
         </p>
@@ -165,7 +167,7 @@ const App = () => {
         </>
       }
       {
-        user != null && <>
+        state.user != null && <>
         <p className="mt-1">
           Link your code to documentation
         </p>

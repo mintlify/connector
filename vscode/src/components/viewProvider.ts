@@ -27,62 +27,69 @@ export class ViewProvider implements WebviewViewProvider {
     private _view?: WebviewView;
 
     constructor(private readonly _extensionUri: Uri) { }
-		
-    public resolveWebviewView(webviewView: WebviewView): void | Thenable<void> 
-			{
 
-        webviewView.webview.options = {
-            // Allow scripts in the webview
-            enableScripts: true,
-            localResourceRoots: [
-                this._extensionUri
-            ]
-        };
-
-        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-
-		webviewView.webview.onDidReceiveMessage(async message => {
-			switch (message.command) {
-				case 'login-github':
-					openGitHubLogin();
-					break;
-				case 'link-submit':
-					{
-						const { docId, title, url, org, isNewDoc, codes } = message.args;
-						if (isNewDoc) {
-							vscode.window.withProgress({
-								location: vscode.ProgressLocation.Notification,
-      					title: 'Creating documentation',
-							}, () => new Promise(async (resolve) => {
-								await axios.post(LINK, { url, org, codes });
-								vscode.window.showInformationMessage(`Successfully connected code with ${url}`);
-								resolve(null);
-							}));
-						} else {
-							vscode.window.withProgress({
-								location: vscode.ProgressLocation.Notification,
-      					title: 'Connecting documentation with code',
-							}, () => new Promise(async (resolve) => {
-								await axios.put(LINK, { docId, codes });
-								vscode.window.showInformationMessage(`Successfully connected code with ${title}`);
-								resolve(null);
-							}));
-						}
-						break;
-					}
+		public authenticate(user: any) {
+			if (!this._view) {
+				return;
 			}
-		});
 
-		this._view = webviewView;
+			return this._view?.webview.postMessage({ command: 'auth', args: user });
+		}
+		
+    public resolveWebviewView(webviewView: WebviewView): void | Thenable<void> {
+			webviewView.webview.options = {
+					// Allow scripts in the webview
+					enableScripts: true,
+					localResourceRoots: [
+							this._extensionUri
+					]
+			};
+
+			webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+			webviewView.webview.onDidReceiveMessage(async message => {
+				switch (message.command) {
+					case 'login-github':
+						openGitHubLogin();
+						break;
+					case 'link-submit':
+						{
+							const { docId, title, url, org, isNewDoc, codes } = message.args;
+							if (isNewDoc) {
+								vscode.window.withProgress({
+									location: vscode.ProgressLocation.Notification,
+									title: 'Creating documentation',
+								}, () => new Promise(async (resolve) => {
+									await axios.post(LINK, { url, org, codes });
+									vscode.window.showInformationMessage(`Successfully connected code with ${url}`);
+									resolve(null);
+								}));
+							} else {
+								vscode.window.withProgress({
+									location: vscode.ProgressLocation.Notification,
+									title: 'Connecting documentation with code',
+								}, () => new Promise(async (resolve) => {
+									await axios.put(LINK, { docId, codes });
+									vscode.window.showInformationMessage(`Successfully connected code with ${title}`);
+									resolve(null);
+								}));
+							}
+							break;
+						}
+				}
+			});
+
+			this._view = webviewView;
     }
 
 	public postCode(code: Code) {
-		if (this._view) {
-			this._view?.webview.postMessage({ command: 'post-code', args: code });
+		if (!this._view) {
+			return;
 		}
+
+		return this._view?.webview.postMessage({ command: 'post-code', args: code });
 	}
 
-    private _getHtmlForWebview(webview: Webview) {
+  private _getHtmlForWebview(webview: Webview) {
 		// Use a nonce to whitelist which scripts can be run
 		const nonce = getNonce();
 

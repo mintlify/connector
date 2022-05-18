@@ -1,14 +1,20 @@
 import * as vscode from 'vscode';
+import { ViewProvider } from './viewProvider';
 
-export const registerAuthRoute = () => {
+export const registerAuthRoute = (provider: ViewProvider) => {
   vscode.window.registerUriHandler({
     async handleUri(uri: vscode.Uri) {
       if (uri.path === '/auth') {
         try {
-					console.log("What's up?");
-          const email = 'Hey there';
+          const user = {
+            userId: '',
+            name: '',
+            email: 'han@mintlify.com'
+          };
 
-          vscode.window.showInformationMessage(`🙌 Successfully signed in with ${email}`);
+          provider.authenticate(user);
+
+          vscode.window.showInformationMessage(`🙌 Successfully signed in with ${user.email}`);
         } catch (err) {
           vscode.window.showErrorMessage('Error authenticating user');
         }
