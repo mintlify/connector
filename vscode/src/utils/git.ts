@@ -159,16 +159,16 @@ export const getGitData = async (fileFsPath: string, viewProvider: ViewProvider,
             formattedFilePath = formattedFilePath.replace(/\s{1}/g, '%20');
             code.file = formattedFilePath;
             let subdir = repoDir !== fileFsPath ? '/' + formattedFilePath : '';
-            if (provider !== null && provider !== undefined) {
+            if (provider != null) {
                 code.provider = provider.name;
                 code.gitOrg = provider.gitUrl.organization;
                 code.repo = provider.gitUrl.name;
                 if (lines) {
                     if (lines[0] === lines[1]) {
-                        code.url = provider.webUrl(sha, subdir, lines[0]);
+                        code.url = provider.webUrl(sha, subdir, lines[0] + 1);
                         code.line = lines[0];
                     } else {
-                        code.url = provider.webUrl(sha, subdir, lines[0], lines[1]);
+                        code.url = provider.webUrl(sha, subdir, lines[0] + 1, lines[1] + 1);
                         code.line = lines[0];
                         code.endLine = lines[1];
                     }
