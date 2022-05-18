@@ -154,38 +154,14 @@ const App = () => {
         <p className="mt-1">
           Sign in to your account to continue
         </p>
-        <div>
-          <button
-            type="button"
-            className="mt-2 relative submit"
-            onClick={onClickSignInWithGitHub}
-          >
-            Sign in with GitHub
-          </button>
-          <div className="my-4 relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-placeholder-vscode" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-vscode text-placeholder-vscode">Or continue with</span>
-            </div>
-          </div>
-          <input
-            type="text"
-            name="email"
-            id="email"
-            className="block w-full text-sm"
-            placeholder="Email address"
-            value={email}
-            onChange={event => setEmail(event.target.value)}
-          />
-          <button type="submit" className="relative submit mt-2">
-            <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-              <LockClosedIcon className="h-4 w-4" aria-hidden="true" />
-            </span>
-            Sign in
-          </button>
-        </div>
+        <button
+          type="submit"
+          className="flex items-center justify-center submit mt-2"
+          onClick={onClickSignInWithGitHub}
+        >
+          <LockClosedIcon className="mr-1 h-4 w-4" aria-hidden="true" />
+          Sign in with Mintlify
+        </button>
         </>
       }
       {
