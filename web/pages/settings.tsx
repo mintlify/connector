@@ -258,9 +258,10 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                         Role
                                       </th>
-                                      <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                      {/* the column for the Edit button- this should be implement later. */}
+                                      {/* <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
                                         <span className="sr-only">Edit</span>
-                                      </th>
+                                      </th> */}
                                     </tr>
                                   </thead>
                                   <tbody className="divide-y divide-gray-200 bg-white">
@@ -294,11 +295,12 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                           {member.pending ? "Pending" : "Member"}
                                         </td>
-                                        <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                        {/* Edit button- this should be implemented later */}
+                                        {/* <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                           <a href="#" className="text-primary hover:text-hover">
                                             Edit<span className="sr-only">, {`${member.firstName} ${member.lastName}`}</span>
                                           </a>
-                                        </td>
+                                        </td> */}
                                       </tr>
                                     ))}
                                   </tbody>
