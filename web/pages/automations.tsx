@@ -39,6 +39,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
   const [isLoading, setIsLoading] = useState(true);
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
   const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
+  const [isAddingAutomation, setIsAddingAutomation] = useState<boolean>(false);
 
   const user = userSession.user;
   const integrations = [
@@ -77,7 +78,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
       .finally(() => {
         setIsLoading(false);
       })
-  }, [user]);
+  }, [user, isAddingAutomation]);
 
   /**
    * It takes an automationId and isActive boolean, and then it makes a PUT request to the API endpoint
@@ -110,6 +111,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
           setIsAddAutomationOpen={setIsAddAutomationOpen}
           isAddDocumentOpen={isAddDocumentOpen}
           setIsAddDocumentOpen={setIsAddDocumentOpen}
+          setIsAddingAutomation={setIsAddingAutomation}
         />
         {/* Projects List */}
         <div className="bg-white lg:min-w-0 lg:flex-1">

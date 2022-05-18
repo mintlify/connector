@@ -9,8 +9,8 @@ import ProfilePicture from './ProfilePicture';
 
 type SidebarProps = {
   user: User;
-  isAddingDoc?: boolean;
   setIsAddingDoc?: (isAddingDoc: boolean) => void;
+  setIsAddingAutomation?: (isAddingAutomation: boolean) => void;
   isAddDocumentOpen: boolean;
   setIsAddDocumentOpen: (isAddingAutomation: boolean) => void;
   isAddAutomationOpen: boolean;
@@ -19,8 +19,8 @@ type SidebarProps = {
 
 export default function Sidebar({
   user,
-  isAddingDoc,
   setIsAddingDoc,
+  setIsAddingAutomation,
   isAddAutomationOpen,
   isAddDocumentOpen,
   setIsAddAutomationOpen,
@@ -36,13 +36,13 @@ export default function Sidebar({
       userId={userId}
       isOpen={isAddDocumentOpen}
       setIsOpen={setIsAddDocumentOpen}
-      isAddingDoc={isAddingDoc}
       setIsAddingDoc={setIsAddingDoc}
     />
     <AddAutomation
       user={user}
       isOpen={isAddAutomationOpen}
       setIsOpen={setIsAddAutomationOpen}
+      setIsAddingAutomation={setIsAddingAutomation}
     />
     <div className="xl:flex-shrink-0 xl:w-64 xl:border-r xl:border-gray-200">
       <div className="pl-4 pr-6 py-6 sm:pl-6 lg:pl-8 xl:pl-0">

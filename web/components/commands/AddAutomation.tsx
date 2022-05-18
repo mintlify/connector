@@ -30,9 +30,10 @@ type AddAutomationProps = {
   user: User;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  setIsAddingAutomation?: (isAddingAutomation: boolean) => void;
 }
 
-export default function AddAutomation({ user, isOpen, setIsOpen }: AddAutomationProps) {
+export default function AddAutomation({ user, isOpen, setIsOpen, setIsAddingAutomation }: AddAutomationProps) {
   const [selectedRuleType, setSelectedRuleType] = useState<AutomationType>();
 
   const onToPrimarySelection = () => {
@@ -71,6 +72,7 @@ export default function AddAutomation({ user, isOpen, setIsOpen }: AddAutomation
                   automationType={selectedRuleType}
                   onCancel={onToPrimarySelection}
                   setIsAddAutomationOpen={setIsOpen}
+                  setIsAddingAutomation={setIsAddingAutomation}
                 />
               ) }
               {

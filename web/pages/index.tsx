@@ -134,7 +134,6 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       <div className="flex-1 min-w-0 xl:flex z-10">
         <Sidebar
           user={userSession.user}
-          isAddingDoc={isAddingDoc}
           setIsAddingDoc={setIsAddingDoc}
           isAddAutomationOpen={isAddAutomationOpen}
           setIsAddAutomationOpen={setIsAddAutomationOpen}
