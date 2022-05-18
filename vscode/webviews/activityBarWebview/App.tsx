@@ -7,10 +7,10 @@ import { vscode } from '../common/message';
 import { InfoCircleIcon, CodeSymbolIcon, XIcon } from '../common/svgs';
 
 export type Doc = {
-  id: string;
+  _id: string;
   title: string;
   url: string;
-  isAdd?: boolean;
+  isDefault?: boolean;
 };
 
 export type Code = {
@@ -33,9 +33,10 @@ export type State = {
 };
 
 const initialDoc: Doc = {
-  id: '0',
+  _id: 'initial',
   title: 'Select documentation',
   url: '',
+  isDefault: true,
 };
 
 const initialState: State = {
@@ -73,7 +74,7 @@ const App = () => {
     event.preventDefault();
     const args = {
       userId: state.user.userId,
-      docId: selectedDoc.id,
+      docId: selectedDoc._id,
       title: selectedDoc.title,
       org: state.codes[0].org,
       codes: state.codes,
@@ -127,7 +128,7 @@ const App = () => {
       <div className='italic'>No code selected</div>
     ) : (
       <div>
-        {props.codes?.map((code: Code) => <CodeContent code={code} />)}
+        {props.codes?.map((code: Code) => <CodeContent code={code} key={code.sha} />)}
       </div>
     );
   };
@@ -141,6 +142,8 @@ const App = () => {
   };
 
   const style = getComputedStyle(document.body);
+
+  const hasDocSelected = selectedDoc.isDefault !== true;
 
   return (
     <div className="space-y-1">
@@ -188,7 +191,7 @@ const App = () => {
                     <Listbox.Options className="absolute mt-1 z-10 w-full shadow-lg code py-1 overflow-auto">
                       {docs.map((doc) => (
                         <Listbox.Option
-                          key={doc.id}
+                          key={doc._id}
                           className={({ active }) =>
                             classNames(
                               active ? 'text-vscode active' : '',
@@ -253,7 +256,13 @@ const App = () => {
           <div className='code'>
             <CodesContent codes={state.codes} />
           </div>
-          <button type="submit" className="submit">Submit</button>
+          <button
+            type="submit"
+            className={classNames("submit", hasDocSelected ? 'opacity-100 hover:cursor-pointer' : 'opacity-50 hover:cursor-default')}
+            disabled={!hasDocSelected}
+          >
+            Submit
+          </button>
         </form>
       </>
       }

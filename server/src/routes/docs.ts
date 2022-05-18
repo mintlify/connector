@@ -37,7 +37,8 @@ export const createDocFromUrl = async (url: string, orgId: string, userId: Types
     createdBy: userId,
   },
   {
-    upsert: true
+    upsert: true,
+    new: true
   });
 
   return { content, doc }
@@ -63,7 +64,6 @@ docsRouter.get('/', userMiddleware, async (_, res) => {
                    { $and:
                       [
                         { $eq: [ "$doc",  "$$doc" ] },
-                        { $eq: [ "$org",  org ] },
                       ]
                    }
                 }
@@ -91,10 +91,13 @@ docsRouter.get('/', userMiddleware, async (_, res) => {
 docsRouter.post('/', userMiddleware, async (req, res) => {
   const { url } = req.body;
   const org = res.locals.user.org;
+  console.log({org});
   try {
     const { content, doc } = await createDocFromUrl(url, org, res.locals.user._id);
+    console.log({doc});
     if (doc != null) {
       await createEvent(org, doc._id, 'add', {});
+      console.log('did we make it here');
       await indexDocForSearch(doc)
     }
     res.send({content});

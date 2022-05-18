@@ -181,7 +181,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                               { doc.favicon && <img src={doc.favicon} alt="favicon" className="h-5 w-5 rounded-sm" /> }
                             </div>
                             <Link
-                              href={doc.url}
+                              href={doc.url || ''}
                             >
                               <a target="_blank" className="decoration-gray-300 hover:underline">
                                 {doc.title}
