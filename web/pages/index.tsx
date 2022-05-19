@@ -59,24 +59,28 @@ export type User = {
     name: string,
     integrations: Record<string, boolean>
   }
+  pending?: boolean;
 }
 
-const listMenu = [
-  {
-    name: 'Rename',
-  },
-  {
-    name: 'Delete',
-    isRed: true,
-  }
-]
-
 export default function Home({ userSession }: { userSession: UserSession }) {
-  const [docs, setDocs] = useState<Doc[]>();
+  const [docs, setDocs] = useState<Doc[]>([]);
   const [events, setEvents] = useState<Event[]>();
   const [selectedDoc, setSelectedDoc] = useState<Doc>();
   const [isAddingDoc, setIsAddingDoc] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
+  const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
+
+  const listMenu = [
+    {
+      name: 'Delete',
+      isRed: true,
+      onClick: (docId: string) => {
+        setDocs(docs.filter(doc => doc._id !== docId));
+        axios.delete(`${API_ENDPOINT}/routes/docs/${docId}?userId=${userSession.user.userId}`);
+      }
+    }
+  ]
 
   useEffect(() => {
     if (userSession == null) {
@@ -131,8 +135,11 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       <div className="flex-1 min-w-0 xl:flex z-10">
         <Sidebar
           user={userSession.user}
-          isAddingDoc={isAddingDoc}
           setIsAddingDoc={setIsAddingDoc}
+          isAddAutomationOpen={isAddAutomationOpen}
+          setIsAddAutomationOpen={setIsAddAutomationOpen}
+          isAddDocumentOpen={isAddDocumentOpen}
+          setIsAddDocumentOpen={setIsAddDocumentOpen}
         />
         {/* Projects List */}
         <div className="bg-white lg:min-w-0 lg:flex-1">
@@ -154,7 +161,10 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                 Add one to get started
               </p>
               <div className="mt-4 flex justify-center">
-                <button className="inline-flex items-center justify-center text-sm bg-primary text-white rounded-md shadow-sm py-2 font-medium px-8 hover:bg-hover">
+                <button
+                  className="inline-flex items-center justify-center text-sm bg-primary text-white rounded-md shadow-sm py-2 font-medium px-8 hover:bg-hover"
+                  onClick={() => setIsAddDocumentOpen(true)}
+                >
                   <DocumentTextIcon className="h-4 w-4 mr-1" />
                   Add Documentation
                 </button>
@@ -228,8 +238,8 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                                         className={classNames(
                                           active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                                           menu.isRed ? 'text-red-700' : '',
-                                          'w-full flex items-center space-x-2 px-3 py-1.5 text-sm'
-                                        )}
+                                          'w-full flex items-center space-x-2 px-3 py-1.5 text-sm')}
+                                          onClick={() => menu.onClick(doc._id)}
                                       >
                                         <span>{menu.name}</span>
                                       </button>

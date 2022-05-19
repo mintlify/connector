@@ -2,20 +2,19 @@ import { NextApiResponse } from "next";
 import { getUserFromUserId } from "../../../helpers/user";
 import { loadStytch } from "../../../lib/loadStytch";
 import { withSession } from "../../../lib/withSession";
-import { redirectToUser } from "../login/vscode";
+import { redirectToVSCode } from "../login/vscode";
 
 async function handler(req: any, res: NextApiResponse) {
   const token = req.query.token as string;
   const state = req.query.state as string;
-  
+
   const client = loadStytch();
-  
+
   try {
     let response;
-    if (state === 'magiclink') {
+    if (state === "magiclink") {
       response = await client.magicLinks.authenticate(token);
-    }
-    else if (state === 'oauth') {
+    } else if (state === "oauth") {
       response = await client.oauth.authenticate(token);
     }
 
@@ -23,13 +22,16 @@ async function handler(req: any, res: NextApiResponse) {
       return res.end();
     }
 
-    const { name: { first_name, last_name }, emails: [{ email }] } = await client.users.get(response.user_id);
+    const {
+      name: { first_name, last_name },
+      emails: [{ email }],
+    } = await client.users.get(response.user_id);
     const user = await getUserFromUserId(response.user_id);
 
-    const authSource = req.session.get('authSource');
+    const authSource = req.session.get("authSource");
 
     req.session.destroy();
-    req.session.set('user', {
+    req.session.set("user", {
       user_id: response.user_id,
       email,
       firstName: first_name,
@@ -38,15 +40,14 @@ async function handler(req: any, res: NextApiResponse) {
     });
 
     await req.session.save();
-
     if (authSource?.source === 'vscode') {
-      redirectToUser(res, user);
+      return redirectToVSCode(res, user);
     }
 
-    return res.redirect('/');
+    return res.redirect("/");
   } catch (e) {
     const errorString = JSON.stringify(e);
-    return res.status(400).json({errorString});
+    return res.status(400).json({ errorString });
   }
 }
 

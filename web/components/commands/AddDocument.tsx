@@ -10,7 +10,6 @@ type AddDocumentProps = {
   userId: string;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void,
-  isAddingDoc?: boolean;
   setIsAddingDoc?: (isAddingDoc: boolean) => void,
 }
 

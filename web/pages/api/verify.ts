@@ -2,23 +2,23 @@ import axios from "axios";
 import { NextApiResponse } from "next";
 import { API_ENDPOINT } from "../../helpers/api";
 import { withSession } from "../../lib/withSession";
-import { redirectToVSCode } from "./login/vscode";
 
+// verify users after they haven't accepted the join invite
 async function handler(req: any, res: NextApiResponse) {
-  const { email, firstName, lastName, orgName } = req.query;
-  const { user_id } = req.session.get("user");
+  const { email, firstName, lastName } = req.query;
+  const {
+    user: { user_id },
+  } = req.session.get();
 
   const {
     data: { user },
-  } = await axios.post(`${API_ENDPOINT}/routes/user`, {
+  } = await axios.put(`${API_ENDPOINT}/routes/user/verify`, {
     userId: user_id,
     email,
     firstName,
     lastName,
-    orgName,
   });
 
-  req.session.destroy();
   req.session.set("user", {
     user_id,
     email,
@@ -27,11 +27,8 @@ async function handler(req: any, res: NextApiResponse) {
     user,
   });
   await req.session.save();
-  if (req.session.get('authSource')?.source === 'vscode') {
-    return redirectToVSCode(res, user);
-  }
 
-  return res.redirect("/");
+  res.redirect("/");
 }
 
 export default withSession(handler);

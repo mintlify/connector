@@ -1,8 +1,16 @@
 {
-  "name": "connect",
+  "name": "connector",
   "publisher": "mintlify",
   "displayName": "Mintlify",
-  "version": "0.0.1",
+  "version": "0.1.1",
+  "icon": "assets/logo.png",
+  "galleryBanner": {
+    "color": "#041811",
+    "theme": "dark"
+  },
+  "repository": {
+    "url": "https://github.com/mintlify/connect"
+  },
   "engines": {
     "vscode": "^1.66.0"
   },
@@ -12,7 +20,7 @@
   ],
   "activationEvents": [
     "onStartupFinished",
-    "onView:mintlify.connect",
+    "onView:primary",
     "onCommand:mintlify.link-code",
     "onCommand:mintlify.link-dir"
   ],
@@ -37,7 +45,7 @@
       "view/title": [
         {
 					"command": "mintlify.logout",
-					"when": "view == mintlify.connect"
+					"when": "view == primary"
 				}
 			],
       "editor/context": [
@@ -54,10 +62,10 @@
       ]
     },
     "views": {
-      "connect": [
+      "primary": [
         {
           "type": "webview",
-          "id": "mintlify.connect",
+          "id": "primary",
           "name": "View"
         }
       ]
@@ -65,24 +73,23 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "connect",
+          "id": "primary",
           "title": "Mintlify",
-          "icon": "assets/logo.png"
+          "icon": "assets/icon.png"
         }
       ]
     }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
-    "compile": "webpack",
     "watch": "webpack --watch",
-    "package": "webpack --mode production --devtool hidden-source-map",
+    "package": "webpack --mode production --devtool hidden-source-map --config-name extension:node --config-name webviews",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "compile:node": "webpack --mode development --config-name extension:node  --config-name webviews",
-    "compile:web": "webpack --mode development --config-name extension:webworker --config-name webviews"
+    "compile": "webpack --mode development --config-name extension:node --config-name webviews",
+    "publish": "vsce publish"
   },
   "devDependencies": {
     "@types/find-parent-dir": "^0.3.0",
