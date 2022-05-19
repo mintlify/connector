@@ -71,11 +71,11 @@ export class ViewProvider implements WebviewViewProvider {
 			this._view?.webview.postMessage({ command: 'start', args: API_ENDPOINT });
     }
 
-	public postCode(code: Code) {
-		if (!this._view) {
-			return;
-		}
+	public show() {
+		this._view?.show();
+	}
 
+	public postCode(code: Code) {
 		return this._view?.webview.postMessage({ command: 'post-code', args: code });
 	}
 
