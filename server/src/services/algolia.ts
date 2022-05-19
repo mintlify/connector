@@ -69,7 +69,8 @@ export const indexAutomationForSearch = async (automation: AutomationType) => {
     const record = {
         objectID: automation._id,
         name: automation.name,
-        org: automation.org
+        org: automation.org,
+        type: automation.type
     }
     await automationsIndex.saveObject(record);
 }
