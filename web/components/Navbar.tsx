@@ -88,7 +88,7 @@ export default function Navbar({ user }: { user: User }) {
                 </div>
               </div>
               <button
-                className="flex-1 flex justify-center px-2 lg:ml-6 lg:justify-end"
+                className="flex-1 flex justify-center px-2 lg:ml-6 lg:justify-end focus:outline-none"
                 onClick={() => setIsSearchOpen(true)}
               >
                 <div className="max-w-lg w-full lg:max-w-xs">

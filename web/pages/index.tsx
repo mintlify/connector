@@ -34,10 +34,10 @@ export type Doc = {
   _id: string,
   title: string,
   lastUpdatedAt: string,
-  favicon: string,
   url: string,
   code: Code[],
-  automations: Automation[]
+  automations: Automation[],
+  favicon?: string,
 }
 
 export type UserSession = {
@@ -188,7 +188,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                         <h2 className="text-sm font-medium text-gray-700">
                           <div className="flex items-center space-x-2">
                             <div>
-                              { doc.favicon && <img src={doc.favicon} alt="favicon" className="h-5 w-5 rounded-sm" /> }
+                              { doc.favicon ? <img src={doc.favicon} alt="favicon" className="h-5 w-5 rounded-sm" /> : <DocumentTextIcon className="h-5 w-5 text-gray-600" /> }
                             </div>
                             <Link
                               href={doc.url || ''}

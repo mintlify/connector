@@ -6,6 +6,7 @@ export type AutomationSourceType = {
 };
 
 export type AutomationType = {
+  _id: Types.ObjectId,
   org: Types.ObjectId,
   type: 'doc' | 'code',
   source: AutomationSourceType,

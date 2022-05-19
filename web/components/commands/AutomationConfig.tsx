@@ -3,7 +3,8 @@ import { Listbox, Transition } from '@headlessui/react'
 import { classNames } from '../../helpers/functions'
 import { getAutomationTypeIcon } from '../../helpers/Icons';
 import { AutomationType } from '../../pages/automations';
-import { BellIcon, CheckIcon, HashtagIcon, LinkIcon, MailIcon, SelectorIcon, DocumentTextIcon } from '@heroicons/react/solid';
+import { BellIcon, CheckIcon, HashtagIcon, LinkIcon, MailIcon, SelectorIcon } from '@heroicons/react/solid';
+import { DocumentTextIcon } from '@heroicons/react/outline';
 import { automationMap } from './AddAutomation';
 import axios from 'axios';
 import { API_ENDPOINT } from '../../helpers/api';
@@ -102,7 +103,7 @@ export default function AutomationConfig({ user, automationType, onCancel, setIs
             return {
               _id: doc._id,
               name: doc.title,
-              icon: <img src={doc.favicon} alt="Slack" className="flex-shrink-0 h-4 w-4 rounded-sm" />
+              icon: doc.favicon ? <img src={doc.favicon} alt="Slack" className="flex-shrink-0 h-4 w-4 rounded-sm" /> : <DocumentTextIcon className="h-4 w-4 text-gray-600" />
             }
           });
           formattedDocs.unshift(defaultDoc);

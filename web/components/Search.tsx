@@ -6,6 +6,9 @@ import { classNames } from '../helpers/functions'
 import axios from 'axios'
 import { API_ENDPOINT } from '../helpers/api'
 import { User } from '../pages'
+import { getAutomationTypeIcon } from '../helpers/Icons'
+import { AutomationType } from '../pages/automations'
+import { useRouter } from 'next/router'
 
 type DocResult = {
   objectID: string,
@@ -18,7 +21,8 @@ type DocResult = {
 type AutomationResult = {
   objectID: string,
   name: string,
-  org: string
+  org: string,
+  type: AutomationType,
 }
 
 type SearchResults = {
@@ -48,12 +52,24 @@ export default function Search({ user, isOpen, setIsOpen }: SearchProps) {
       })
   }, [query, user]);
 
+  const router = useRouter();
+
   if (!isOpen) {
     return null;
   }
 
   const docsResults = results.docs;
   const automationsResults = results.automations;
+
+  const onSelectionChange = (result: any) => {
+    if (result.type != null) {
+      router.push('/automations');
+      setIsOpen(false);
+      return
+    }
+
+    window.open(result.url, '_blank')
+  }
 
   const onClose = () => {
     setQuery('');
@@ -86,7 +102,7 @@ export default function Search({ user, isOpen, setIsOpen }: SearchProps) {
             leaveTo="opacity-0 scale-95"
           >
             <Dialog.Panel className="mx-auto max-w-xl transform divide-y divide-gray-100 overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
-              <Combobox value={query} onChange={(result: any) => {window.open(result.url, '_blank')}}>
+              <Combobox value={query} onChange={onSelectionChange}>
                 <div className="relative">
                   <SearchIcon
                     className="pointer-events-none absolute top-3.5 left-4 h-5 w-5 text-gray-400"
@@ -135,7 +151,7 @@ export default function Search({ user, isOpen, setIsOpen }: SearchProps) {
                     )}
                     {automationsResults.length > 0 && (
                       <li>
-                        <h2 className="text-xs font-semibold text-gray-900">Users</h2>
+                        <h2 className="text-xs font-semibold text-gray-900">Automations</h2>
                         <ul className="-mx-4 mt-2 text-sm text-gray-700">
                           {automationsResults.map((automationResult) => (
                             <Combobox.Option
@@ -148,6 +164,7 @@ export default function Search({ user, isOpen, setIsOpen }: SearchProps) {
                                 )
                               }
                             >
+                              {getAutomationTypeIcon(automationResult.type, 6, 4)}
                               <span className="ml-2 flex-auto truncate">{automationResult.name}</span>
                             </Combobox.Option>
                           ))}
