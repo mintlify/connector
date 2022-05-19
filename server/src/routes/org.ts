@@ -1,5 +1,6 @@
 import express from "express";
 import Org from "../models/Org";
+import User from "../models/User";
 import { userMiddleware } from "./user";
 import mongoose from "mongoose";
 
@@ -47,6 +48,36 @@ orgRouter.put("/:orgId/email-notifications", userMiddleware, async (req: express
   } catch (error) {
     return res.status(500).send({ error });
   }
+});
+
+// Given an orgId from the request query, return all the user objects within that organization
+orgRouter.get("/list-users", async (req: any, res: express.Response) => {
+  const { orgId } = req.query;
+
+  if (!orgId) return res.status(400).json({ error: "orgId not provided" });
+
+  const users = await User.aggregate([
+    {
+      $match: {
+        org: new mongoose.Types.ObjectId(orgId.toString()),
+      },
+    },
+    {
+      $lookup: {
+        from: "orgs",
+        localField: "org",
+        foreignField: "_id",
+        as: "org",
+      },
+    },
+    {
+      $set: {
+        org: { $first: "$org" },
+      },
+    },
+  ]);
+
+  return res.status(200).json({ users });
 });
 
 orgRouter.put("/:orgId/name", userMiddleware, async (req, res) => {

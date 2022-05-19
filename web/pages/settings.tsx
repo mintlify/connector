@@ -3,47 +3,44 @@ import { BellIcon, UserCircleIcon, UserGroupIcon } from "@heroicons/react/outlin
 import { GetServerSideProps } from "next";
 import { withSession } from "../lib/withSession";
 import { UserSession } from ".";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import axios from "axios";
 import { API_ENDPOINT } from "../helpers/api";
-import { useEffect } from "react";
 
-const navigation = [
-  { name: "Account", href: "#", icon: UserCircleIcon },
-  { name: "Organization", href: "#", icon: UserGroupIcon },
-  { name: "Notifications", href: "#", icon: BellIcon },
-];
-
-const people = [
-  {
-    name: "Lindsay Walton",
-    title: "Front-end Developer",
-    department: "Optimization",
-    email: "lindsay.walton@example.com",
-    role: "Member",
-    image:
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-  },
-  // More people...
-];
+import { classNames } from "../helpers/functions";
+import { User } from ".";
 
 export type EmailNotifications = {
   monthlyDigest: boolean;
   newsletter: boolean;
 };
 
+const navigation = [
+  { name: "Account", href: "#setting-account", icon: UserCircleIcon },
+  { name: "Organization", href: "#setting-organization", icon: UserGroupIcon },
+  { name: "Notifications", href: "#setting-notifications", icon: BellIcon },
+];
+
 export default function Settings({ userSession }: { userSession: UserSession }) {
   const user = userSession.user;
   const [firstName, setFirstName] = useState(user.firstName);
   const [lastName, setLastName] = useState(user.lastName);
   const [orgName, setOrgName] = useState(user.org.name);
+  const [invitedEmail, setInvitedEmail] = useState("");
+  const [isSendingInvite, setIsSendingInvite] = useState(false);
+  const [members, setMembers] = useState<User[]>([]);
   const [emailNotifications, setEmailNotifications] = useState<EmailNotifications>({
     monthlyDigest: false,
     newsletter: false,
   });
 
   useEffect(() => {
+    // get all members of the organization
+    axios.get(`${API_ENDPOINT}/routes/org/list-users?orgId=${user.org._id}`).then((res) => {
+      setMembers(res.data.users);
+    });
+
     async function getEmailNotifications() {
       await axios.get(`${API_ENDPOINT}/routes/org?userId=${user.userId}&orgId=${user.org._id.toString()}`).then((res) => {
         setEmailNotifications(res.data?.org?.notifications);
@@ -52,6 +49,27 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
 
     getEmailNotifications();
   }, [user]);
+
+  const inviteMember = async (email: string) => {
+    // disable the add member button before sending the invitation
+    setIsSendingInvite(true);
+    setInvitedEmail("");
+    // create a pending account by calling the invitation API
+    await axios
+      .post(`${API_ENDPOINT}/routes/user/invite-to-org`, {
+        emails: [email],
+        orgId: user.org._id,
+      })
+      .then((res) => {
+        setMembers(members.concat(res.data.users));
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    // send login invitation
+    await axios.post("/api/login/magiclink", { email }).catch((err) => console.log(err));
+    setIsSendingInvite(false);
+  };
 
   const onBlurFirstNameInput = () => {
     if (firstName !== user.firstName) {
@@ -108,7 +126,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
           </aside>
 
           <div className="space-y-8 sm:px-6 lg:px-0 lg:col-span-5">
-            <form action="#" method="POST">
+            <form action="#" method="POST" id="setting-account">
               <div className="shadow sm:rounded-md sm:overflow-hidden">
                 <div className="bg-white pt-6 pb-8 px-4 space-y-5 sm:px-6">
                   <div>
@@ -174,7 +192,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
               </div>
             </form>
 
-            <form action="#" method="POST">
+            <form action="#" method="POST" id="setting-organization">
               <div className="shadow sm:rounded-md sm:overflow-hidden">
                 <div className="bg-white pt-6 pb-8 px-4 space-y-5 sm:px-6">
                   <div>
@@ -202,20 +220,40 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                     </div>
 
                     <div className="col-span-3">
-                      <div>
+                      <div className="space-y-5">
                         <div className="sm:flex sm:items-center">
                           <div className="sm:flex-auto">
                             <h1 className="text-lg leading-6 font-medium text-gray-900">Members</h1>
                             <p className="mt-2 text-sm text-gray-500">Manage members of your organization here</p>
                           </div>
-                          <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+                        </div>
+                        <div className="flex">
+                          <div className="flex-grow">
+                            <input
+                              type="email"
+                              name="add-team-members"
+                              id="add-team-members"
+                              className="block w-full shadow-sm focus:ring-sky-500 focus:border-sky-500 sm:text-sm border-gray-300 rounded-md"
+                              placeholder="Email address"
+                              aria-describedby="add-team-members-helper"
+                              value={invitedEmail}
+                              onChange={(e) => setInvitedEmail(e.target.value)}
+                              required
+                            />
+                          </div>
+                          <span className="ml-3">
                             <button
                               type="button"
+                              disabled={isSendingInvite}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                inviteMember(invitedEmail);
+                              }}
                               className="inline-flex items-center justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-hover focus:outline-none focus:ring-0 focus:ring-offset-2 sm:w-auto"
                             >
                               Add member
                             </button>
-                          </div>
+                          </span>
                         </div>
                         <div className="mt-8 flex flex-col">
                           <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -233,32 +271,54 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                         Role
                                       </th>
-                                      <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                      {/* the column for the Edit button- this should be implement later. */}
+                                      {/* <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
                                         <span className="sr-only">Edit</span>
-                                      </th>
+                                      </th> */}
                                     </tr>
                                   </thead>
                                   <tbody className="divide-y divide-gray-200 bg-white">
-                                    {people.map((person) => (
-                                      <tr key={person.email}>
+                                    {members.map((member) => (
+                                      <tr key={member.email}>
                                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
                                           <div className="flex items-center">
-                                            <div className="h-10 w-10 flex-shrink-0">
-                                              <img className="h-10 w-10 rounded-full" src={person.image} alt="" />
-                                            </div>
+                                            {member.pending ? (
+                                              <span className="inline-block h-10 w-10 rounded-full overflow-hidden bg-gray-100">
+                                                <svg
+                                                  className="h-full w-full text-gray-300"
+                                                  fill="currentColor"
+                                                  viewBox="0 0 24 24"
+                                                >
+                                                  <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                                                </svg>
+                                              </span>
+                                            ) : (
+                                              <div className="h-10 w-10 flex-shrink-0 border border-gray-3 bg-hover text-white flex items-center justify-center rounded-full">
+                                                <p className={"text-xs"}>{member.firstName[0] + member.lastName[0]}</p>
+                                              </div>
+                                            )}
                                             <div className="ml-4">
-                                              <div className="font-medium text-gray-900">{person.name}</div>
-                                              <div className="text-gray-500">{person.email}</div>
+                                              <div
+                                                className={classNames(
+                                                  "font-medium text-gray-900",
+                                                  member.pending ? "italic" : ""
+                                                )}
+                                              >
+                                                {member.pending ? "Pending User" : `${member.firstName} ${member.lastName}`}
+                                              </div>
+                                              <div className="text-gray-500">{member.email}</div>
                                             </div>
                                           </div>
                                         </td>
-                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{person.role}</td>
-                                        <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                          <a href="#" className="text-primary hover:text-hover">
-                                            Edit
-                                            <span className="sr-only">, {person.name}</span>
-                                          </a>
+                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                          {member.pending ? "Pending" : "Member"}
                                         </td>
+                                        {/* Edit button- this should be implemented later */}
+                                        {/* <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                          <a href="#" className="text-primary hover:text-hover">
+                                            Edit<span className="sr-only">, {`${member.firstName} ${member.lastName}`}</span>
+                                          </a>
+                                        </td> */}
                                       </tr>
                                     ))}
                                   </tbody>
@@ -274,7 +334,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
               </div>
             </form>
 
-            <form action="#" method="POST">
+            <form action="#" method="POST" id="setting-notifications">
               <div className="shadow sm:rounded-md sm:overflow-hidden">
                 <div className="bg-white pt-6 pb-8 px-4 space-y-5 sm:px-6">
                   <div>

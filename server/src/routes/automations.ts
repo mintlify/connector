@@ -65,6 +65,18 @@ automationsRouter.put('/active', userMiddleware, async (req, res) => {
 
   await Automation.findOneAndUpdate({ org, _id: automationId }, { isActive });
   res.end();
+});
+
+automationsRouter.delete('/:automationId', userMiddleware, async (req, res) => {
+  const { automationId } = req.params;
+  const { org } = res.locals.user;
+  
+  try {
+    await Automation.findOneAndDelete({ _id: automationId, org });
+    res.end();
+  } catch (error) {
+    res.status(500).send({error})
+  }
 })
 
 export default automationsRouter;
