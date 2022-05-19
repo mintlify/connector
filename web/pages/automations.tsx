@@ -3,11 +3,11 @@ import Sidebar from "../components/Sidebar";
 import { classNames } from "../helpers/functions";
 import Layout from "../components/layout";
 import { getAutomationTypeIcon, getTypeIcon } from "../helpers/Icons";
-import { Switch } from "@headlessui/react";
+import { Menu, Switch } from "@headlessui/react";
 import Head from "next/head";
 import { withSession } from "../lib/withSession";
 import { UserSession } from ".";
-import { CheckCircleIcon } from "@heroicons/react/solid";
+import { CheckCircleIcon, DotsVerticalIcon } from "@heroicons/react/solid";
 import { API_ENDPOINT } from "../helpers/api";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -37,8 +37,11 @@ export type Automation = {
 export default function Automations({ userSession }: { userSession: UserSession }) {
   const [automations, setAutomations] = useState<Automation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const user = userSession.user;
+  const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
+  const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
+  const [isAddingAutomation, setIsAddingAutomation] = useState<boolean>(false);
 
+  const user = userSession.user;
   const integrations = [
     {
       id: 'github',
@@ -50,7 +53,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
       id: 'vscode',
       name: 'VS Code',
       imageUrl: '/assets/integrations/vscode.svg',
-      href: ``,
+      href: 'vscode:extension/mintlify.connector',
     },
     {
       id: 'slack',
@@ -66,6 +69,17 @@ export default function Automations({ userSession }: { userSession: UserSession 
     },
   ]
 
+  const listMenu = [
+    {
+      name: 'Delete',
+      isRed: true,
+      onClick: (automationId: string) => {
+        setAutomations(automations.filter(automation => automation._id !== automationId));
+        axios.delete(`${API_ENDPOINT}/routes/automations/${automationId}?userId=${userSession.user.userId}`);
+      }
+    }
+  ]
+
   useEffect(() => {
     axios.get(`${API_ENDPOINT}/routes/automations?userId=${user.userId}`)
       .then(({ data }) => {
@@ -75,7 +89,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
       .finally(() => {
         setIsLoading(false);
       })
-  }, [user]);
+  }, [user, isAddingAutomation]);
 
   /**
    * It takes an automationId and isActive boolean, and then it makes a PUT request to the API endpoint
@@ -102,7 +116,14 @@ export default function Automations({ userSession }: { userSession: UserSession 
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
       {/* Left sidebar & main wrapper */}
       <div className="flex-1 min-w-0 xl:flex">
-        <Sidebar user={userSession.user} />
+        <Sidebar
+          user={userSession.user}
+          isAddAutomationOpen={isAddAutomationOpen}
+          setIsAddAutomationOpen={setIsAddAutomationOpen}
+          isAddDocumentOpen={isAddDocumentOpen}
+          setIsAddDocumentOpen={setIsAddDocumentOpen}
+          setIsAddingAutomation={setIsAddingAutomation}
+        />
         {/* Projects List */}
         <div className="bg-white lg:min-w-0 lg:flex-1">
           <div className="pl-4 pr-6 pt-4 pb-4 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
@@ -122,8 +143,11 @@ export default function Automations({ userSession }: { userSession: UserSession 
                 Add one to get started
               </p>
               <div className="mt-4 flex justify-center">
-                <button className="inline-flex items-center justify-center text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 shadow-sm py-2 px-8 font-medium">
-                  Add Documentation
+                <button
+                  className="inline-flex items-center justify-center text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 shadow-sm py-2 px-8 font-medium"
+                  onClick={() => setIsAddAutomationOpen(true)}
+                >
+                  Add Automation
                 </button>
               </div>
             </div>
@@ -140,7 +164,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
                         { getAutomationTypeIcon(automation.type, 8, 5) }
                         <p className="text-sm font-medium text-gray-700 truncate">{automation.name}</p>
                       </div>
-                      <div className="ml-2 flex-shrink-0 flex">
+                      <div className="ml-2 flex-shrink-0 flex items-center space-x-2">
                       <Switch
                           checked={automation.isActive}
                           onChange={() => handleToggleSwitch(automation._id, !automation.isActive)}
@@ -163,6 +187,36 @@ export default function Automations({ userSession }: { userSession: UserSession 
                             )}
                           />
                         </Switch>
+                        <Menu as="div" className="relative inline-block text-left">
+                        <div>
+                          <Menu.Button className="p-1 rounded-full flex items-center text-gray-400 hover:text-gray-600">
+                            <span className="sr-only">Open options</span>
+                            <DotsVerticalIcon className="h-4 w-4" aria-hidden="true" />
+                          </Menu.Button>
+                        </div>
+                        <Menu.Items className="origin-top-right absolute right-0 mt-2 z-10 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+                            <div className="py-1 w-32">
+                              {
+                                listMenu.map((menu) => (
+                                  <Menu.Item key={menu.name}>
+                                    {({ active }) => (
+                                      <button
+                                        type="button"
+                                        className={classNames(
+                                          active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                          menu.isRed ? 'text-red-700' : '',
+                                          'w-full flex items-center space-x-2 px-3 py-1.5 text-sm')}
+                                          onClick={() => menu.onClick(automation._id)}
+                                      >
+                                        <span>{menu.name}</span>
+                                      </button>
+                                    )}
+                                  </Menu.Item>
+                                ))
+                              }
+                            </div>
+                          </Menu.Items>
+                      </Menu>
                       </div>
                     </div>
                     <div className="mt-2 sm:flex sm:justify-between">

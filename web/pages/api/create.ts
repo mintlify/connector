@@ -2,7 +2,7 @@ import axios from "axios";
 import { NextApiResponse } from "next";
 import { API_ENDPOINT } from "../../helpers/api";
 import { withSession } from "../../lib/withSession";
-import { redirectToUser } from "./login/vscode";
+import { redirectToVSCode } from "./login/vscode";
 
 async function handler(req: any, res: NextApiResponse) {
   const { email, firstName, lastName, orgName } = req.query;
@@ -27,9 +27,8 @@ async function handler(req: any, res: NextApiResponse) {
     user,
   });
   await req.session.save();
-
-  if (req.session.get("authSource")?.source === "vscode") {
-    redirectToUser(res, user);
+  if (req.session.get('authSource')?.source === 'vscode') {
+    redirectToVSCode(res, user);
   }
 
   return res.redirect("/");

@@ -90,8 +90,7 @@ docsRouter.get('/', userMiddleware, async (_, res) => {
 
 docsRouter.post('/', userMiddleware, async (req, res) => {
   const { url } = req.body;
-  const org = res.locals.user.org;
-  console.log({org});
+  const org = res.locals.user.org; 
   try {
     const { content, doc } = await createDocFromUrl(url, org, res.locals.user._id);
     console.log({doc});
@@ -108,7 +107,7 @@ docsRouter.post('/', userMiddleware, async (req, res) => {
 
 docsRouter.delete('/:docsId', userMiddleware, async (req, res) => {
   const { docsId } = req.params;
-  const { org } = res.locals.user.org;
+  const { org } = res.locals.user;
   
   try {
     await Doc.findOneAndDelete({ _id: docsId, org });

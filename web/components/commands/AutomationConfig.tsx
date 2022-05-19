@@ -35,9 +35,10 @@ type AutomationConfig = {
   automationType: AutomationType,
   onCancel: () => void,
   setIsAddAutomationOpen: (isOpen: boolean) => void,
+  setIsAddingAutomation?: (isAddingAutomation: boolean) => void;
 }
 
-export default function AutomationConfig({ user, automationType, onCancel, setIsAddAutomationOpen }: AutomationConfig) {
+export default function AutomationConfig({ user, automationType, onCancel, setIsAddAutomationOpen, setIsAddingAutomation }: AutomationConfig) {
   const destinations = [
     {
       id: 0,
@@ -144,13 +145,19 @@ export default function AutomationConfig({ user, automationType, onCancel, setIs
 
   const onCreateButton = async () => {
     setIsAddAutomationOpen(false);
+    if (setIsAddingAutomation) {
+      setIsAddingAutomation(true);
+    }
     await axios.post(`${API_ENDPOINT}/routes/automations?userId=${user.userId}`, {
       type: automationType,
       sourceValue: automationType === 'code' ? selectedRepo.name : selectedDoc._id,
       destinationType: selectedDestinationType.id,
       destinationValue,
       name: name ? name : namePlaceholder
-    })
+    });
+    if (setIsAddingAutomation) {
+      setIsAddingAutomation(false);
+    }
   }
 
   const isCompletedForm = (automationType === 'doc' && selectedDoc.isDefault !== true && selectedDestinationType.isDefault !== true && destinationValue !== '') || (automationType === 'code' && selectedRepo.isDefault !== true && selectedDestinationType.isDefault !== true && destinationValue !== '');

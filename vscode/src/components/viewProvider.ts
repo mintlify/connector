@@ -23,7 +23,7 @@ export type Link = {
 };
 
 export class ViewProvider implements WebviewViewProvider {
-    public static readonly viewType = 'mintlify.connect';
+    public static readonly viewType = 'primary';
     private _view?: WebviewView;
 
     constructor(private readonly _extensionUri: Uri) { }

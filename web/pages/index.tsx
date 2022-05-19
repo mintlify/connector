@@ -59,22 +59,25 @@ export type User = {
   pending?: boolean;
 };
 
-const listMenu = [
-  {
-    name: "Rename",
-  },
-  {
-    name: "Delete",
-    isRed: true,
-  },
-];
-
 export default function Home({ userSession }: { userSession: UserSession }) {
-  const [docs, setDocs] = useState<Doc[]>();
+  const [docs, setDocs] = useState<Doc[]>([]);
   const [events, setEvents] = useState<Event[]>();
   const [selectedDoc, setSelectedDoc] = useState<Doc>();
   const [isAddingDoc, setIsAddingDoc] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
+  const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
+
+  const listMenu = [
+    {
+      name: 'Delete',
+      isRed: true,
+      onClick: (docId: string) => {
+        setDocs(docs.filter(doc => doc._id !== docId));
+        axios.delete(`${API_ENDPOINT}/routes/docs/${docId}?userId=${userSession.user.userId}`);
+      }
+    }
+  ]
 
   useEffect(() => {
     if (userSession == null) {
@@ -119,22 +122,49 @@ export default function Home({ userSession }: { userSession: UserSession }) {
 
   return (
     <>
-      <Head>
-        <title>Mintlify Dashboard</title>
-      </Head>
-      <Layout user={userSession.user}>
-        <ClearSelectedFrame />
-        <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
-          {/* Left sidebar & main wrapper */}
-          <div className="flex-1 min-w-0 xl:flex z-10">
-            <Sidebar user={userSession.user} isAddingDoc={isAddingDoc} setIsAddingDoc={setIsAddingDoc} />
-            {/* Projects List */}
-            <div className="bg-white lg:min-w-0 lg:flex-1">
-              <ClearSelectedFrame />
-              <div className="pl-4 pr-6 pt-4 pb-4 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
-                <div className="flex items-center">
-                  {hasDocs && <h1 className="flex-1 text-lg font-medium text-gray-800">Documentation</h1>}
-                </div>
+    <Head>
+      <title>Mintlify Dashboard</title>
+    </Head>
+    <Layout user={userSession.user}>
+    <ClearSelectedFrame />
+    <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
+      {/* Left sidebar & main wrapper */}
+      <div className="flex-1 min-w-0 xl:flex z-10">
+        <Sidebar
+          user={userSession.user}
+          setIsAddingDoc={setIsAddingDoc}
+          isAddAutomationOpen={isAddAutomationOpen}
+          setIsAddAutomationOpen={setIsAddAutomationOpen}
+          isAddDocumentOpen={isAddDocumentOpen}
+          setIsAddDocumentOpen={setIsAddDocumentOpen}
+        />
+        {/* Projects List */}
+        <div className="bg-white lg:min-w-0 lg:flex-1">
+          <ClearSelectedFrame />
+          <div className="pl-4 pr-6 pt-4 pb-4 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
+            <div className="flex items-center">
+              {hasDocs && <h1 className="flex-1 text-lg font-medium text-gray-800">Documentation</h1> } 
+            </div>
+          </div>
+          {
+            !hasDocs && !isLoading && <div className="pb-8">
+              <div className="flex items-center justify-center">
+                <img className="w-24 h-24" src="/assets/empty/docs.svg" alt="No documentations" />
+              </div>
+              <p className="text-center mt-6 text-gray-600 font-medium">
+                No documentation found
+              </p>
+              <p className="mt-1 text-center text-sm text-gray-400">
+                Add one to get started
+              </p>
+              <div className="mt-4 flex justify-center">
+                <button
+                  className="inline-flex items-center justify-center text-sm bg-primary text-white rounded-md shadow-sm py-2 font-medium px-8 hover:bg-hover"
+                  onClick={() => setIsAddDocumentOpen(true)}
+                >
+                  <DocumentTextIcon className="h-4 w-4 mr-1" />
+                  Add Documentation
+                </button>
               </div>
               {!hasDocs && !isLoading && (
                 <div className="pb-8">
@@ -220,19 +250,19 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                                 <div className="py-1 w-32">
                                   {listMenu.map((menu) => (
                                     <Menu.Item key={menu.name}>
-                                      {({ active }) => (
-                                        <button
-                                          type="button"
-                                          className={classNames(
-                                            active ? "bg-gray-100 text-gray-900" : "text-gray-700",
-                                            menu.isRed ? "text-red-700" : "",
-                                            "w-full flex items-center space-x-2 px-3 py-1.5 text-sm"
-                                          )}
-                                        >
-                                          <span>{menu.name}</span>
-                                        </button>
-                                      )}
-                                    </Menu.Item>
+                                    {({ active }) => (
+                                      <button
+                                        type="button"
+                                        className={classNames(
+                                          active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                          menu.isRed ? 'text-red-700' : '',
+                                          'w-full flex items-center space-x-2 px-3 py-1.5 text-sm')}
+                                          onClick={() => menu.onClick(doc._id)}
+                                      >
+                                        <span>{menu.name}</span>
+                                      </button>
+                                    )}
+                                  </Menu.Item>
                                   ))}
                                 </div>
                               </Menu.Items>
