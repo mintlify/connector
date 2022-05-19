@@ -1,74 +1,99 @@
-import { Fragment, useState } from 'react'
-import { Combobox, Dialog, Transition } from '@headlessui/react'
-import { PlusIcon, LinkIcon } from '@heroicons/react/solid'
-import { classNames } from '../../helpers/functions'
-import { ConfluenceIcon, GoogleDocsIcon, NotionIcon } from '../../helpers/Icons'
-import axios from 'axios'
-import { API_ENDPOINT } from '../../helpers/api'
+import { Fragment, useState } from "react"
+import { Combobox, Dialog, Transition } from "@headlessui/react"
+import { PlusIcon, LinkIcon } from "@heroicons/react/solid"
+import { classNames } from "../../helpers/functions"
+import { ConfluenceIcon, GoogleDocsIcon, NotionIcon } from "../../helpers/Icons"
+import axios from "axios"
+import { API_ENDPOINT } from "../../helpers/api"
 
 type AddDocumentProps = {
-  userId: string;
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void,
-  setIsAddingDoc?: (isAddingDoc: boolean) => void,
+  userId: string
+  isOpen: boolean
+  setIsOpen: (isOpen: boolean) => void
+  setIsAddingDoc?: (isAddingDoc: boolean) => void
 }
 
 export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc }: AddDocumentProps) {
-  const [query, setQuery] = useState('');
-  const [placeholder, setPlaceholder] = useState('Add link');
+  const [query, setQuery] = useState("")
+  const [placeholder, setPlaceholder] = useState("Add link")
+  const [showQueryError, setShowQueryError] = useState<boolean>(false)
+  const [errorMessage, setErrorMessage] = useState<string>("")
 
   const actions = [
     {
-      name: 'Add web page',
-      icon: (className: string) => <LinkIcon className={classNames(className, 'h-5 w-5')} aria-hidden="true" />,
+      name: "Add web page",
+      icon: (className: string) => <LinkIcon className={classNames(className, "h-5 w-5")} aria-hidden="true" />,
       filter: () => true,
       isLeastPriority: true,
-      onActive: () => setPlaceholder('https://'),
+      onActive: () => setPlaceholder("https://"),
     },
     {
-      name: 'Add Notion page',
+      name: "Add Notion page",
       icon: (className: string, isActive: boolean) => <NotionIcon className={className} isActive={isActive} />,
-      filter: (query: string) => !query || query.includes('notion.site'),
-      onActive: () => setPlaceholder('https://notion.site/')
+      filter: (query: string) => !query || query.includes("notion.site"),
+      onActive: () => setPlaceholder("https://notion.site/"),
     },
     {
-      name: 'Add Google docs',
+      name: "Add Google docs",
       icon: (className: string, isActive: boolean) => <GoogleDocsIcon className={className} isActive={isActive} />,
-      filter: (query: string) => !query || query.includes('docs.google.com'),
-      onActive: () => setPlaceholder('https://docs.google.com/')
+      filter: (query: string) => !query || query.includes("docs.google.com"),
+      onActive: () => setPlaceholder("https://docs.google.com/"),
     },
     {
-      name: 'Add Confluence page',
+      name: "Add Confluence page",
       icon: (className: string, isActive: boolean) => <ConfluenceIcon className={className} isActive={isActive} />,
-      filter: (query: string) => !query || query.includes('atlassian.net'),
-      onActive: () => setPlaceholder('https://[your_workspace].atlassian.net/')
+      filter: (query: string) => !query || query.includes("atlassian.net"),
+      onActive: () => setPlaceholder("https://atlassian.net/"),
     },
   ]
 
-  let filteredActions = actions.filter(action => action.filter(query));
+  let filteredActions = actions.filter((action) => action.filter(query))
   if (query && filteredActions.length > 1) {
-    filteredActions = filteredActions.filter((action) => !action.isLeastPriority);
+    filteredActions = filteredActions.filter((action) => !action.isLeastPriority)
   }
 
-  const onEnter = () => {
-    if (!query) return;
-    
-    if (setIsAddingDoc) {
-      setIsAddingDoc(true);
+  const isValidUrl = (_string: string) => {
+    try {
+      new URL(_string)
+      return true
+    } catch (error) {
+      return false
     }
-    axios.post(`${API_ENDPOINT}/routes/docs?userId=${userId}`, {
-      url: query,
-    }).then(() => {
-      if (setIsAddingDoc) {
-        setIsAddingDoc(false);
-      }
-    });
+  }
 
-    setIsOpen(false);
+  const onEnter = async () => {
+    if (!query) return
+
+    let formattedQuery: string = query.toLowerCase()
+
+    // prepend `https://` to the url if it's missing
+    if (formattedQuery.startsWith("http://")) formattedQuery = formattedQuery.replace(/^http:\/\//i, "https://")
+    else if (!formattedQuery.startsWith("https://")) formattedQuery = `https://${formattedQuery}`
+
+    if (!isValidUrl(formattedQuery)) {
+      setShowQueryError(true)
+      setErrorMessage("Error: The link you entered is invalid.")
+      return
+    }
+
+    if (setIsAddingDoc) {
+      setIsAddingDoc(true)
+    }
+    axios
+      .post(`${API_ENDPOINT}/routes/docs?userId=${userId}`, {
+        url: formattedQuery,
+      })
+      .then(() => {
+        if (setIsAddingDoc) {
+          setIsAddingDoc(false)
+        }
+      })
+
+    setIsOpen(false)
   }
 
   return (
-    <Transition.Root show={isOpen} as={Fragment} afterLeave={() => setQuery('')} appear>
+    <Transition.Root show={isOpen} as={Fragment} afterLeave={() => setQuery("")} appear>
       <Dialog as="div" className="relative z-10" onClose={setIsOpen}>
         <Transition.Child
           as={Fragment}
@@ -95,17 +120,26 @@ export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc 
             <Dialog.Panel className="mx-auto max-w-2xl transform divide-y divide-gray-100 overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
               <Combobox onChange={() => onEnter()} value={query}>
                 <div className="relative rounded-xl">
-                  <PlusIcon
-                    className="pointer-events-none absolute top-3.5 left-4 h-5 w-5 text-gray-400"
-                    aria-hidden="true"
-                  />
+                  <PlusIcon className="pointer-events-none absolute top-3.5 left-4 h-5 w-5 text-gray-400" aria-hidden="true" />
                   <Combobox.Input
                     className="h-12 w-full rounded-t-xl border-0 bg-transparent pl-11 pr-4 text-gray-800 placeholder-gray-400 sm:text-sm focus:outline-none focus:ring-0"
                     placeholder={placeholder}
                     value={query}
-                    onChange={(event) => setQuery(event.target.value)}
-                    onKeyDown={({ key }: { key: string }) => key === 'Enter' && onEnter()}
+                    onChange={(event) => {
+                      // disable the error message when the user starts typing
+                      setShowQueryError(false)
+                      setQuery(event.target.value)
+                    }}
+                    onKeyDown={({ key }: { key: string }) => key === "Enter" && onEnter()}
                   />
+                  <span
+                    className={classNames(
+                      "h-12 w-full rounded-t-xl border-0 bg-transparent pl-11 pr-4 text-red-500 placeholder-gray-400 sm:text-sm",
+                      showQueryError ? "" : "hidden"
+                    )}
+                  >
+                    {errorMessage}
+                  </span>
                 </div>
                 <Combobox.Options static className="max-h-80 scroll-py-2 divide-y divide-gray-100 overflow-y-auto">
                   <li className="p-2">
@@ -117,25 +151,23 @@ export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc 
                           value={action}
                           className={({ active }) =>
                             classNames(
-                              'flex select-none items-center rounded-md px-3 py-2 cursor-pointer',
-                              active ? 'bg-primary text-white' : ''
+                              "flex select-none items-center rounded-md px-3 py-2 cursor-pointer",
+                              active ? "bg-primary text-white" : ""
                             )
                           }
                         >
                           {({ active }) => (
                             <>
                               {active && action.onActive()}
-                              {action.icon('h-4 w-4 flex-none fill-current', active)}
+                              {action.icon("h-4 w-4 flex-none fill-current", active)}
                               <span className="ml-2 flex-auto truncate">{action.name}</span>
                               <span
                                 className={classNames(
-                                  'ml-3 flex-none text-xs font-semibold',
-                                  active ? 'text-green-100' : 'text-gray-400'
+                                  "ml-3 flex-none text-xs font-semibold",
+                                  active ? "text-green-100" : "text-gray-400"
                                 )}
                               >
-                                {
-                                  query && <kbd className="font-sans">⏎</kbd>
-                                }
+                                {query && <kbd className="font-sans">⏎</kbd>}
                               </span>
                             </>
                           )}
