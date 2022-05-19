@@ -7,16 +7,16 @@ Bring documentation closer to your code using the VSCode extension.
 ## Get Started
 1. 🔒 Join the waitlist by filling out [this form](https://1tc7vihvbit.typeform.com/to/ZUY3igg4?typeform)
 2. Add documents through the platform
-![Add documents](./assets/Add-doc.png)
+<img src="/vscode/assets/Add-doc.png"/>
 3. Select the document you want to connect to code.
-![Doc dropdown](./assets/Doc-dropdown.png)
+<img src="/vscode/assets/Doc-dropdown.png"/>
 4. Select code you want to associate with the document.
   - Select lines of code by highlighting the lines, right clicking, and selecting "Link code to documentation"
-  ![Link code](./assets/link-code.png)
+  <img src="/vscode/assets/link-code.png"/>
   - Select folders/files by right clicking on them in the explorer, and selecting "Link folder to documentation"
-  ![Link file](./assets/link-file.png)
+  <img src="/vscode/assets/link-file.png">
 5. Submit!
-![submit](./assets/submit.png)
+  <img src="/vscode/assets/submit.png">
 
 ## Features
 After your connections are made, enjoy having full visibility into your documentation and codebase.
