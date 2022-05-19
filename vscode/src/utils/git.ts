@@ -176,6 +176,11 @@ export const getGitData = async (fileFsPath: string, viewProvider: ViewProvider,
                     code.url = provider.webUrl(sha, subdir);
                 }
             }
+            await viewProvider.show();
+            function delay(time) {
+                return new Promise(resolve => setTimeout(resolve, time));
+            }
+            await delay(500);
             viewProvider.postCode(code);
         });
     });
