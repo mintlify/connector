@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { ViewProvider } from './viewProvider';
+import { WEB_ENDPOINT } from '../utils/api';
 
 export const registerAuthRoute = (provider: ViewProvider) => {
   vscode.window.registerUriHandler({
@@ -34,5 +35,5 @@ export const registerAuthRoute = (provider: ViewProvider) => {
 };
 
 export const openLogin = () => {
-  return vscode.env.openExternal(vscode.Uri.parse('http://localhost:3000/api/login/vscode'));
+  return vscode.env.openExternal(vscode.Uri.parse(`${WEB_ENDPOINT}/api/login/vscode`));
 };

@@ -30,6 +30,7 @@ export type State = {
   user?: any,
   doc: Doc;
   codes: Code[];
+  API_ENDPOINT: string;
 };
 
 const initialDoc: Doc = {
@@ -41,7 +42,8 @@ const initialDoc: Doc = {
 
 const initialState: State = {
   doc: initialDoc,
-  codes: []
+  codes: [],
+  API_ENDPOINT: 'https://connect.mintlify.com/route'
 };
 
 function classNames(...classes) {
@@ -54,11 +56,10 @@ const App = () => {
   const [state, setState] = useState<State>(vscode.getState() || initialState);
 
   useEffect(() => {
-    console.log(state.user);
     if (!state.user?.userId) {
       return;
     }
-    axios.get(`http://localhost:5000/routes/docs?userId=${state.user.userId}`)
+    axios.get(`${state.API_ENDPOINT}/docs?userId=${state.user.userId}`)
       .then((res) => {
         const { data: { docs } } = res;
         setDocs(docs);
@@ -86,6 +87,10 @@ const App = () => {
   window.addEventListener('message', event => {
     const message = event.data;
     switch (message.command) {
+      case 'start':
+        const API_ENDPOINT = message.args;
+        updateState({...state, API_ENDPOINT});
+        break;
       case 'auth':
         const user = message.args;
         updateState({...state, user});
