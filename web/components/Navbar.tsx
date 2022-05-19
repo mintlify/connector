@@ -46,6 +46,7 @@ export default function Navbar({ user }: { user: User }) {
   return (
     <>
     <Search
+      user={user}
       isOpen={isSearchOpen}
       setIsOpen={setIsSearchOpen}
     />
