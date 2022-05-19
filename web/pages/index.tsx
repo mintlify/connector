@@ -59,6 +59,7 @@ export type User = {
     name: string,
     integrations: Record<string, boolean>
   }
+  pending?: boolean;
 }
 
 export default function Home({ userSession }: { userSession: UserSession }) {
