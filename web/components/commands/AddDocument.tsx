@@ -41,7 +41,7 @@ export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc 
       name: 'Add Confluence page',
       icon: (className: string, isActive: boolean) => <ConfluenceIcon className={className} isActive={isActive} />,
       filter: (query: string) => !query || query.includes('atlassian.net'),
-      onActive: () => setPlaceholder('https://.atlassian.net/')
+      onActive: () => setPlaceholder('https://[your_workspace].atlassian.net/')
     },
   ]
 
