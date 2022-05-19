@@ -1,5 +1,6 @@
 import algoliasearch from 'algoliasearch';
 import dotenv from 'dotenv';
+import { AutomationType } from '../models/Automation';
 import { DocType } from '../models/Doc';
 
 dotenv.config();
@@ -36,6 +37,7 @@ export const searchDocsAndAutomations = async (query: string, orgId: string): Pr
 }
 
 const docsIndex = client.initIndex('docs');
+const automationsIndex = client.initIndex('automations');
 
 export const indexDocForSearch = async (doc: DocType) => {
     const record = {
@@ -61,4 +63,17 @@ export const updateDocContentForSearch = async (doc: DocType, newContent: string
 
 export const deleteDocForSearch = async (objectID: string) => {
     await docsIndex.deleteObject(objectID);
+}
+
+export const indexAutomationForSearch = async (automation: AutomationType) => {
+    const record = {
+        objectID: automation._id,
+        name: automation.name,
+        org: automation.org
+    }
+    await automationsIndex.saveObject(record);
+}
+
+export const deleteAutomationForSearch = async (objectID: string) => {
+    await automationsIndex.deleteObject(objectID);
 }

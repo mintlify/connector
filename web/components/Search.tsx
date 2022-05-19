@@ -135,7 +135,7 @@ export default function Search({ user, isOpen, setIsOpen }: SearchProps) {
                     )}
                     {automationsResults.length > 0 && (
                       <li>
-                        <h2 className="text-xs font-semibold text-gray-900">Users</h2>
+                        <h2 className="text-xs font-semibold text-gray-900">Automations</h2>
                         <ul className="-mx-4 mt-2 text-sm text-gray-700">
                           {automationsResults.map((automationResult) => (
                             <Combobox.Option

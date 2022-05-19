@@ -95,7 +95,7 @@ docsRouter.post('/', userMiddleware, async (req, res) => {
     const { content, doc } = await createDocFromUrl(url, org, res.locals.user._id);
     if (doc != null) {
       await createEvent(org, doc._id, 'add', {});
-      await indexDocForSearch(doc)
+      indexDocForSearch(doc)
     }
     res.send({content});
   } catch (error) {

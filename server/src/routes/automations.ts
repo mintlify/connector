@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import Automation, { AutomationSourceType } from '../models/Automation';
+import { deleteAutomationForSearch, indexAutomationForSearch } from '../services/algolia';
 import { userMiddleware } from './user';
 
 
@@ -56,6 +57,7 @@ automationsRouter.post('/', userMiddleware, async (req, res) => {
     createdBy: res.locals.user._id
   })
 
+  indexAutomationForSearch(automation);
   return res.send({automation});
 });
 
@@ -72,7 +74,9 @@ automationsRouter.delete('/:automationId', userMiddleware, async (req, res) => {
   const { org } = res.locals.user;
   
   try {
-    await Automation.findOneAndDelete({ _id: automationId, org });
+    const deleteAutomationPromise = Automation.findOneAndDelete({ _id: automationId, org });
+    const deleteAutomationForSearchPromise = deleteAutomationForSearch(automationId);
+    await Promise.all([deleteAutomationPromise, deleteAutomationForSearchPromise]);
     res.end();
   } catch (error) {
     res.status(500).send({error})
