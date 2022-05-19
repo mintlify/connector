@@ -55,9 +55,14 @@ export default function Search({ user, isOpen, setIsOpen }: SearchProps) {
   const docsResults = results.docs;
   const automationsResults = results.automations;
 
+  const onClose = () => {
+    setQuery('');
+    setIsOpen(false);
+  }
+
   return (
-    <Transition.Root show={isOpen} as={Fragment} afterLeave={() => setQuery('')} appear>
-      <Dialog as="div" className="relative z-10" onClose={setIsOpen}>
+    <Transition.Root show={isOpen} as={Fragment} appear>
+      <Dialog as="div" className="relative z-10" onClose={onClose}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -81,7 +86,7 @@ export default function Search({ user, isOpen, setIsOpen }: SearchProps) {
             leaveTo="opacity-0 scale-95"
           >
             <Dialog.Panel className="mx-auto max-w-xl transform divide-y divide-gray-100 overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
-              <Combobox value={query} onChange={(item) => {}}>
+              <Combobox value={query} onChange={(result: any) => {window.open(result.url, '_blank')}}>
                 <div className="relative">
                   <SearchIcon
                     className="pointer-events-none absolute top-3.5 left-4 h-5 w-5 text-gray-400"
@@ -109,7 +114,7 @@ export default function Search({ user, isOpen, setIsOpen }: SearchProps) {
                               value={docResult}
                               className={({ active }) =>
                                 classNames(
-                                  'flex cursor-default select-none items-center px-4 py-2',
+                                  'flex cursor-pointer select-none items-center px-4 py-2',
                                   active ? 'bg-primary text-white' : ''
                                 )
                               }
@@ -138,7 +143,7 @@ export default function Search({ user, isOpen, setIsOpen }: SearchProps) {
                               value={automationResult}
                               className={({ active }) =>
                                 classNames(
-                                  'flex cursor-default select-none items-center px-4 py-2',
+                                  'flex cursor-pointer select-none items-center px-4 py-2',
                                   active ? 'bg-primary text-white' : ''
                                 )
                               }
@@ -156,7 +161,7 @@ export default function Search({ user, isOpen, setIsOpen }: SearchProps) {
                   <div className="py-14 px-6 text-center text-sm sm:px-14">
                     <ExclamationIcon className="mx-auto h-6 w-6 text-gray-400" aria-hidden="true" />
                     <p className="mt-4 font-semibold text-gray-900">No results found</p>
-                    <p className="mt-2 text-gray-500">We couldn’t find anything with that term. Please try again.</p>
+                    <p className="mt-2 text-gray-500">We couldn’t find anything with that query</p>
                   </div>
                 )}
 
