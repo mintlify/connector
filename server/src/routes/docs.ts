@@ -6,7 +6,7 @@ import { createEvent } from './events';
 import Doc from '../models/Doc';
 import Event from '../models/Event';
 import { getDataFromWebpage } from '../services/webscraper';
-import { indexDocForSearch } from '../services/algolia';
+import { deleteDocForSearch, indexDocForSearch } from '../services/algolia';
 
 const docsRouter = express.Router();
 
@@ -103,13 +103,16 @@ docsRouter.post('/', userMiddleware, async (req, res) => {
   }
 });
 
-docsRouter.delete('/:docsId', userMiddleware, async (req, res) => {
-  const { docsId } = req.params;
+docsRouter.delete('/:docId', userMiddleware, async (req, res) => {
+  const { docId } = req.params;
   const { org } = res.locals.user;
   
   try {
-    await Doc.findOneAndDelete({ _id: docsId, org });
-    await Event.deleteMany({ doc: docsId });
+    const deleteDocPromise = Doc.findOneAndDelete({ _id: docId, org });
+    const deleteEventsPromise = Event.deleteMany({ doc: docId });
+    const deleteDocForSearchPromise = deleteDocForSearch(docId);
+
+    await Promise.all([deleteDocPromise, deleteEventsPromise, deleteDocForSearchPromise]);
     res.end();
   } catch (error) {
     res.status(500).send({error})
