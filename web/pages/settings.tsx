@@ -6,7 +6,7 @@ import { UserSession } from ".";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { API_ENDPOINT } from "../helpers/api";
+import { API_ENDPOINT, updateSession } from "../helpers/api";
 
 import { classNames } from "../helpers/functions";
 import { User } from ".";
@@ -63,36 +63,33 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
       .then((res) => {
         setMembers(members.concat(res.data.users));
       })
-      .catch((err) => {
-        console.log(err);
-      });
     // send login invitation
     await axios.post("/api/login/magiclink", { email }).catch((err) => console.log(err));
     setIsSendingInvite(false);
   };
 
   const onBlurFirstNameInput = () => {
-    if (firstName !== user.firstName) {
-      axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/firstname`, {
-        firstName,
-      });
-    }
+    axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/firstname`, {
+      firstName,
+    }).then(() => {
+      updateSession();
+    })
   };
 
   const onBlurLastNameInput = () => {
-    if (lastName !== user.lastName) {
-      axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/lastname`, {
-        lastName,
-      });
-    }
+    axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/lastname`, {
+      lastName,
+    }).then(() => {
+      updateSession();
+    })
   };
 
   const onBlurOrgNameInput = () => {
-    if (orgName !== user.org.name) {
-      axios.put(`${API_ENDPOINT}/routes/org/${user.org._id}/name?userId=${user.userId}`, {
-        name: orgName,
-      });
-    }
+    axios.put(`${API_ENDPOINT}/routes/org/${user.org._id}/name?userId=${user.userId}`, {
+      name: orgName,
+    }).then(() => {
+      updateSession();
+    })
   };
 
   const updateEmailNotifications = async (newNotifications: EmailNotifications) => {

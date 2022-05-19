@@ -249,7 +249,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
             {integrations.map((integration) => (
               <Link key={integration.id} href={integration.href}>
                 <div
-                  className="relative rounded-md border border-gray-200 bg-white px-3 py-2 shadow-sm flex items-center space-x-3 hover:bg-gray-50 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary"
+                  className="relative rounded-md border border-gray-200 bg-white px-3 py-2 shadow-sm flex items-center space-x-3 hover:bg-gray-50"
                 >
                   <div className="flex-shrink-0">
                     <img className="h-6 w-6" src={integration.imageUrl} alt="" />
