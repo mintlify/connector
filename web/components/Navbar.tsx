@@ -1,4 +1,5 @@
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
+import { useHotkeys } from 'react-hotkeys-hook'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
 import {
   SearchIcon,
@@ -10,6 +11,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import ProfilePicture from './ProfilePicture'
 import { User } from '../pages'
+import Search from './Search'
 
 const navigation = [
   {
@@ -34,11 +36,19 @@ const navButtonClass = (isActive: boolean) => {
 }
 
 export default function Navbar({ user }: { user: User }) {
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const router = useRouter();
 
   const fullName = `${user.firstName} ${user.lastName}`;
+
+  useHotkeys('cmd+k', () => setIsSearchOpen(true));
   
   return (
+    <>
+    <Search
+      isOpen={isSearchOpen}
+      setIsOpen={setIsSearchOpen}
+    />
     <Disclosure as="nav" className="bg-background z-20">
       {({ open }) => (
         <>
@@ -76,7 +86,10 @@ export default function Navbar({ user }: { user: User }) {
                   </div>
                 </div>
               </div>
-              <div className="flex-1 flex justify-center px-2 lg:ml-6 lg:justify-end">
+              <button
+                className="flex-1 flex justify-center px-2 lg:ml-6 lg:justify-end"
+                onClick={() => setIsSearchOpen(true)}
+              >
                 <div className="max-w-lg w-full lg:max-w-xs">
                   <label htmlFor="search" className="sr-only">
                     Search
@@ -99,7 +112,7 @@ export default function Navbar({ user }: { user: User }) {
                     </div>
                   </div>
                 </div>
-              </div>
+              </button>
               <div className="flex lg:hidden">
                 {/* Mobile menu button */}
                 <Disclosure.Button className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
@@ -207,5 +220,6 @@ export default function Navbar({ user }: { user: User }) {
         </>
       )}
     </Disclosure>
+    </>
   )
 }
