@@ -1,18 +1,9 @@
 import axios, { Method } from "axios";
 
-export async function triggerWebhook(
-  url: string,
-  method: Method = "get"
-): Promise<boolean | Error> {
+export async function triggerWebhook(url: string, method: Method = "get"): Promise<any> {
   try {
-    await axios({ url, method }).catch((error: Error) => {
-      // log error out to server, so we can see it.
-      console.log(error);
-      throw new Error(error.message);
-    });
+    await axios({ url, method });
   } catch (error: any) {
     return new Error(error);
   }
-
-  return true;
 }
