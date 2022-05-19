@@ -12,24 +12,32 @@ type SearchResults = {
     automations: any[]
 }
 
-export const searchDocsAndAutomations = async (query: string): Promise<SearchResults> => {
+export const searchDocsAndAutomations = async (query: string, orgId: string): Promise<SearchResults> => {
     const queries = [{
         indexName: 'docs',
         query,
+        params: {
+            filters: `org:${orgId}`
+        }
       }, {
         indexName: 'automations',
         query,
-      }]
+        params: {
+            filters: `org:${orgId}`
+        }
+      }];
     const { results } = await client.multipleQueries(queries);
 
+    console.log({results})
     return {
         docs: results[0].hits,
         automations: results[1].hits
     }
 }
 
+const docsIndex = client.initIndex('docs');
+
 export const indexDocForSearch = async (doc: DocType) => {
-    const index = client.initIndex('docs');
     const record = {
         objectID: doc._id,
         name: doc.title,
@@ -37,11 +45,10 @@ export const indexDocForSearch = async (doc: DocType) => {
         url: doc.url,
         org: doc.org
     };
-    await index.saveObject(record);
+    await docsIndex.saveObject(record);
 }
 
 export const updateDocContentForSearch = async (doc: DocType, newContent: string) => {
-    const index = client.initIndex('docs');
     const record = {
         objectID: doc._id,
         name: doc.title,
@@ -49,5 +56,5 @@ export const updateDocContentForSearch = async (doc: DocType, newContent: string
         url: doc.url,
         org: doc.org
     };
-    await index.saveObject(record);
+    await docsIndex.saveObject(record);
 }

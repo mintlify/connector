@@ -1,69 +1,62 @@
 import { Fragment, useEffect, useState } from 'react'
 import { Combobox, Dialog, Transition } from '@headlessui/react'
 import { SearchIcon } from '@heroicons/react/solid'
-import { ExclamationIcon, FolderIcon, SupportIcon } from '@heroicons/react/outline'
+import { DocumentTextIcon, ExclamationIcon } from '@heroicons/react/outline'
 import { classNames } from '../helpers/functions'
 import axios from 'axios'
 import { API_ENDPOINT } from '../helpers/api'
+import { User } from '../pages'
 
-const projects = [
-  { id: 1, name: 'Workflow Inc. / Website Redesign', category: 'Projects', url: '#' },
-  // More projects...
-]
+type DocResult = {
+  objectID: string,
+  name: string,
+  content: string,
+  url: string,
+  org: string
+}
 
-const users = [
-  {
-    id: 1,
-    name: 'Leslie Alexander',
-    url: '#',
-    imageUrl:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-  },
-  // More users...
-]
+type AutomationResult = {
+  objectID: string,
+  name: string,
+  org: string
+}
+
+type SearchResults = {
+  docs: DocResult[],
+  automations: AutomationResult[],
+}
 
 type SearchProps = {
+  user: User,
   isOpen: boolean,
   setIsOpen: (isOpen: boolean) => void,
 }
 
-export default function Search({ isOpen, setIsOpen }: SearchProps) {
-  const [rawQuery, setRawQuery] = useState('')
+export default function Search({ user, isOpen, setIsOpen }: SearchProps) {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<SearchResults>({ docs: [], automations: [] });
 
   useEffect(() => {
-    if (!rawQuery) {
+    if (!query) {
+      setResults({ docs: [], automations: [] });
       return;
     }
-    
-    axios.get(`${API_ENDPOINT}/routes/search`, {
-      data: {
-        query: rawQuery
-      }
-    })
-  }, [rawQuery]);
+
+    axios.get(`${API_ENDPOINT}/routes/search?query=${query}&orgId=${user.org._id}`)
+      .then(({ data: { results } }: { data: { results: SearchResults } }) => {
+        setResults(results)
+      })
+  }, [query, user]);
 
   if (!isOpen) {
     return null;
   }
 
-  const query = rawQuery.toLowerCase().replace(/^[#>]/, '')
-
-  const filteredProjects =
-    rawQuery === '/'
-      ? projects
-      : query === '' || rawQuery.startsWith('/')
-      ? []
-      : projects.filter((project) => project.name.toLowerCase().includes(query))
-
-  const filteredUsers =
-    rawQuery === '>'
-      ? users
-      : query === '' || rawQuery.startsWith('>')
-      ? []
-      : users.filter((user) => user.name.toLowerCase().includes(query))
+  const docsResults = results.docs;
+  const automationsResults = results.automations;
 
   return (
-    <Transition.Root show={isOpen} as={Fragment} afterLeave={() => setRawQuery('')} appear>
+    <Transition.Root show={isOpen} as={Fragment} afterLeave={() => setQuery('')} appear>
       <Dialog as="div" className="relative z-10" onClose={setIsOpen}>
         <Transition.Child
           as={Fragment}
@@ -88,7 +81,7 @@ export default function Search({ isOpen, setIsOpen }: SearchProps) {
             leaveTo="opacity-0 scale-95"
           >
             <Dialog.Panel className="mx-auto max-w-xl transform divide-y divide-gray-100 overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
-              <Combobox value={rawQuery} onChange={(item) => {}}>
+              <Combobox value={query} onChange={(item) => {}}>
                 <div className="relative">
                   <SearchIcon
                     className="pointer-events-none absolute top-3.5 left-4 h-5 w-5 text-gray-400"
@@ -97,23 +90,23 @@ export default function Search({ isOpen, setIsOpen }: SearchProps) {
                   <Combobox.Input
                     className="h-12 w-full border-0 bg-transparent pl-11 pr-4 text-gray-800 placeholder-gray-400 focus:ring-0 sm:text-sm"
                     placeholder="Search..."
-                    onChange={(event) => setRawQuery(event.target.value)}
+                    onChange={(event) => setQuery(event.target.value)}
                   />
                 </div>
 
-                {(filteredProjects.length > 0 || filteredUsers.length > 0) && (
+                {(docsResults.length > 0 || automationsResults.length > 0) && (
                   <Combobox.Options
                     static
                     className="max-h-80 scroll-py-10 scroll-py-10 scroll-pb-2 scroll-pb-2 space-y-4 overflow-y-auto p-4 pb-2"
                   >
-                    {filteredProjects.length > 0 && (
+                    {docsResults.length > 0 && (
                       <li>
-                        <h2 className="text-xs font-semibold text-gray-900">Projects</h2>
+                        <h2 className="text-xs font-semibold text-gray-900">Documentation</h2>
                         <ul className="-mx-4 mt-2 text-sm text-gray-700">
-                          {filteredProjects.map((project) => (
+                          {docsResults.map((docResult) => (
                             <Combobox.Option
-                              key={project.id}
-                              value={project}
+                              key={docResult.objectID}
+                              value={docResult}
                               className={({ active }) =>
                                 classNames(
                                   'flex cursor-default select-none items-center px-4 py-2',
@@ -123,11 +116,11 @@ export default function Search({ isOpen, setIsOpen }: SearchProps) {
                             >
                               {({ active }) => (
                                 <>
-                                  <FolderIcon
+                                  <DocumentTextIcon
                                     className={classNames('h-6 w-6 flex-none', active ? 'text-white' : 'text-gray-400')}
                                     aria-hidden="true"
                                   />
-                                  <span className="ml-3 flex-auto truncate">{project.name}</span>
+                                  <span className="ml-2 flex-auto truncate">{docResult.name}</span>
                                 </>
                               )}
                             </Combobox.Option>
@@ -135,14 +128,14 @@ export default function Search({ isOpen, setIsOpen }: SearchProps) {
                         </ul>
                       </li>
                     )}
-                    {filteredUsers.length > 0 && (
+                    {automationsResults.length > 0 && (
                       <li>
                         <h2 className="text-xs font-semibold text-gray-900">Users</h2>
                         <ul className="-mx-4 mt-2 text-sm text-gray-700">
-                          {filteredUsers.map((user) => (
+                          {automationsResults.map((automationResult) => (
                             <Combobox.Option
-                              key={user.id}
-                              value={user}
+                              key={automationResult.objectID}
+                              value={automationResult}
                               className={({ active }) =>
                                 classNames(
                                   'flex cursor-default select-none items-center px-4 py-2',
@@ -150,8 +143,7 @@ export default function Search({ isOpen, setIsOpen }: SearchProps) {
                                 )
                               }
                             >
-                              <img src={user.imageUrl} alt="" className="h-6 w-6 flex-none rounded-full" />
-                              <span className="ml-3 flex-auto truncate">{user.name}</span>
+                              <span className="ml-2 flex-auto truncate">{automationResult.name}</span>
                             </Combobox.Option>
                           ))}
                         </ul>
@@ -160,7 +152,7 @@ export default function Search({ isOpen, setIsOpen }: SearchProps) {
                   </Combobox.Options>
                 )}
 
-                {query !== '' && rawQuery !== '?' && filteredProjects.length === 0 && filteredUsers.length === 0 && (
+                {query !== '' && query !== '?' && docsResults.length === 0 && automationsResults.length === 0 && (
                   <div className="py-14 px-6 text-center text-sm sm:px-14">
                     <ExclamationIcon className="mx-auto h-6 w-6 text-gray-400" aria-hidden="true" />
                     <p className="mt-4 font-semibold text-gray-900">No results found</p>
@@ -169,34 +161,15 @@ export default function Search({ isOpen, setIsOpen }: SearchProps) {
                 )}
 
                 <div className="flex flex-wrap items-center bg-gray-50 py-2.5 px-4 text-xs text-gray-700">
-                  Type{' '}
+                  Universal search across all documentation. Type
                   <kbd
                     className={classNames(
-                      'mx-1 flex h-5 w-5 items-center justify-center rounded border bg-white font-semibold sm:mx-2',
-                      rawQuery.startsWith('/') ? 'border-primary text-primary' : 'border-gray-400 text-gray-900'
-                    )}
-                  >
-                    /
-                  </kbd>{' '}
-                  <span className="sm:hidden">for documentation,</span>
-                  <span className="hidden sm:inline">to search documentation,</span>
-                  <kbd
-                    className={classNames(
-                      'mx-1 flex h-5 w-5 items-center justify-center rounded border bg-white font-semibold sm:mx-2',
-                      rawQuery.startsWith('>') ? 'border-primary text-primary' : 'border-gray-400 text-gray-900'
-                    )}
-                  >
-                    &gt;
-                  </kbd>{' '}
-                  for automations, and{' '}
-                  <kbd
-                    className={classNames(
-                      'mx-1 flex h-5 px-1 items-center justify-center rounded border bg-white border-gray-400 text-gray-900 font-medium sm:mx-2',
+                      'mx-1 flex h-5 px-1 items-center justify-center rounded border bg-white border-gray-400 text-gray-900 font-medium sm:mx-1',
                     )}
                   >
                     esc
                   </kbd>{' '}
-                  to escape.
+                  to close
                 </div>
               </Combobox>
             </Dialog.Panel>
