@@ -11,6 +11,7 @@ import linksRouter from "./links";
 import userRouter from "./user";
 import orgRouter from "./org";
 import automationsRouter from "./automations";
+import searchRouter from "./search";
 const headRouter = express.Router();
 
 headRouter.use(cors());
@@ -31,6 +32,7 @@ headRouter.use("/automations", automationsRouter);
 headRouter.use("/alerts", alertsRouter);
 headRouter.use("/events", eventsRouter);
 headRouter.use("/links", linksRouter);
+headRouter.use("/search", searchRouter);
 // GitHub
 headRouter.use("/v01", v01Router);
 // Integrations

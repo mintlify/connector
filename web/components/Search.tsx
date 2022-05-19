@@ -1,8 +1,10 @@
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { Combobox, Dialog, Transition } from '@headlessui/react'
 import { SearchIcon } from '@heroicons/react/solid'
 import { ExclamationIcon, FolderIcon, SupportIcon } from '@heroicons/react/outline'
 import { classNames } from '../helpers/functions'
+import axios from 'axios'
+import { API_ENDPOINT } from '../helpers/api'
 
 const projects = [
   { id: 1, name: 'Workflow Inc. / Website Redesign', category: 'Projects', url: '#' },
@@ -27,6 +29,18 @@ type SearchProps = {
 
 export default function Search({ isOpen, setIsOpen }: SearchProps) {
   const [rawQuery, setRawQuery] = useState('')
+
+  useEffect(() => {
+    if (!rawQuery) {
+      return;
+    }
+    
+    axios.get(`${API_ENDPOINT}/routes/search`, {
+      data: {
+        query: rawQuery
+      }
+    })
+  }, [rawQuery]);
 
   if (!isOpen) {
     return null;
