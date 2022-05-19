@@ -43,7 +43,7 @@ const initialDoc: Doc = {
 const initialState: State = {
   doc: initialDoc,
   codes: [],
-  API_ENDPOINT: 'https://connect.mintlify.com/route'
+  API_ENDPOINT: 'https://connect.mintlify.com/routes'
 };
 
 function classNames(...classes) {
