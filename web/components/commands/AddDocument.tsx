@@ -52,10 +52,24 @@ export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc 
     filteredActions = filteredActions.filter((action) => !action.isLeastPriority)
   }
 
-  const isValidUrl = (_string: string) => {
+  const isUrlValid = (str: string): boolean => {
+    var pattern = new RegExp(
+      "^(https?:\\/\\/)?" + // protocol
+        "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
+        "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
+        "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
+        "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
+        "(\\#[-a-z\\d_]*)?$", // fragment locator
+      "i"
+    )
+    return !!pattern.test(str)
+  }
+
+  const isUrlAlive = async (url: string): Promise<boolean> => {
     try {
-      new URL(_string)
-      return true
+      const response = await axios.get(url)
+      // consider all the websites with status codes less than 400 as valid.
+      return response.status < 400
     } catch (error) {
       return false
     }
@@ -64,16 +78,14 @@ export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc 
   const onEnter = async () => {
     if (!query) return
 
-    let formattedQuery: string = query.toLowerCase()
+    let formattedQuery: string = query.trim().toLowerCase()
 
     // prepend `https://` to the url if it's missing
-    if (formattedQuery.startsWith("http://")) formattedQuery = formattedQuery.replace(/^http:\/\//i, "https://")
-    else if (!formattedQuery.startsWith("https://")) formattedQuery = `https://${formattedQuery}`
+    if (!formattedQuery.startsWith("http://") && !formattedQuery.startsWith("https://"))
+      formattedQuery = `https://${formattedQuery}`
 
-    console.log(formattedQuery);
-    console.log(isValidUrl(formattedQuery));
-
-    if (!isValidUrl(formattedQuery)) {
+    // check if the url is valid & the website is alive
+    if (!isUrlValid(formattedQuery) || !isUrlAlive(formattedQuery)) {
       setShowQueryError(true)
       setErrorMessage("Error: The link you entered is invalid.")
       return
