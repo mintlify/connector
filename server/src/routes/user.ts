@@ -144,6 +144,9 @@ userRouter.get("/:userId", async (req, res) => {
         org: { $first: "$org" },
       },
     },
+    {
+      $unset: "org.integrations", // temporarily remove
+    },
   ]);
 
   const user = users[0];

@@ -41,7 +41,7 @@ async function handler(req: any, res: NextApiResponse) {
 
     await req.session.save();
     if (authSource?.source === 'vscode') {
-      redirectToVSCode(res, user);
+      return redirectToVSCode(res, user);
     }
 
     return res.redirect("/");
