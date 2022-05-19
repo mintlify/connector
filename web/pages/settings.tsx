@@ -7,10 +7,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import axios from "axios";
 import { API_ENDPOINT } from "../helpers/api";
-
 import { classNames } from "../helpers/functions";
 import { User } from ".";
-import updateSession from "./api/updateSession";
+import { updateSession } from "../helpers/session";
 
 export type EmailNotifications = {
   monthlyDigest: boolean;
@@ -69,28 +68,25 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
     setIsSendingInvite(false);
   };
 
-  const onBlurFirstNameInput = () => {
-    axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/firstname`, {
+  const onBlurFirstNameInput = async () => {
+    await axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/firstname`, {
       firstName,
-    }).then(() => {
-      updateSession();
     })
+    updateSession();
   };
 
-  const onBlurLastNameInput = () => {
-    axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/lastname`, {
+  const onBlurLastNameInput = async () => {
+    await axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/lastname`, {
       lastName,
-    }).then(() => {
-      updateSession();
     })
+    updateSession();
   };
 
-  const onBlurOrgNameInput = () => {
-    axios.put(`${API_ENDPOINT}/routes/org/${user.org._id}/name?userId=${user.userId}`, {
+  const onBlurOrgNameInput = async () => {
+    await axios.put(`${API_ENDPOINT}/routes/org/${user.org._id}/name?userId=${user.userId}`, {
       name: orgName,
-    }).then(() => {
-      updateSession();
     })
+    updateSession();
   };
 
   const updateEmailNotifications = async (newNotifications: EmailNotifications) => {
