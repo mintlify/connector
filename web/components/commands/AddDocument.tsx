@@ -70,6 +70,9 @@ export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc 
     if (formattedQuery.startsWith("http://")) formattedQuery = formattedQuery.replace(/^http:\/\//i, "https://")
     else if (!formattedQuery.startsWith("https://")) formattedQuery = `https://${formattedQuery}`
 
+    console.log(formattedQuery);
+    console.log(isValidUrl(formattedQuery));
+
     if (!isValidUrl(formattedQuery)) {
       setShowQueryError(true)
       setErrorMessage("Error: The link you entered is invalid.")
