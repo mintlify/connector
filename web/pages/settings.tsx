@@ -6,10 +6,11 @@ import { UserSession } from ".";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { API_ENDPOINT, updateSession } from "../helpers/api";
+import { API_ENDPOINT } from "../helpers/api";
 
 import { classNames } from "../helpers/functions";
 import { User } from ".";
+import updateSession from "./api/updateSession";
 
 export type EmailNotifications = {
   monthlyDigest: boolean;
