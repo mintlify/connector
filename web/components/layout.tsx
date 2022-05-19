@@ -1,7 +1,7 @@
 import { User } from "../pages";
 import Navbar from "./Navbar";
 
-export default function Layout({ children, user }: { children: React.ReactNode, user: User }) {
+export default function Layout({ children, user }: { children: React.ReactNode; user: User }) {
   return (
     <>
       {/* Background color split screen for large screens */}
@@ -12,5 +12,5 @@ export default function Layout({ children, user }: { children: React.ReactNode, 
         {children}
       </main>
     </>
-  )
+  );
 }

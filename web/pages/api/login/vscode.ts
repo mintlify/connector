@@ -18,7 +18,7 @@ async function handler(req: any, res: NextApiResponse) {
       return res.redirect('/');
     }
 
-    redirectToVSCode(res, user);
+    return redirectToVSCode(res, user);
   } catch (e) {
     const errorString = JSON.stringify(e);
     return res.status(400).json({errorString});
