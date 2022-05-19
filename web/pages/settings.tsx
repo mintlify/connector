@@ -7,8 +7,14 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import axios from "axios";
 import { API_ENDPOINT } from "../helpers/api";
+
 import { classNames } from "../helpers/functions";
 import { User } from ".";
+
+export type EmailNotifications = {
+  monthlyDigest: boolean;
+  newsletter: boolean;
+};
 
 const navigation = [
   { name: "Account", href: "#setting-account", icon: UserCircleIcon },
@@ -24,12 +30,24 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
   const [invitedEmail, setInvitedEmail] = useState("");
   const [isSendingInvite, setIsSendingInvite] = useState(false);
   const [members, setMembers] = useState<User[]>([]);
+  const [emailNotifications, setEmailNotifications] = useState<EmailNotifications>({
+    monthlyDigest: false,
+    newsletter: false,
+  });
 
-  // get all members of the organization
   useEffect(() => {
+    // get all members of the organization
     axios.get(`${API_ENDPOINT}/routes/org/list-users?orgId=${user.org._id}`).then((res) => {
       setMembers(res.data.users);
     });
+
+    async function getEmailNotifications() {
+      await axios.get(`${API_ENDPOINT}/routes/org?userId=${user.userId}&orgId=${user.org._id.toString()}`).then((res) => {
+        setEmailNotifications(res.data?.org?.notifications);
+      });
+    }
+
+    getEmailNotifications();
   }, [user]);
 
   const inviteMember = async (email: string) => {
@@ -75,6 +93,14 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
         name: orgName,
       });
     }
+  };
+
+  const updateEmailNotifications = async (newNotifications: EmailNotifications) => {
+    setEmailNotifications(newNotifications);
+    // update the organization's new notifications in the database
+    await axios.put(`${API_ENDPOINT}/routes/org/${user.org._id}/email-notifications?userId=${user.userId}`, {
+      ...newNotifications,
+    });
   };
 
   return (
@@ -326,6 +352,13 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                             name="comments"
                             type="checkbox"
                             className="focus:ring-primary h-4 w-4 text-primary border-gray-300 rounded"
+                            checked={emailNotifications.monthlyDigest}
+                            onChange={(_) =>
+                              updateEmailNotifications({
+                                ...emailNotifications,
+                                monthlyDigest: !emailNotifications.monthlyDigest,
+                              })
+                            }
                           />
                         </div>
                         <div className="ml-3 text-sm">
@@ -343,6 +376,13 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                               name="candidates"
                               type="checkbox"
                               className="focus:ring-primary h-4 w-4 text-primary border-gray-300 rounded"
+                              checked={emailNotifications.newsletter}
+                              onChange={(_) =>
+                                updateEmailNotifications({
+                                  ...emailNotifications,
+                                  newsletter: !emailNotifications.newsletter,
+                                })
+                              }
                             />
                           </div>
                           <div className="ml-3 text-sm">
