@@ -8,6 +8,8 @@ import { triggerWebhook } from '../services/webhook';
 export const triggerAutomationsForEvents = async (orgId: string, events: EventType[]) => {
     const automationsFromOrg = await Automation.find({ org: orgId });
     const orgObj = await Org.findById(orgId);
+    console.log({automationsFromOrg});
+    console.log({orgObj});
     if (orgObj != null) {
         events.forEach(async (event) => {
             await triggerAutomations(event, automationsFromOrg, orgObj);
@@ -28,6 +30,7 @@ export const triggerAutomations = async (event: EventType, automations: Automati
     }).forEach(async (automation) => { 
         switch (automation.destination.type) {
             case 'slack':
+                console.log('slackkkk');
                 slackAutomationForEvent(event, automation, org);
                 break;
             case 'email':

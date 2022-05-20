@@ -8,22 +8,20 @@ import { OrgType } from '../models/Org';
 
 dotenv.config();
 
-export const publishMessage = async (text: string, channel: string) => {
-  const slackToken = process.env.SLACK_TOKEN;
-  if (slackToken == null ) return;
+export const publishMessage = async (text: string, channel: string, token: string) => {
   const postMessage = async () => {
     const messageUrl = 'https://slack.com/api/chat.postMessage';
     return await axios.post(messageUrl, {
       channel: channel,
       text
-    }, { headers: { authorization: `Bearer ${slackToken}` } });
+    }, { headers: { authorization: `Bearer ${token}` } });
   }
   const handleChannelNotFound = async (err: string) => {
     if (err === 'channel_not_found') {
       const url = 'https://slack.com/api/conversations.create';
       await axios.post(url, {
         name: channel.substring(1)
-      }, { headers: { authorization: `Bearer ${slackToken}` } });
+      }, { headers: { authorization: `Bearer ${token}` } });
       await postMessage();
     }
   }
@@ -58,8 +56,12 @@ const getSlackMessage = async (event: EventType, automation: AutomationType): Pr
 
 export const slackAutomationForEvent = async (event: EventType, automation: AutomationType, org: OrgType) => {
     const message = await getSlackMessage(event, automation);
+    console.log({message});
     const channel = org?.integrations?.slack?.channel;
-    if (channel && message){
-        await publishMessage(message, channel);
+    console.log({channel});
+    const token = org?.integrations?.slack?.accessToken;
+    console.log({token})
+    if (channel && message) {
+        await publishMessage(message, channel, token);
     }
 };
