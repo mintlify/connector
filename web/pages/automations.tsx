@@ -12,6 +12,7 @@ import { API_ENDPOINT } from "../helpers/api";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Skeleton from "react-loading-skeleton";
 
 export type DestinationType = 'slack' | 'email' | 'webhook';
 export type AutomationType = 'doc' | 'code';
@@ -34,20 +35,13 @@ export type Automation = {
   createdBy: string,
 }
 
-export default function Automations({ userSession }: { userSession: UserSession }) {
-  const [automations, setAutomations] = useState<Automation[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
-  const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
-  const [isAddingAutomation, setIsAddingAutomation] = useState<boolean>(false);
-
-  const user = userSession.user;
-  const integrations = [
+const getIntegrations = (orgId: string) => {
+  return [
     {
       id: 'github',
       name: 'GitHub',
       imageUrl: '/assets/integrations/github.svg',
-      href: `${API_ENDPOINT}/routes/integrations/github/install?org=${user.org._id}`,
+      href: `${API_ENDPOINT}/routes/integrations/github/install?org=${orgId}`,
     },
     {
       id: 'vscode',
@@ -59,15 +53,28 @@ export default function Automations({ userSession }: { userSession: UserSession 
       id: 'slack',
       name: 'Slack',
       imageUrl: '/assets/integrations/slack.svg',
-      href: `${API_ENDPOINT}/routes/integrations/slack/install?org=${user.org._id}`,
+      href: `${API_ENDPOINT}/routes/integrations/slack/install?org=${orgId}`,
     },
     {
       id: 'notion',
       name: 'Notion',
       imageUrl: '/assets/integrations/notion.svg',
-      href: `${API_ENDPOINT}/routes/integrations/notion/install?org=${user.org._id}`,
+      href: `${API_ENDPOINT}/routes/integrations/notion/install?org=${orgId}`,
     },
   ]
+}
+
+export default function Automations({ userSession }: { userSession: UserSession }) {
+  const [automations, setAutomations] = useState<Automation[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
+  const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
+  const [isAddingAutomation, setIsAddingAutomation] = useState<boolean>(false);
+  const [integrationsStatus, setIntegrationsStatus] = useState<{ [key: string]: boolean }>();
+
+  const user = userSession.user;
+
+  const integrations = getIntegrations(user.org._id);
 
   const listMenu = [
     {
@@ -88,15 +95,15 @@ export default function Automations({ userSession }: { userSession: UserSession 
       })
       .finally(() => {
         setIsLoading(false);
+      });
+
+    axios.get(`${API_ENDPOINT}/routes/org/${user.org._id}/integrations?userId=${user.userId}`)
+      .then(({ data }) => {
+        const { integrations } = data;
+        setIntegrationsStatus(integrations);
       })
   }, [user, isAddingAutomation]);
 
-  /**
-   * It takes an automationId and isActive boolean, and then it makes a PUT request to the API endpoint
-   * to update the automation's isActive property
-   * @param {string} automationId - The id of the automation that we want to toggle
-   * @param {boolean} isActive - boolean - This is the new state of the switch.
-   */
   const handleToggleSwitch = async (automationId: string, isActive: boolean) => {
     axios.put(`${API_ENDPOINT}/routes/automations/active?userId=${user.userId}`, { automationId, isActive })
       .then(() => {
@@ -259,7 +266,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
                       <span className="absolute inset-0" aria-hidden="true" />
                       <p className="text-sm font-medium text-gray-900">{integration.name}</p>
                       <div className="flex space-x-0.5 items-center">
-                        <p className="text-xs text-gray-500 truncate">{ user.org?.integrations != null && user.org.integrations[integration.id] ? 'Installed' : 'Not installed'}</p>
+                        <p className="text-xs text-gray-500 truncate">{ integrationsStatus == null ? <Skeleton width={56} /> : integrationsStatus[integration.id] ? 'Installed' : 'Not installed'}</p>
                         { user.org?.integrations != null && user.org.integrations[integration.id] ? <CheckCircleIcon className="h-3 w-3 text-green-600" /> : null }
                       </div>
                     </a>

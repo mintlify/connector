@@ -26,7 +26,7 @@ export default function SignIn() {
             <p className="mt-2 text-center text-sm text-gray-600">
               Or{' '}
               <a href="#" className="font-medium text-primary hover:text-hover">
-                start your 14-day free trial
+                create a new account
               </a>
             </p>
           </div>
@@ -66,7 +66,7 @@ export default function SignIn() {
                 <span className="px-2 bg-gray-50 text-gray-500">Or continue with</span>
               </div>
             </div>
-            <form className="mt-8 space-y-6" action="#" method="POST">
+            <form className="mt-8 space-y-4" action="#" method="POST">
               <input type="hidden" name="remember" defaultValue="true" />
               <div className="rounded-md shadow-sm -space-y-px">
                 <div>

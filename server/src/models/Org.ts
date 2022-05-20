@@ -54,8 +54,8 @@ const OrgSchema = new Schema({
     },
   },
   notifications: {
-    monthlyDigest: { type: Boolean, default: false },
-    newsletter: { type: Boolean, default: false },
+    monthlyDigest: { type: Boolean, default: true },
+    newsletter: { type: Boolean, default: true },
   },
 });
 

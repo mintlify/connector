@@ -145,12 +145,8 @@ userRouter.get("/:userId", async (req, res) => {
       },
     },
     {
-      // Convert integration keys to boolean
-      $set: {
-        "org.integrations.notion": { $gt: ["$org.integrations.notion", null] },
-        "org.integrations.github": { $gt: ["$org.integrations.github", null] },
-        "org.integrations.slack": { $gt: ["$org.integrations.slack", null] },
-      },
+      // Remove integrations data
+      $unset: "org.integrations",
     },
   ]);
 
