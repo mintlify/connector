@@ -88,7 +88,7 @@ automationsRouter.delete('/:automationId', userMiddleware, async (req, res) => {
 
 automationsRouter.get('/testSlack', userMiddleware, async (_, res) => {
   const { org } = res.locals.user;
-  const docs = await Doc.find({ url: 'https://mintlify.notion.site/Mintlify-Connect-c77063caf3f6492e85badd026b769a69'});
+  const docs = await Doc.find({ org, url: 'https://mintlify.notion.site/Mintlify-Connect-c77063caf3f6492e85badd026b769a69' });
   if (docs) {
     const events: EventType[] = [
       {
@@ -110,6 +110,7 @@ automationsRouter.get('/testSlack', userMiddleware, async (_, res) => {
     await triggerAutomationsForEvents(org, events);
     res.end();
   }
+  res.end();
 })
 
 export default automationsRouter;
