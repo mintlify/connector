@@ -102,7 +102,7 @@ export default function EventItem({ event }: { event: Event }) {
                   { isShowingChanges ? <><ChevronUpIcon className="h-4 w-4" />Hide changes</> :  <><ChevronDownIcon className="h-4 w-4" />Show changes</> }
                 </button>
                 {
-                  isShowingChanges && <div className="mt-1">
+                  isShowingChanges && <div className="mt-1 px-1">
                   <ChangedText changes={event.change} />
                 </div>
                 }
