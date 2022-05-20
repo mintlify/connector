@@ -267,13 +267,25 @@ export default function Automations({ userSession }: { userSession: UserSession 
                       <p className="text-sm font-medium text-gray-900">{integration.name}</p>
                       <div className="flex space-x-0.5 items-center">
                         <p className="text-xs text-gray-500 truncate">{ integrationsStatus == null ? <Skeleton width={56} /> : integrationsStatus[integration.id] ? 'Installed' : 'Not installed'}</p>
-                        { user.org?.integrations != null && user.org.integrations[integration.id] ? <CheckCircleIcon className="h-3 w-3 text-green-600" /> : null }
+                        { integrationsStatus != null && integrationsStatus[integration.id] ? <CheckCircleIcon className="h-3 w-3 text-green-600" /> : null }
                       </div>
                     </a>
                   </div>
                 </div>
               </Link>
             ))}
+            <Link key="test" href={`${API_ENDPOINT}/routes/automations/testSlack?userId=${user.userId}`}>
+                <div
+                  className="relative rounded-md border border-gray-200 bg-white px-3 py-2 shadow-sm flex items-center space-x-3 hover:bg-gray-50"
+                >
+                  <div className="flex-1 min-w-0">
+                    <a href="#" className="focus:outline-none">
+                      <span className="absolute inset-0" aria-hidden="true" />
+                      <p className="text-sm font-medium text-gray-900">test slack</p>
+                    </a>
+                  </div>
+                </div>
+              </Link>
           </div>
         </div>
       </div>

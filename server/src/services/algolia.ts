@@ -6,7 +6,8 @@ import { DocType } from '../models/Doc';
 dotenv.config();
 
 const algoliaSecret = process.env.ALGOLIA_SECRET as string;
-const client = algoliasearch('ZYAFPP03KM', algoliaSecret);
+const algoliaClientId = process.env.ALGOLIA_APP_ID as string;
+const client = algoliasearch(algoliaClientId, algoliaSecret);
 
 type SearchResults = {
     docs: any[],
@@ -28,8 +29,6 @@ export const searchDocsAndAutomations = async (query: string, orgId: string): Pr
         }
       }];
     const { results } = await client.multipleQueries(queries);
-
-    console.log({results})
     return {
         docs: results[0].hits,
         automations: results[1].hits

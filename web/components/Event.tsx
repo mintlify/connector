@@ -20,21 +20,21 @@ export type Event = {
 }
 
 const countTotalChanges = (change: Change[]) => {
-  let totalRemoved = 0;
-  let totalAdded = 0;
+  let totalWordsRemoved = 0;
+  let totalWordsAdded = 0;
 
   change.forEach((section) => {
     if (section.removed) {
-      totalRemoved += section.count;
+      totalWordsRemoved += section.value.split(' ').length;
     }
     if (section.added) {
-      totalAdded += section.count;
+      totalWordsAdded += section.value.split(' ').length;
     }
   });
 
   return {
-    removed: totalRemoved,
-    added: totalAdded,
+    removed: totalWordsRemoved,
+    added: totalWordsAdded,
   }
 }
 
@@ -60,13 +60,13 @@ export default function EventItem({ event }: { event: Event }) {
                 <div className="flex items-center space-x-1 text-green-700">
                   <PlusIcon className="h-4 w-4" />
                   <p className="text-sm">
-                    {countTotalChanges(event.change).added} {countTotalChanges(event.change).added > 1 ? 'changes' : 'change'}
+                    {countTotalChanges(event.change).added} {countTotalChanges(event.change).added > 1 ? 'words added' : 'word added'}
                   </p>
                 </div>
                 <div className="flex items-center space-x-1 text-red-700">
                   <MinusIcon className="h-4 w-4" />
                   <p className="text-sm">
-                    {countTotalChanges(event.change).removed} {countTotalChanges(event.change).removed > 1 ? 'changes' : 'change'}
+                    {countTotalChanges(event.change).removed} {countTotalChanges(event.change).removed > 1 ? 'words deleted' : 'word deleted'}
                   </p>
                 </div>
               </div>
