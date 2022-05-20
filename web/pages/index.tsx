@@ -108,11 +108,21 @@ export default function Home({ userSession }: { userSession: UserSession }) {
   }, [userSession, selectedDoc, isAddingDoc]);
 
   if (!userSession) {
-    return <SignIn />
+    return <>
+      <Head>
+        <title>Sign in to Mintlify</title>
+      </Head>
+      <SignIn />
+    </>
   }
 
   if (userSession.user == null) {
-    return <Setup email={userSession.email} firstName={userSession.firstName} lastName={userSession.lastName} />;
+    return <>
+      <Head>
+        <title>Finish setting up your account</title>
+      </Head>
+      <Setup email={userSession.email} firstName={userSession.firstName} lastName={userSession.lastName} />
+    </>;
   }
 
   const ClearSelectedFrame = () => {
