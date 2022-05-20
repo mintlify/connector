@@ -1,59 +1,65 @@
-import Layout from "../components/layout";
-import { BellIcon, UserCircleIcon, UserGroupIcon } from "@heroicons/react/outline";
-import { GetServerSideProps } from "next";
-import { withSession } from "../lib/withSession";
-import { UserSession } from ".";
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import axios from "axios";
-import { API_ENDPOINT } from "../helpers/api";
-import { classNames } from "../helpers/functions";
-import { User } from ".";
-import { updateSession } from "../helpers/session";
+import Layout from "../components/layout"
+import { BellIcon, UserCircleIcon, UserGroupIcon } from "@heroicons/react/outline"
+import { GetServerSideProps } from "next"
+import { withSession } from "../lib/withSession"
+import { UserSession } from "."
+import { useState, useEffect } from "react"
+import Link from "next/link"
+import axios from "axios"
+import { API_ENDPOINT } from "../helpers/api"
+import { classNames } from "../helpers/functions"
+import { User } from "."
+import { updateSession } from "../helpers/session"
 
 export type EmailNotifications = {
-  monthlyDigest: boolean;
-  newsletter: boolean;
-};
+  monthlyDigest: boolean
+  newsletter: boolean
+}
 
 const navigation = [
   { name: "Account", href: "#setting-account", icon: UserCircleIcon },
   { name: "Organization", href: "#setting-organization", icon: UserGroupIcon },
   { name: "Notifications", href: "#setting-notifications", icon: BellIcon },
-];
+]
 
 export default function Settings({ userSession }: { userSession: UserSession }) {
-  const user = userSession.user;
-  const [firstName, setFirstName] = useState(user.firstName);
-  const [lastName, setLastName] = useState(user.lastName);
-  const [orgName, setOrgName] = useState(user.org.name);
-  const [invitedEmail, setInvitedEmail] = useState("");
-  const [isSendingInvite, setIsSendingInvite] = useState(false);
-  const [members, setMembers] = useState<User[]>([]);
+  const user = userSession.user
+  const [firstName, setFirstName] = useState(user.firstName)
+  const [lastName, setLastName] = useState(user.lastName)
+  const [orgName, setOrgName] = useState(user.org.name)
+  const [invitedEmail, setInvitedEmail] = useState("")
+  const [inviteErrorMessage, setInviteErrorMessage] = useState<string | undefined>(undefined)
+  const [isSendingInvite, setIsSendingInvite] = useState(false)
+  const [members, setMembers] = useState<User[]>([])
   const [emailNotifications, setEmailNotifications] = useState<EmailNotifications>({
     monthlyDigest: false,
     newsletter: false,
-  });
+  })
 
   useEffect(() => {
     // get all members of the organization
     axios.get(`${API_ENDPOINT}/routes/org/list-users?orgId=${user.org._id}`).then((res) => {
-      setMembers(res.data.users);
-    });
+      setMembers(res.data.users)
+    })
 
     async function getEmailNotifications() {
       await axios.get(`${API_ENDPOINT}/routes/org?userId=${user.userId}&orgId=${user.org._id.toString()}`).then((res) => {
-        setEmailNotifications(res.data?.org?.notifications);
-      });
+        setEmailNotifications(res.data?.org?.notifications)
+      })
     }
 
-    getEmailNotifications();
-  }, [user]);
+    getEmailNotifications()
+  }, [user])
 
   const inviteMember = async (email: string) => {
+    if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email.trim()) || email.trim() === "") {
+      setInviteErrorMessage("Please enter a valid email address.")
+      return
+    }
+
     // disable the add member button before sending the invitation
-    setIsSendingInvite(true);
-    setInvitedEmail("");
+    setIsSendingInvite(true)
+    setInvitedEmail("")
     // create a pending account by calling the invitation API
     await axios
       .post(`${API_ENDPOINT}/routes/user/invite-to-org`, {
@@ -61,41 +67,41 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
         orgId: user.org._id,
       })
       .then((res) => {
-        setMembers(members.concat(res.data.users));
+        setMembers(members.concat(res.data.users))
       })
     // send login invitation
-    await axios.post("/api/login/magiclink", { email }).catch((err) => console.log(err));
-    setIsSendingInvite(false);
-  };
+    await axios.post("/api/login/magiclink", { email }).catch((err) => console.log(err))
+    setIsSendingInvite(false)
+  }
 
   const onBlurFirstNameInput = async () => {
     await axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/firstname`, {
       firstName,
     })
-    updateSession();
-  };
+    updateSession()
+  }
 
   const onBlurLastNameInput = async () => {
     await axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/lastname`, {
       lastName,
     })
-    updateSession();
-  };
+    updateSession()
+  }
 
   const onBlurOrgNameInput = async () => {
     await axios.put(`${API_ENDPOINT}/routes/org/${user.org._id}/name?userId=${user.userId}`, {
       name: orgName,
     })
-    updateSession();
-  };
+    updateSession()
+  }
 
   const updateEmailNotifications = async (newNotifications: EmailNotifications) => {
-    setEmailNotifications(newNotifications);
+    setEmailNotifications(newNotifications)
     // update the organization's new notifications in the database
     await axios.put(`${API_ENDPOINT}/routes/org/${user.org._id}/email-notifications?userId=${user.userId}`, {
       ...newNotifications,
-    });
-  };
+    })
+  }
 
   return (
     <Layout user={userSession.user}>
@@ -231,17 +237,21 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                               placeholder="Email address"
                               aria-describedby="add-team-members-helper"
                               value={invitedEmail}
-                              onChange={(e) => setInvitedEmail(e.target.value)}
+                              onChange={(e) => {
+                                setInviteErrorMessage(undefined)
+                                setInvitedEmail(e.target.value)
+                              }}
                               required
                             />
+                            {inviteErrorMessage && <div className="text-red-500 pt-2 pl-2">{inviteErrorMessage}</div>}
                           </div>
                           <span className="ml-3">
                             <button
                               type="button"
                               disabled={isSendingInvite}
                               onClick={(e) => {
-                                e.preventDefault();
-                                inviteMember(invitedEmail);
+                                e.preventDefault()
+                                inviteMember(invitedEmail)
                               }}
                               className="inline-flex items-center justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-hover focus:outline-none focus:ring-0 focus:ring-offset-2 sm:w-auto"
                             >
@@ -396,13 +406,13 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
         </div>
       </div>
     </Layout>
-  );
+  )
 }
 
 const getServerSidePropsHandler: GetServerSideProps = async ({ req }: any) => {
-  const userSession = req.session.get("user") ?? null;
-  const props = { userSession };
-  return { props };
-};
+  const userSession = req.session.get("user") ?? null
+  const props = { userSession }
+  return { props }
+}
 
-export const getServerSideProps = withSession(getServerSidePropsHandler);
+export const getServerSideProps = withSession(getServerSidePropsHandler)
