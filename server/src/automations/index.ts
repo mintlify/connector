@@ -21,20 +21,12 @@ export const triggerAutomationsForEvents = async (orgId: string, events: EventTy
 export const triggerAutomations = async (event: EventType, automations: AutomationType[], org: OrgType) => {
     console.log('triggerAutomations');
     automations.filter((automation) => {
-        const isDocEvent = (event.type === 'change' || event.type === 'add') && automation.type === 'doc';
-        if (isDocEvent) {
-            console.log('event.doc: ', event.doc);
-            console.log('automation.source?.doc: ', automation.source?.doc);
-            const isSameDocObj = event.doc.toString() === automation.source?.doc?.toString();
-            if (isSameDocObj) {
-                console.log({isSameDocObj});
-                console.log({automation});
-                return true;
-            }
+        const isSameDocObj = event.doc.toString() === automation.source?.doc?.toString();
+        if (isSameDocObj) {
+            console.log({isSameDocObj});
+            console.log({automation});
+            return true;
         }
-        console.log({automation});
-        console.log(automation.source?.doc);
-        console.log(false);
         return false;
     }).forEach(async (automation) => { 
         switch (automation.destination.type) {
