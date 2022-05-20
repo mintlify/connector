@@ -180,7 +180,7 @@ export const getGitData = async (fileFsPath: string, viewProvider: ViewProvider,
             function delay(time) {
                 return new Promise(resolve => setTimeout(resolve, time));
             }
-            await delay(500);
+            await delay(200);
             viewProvider.postCode(code);
         });
     });
