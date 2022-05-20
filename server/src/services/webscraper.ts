@@ -108,7 +108,7 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
     $('script').remove();
     $('style').remove();
     
-    let content; 
+    let content;
 
     if (scrapingMethod === 'readme') {
         // Remove unneeded components
@@ -120,33 +120,37 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
         content = getContentFromHTML($('body'));
     }
 
-    if (scrapingMethod === 'stoplight') {
+    else if (scrapingMethod === 'stoplight') {
         content = getContentFromHTML($('.Editor'))
     }
 
-    if (scrapingMethod === 'docusaurus') {
+    else if (scrapingMethod === 'docusaurus') {
         content = getContentFromHTML($('.markdown'))
     }
 
-    if (scrapingMethod === 'github') {
+    else if (scrapingMethod === 'github') {
         content = getContentFromHTML($('#readme'))
     }
 
-    if (scrapingMethod === 'notion-public') {
+    else if (scrapingMethod === 'notion-public') {
+        $('.notion-overlay-container').remove();
         content = getContentFromHTML($('.notion-page-content'))
     }
 
-    if (scrapingMethod === 'confluence-public') {
+    else if (scrapingMethod === 'confluence-public') {
         $('.recently-updated').remove();
         content = getContentFromHTML($('#content-body'))
     }
 
-    if (scrapingMethod === 'googledocs') {
+    else if (scrapingMethod === 'googledocs') {
         content = getContentFromHTML($('#contents'))
     }
 
     else {
         content = getContentFromHTML($('body'))
+        if ($('body').find('main').length > 0) {
+            content = getContentFromHTML($('body main'))
+        }
     }
 
     return {
