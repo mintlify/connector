@@ -5,6 +5,7 @@ import { AutomationType } from '../models/Automation';
 import Doc, { DocType } from '../models/Doc';
 import { getDocumentNameFromUrl } from '../helpers/routes/messages';
 import { OrgType } from '../models/Org';
+import Code, { CodeType } from '../models/Code';
 
 dotenv.config();
 
@@ -13,7 +14,8 @@ export const publishMessage = async (text: string, channel: string, token: strin
     const messageUrl = 'https://slack.com/api/chat.postMessage';
     return await axios.post(messageUrl, {
       channel: channel,
-      text
+      text,
+      mrkdwn: true
     }, { headers: { authorization: `Bearer ${token}` } });
   }
   const handleChannelNotFound = async (err: string) => {
@@ -34,22 +36,17 @@ export const publishMessage = async (text: string, channel: string, token: strin
 }
 
 const getSlackMessage = async (event: EventType, automation: AutomationType): Promise<string|null> => {
-    if (automation.type === 'doc' && event.type === 'change') {
-        const doc: DocType | null = await Doc.findById(event.doc);
-        let header = 'Changes have been made to one of your document:';
-        if (doc != null) {
-            const title = await getDocumentNameFromUrl(doc.url);
-            header = `Changes have been made to [${title}](${doc.url}):\n`;
-        }
-        const changes = event?.change;
-        const changesFormatted: string = changes?.filter((change) => {
-            return change.count != 1 && !change?.removed;
-        })?.map((change) => {
-            return `> ${change.value}\n`;
-        }).join('\n') ?? '';
-        return `${header}${changesFormatted}`;
+      const doc: DocType | null = await Doc.findById(event.doc);
+      let title = 'your document';
+      if (doc != null) {
+        title = await getDocumentNameFromUrl(doc.url);
+      }
+      if (automation.type === 'doc' && event.type === 'change') {
+        return `Changes have been made to <${doc?.url}|${title}>`;
     } else if (automation.type === 'code') {
-        // TODO
+      const code: CodeType | null = await Code.findById(event.code);
+
+      return `Changes have been made to <${code?.url}|code> connected to <${doc?.url}|${title}>. Do you need to update your document to reflect the changes?`;
     }
     return null;
 }
