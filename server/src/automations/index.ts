@@ -2,6 +2,8 @@ import { EventType } from '../models/Event';
 import Automation, { AutomationType } from '../models/Automation';
 import Org, { OrgType } from '../models/Org';
 import { slackAutomationForEvent } from './slack';
+import { sendEmail } from '../services/mandrill';
+import { triggerWebhook } from '../services/webhook';
 
 export const triggerAutomationsForEvents = async (orgId: string, events: EventType[]) => {
     const automationsFromOrg = await Automation.find({ org: orgId });
@@ -24,9 +26,18 @@ export const triggerAutomations = async (event: EventType, automations: Automati
         }
         return false;
     }).forEach(async (automation) => { 
-        switch(automation.destination.type) {
+        switch (automation.destination.type) {
             case 'slack':
-                await slackAutomationForEvent(event, automation, org);
+                slackAutomationForEvent(event, automation, org);
+                break;
+            case 'email':
+                sendEmail(automation.destination.value);
+                break;
+            case 'webhook':
+                triggerWebhook(automation.destination.value);
+                break;
+            default:
+                return;
         }
     })
 }
