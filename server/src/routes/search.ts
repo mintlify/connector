@@ -16,7 +16,6 @@ searchRouter.get('/', async (req, res) => {
     return res.send({results});
   }
   catch (error) {
-    console.log(error);
     return res.status(400).send({error})
   }
 });

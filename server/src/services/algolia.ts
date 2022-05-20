@@ -29,8 +29,6 @@ export const searchDocsAndAutomations = async (query: string, orgId: string): Pr
         }
       }];
     const { results } = await client.multipleQueries(queries);
-
-    console.log({results})
     return {
         docs: results[0].hits,
         automations: results[1].hits

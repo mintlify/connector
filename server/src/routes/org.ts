@@ -20,7 +20,6 @@ orgRouter.get("/", userMiddleware, async (req: any, res: express.Response) => {
     const org = await Org.findById(new mongoose.Types.ObjectId(orgId.toString()))
       .exec()
       .catch((err) => {
-        console.log(err);
         throw new Error(err);
       });
 
