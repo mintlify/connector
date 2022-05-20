@@ -274,7 +274,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
                 </div>
               </Link>
             ))}
-            <Link key="test" href={`${API_ENDPOINT}/routes/automations/testSlack`}>
+            <Link key="test" href={`${API_ENDPOINT}/routes/automations/testSlack?userId=${user.userId}`}>
                 <div
                   className="relative rounded-md border border-gray-200 bg-white px-3 py-2 shadow-sm flex items-center space-x-3 hover:bg-gray-50"
                 >
