@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import { getNotionContent, isNotionUrl } from './notion';
 import validUrl from 'valid-url';
 import Org from '../models/Org';
+import { getContentFromHTML } from '../helpers/routes/domparsing';
 const webScrapingApiClient = require('webscrapingapi');
 
 const client = new webScrapingApiClient(process.env.WEBSCRAPER_KEY);
@@ -102,42 +103,50 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
         const urlParsed = new URL(url);
         favicon = `${urlParsed.origin}${favicon}`;
     }
-    // Remove iframes
+    // Remove unneeded for content
     $('iframe').remove();
-    let content = $('body').text().trim();
+    $('script').remove();
+    $('style').remove();
+    
+    let content; 
 
     if (scrapingMethod === 'readme') {
         // Remove unneeded components
-        $('.DateLine').remove();
+        $('#updated-at').nextAll().remove();
+        $('#updated-at').remove();
         $('nav').remove();
         $('header.rm-Header').remove();
         $('.PageThumbs').remove();
-        content = $('body').text().trim();
+        content = getContentFromHTML($('body'));
     }
 
     if (scrapingMethod === 'stoplight') {
-        content = $('.Editor').text().trim();
+        content = getContentFromHTML($('.Editor'))
     }
 
     if (scrapingMethod === 'docusaurus') {
-        content = $('.markdown').text().trim();
+        content = getContentFromHTML($('.markdown'))
     }
 
     if (scrapingMethod === 'github') {
-        content = $('#readme').text().trim();
+        content = getContentFromHTML($('#readme'))
     }
 
     if (scrapingMethod === 'notion-public') {
-        content = $('.notion-app-inner').text().trim();
+        content = getContentFromHTML($('.notion-page-content'))
     }
 
     if (scrapingMethod === 'confluence-public') {
         $('.recently-updated').remove();
-        content = $('#content-body').text().trim();
+        content = getContentFromHTML($('#content-body'))
     }
 
     if (scrapingMethod === 'googledocs') {
-        content = $('#contents').text().trim();
+        content = getContentFromHTML($('#contents'))
+    }
+
+    else {
+        content = getContentFromHTML($('body'))
     }
 
     return {
