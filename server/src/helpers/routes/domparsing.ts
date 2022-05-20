@@ -14,6 +14,6 @@ export const getContentFromHTML = (element: cheerio.Cheerio<cheerio.Element>) =>
 const removeRedundantWhitespace = (str: string) => {
   const trimmed = str.trim();
 
-  const results = trimmed.split('\n').filter((line) => line).map((line) => line.trim());
+  const results = trimmed.split('\n').map((line) => line.trim()).filter((line) => line)
   return results.join('\n');
 }

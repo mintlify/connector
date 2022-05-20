@@ -77,6 +77,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       isRed: true,
       onClick: (docId: string) => {
         setDocs(docs.filter(doc => doc._id !== docId));
+        setSelectedDoc(undefined);
         axios.delete(`${API_ENDPOINT}/routes/docs/${docId}?userId=${userSession.user.userId}`);
       }
     }
@@ -127,7 +128,6 @@ export default function Home({ userSession }: { userSession: UserSession }) {
 
   const ClearSelectedFrame = () => {
     if (!selectedDoc) return null;
-
     return <div className="absolute inset-0" onClick={() => setSelectedDoc(undefined)}></div>
   }
 
@@ -285,11 +285,6 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                           ))
                         }
                       </div>
-                      {[].length > 5 ? (
-                        <span className="flex-shrink-0 text-xs leading-5 font-medium">
-                          +1
-                        </span>
-                      ) : null}
                     </div>
                   </div>
                 </div>
