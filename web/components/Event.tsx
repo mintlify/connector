@@ -57,18 +57,22 @@ export default function EventItem({ event }: { event: Event }) {
           {
             event.type === 'change' && event.change && (
               <div>
-                <div className="flex items-center space-x-1 text-green-700">
+                {
+                  countTotalChanges(event.change).added > 0 && (<div className="flex items-center space-x-1 text-green-700">
                   <PlusIcon className="h-4 w-4" />
                   <p className="text-sm">
                     {countTotalChanges(event.change).added} {countTotalChanges(event.change).added > 1 ? 'words added' : 'word added'}
                   </p>
-                </div>
-                <div className="flex items-center space-x-1 text-red-700">
+                </div>)
+                }
+                {
+                  countTotalChanges(event.change).removed > 0 && <div className="flex items-center space-x-1 text-red-700">
                   <MinusIcon className="h-4 w-4" />
                   <p className="text-sm">
                     {countTotalChanges(event.change).removed} {countTotalChanges(event.change).removed > 1 ? 'words deleted' : 'word deleted'}
                   </p>
                 </div>
+                }
               </div>
             )
           }
