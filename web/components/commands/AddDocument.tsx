@@ -16,8 +16,7 @@ type AddDocumentProps = {
 export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc }: AddDocumentProps) {
   const [query, setQuery] = useState("")
   const [placeholder, setPlaceholder] = useState("Add link")
-  const [showQueryError, setShowQueryError] = useState<boolean>(false)
-  const [errorMessage, setErrorMessage] = useState<string>("")
+  const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
   const actions = [
     {
@@ -86,8 +85,7 @@ export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc 
 
     // check if the url is valid & the website is alive
     if (!isUrlValid(formattedQuery) || !isUrlAlive(formattedQuery)) {
-      setShowQueryError(true)
-      setErrorMessage("Error: The link you entered is invalid.")
+      setErrorMessage('Invalid URL')
       return
     }
 
@@ -137,24 +135,20 @@ export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc 
                 <div className="relative rounded-xl">
                   <PlusIcon className="pointer-events-none absolute top-3.5 left-4 h-5 w-5 text-gray-400" aria-hidden="true" />
                   <Combobox.Input
-                    className="h-12 w-full rounded-t-xl border-0 bg-transparent pl-11 pr-4 text-gray-800 placeholder-gray-400 sm:text-sm focus:outline-none focus:ring-0"
+                    className="h-12 w-full rounded-t-xl bg-transparent pl-11 pr-4 border-0 text-gray-800 placeholder-gray-400 sm:text-sm focus:outline-none focus:ring-0"
                     placeholder={placeholder}
                     value={query}
                     onChange={(event) => {
-                      // disable the error message when the user starts typing
-                      setShowQueryError(false)
+                      setErrorMessage(undefined);
                       setQuery(event.target.value)
                     }}
                     onKeyDown={({ key }: { key: string }) => key === "Enter" && onEnter()}
                   />
-                  <span
-                    className={classNames(
-                      "h-12 w-full rounded-t-xl border-0 bg-transparent pl-11 pr-4 text-red-500 placeholder-gray-400 sm:text-sm",
-                      showQueryError ? "" : "hidden"
-                    )}
-                  >
+                  {
+                    errorMessage && <div className="pointer-events-none flex items-center absolute top-3.5 right-4 h-5 bg-red-600 text-white text-xs px-2 rounded-md">
                     {errorMessage}
-                  </span>
+                  </div>
+                  }
                 </div>
                 <Combobox.Options static className="max-h-80 scroll-py-2 divide-y divide-gray-100 overflow-y-auto">
                   <li className="p-2">
