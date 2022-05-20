@@ -101,6 +101,33 @@ orgRouter.put("/:orgId/name", userMiddleware, async (req, res) => {
   }
 });
 
+orgRouter.get('/:orgId/integrations', userMiddleware, async (req, res) => {
+  const { orgId } = req.params;
+  const userOrgId = res.locals.user.org.toString();
+
+  if (userOrgId !== orgId) {
+    return res.status(403).send({ error: "User does not have permission" });
+  }
+
+  try {
+    const org = await Org.findById(orgId);
+
+    if (org?.integrations == null) {
+      return res.send({integrations: { github: false, notion: false, vscode: false, slack: false }})
+    }
+
+    const integrations = {
+      github: org.integrations.github?.installations != null,
+      notion: org.integrations.notion?.accessToken != null,
+      slack: org.integrations.slack?.accessToken != null,
+      vscode: false,
+    }
+    return res.send({integrations});
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
+})
+
 orgRouter.get("/repos", userMiddleware, async (_, res) => {
   const orgId = res.locals.user.org.toString();
 
