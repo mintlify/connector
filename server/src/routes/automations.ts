@@ -110,6 +110,7 @@ automationsRouter.get('/testSlack', userMiddleware, async (_, res) => {
     await triggerAutomationsForEvents(org, events);
     res.end();
   }
+  res.end();
 })
 
 export default automationsRouter;
