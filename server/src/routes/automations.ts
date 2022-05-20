@@ -88,12 +88,12 @@ automationsRouter.delete('/:automationId', userMiddleware, async (req, res) => {
 
 automationsRouter.get('/testSlack', userMiddleware, async (_, res) => {
   const { org } = res.locals.user;
-  const docs = await Doc.find({ org });
-  if (docs) {
+  const doc = await Doc.findById('628703e29318d3c30f3b27af');
+  if (doc) {
     const events: EventType[] = [
       {
         org,
-        doc: docs[0]._id,
+        doc: doc._id,
         type: 'change',
         change: [
           {
