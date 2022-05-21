@@ -87,38 +87,4 @@ automationsRouter.delete('/:automationId', userMiddleware, async (req, res) => {
   }
 })
 
-automationsRouter.get('/testSlack', userMiddleware, async (_, res) => {
-  const { org } = res.locals.user;
-  const docs = await Doc.find({ org, url: 'https://mintlify.notion.site/Mintlify-Connect-c77063caf3f6492e85badd026b769a69' });
-  const code = await Code.find({org, sha: '93f11da51b1db6949ef5e5ca8e673e8183aba99f'});
-  if (docs) {
-    const events: EventType[] = [
-      {
-        org,
-        doc: docs[0]._id,
-        type: 'change',
-        change: [
-          {
-            count: 45,
-            value: '🚀 QuickstartGet up and running with auto generated documentation for codeIntegrate Mintlify into your app to generate documentation in less than 2 minutes'
-          },
-          {
-            count: 19,
-            value: 'Follow the instructions below to make your first request.'
-          }
-        ]
-      },
-      {
-        org,
-        doc: docs[0]._id,
-        type: 'code',
-        code: code[0]._id
-      }
-    ];
-    await triggerAutomationsForEvents(org, events);
-    res.end();
-  }
-  res.end();
-})
-
 export default automationsRouter;
