@@ -53,11 +53,8 @@ const getSlackMessage = async (event: EventType, automation: AutomationType): Pr
 
 export const slackAutomationForEvent = async (event: EventType, automation: AutomationType, org: OrgType) => {
     const message = await getSlackMessage(event, automation);
-    console.log({message});
     const channel = org?.integrations?.slack?.channel;
-    console.log({channel});
     const token = org?.integrations?.slack?.accessToken;
-    console.log({token})
     if (channel && message && token) {
         await publishMessage(message, channel, token);
     }

@@ -1,12 +1,8 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import { triggerAutomationsForEvents } from '../automations';
 import Automation, { AutomationSourceType } from '../models/Automation';
-import { EventType } from '../models/Event';
 import { deleteAutomationForSearch, indexAutomationForSearch } from '../services/algolia';
 import { userMiddleware } from './user';
-import Doc from '../models/Doc';
-import Code from '../models/Code';
 
 
 const automationsRouter = express.Router();
