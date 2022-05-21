@@ -10,7 +10,7 @@ export const getContentFromHTML = (element: cheerio.Cheerio<cheerio.Element>) =>
   return removeRedundantWhitespace(decodedHTML);
 }
 
-// Each sentence can start from one whitespace
+// Remove all extra newlines and whitespaces for each line
 const removeRedundantWhitespace = (str: string) => {
   const trimmed = str.trim();
 
