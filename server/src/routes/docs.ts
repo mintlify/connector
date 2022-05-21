@@ -1,12 +1,12 @@
-import axios from "axios";
-import express from "express";
-import { Types } from "mongoose";
-import { userMiddleware } from "./user";
-import { createEvent } from "./events";
-import Doc from "../models/Doc";
-import Event from "../models/Event";
-import { getDataFromWebpage } from "../services/webscraper";
-import { deleteDocForSearch, indexDocForSearch } from "../services/algolia";
+import axios from 'axios';
+import express from 'express';
+import { Types } from 'mongoose';
+import { userMiddleware } from './user';
+import { createEvent } from './events';
+import Doc from '../models/Doc';
+import Event from '../models/Event';
+import { getDataFromWebpage } from '../services/webscraper';
+import { deleteDocForSearch, indexDocForSearch } from '../services/algolia';
 
 const docsRouter = express.Router();
 
@@ -45,7 +45,7 @@ export const createDocFromUrl = async (url: string, orgId: string, userId: Types
   return { content, doc };
 };
 
-docsRouter.get("/", userMiddleware, async (_, res) => {
+docsRouter.get('/', userMiddleware, async (_, res) => {
   const org = res.locals.user.org;
   try {
     const docs = await Doc.aggregate([
@@ -57,18 +57,18 @@ docsRouter.get("/", userMiddleware, async (_, res) => {
       },
       {
         $lookup: {
-          from: "code",
-          let: { doc: "$_id" },
-          pipeline: [{ $match: { $expr: { $and: [{ $eq: ["$doc", "$$doc"] }] } } }, { $project: { stock_item: 0, _id: 0 } }],
-          as: "code",
+          from: 'code',
+          let: { doc: '$_id' },
+          pipeline: [{ $match: { $expr: { $and: [{ $eq: ['$doc', '$$doc'] }] } } }, { $project: { stock_item: 0, _id: 0 } }],
+          as: 'code',
         },
       },
       {
         $lookup: {
-          from: "automations",
-          foreignField: "source.doc",
-          localField: "_id",
-          as: "automations",
+          from: 'automations',
+          foreignField: 'source.doc',
+          localField: '_id',
+          as: 'automations',
         },
       },
     ]);
@@ -78,13 +78,13 @@ docsRouter.get("/", userMiddleware, async (_, res) => {
   }
 });
 
-docsRouter.post("/", userMiddleware, async (req, res) => {
+docsRouter.post('/', userMiddleware, async (req, res) => {
   const { url } = req.body;
   const org = res.locals.user.org;
   try {
     const { content, doc } = await createDocFromUrl(url, org, res.locals.user._id);
     if (doc != null) {
-      await createEvent(org, doc._id, "add", {});
+      await createEvent(org, doc._id, 'add', {});
       indexDocForSearch(doc);
     }
     res.send({ content });
@@ -93,7 +93,7 @@ docsRouter.post("/", userMiddleware, async (req, res) => {
   }
 });
 
-docsRouter.delete("/:docId", userMiddleware, async (req, res) => {
+docsRouter.delete('/:docId', userMiddleware, async (req, res) => {
   const { docId } = req.params;
   const { org } = res.locals.user;
 
