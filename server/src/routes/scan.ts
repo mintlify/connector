@@ -40,7 +40,7 @@ export const scanDocsInOrg = async (orgId: string) => {
 
   const diffAlerts: DiffAlert[] = [];
   diffsAndContent.forEach(({ diff, newContent }, i) => {
-    const hasChanges = diff.some((diff) => diff.added || diff.removed);
+    const hasChanges = diff.some((diff) => (diff.added || diff.removed) && diff.value.trim());
     if (hasChanges) {
       diffAlerts.push({
         doc: docsFromOrg[i],
