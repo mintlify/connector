@@ -70,7 +70,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
         setMembers(members.concat(res.data.users))
       })
     // send login invitation
-    await axios.post("/api/login/magiclink", { email }).catch((err) => console.log(err))
+    await axios.post("/api/login/magiclink", { email })
     setIsSendingInvite(false)
   }
 

@@ -77,7 +77,7 @@ export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc 
   const onEnter = async () => {
     if (!query) return
 
-    let formattedQuery: string = query.trim().toLowerCase()
+    let formattedQuery: string = query.trim()
 
     // prepend `https://` to the url if it's missing
     if (!formattedQuery.startsWith("http://") && !formattedQuery.startsWith("https://"))

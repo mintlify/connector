@@ -6,3 +6,4 @@ npm-debug.log
 .env*
 coverage
 lib
+dump.rdb

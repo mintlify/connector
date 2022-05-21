@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import { getNotionContent, isNotionUrl } from './notion';
 import validUrl from 'valid-url';
 import Org from '../models/Org';
+import { getContentFromHTML } from '../helpers/routes/domparsing';
 const webScrapingApiClient = require('webscrapingapi');
 
 const client = new webScrapingApiClient(process.env.WEBSCRAPER_KEY);
@@ -20,6 +21,14 @@ const getScrapingMethod = (url: string): URLScrapingMethod => {
         return 'googledocs';
     }
     return 'other';
+}
+
+const getWaitTime = (url: string): number => {
+    if (url.includes('notion.site')) {
+        return 5000;
+    }
+
+    return 0;
 }
 
 const possiblyGetWebScrapingMethod = ($: cheerio.CheerioAPI): WebScrapingMethod => {
@@ -78,13 +87,13 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
         }
     }
 
+    const waitFor = getWaitTime(url);
     const response = await client.get(url, {
         render_js: 1,
         proxy_type: 'datacenter',
-        session: 1,
         timeout: 10000,
         wait_until: 'domcontentloaded',
-        wait_for: 5000,
+        wait_for: waitFor,
     });
     
     if (!response.success) {
@@ -97,47 +106,59 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
     scrapingMethod = scrapingMethod === 'other' ? possiblyGetWebScrapingMethod($) : scrapingMethod;
 
     const title = $('title').text().trim();
-    let favicon = $('link[rel="shortcut icon"]').attr('href');
+    let favicon = $('link[rel="shortcut icon"]').attr('href') || $('link[rel="icon"]').attr('href');
     if (favicon?.startsWith('/')) {
         const urlParsed = new URL(url);
         favicon = `${urlParsed.origin}${favicon}`;
     }
-    // Remove iframes
+    // Remove unneeded for content
     $('iframe').remove();
-    let content = $('body').text().trim();
+    $('script').remove();
+    $('style').remove();
+    
+    let content;
 
     if (scrapingMethod === 'readme') {
         // Remove unneeded components
-        $('.DateLine').remove();
+        $('#updated-at').nextAll().remove();
+        $('#updated-at').remove();
         $('nav').remove();
         $('header.rm-Header').remove();
         $('.PageThumbs').remove();
-        content = $('body').text().trim();
+        content = getContentFromHTML($('body'));
     }
 
-    if (scrapingMethod === 'stoplight') {
-        content = $('.Editor').text().trim();
+    else if (scrapingMethod === 'stoplight') {
+        content = getContentFromHTML($('.Editor'))
     }
 
-    if (scrapingMethod === 'docusaurus') {
-        content = $('.markdown').text().trim();
+    else if (scrapingMethod === 'docusaurus') {
+        content = getContentFromHTML($('.markdown'))
     }
 
-    if (scrapingMethod === 'github') {
-        content = $('#readme').text().trim();
+    else if (scrapingMethod === 'github') {
+        content = getContentFromHTML($('#readme'))
     }
 
-    if (scrapingMethod === 'notion-public') {
-        content = $('.notion-app-inner').text().trim();
+    else if (scrapingMethod === 'notion-public') {
+        $('.notion-overlay-container').remove();
+        content = getContentFromHTML($('.notion-page-content'))
     }
 
-    if (scrapingMethod === 'confluence-public') {
+    else if (scrapingMethod === 'confluence-public') {
         $('.recently-updated').remove();
-        content = $('#content-body').text().trim();
+        content = getContentFromHTML($('#content-body'))
     }
 
-    if (scrapingMethod === 'googledocs') {
-        content = $('#contents').text().trim();
+    else if (scrapingMethod === 'googledocs') {
+        content = getContentFromHTML($('#contents'))
+    }
+
+    else {
+        content = getContentFromHTML($('body'))
+        if ($('body').find('main').length > 0) {
+            content = getContentFromHTML($('body main'))
+        }
     }
 
     return {
