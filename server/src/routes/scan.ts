@@ -7,6 +7,7 @@ import { triggerAutomationsForEvents } from '../automations';
 import { updateDocContentForSearch } from '../services/algolia';
 import { workQueue } from '../workers';
 import mongoose from 'mongoose';
+import Org from '../models/Org';
 
 const scanRouter = express.Router();
 
@@ -80,7 +81,7 @@ export const scanDocsInOrg = async (orgId: string) => {
   return diffAlerts;
 }
 
-scanRouter.post('/:orgId', async (req, res) => {
+scanRouter.post('/org/:orgId', async (req, res) => {
   const { orgId } = req.params;
 
   try {
@@ -110,11 +111,16 @@ scanRouter.get('/status/:jobId', async (req, res) => {
   }
 })
 
-// scanRouter.put('/global', async (_, res) => {
-//   const orgs = await Org.find({});
-//   const orgIds = orgs.map((org) => org._id);
-//   workQueue.add(orgIds);
-//   res.send('Initializing global scan');
-// });
+scanRouter.put('/global', async (_, res) => {
+  const orgs = await Org.find({});
+  const orgIds = orgs.map((org) => org._id);
+  const startWorkerPromises = orgIds.map((orgId) => {
+    return workQueue.add({orgId});
+  })
+
+  const jobs = await Promise.all(startWorkerPromises);
+  const jobsIds = jobs.map((job) => job.id);
+  res.send({jobsIds});
+});
 
 export default scanRouter;
