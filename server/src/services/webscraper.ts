@@ -24,6 +24,14 @@ const getScrapingMethod = (url: string): URLScrapingMethod => {
   return "other";
 };
 
+const getWaitTime = (url: string): number => {
+  if (url.includes("notion.site")) {
+    return 5000;
+  }
+
+  return 0;
+};
+
 const possiblyGetWebScrapingMethod = ($: cheerio.CheerioAPI): WebScrapingMethod => {
   const readmeVersion = $('meta[name="readme-version"]');
   if (readmeVersion.length !== 0) {
@@ -53,7 +61,7 @@ const possiblyGetWebScrapingMethod = ($: cheerio.CheerioAPI): WebScrapingMethod 
   return "web";
 };
 
-export type ContentData = {
+type ContentData = {
   method: ScrapingMethod;
   title: string;
   content: string;
@@ -85,13 +93,13 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
     return await getGoogleDocsData(parsedUrl);
   }
 
+  const waitFor = getWaitTime(url);
   const response = await client.get(url, {
     render_js: 1,
     proxy_type: "datacenter",
-    session: 1,
     timeout: 10000,
     wait_until: "domcontentloaded",
-    wait_for: 5000,
+    wait_for: waitFor,
   });
 
   if (!response.success) {
@@ -104,7 +112,7 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
   scrapingMethod = scrapingMethod === "other" ? possiblyGetWebScrapingMethod($) : scrapingMethod;
 
   const title = $("title").text().trim();
-  let favicon = $('link[rel="shortcut icon"]').attr("href");
+  let favicon = $('link[rel="shortcut icon"]').attr("href") || $('link[rel="icon"]').attr("href");
   if (favicon?.startsWith("/")) {
     const urlParsed = new URL(url);
     favicon = `${urlParsed.origin}${favicon}`;
