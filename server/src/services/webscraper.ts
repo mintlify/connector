@@ -61,7 +61,7 @@ const possiblyGetWebScrapingMethod = ($: cheerio.CheerioAPI): WebScrapingMethod 
   return "web";
 };
 
-type ContentData = {
+export type ContentData = {
   method: ScrapingMethod;
   title: string;
   content: string;

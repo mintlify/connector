@@ -4,17 +4,6 @@ import { ContentData } from "./webscraper";
 // load environment variables
 dotenv.config();
 
-const scopes = ["https://www.googleapis.com/auth/documents.readonly"];
-
-const jwt = {
-  private_key: process.env.GOOGLE_PRIVATE_KEY,
-  client_email: process.env.GOOGLE_CLIENT_EMAIL,
-  auth_email: process.env.GOOGLE_AUTH_EMAIL,
-};
-
-const auth = new google.auth.JWT(jwt.client_email, undefined, jwt.private_key, scopes, jwt.auth_email);
-const docs = google.docs({ version: "v1", auth });
-
 export type ParagraphElement = {
   startIndex: number;
   endIndex: number;
@@ -29,6 +18,19 @@ export type Paragraph = {
   paragraphStyle?: any;
 };
 
+const scopes = ["https://www.googleapis.com/auth/documents.readonly"];
+
+const jwt = {
+  private_key: process.env.GOOGLE_PRIVATE_KEY,
+  client_email: process.env.GOOGLE_CLIENT_EMAIL,
+  auth_email: process.env.GOOGLE_AUTH_EMAIL,
+};
+
+const auth = new google.auth.JWT(jwt.client_email, undefined, jwt.private_key, scopes, jwt.auth_email);
+const docs = google.docs({ version: "v1", auth });
+
+const GOOGLE_DOCS_ICON = 'https://res.cloudinary.com/mintlify/image/upload/v1653175048/googledocs-icon_im6j4z.svg';
+
 export const isGoogleDocsUrl = (url: URL): boolean => url.host === "docs.google.com" || url.host === "www.docs.google.com";
 
 export const getGoogleDocsData = async (url: URL): Promise<ContentData> => {
@@ -41,7 +43,7 @@ export const getGoogleDocsData = async (url: URL): Promise<ContentData> => {
       method: "googledocs",
       title,
       content: "Error getting content data",
-      favicon: "https://res.cloudinary.com/mintlify/image/upload/v1653166463/google-docs-icon_lwx6rd.svg",
+      favicon: GOOGLE_DOCS_ICON,
     };
 
   const content: any = res.data.body?.content;
@@ -59,6 +61,6 @@ export const getGoogleDocsData = async (url: URL): Promise<ContentData> => {
     method: "googledocs",
     title,
     content: accumulateContent,
-    favicon: "https://res.cloudinary.com/mintlify/image/upload/v1653166463/google-docs-icon_lwx6rd.svg",
+    favicon: GOOGLE_DOCS_ICON,
   };
 };
