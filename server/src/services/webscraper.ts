@@ -23,6 +23,14 @@ const getScrapingMethod = (url: string): URLScrapingMethod => {
     return 'other';
 }
 
+const getWaitTime = (url: string): number => {
+    if (url.includes('notion.site')) {
+        return 5000;
+    }
+
+    return 0;
+}
+
 const possiblyGetWebScrapingMethod = ($: cheerio.CheerioAPI): WebScrapingMethod => {
     const readmeVersion = $('meta[name="readme-version"]');
     if (readmeVersion.length !== 0) {
@@ -79,13 +87,13 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
         }
     }
 
+    const waitFor = getWaitTime(url);
     const response = await client.get(url, {
         render_js: 1,
         proxy_type: 'datacenter',
-        session: 1,
         timeout: 10000,
         wait_until: 'domcontentloaded',
-        wait_for: 5000,
+        wait_for: waitFor,
     });
     
     if (!response.success) {
