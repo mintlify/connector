@@ -106,7 +106,7 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
     scrapingMethod = scrapingMethod === 'other' ? possiblyGetWebScrapingMethod($) : scrapingMethod;
 
     const title = $('title').text().trim();
-    let favicon = $('link[rel="shortcut icon"]').attr('href');
+    let favicon = $('link[rel="shortcut icon"]').attr('href') || $('link[rel="icon"]').attr('href');
     if (favicon?.startsWith('/')) {
         const urlParsed = new URL(url);
         favicon = `${urlParsed.origin}${favicon}`;
