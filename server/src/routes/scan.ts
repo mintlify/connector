@@ -1,6 +1,6 @@
 import express from 'express';
 import * as Diff from 'diff';
-import Doc from '../models/Doc';
+import Doc, { DocType } from '../models/Doc';
 import Event, { EventType } from '../models/Event';
 import { getDataFromWebpage } from '../services/webscraper';
 import { triggerAutomationsForEvents } from '../automations';
@@ -19,7 +19,7 @@ type DiffAndContent = {
 type DiffAlert = {
   diff: Diff.Change[],
   newContent: string,
-  doc: any
+  doc: DocType
 }
 
 const getDiffAndContent = async (url: string, previousContent: string, orgId: string): Promise<DiffAndContent> => {
