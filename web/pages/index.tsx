@@ -249,7 +249,10 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                                           active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                                           menu.isRed ? 'text-red-700' : '',
                                           'w-full flex items-center space-x-2 px-3 py-1.5 text-sm')}
-                                          onClick={() => menu.onClick(doc._id)}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            menu.onClick(doc._id);
+                                          }}
                                       >
                                         <span>{menu.name}</span>
                                       </button>
