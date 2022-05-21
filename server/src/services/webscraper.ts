@@ -1,7 +1,6 @@
 import * as cheerio from "cheerio";
 import { getNotionContent, isNotionUrl } from "./notion";
-import { getGoogleDocsContent, isGoogleDocsUrl } from "./googleDocs";
-import { getGoogleDocsTitle } from "./googleDocs";
+import { isGoogleDocsUrl, getGoogleDocsData } from "./googleDocs";
 import validUrl from "valid-url";
 import Org from "../models/Org";
 import { getContentFromHTML } from "../helpers/routes/domparsing";
@@ -54,7 +53,7 @@ const possiblyGetWebScrapingMethod = ($: cheerio.CheerioAPI): WebScrapingMethod 
   return "web";
 };
 
-type ContentData = {
+export type ContentData = {
   method: ScrapingMethod;
   title: string;
   content: string;
@@ -83,18 +82,7 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
   // Only use the Google API to handle unpublished Google Docs for now since it doesn't work with published document yet.
   else if (scrapingMethod === "googledocs" && !url.includes("/pub")) {
     const parsedUrl = new URL(url);
-    console.log("Entering google api");
-    const googleDocsContent = await getGoogleDocsContent();
-    console.log("Got google docs content!");
-    const title: string = await getGoogleDocsTitle(parsedUrl);
-    console.log("Got google docs title");
-    return {
-      method: "googledocs",
-      title,
-      content: googleDocsContent,
-      // hardcoded Google Docs favicon for now
-      favicon: "https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_document_x16.png",
-    };
+    return await getGoogleDocsData(parsedUrl);
   }
 
   const response = await client.get(url, {

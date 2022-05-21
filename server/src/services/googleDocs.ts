@@ -1,5 +1,6 @@
 import { google } from "googleapis";
 import dotenv from "dotenv";
+import { ContentData } from "./webscraper";
 // load environment variables
 dotenv.config();
 
@@ -12,6 +13,7 @@ const jwt = {
 };
 
 const auth = new google.auth.JWT(jwt.client_email, undefined, jwt.private_key, scopes, jwt.auth_email);
+const docs = google.docs({ version: "v1", auth });
 
 export type ParagraphElement = {
   startIndex: number;
@@ -29,45 +31,34 @@ export type Paragraph = {
 
 export const isGoogleDocsUrl = (url: URL): boolean => url.host === "docs.google.com" || url.host === "www.docs.google.com";
 
-export const getGoogleDocsTitle = async (url: URL): Promise<string> => {
-  const docs = google.docs({ version: "v1", auth });
-  console.log("url.pathname", url.pathname);
-  console.log("url.pathname.split('/')[3] = ", url.pathname.split("/")[3]);
-  try {
-    const documentId = url.pathname.split("/")[3].toString();
-    const response = await docs.documents.get({ documentId });
-    return response.data.title ? response.data.title : "";
-  } catch (err) {
-    console.log("error catched");
-    console.log(err);
-    return "Title not found";
-  }
-};
+export const getGoogleDocsData = async (url: URL): Promise<ContentData> => {
+  const documentId: string = url.pathname.split("/")[3];
+  const res = await docs.documents.get({ documentId });
+  const title = res.data.title ? res.data.title : "No Title";
 
-export const getGoogleDocsContent = async (): Promise<string> => {
-  try {
-    const documentId: string = "1vYV9TUw8VFpuGatfgmOvcRSpHxuDkuN0zBS4p2GIQoU";
-    console.log(`documentId = |${documentId}|`);
-    console.log("auth = ", auth);
-    const docs = google.docs({ version: "v1", auth });
-    const res = await docs.documents.get({ documentId });
-    console.log("Got res!");
-    if (!res.data.body) return "";
-    const content: any = res.data.body?.content;
-    if (!content) return "";
-    let accumulateContent = "";
+  if (!res.data.body || !res.data.body.content)
+    return {
+      method: "googledocs",
+      title,
+      content: "Error getting content data",
+      favicon: "https://res.cloudinary.com/mintlify/image/upload/v1653166463/google-docs-icon_lwx6rd.svg",
+    };
 
-    content
-      .filter((block: any) => block.hasOwnProperty("paragraph"))
-      .map(({ paragraph }: { paragraph: Paragraph }) => {
-        paragraph.elements.map(
-          ({ textRun: { content } }: { textRun: { content: string } }) => (accumulateContent = `${accumulateContent}${content}`)
-        );
-      });
+  const content: any = res.data.body?.content;
+  let accumulateContent = "";
 
-    return accumulateContent;
-  } catch (err) {
-    console.log(err);
-    return "Dummy content";
-  }
+  content
+    .filter((block: any) => block.hasOwnProperty("paragraph"))
+    .map(({ paragraph }: { paragraph: Paragraph }) => {
+      paragraph.elements.map(
+        ({ textRun: { content } }: { textRun: { content: string } }) => (accumulateContent = `${accumulateContent}${content}`)
+      );
+    });
+
+  return {
+    method: "googledocs",
+    title,
+    content: accumulateContent,
+    favicon: "https://res.cloudinary.com/mintlify/image/upload/v1653166463/google-docs-icon_lwx6rd.svg",
+  };
 };

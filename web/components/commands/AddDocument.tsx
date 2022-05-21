@@ -16,7 +16,7 @@ type AddDocumentProps = {
 export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc }: AddDocumentProps) {
   const [query, setQuery] = useState("")
   const [placeholder, setPlaceholder] = useState("Add link")
-  const [errorMessage, setErrorMessage] = useState<string | undefined>();
+  const [errorMessage, setErrorMessage] = useState<string | undefined>()
 
   const actions = [
     {
@@ -77,15 +77,15 @@ export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc 
   const onEnter = async () => {
     if (!query) return
 
-    let formattedQuery: string = query.trim().toLowerCase()
+    let formattedQuery: string = query.trim()
 
     // prepend `https://` to the url if it's missing
-    if (!formattedQuery.startsWith("http://") && !formattedQuery.startsWith("https://"))
+    if (!formattedQuery.toLowerCase().startsWith("http://") && !formattedQuery.toLowerCase().startsWith("https://"))
       formattedQuery = `https://${formattedQuery}`
 
     // check if the url is valid & the website is alive
     if (!isUrlValid(formattedQuery) || !isUrlAlive(formattedQuery)) {
-      setErrorMessage('Invalid URL')
+      setErrorMessage("Invalid URL")
       return
     }
 
@@ -139,16 +139,16 @@ export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc 
                     placeholder={placeholder}
                     value={query}
                     onChange={(event) => {
-                      setErrorMessage(undefined);
+                      setErrorMessage(undefined)
                       setQuery(event.target.value)
                     }}
                     onKeyDown={({ key }: { key: string }) => key === "Enter" && onEnter()}
                   />
-                  {
-                    errorMessage && <div className="pointer-events-none flex items-center absolute top-3.5 right-4 h-5 bg-red-600 text-white text-xs px-2 rounded-md">
-                    {errorMessage}
-                  </div>
-                  }
+                  {errorMessage && (
+                    <div className="pointer-events-none flex items-center absolute top-3.5 right-4 h-5 bg-red-600 text-white text-xs px-2 rounded-md">
+                      {errorMessage}
+                    </div>
+                  )}
                 </div>
                 <Combobox.Options static className="max-h-80 scroll-py-2 divide-y divide-gray-100 overflow-y-auto">
                   <li className="p-2">
