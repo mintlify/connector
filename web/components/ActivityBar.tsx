@@ -14,12 +14,22 @@ import Tooltip from './Tooltip';
 function DocProfile({ doc, userSession }: { doc: Doc, userSession: UserSession }) {
   const [codes, setCodes] = useState(doc.code);
   const [automations, setAutomations] = useState(doc.automations);
+  const [isVSCodeInstalled, setIsVSCodeInstalled] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     setCodes(doc.code);
     setAutomations(doc.automations);
   }, [doc]);
+
+  useEffect(() => {
+    axios.get(`${API_ENDPOINT}/routes/user/${userSession.user.userId}/install-vscode`)
+      .then(({ data }) => {
+        if (data.isVSCodeInstalled) {
+          setIsVSCodeInstalled(data.isVSCodeInstalled)
+        }
+      })
+  }, [userSession.user.userId]);
 
   const onDeleteCode = async (codeId: string) => {
     setCodes(codes.filter(code => code._id !== codeId));
@@ -31,7 +41,6 @@ function DocProfile({ doc, userSession }: { doc: Doc, userSession: UserSession }
     await axios.delete(`${API_ENDPOINT}/routes/automations/${automationId}?userId=${userSession.user.userId}`);
   }
 
-  const isVSCodeInstalled = true;
   const vscodeUrl = isVSCodeInstalled ? `vscode://mintlify.connector/prefill-doc?docId=${doc._id}` : 'vscode:extension/mintlify.connector';
 
   return <div className="pt-6">

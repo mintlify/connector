@@ -205,11 +205,23 @@ userRouter.put("/:userId/lastname", async (req, res) => {
   }
 });
 
+userRouter.get('/:userId/install-vscode', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await User.findOne({userId});
+    const isVSCodeInstalled = user?.isVSCodeInstalled;
+    return res.send({isVSCodeInstalled});
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
+})
+
 userRouter.put('/:userId/install-vscode', async (req, res) => {
   const { userId } = req.params;
 
   try {
-    await User.findOneAndUpdate({userId}, { isVSCodeInstalled: true });    
+    await User.findOneAndUpdate({userId}, { isVSCodeInstalled: true });
     return res.end();
   } catch (error) {
     return res.status(500).send({ error });
