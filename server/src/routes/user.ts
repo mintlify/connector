@@ -205,4 +205,15 @@ userRouter.put("/:userId/lastname", async (req, res) => {
   }
 });
 
+userRouter.put('/:userId/install-vscode', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    await User.findOneAndUpdate({userId}, { isVSCodeInstalled: true });    
+    return res.end();
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
+})
+
 export default userRouter;
