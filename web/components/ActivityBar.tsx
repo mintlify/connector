@@ -11,7 +11,13 @@ import timeAgo from '../services/timeago';
 import EventItem, { Event } from './Event';
 import Tooltip from './Tooltip';
 
-function DocProfile({ doc, userSession }: { doc: Doc, userSession: UserSession }) {
+type DocProfileProps = {
+  doc: Doc,
+  userSession: UserSession,
+  setIsAddAutomationOpen: (isOpen: boolean) => void;
+}
+
+function DocProfile({ doc, userSession, setIsAddAutomationOpen }: DocProfileProps) {
   const [codes, setCodes] = useState(doc.code);
   const [automations, setAutomations] = useState(doc.automations);
   const [isVSCodeInstalled, setIsVSCodeInstalled] = useState(false);
@@ -123,6 +129,7 @@ function DocProfile({ doc, userSession }: { doc: Doc, userSession: UserSession }
           <button
             type="button"
             className="inline-flex items-center justify-center py-1 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 w-full"
+            onClick={() => setIsAddAutomationOpen(true)}
           >
             Add Automation
           </button>
@@ -136,13 +143,14 @@ function DocProfile({ doc, userSession }: { doc: Doc, userSession: UserSession }
 type ActivityBarProps = {
   events: Event[];
   userSession: UserSession;
+  setIsAddAutomationOpen: (isOpen: boolean) => void;
   selectedDoc?: Doc;
 }
 
-export default function ActivityBar({ events, userSession, selectedDoc }: ActivityBarProps) {
+export default function ActivityBar({ events, userSession, selectedDoc, setIsAddAutomationOpen }: ActivityBarProps) {
   return (
     <div className="relative pl-6 lg:w-80">
-      {selectedDoc && <DocProfile doc={selectedDoc} userSession={userSession} />}
+      {selectedDoc && <DocProfile doc={selectedDoc} userSession={userSession} setIsAddAutomationOpen={setIsAddAutomationOpen} />}
         <div className="pt-6 pb-2">
           <h2 className="text-sm font-semibold">Activity</h2>
         </div>

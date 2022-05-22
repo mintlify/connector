@@ -292,7 +292,12 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       </div>
       {/* Activity feed */}
       <div className="relative bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0 z-10">
-        <ActivityBar events={events} selectedDoc={selectedDoc} userSession={userSession} />
+        <ActivityBar
+          events={events}
+          selectedDoc={selectedDoc}
+          userSession={userSession}
+          setIsAddAutomationOpen={setIsAddAutomationOpen}
+        />
       </div>
     </div>
     </Layout>
