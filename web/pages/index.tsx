@@ -270,23 +270,15 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                       <div className="flex flex-shrink-0 space-x-1">
                         <div className="h-6 w-6"></div>
                         {doc.code.map((code) => (
-                          <Tooltip key={code._id} message={`Connected to ${code.file}`}>
-                            <Link href={code.url}>
-                              <a className="hover:opacity-75" target="_blank">
-                                {getConnectionIcon(6, 4)}
-                              </a>
-                            </Link>
-                          </Tooltip>
+                          <a key={code._id} >
+                            {getConnectionIcon(6, 4)}
+                          </a>
                         ))}
                         {
                           doc.automations.map((automation) => (
-                            <Tooltip key="auto" message={automation.name}>
-                              <Link href='/automations'>
-                                <a className="hover:opacity-50">
-                                {getAutomationTypeIcon(automation.type, 6, 4)}
-                                </a>
-                              </Link>
-                            </Tooltip>
+                          <a key={automation._id}>
+                            {getAutomationTypeIcon(automation.type, 6, 4)}
+                          </a>
                           ))
                         }
                       </div>

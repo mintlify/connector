@@ -1,12 +1,24 @@
 import { DocumentTextIcon, InformationCircleIcon } from '@heroicons/react/outline';
-import { CodeIcon, XIcon } from '@heroicons/react/solid';
+import { XCircleIcon } from '@heroicons/react/solid';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { getAutomationTypeIcon, getConnectionIcon } from '../helpers/Icons';
 import { Doc } from '../pages';
 import timeAgo from '../services/timeago';
 import EventItem, { Event } from './Event';
 import Tooltip from './Tooltip';
 
 function DocProfile({ doc }: { doc: Doc }) {
+  const router = useRouter();
+
+  const onDeleteCode = (codeId: string) => {
+    console.log(codeId);
+  };
+
+  const onDeleteAutomation = (automationId: string) => {
+    console.log(automationId);
+  }
+
   return <div className="pt-6">
     <div className="flex space-x-3">
       {
@@ -19,23 +31,58 @@ function DocProfile({ doc }: { doc: Doc }) {
       <div className="flex-1">
         <h1 className="text-sm font-medium">{doc.title}</h1>
         <h2 className="mt-px text-sm text-gray-500">Added {timeAgo.format(Date.parse(doc.createdAt))}</h2>
-        <div className="mt-2 space-y-2 w-full sm:w-3/4">
-          <div>
+        <div className="my-2 space-y-2 w-full sm:w-3/4">
+          <div className="space-y-1">
             {
-              doc.code.length > 0 && <div className="space-y-1 my-2">
+              doc.code.length > 0 && <div className="space-y-1">
               {
                 doc.code.map((code) => (
-                  <Link key={code._id} href={code.url}>
-                    <a key={code._id} target="_blank" className="inline-flex items-center px-3 py-0.5 rounded-full text-xs bg-green-100 text-green-700">
-                      <CodeIcon className="h-3 w-3 mr-1" />
-                      {code.file}
-                      <XIcon className="h-3 w-3 ml-2" />
-                    </a>
-                  </Link>
+                  <Tooltip key={code._id} message="View on GitHub" isCentered={false}>
+                    <button key={code._id} onClick={() => { window.open(code.url, '_target') }}>
+                      <a key={code._id} target="_blank" className="inline-flex items-center px-3 py-0.5 rounded-full text-xs bg-green-100 text-green-700">
+                        <span className="mr-1">
+                          {getConnectionIcon(4, 4)}
+                        </span>
+                        <span className="truncate" style={{maxWidth: '11rem'}}>
+                          {code.file}
+                        </span>
+                        <XCircleIcon className="h-3 w-3 ml-2 hover:text-green-800" onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteCode(code._id);
+                        }}/>
+                      </a>
+                    </button>
+                  </Tooltip>
                 ))
               }
               </div>
             }
+            {
+              doc.automations.length > 0 && <div className="space-y-1">
+                {
+                  doc.automations.map((automation) => (
+                    <Tooltip key={automation._id} message="Go to automations" isCentered={false}>
+                      <button key={automation._id} onClick={() => { router.push('/automations') }}>
+                        <a key={automation._id} className="inline-flex items-center px-3 py-0.5 rounded-full text-xs bg-amber-100 text-amber-700">
+                          <span className="mr-1">
+                            {getAutomationTypeIcon(automation.type, 4, 4)}
+                          </span>
+                          <span className="truncate" style={{maxWidth: '11rem'}}>
+                            {automation.name}
+                          </span>
+                          <XCircleIcon className="h-3 w-3 ml-2 hover:text-amber-800" onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteAutomation(automation._id);
+                          }} />
+                        </a>
+                      </button>
+                    </Tooltip>
+                  ))
+                }
+              </div>
+            }
+          </div>
+          <div>
             <Link href="vscode:extension/mintlify.connector">
               <button
                 type="button"
