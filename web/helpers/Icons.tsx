@@ -60,7 +60,7 @@ export const getAutomationTypeIcon = (type: AutomationType, outerSize = 10, inne
 
 export const getConnectionIcon = (outerSize = 10, innerSize = 6) => {
   return <div className={`h-${outerSize} w-${outerSize} rounded-lg bg-green-100 flex items-center justify-center`}>
-    <CodeIcon className={`h-${innerSize} w-${innerSize} text-green-600`} />
+    <CodeIcon className={`h-${innerSize} w-${innerSize} text-green-700`} />
   </div>
 }
 

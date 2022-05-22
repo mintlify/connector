@@ -169,7 +169,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
                     <div className="flex items-center justify-between">
                       <div className="flex space-x-2 items-center">
                         { getAutomationTypeIcon(automation.type, 8, 5) }
-                        <p className="text-sm font-medium text-gray-700 truncate">{automation.name}</p>
+                        <p className="text-sm font-medium text-gray-700">{automation.name}</p>
                       </div>
                       <div className="ml-2 flex-shrink-0 flex items-center space-x-2">
                       <Switch
@@ -267,7 +267,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
                       <p className="text-sm font-medium text-gray-900">{integration.name}</p>
                       <div className="flex space-x-0.5 items-center">
                         <p className="text-xs text-gray-500 truncate">{ integrationsStatus == null ? <Skeleton width={56} /> : integrationsStatus[integration.id] ? 'Installed' : 'Not installed'}</p>
-                        { integrationsStatus != null && integrationsStatus[integration.id] ? <CheckCircleIcon className="h-3 w-3 text-green-600" /> : null }
+                        { integrationsStatus != null && integrationsStatus[integration.id] ? <CheckCircleIcon className="h-3 w-3 text-green-700" /> : null }
                       </div>
                     </a>
                   </div>
