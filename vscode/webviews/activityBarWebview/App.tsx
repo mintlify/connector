@@ -41,17 +41,19 @@ const initialDoc: Doc = {
   isDefault: true,
 };
 
+const initialStateData: State = {
+  docs: [initialDoc],
+  selectedDoc: initialDoc,
+  codes: [],
+  API_ENDPOINT: 'https://connect.mintlify.com/routes'
+};
+
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
 const App = () => {
-  const initialState: State = vscode.getState() || {
-    docs: [initialDoc],
-    selectedDoc: initialDoc,
-    codes: [],
-    API_ENDPOINT: 'https://connect.mintlify.com/routes'
-  };
+  const initialState: State = vscode.getState() || initialStateData;
   const [state, setState] = useState<State>(initialState);
 
   useEffect(() => {
@@ -92,7 +94,7 @@ const App = () => {
         break;
       case 'auth':
         const user = message.args;
-        updateState({...state, user});
+        updateState({...initialStateData, user});
         break;
       case 'post-code':
         const code = message.args;
