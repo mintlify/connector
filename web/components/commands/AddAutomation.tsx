@@ -40,9 +40,13 @@ export default function AddAutomation({ user, isOpen, setIsOpen, setIsAddingAuto
     setSelectedRuleType(undefined);
   }
 
+  const onClose = () => {
+    setIsOpen(false);
+  }
+
   return (
     <Transition.Root show={isOpen} as={Fragment} appear>
-      <Dialog as="div" className="relative z-10" onClose={setIsOpen}>
+      <Dialog as="div" className="relative z-10" onClose={onClose}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -64,6 +68,7 @@ export default function AddAutomation({ user, isOpen, setIsOpen, setIsAddingAuto
             leave="ease-in duration-200"
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
+            afterLeave={() => setSelectedRuleType(undefined)}
           >
             <Dialog.Panel className="mx-auto max-w-xl transform divide-y divide-gray-100 rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
               { selectedRuleType && (
