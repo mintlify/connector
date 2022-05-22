@@ -32,6 +32,10 @@ export class ViewProvider implements WebviewViewProvider {
 			this._view?.webview.postMessage({ command: 'auth', args: user });
 		}
 
+		public prefillDoc(docId: string): void {
+			this._view?.webview.postMessage({ command: 'prefill-doc', args: docId });
+		}
+
 		public logout(): void {
 			this._view?.webview.postMessage({ command: 'logout' });
 		}

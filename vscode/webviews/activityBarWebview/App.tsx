@@ -96,6 +96,17 @@ const App = () => {
         const user = message.args;
         updateState({...initialStateData, user});
         break;
+      case 'prefill-doc':
+        const docId = message.args;
+        axios.get(`${state.API_ENDPOINT}/docs?userId=${state.user.userId}`)
+          .then((res) => {
+            const { data: { docs } } = res;
+            const selectedDoc = docs.find(doc => doc._id === docId);
+            if (selectedDoc) {
+              updateState({...state, docs, selectedDoc, codes: []});
+            }
+          });
+        break;
       case 'post-code':
         const code = message.args;
         updateState({...state, codes: [code]});

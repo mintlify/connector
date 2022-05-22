@@ -25,6 +25,15 @@ export const registerAuthRoute = (provider: ViewProvider) => {
         } catch (err) {
           vscode.window.showErrorMessage('Error authenticating user');
         }
+      } else if (uri.path === '/prefill-doc') {
+        const query = new URLSearchParams(uri.query);
+        const docId = query.get('docId');
+        if (!docId) {
+          vscode.window.showErrorMessage('No document identifier selected');
+          return;
+        }
+
+        provider.prefillDoc(docId);
       }
     }
   });

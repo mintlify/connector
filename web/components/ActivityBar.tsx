@@ -3,7 +3,7 @@ import { XCircleIcon } from '@heroicons/react/solid';
 import axios from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { API_ENDPOINT } from '../helpers/api';
 import { getAutomationTypeIcon, getConnectionIcon } from '../helpers/Icons';
 import { Doc, UserSession } from '../pages';
@@ -16,6 +16,11 @@ function DocProfile({ doc, userSession }: { doc: Doc, userSession: UserSession }
   const [automations, setAutomations] = useState(doc.automations);
   const router = useRouter();
 
+  useEffect(() => {
+    setCodes(doc.code);
+    setAutomations(doc.automations);
+  }, [doc]);
+
   const onDeleteCode = async (codeId: string) => {
     setCodes(codes.filter(code => code._id !== codeId));
     await axios.delete(`${API_ENDPOINT}/routes/links/${codeId}?userId=${userSession.user.userId}`);
@@ -25,6 +30,9 @@ function DocProfile({ doc, userSession }: { doc: Doc, userSession: UserSession }
     setAutomations(automations.filter(automation => automation._id !== automationId));
     await axios.delete(`${API_ENDPOINT}/routes/automations/${automationId}?userId=${userSession.user.userId}`);
   }
+
+  const isVSCodeInstalled = true;
+  const vscodeUrl = isVSCodeInstalled ? `vscode://mintlify.connector/prefill-doc?docId=${doc._id}` : 'vscode:extension/mintlify.connector';
 
   return <div className="pt-6">
     <div className="flex space-x-3">
@@ -90,7 +98,7 @@ function DocProfile({ doc, userSession }: { doc: Doc, userSession: UserSession }
             }
           </div>
           <div>
-            <Link href="vscode:extension/mintlify.connector">
+            <Link href={vscodeUrl}>
               <button
                 type="button"
                 className="inline-flex items-center justify-center py-1 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 w-full"
