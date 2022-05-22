@@ -68,7 +68,7 @@ docsRouter.get('/', userMiddleware, async (_, res) => {
                    }
                 }
              },
-             { $project: { stock_item: 0, _id: 0 } }
+             { $project: { stock_item: 0 } }
           ],
           as: "code"
         }

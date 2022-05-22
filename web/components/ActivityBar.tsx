@@ -1,22 +1,29 @@
 import { DocumentTextIcon, InformationCircleIcon } from '@heroicons/react/outline';
 import { XCircleIcon } from '@heroicons/react/solid';
+import axios from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useState } from 'react';
+import { API_ENDPOINT } from '../helpers/api';
 import { getAutomationTypeIcon, getConnectionIcon } from '../helpers/Icons';
-import { Doc } from '../pages';
+import { Doc, UserSession } from '../pages';
 import timeAgo from '../services/timeago';
 import EventItem, { Event } from './Event';
 import Tooltip from './Tooltip';
 
-function DocProfile({ doc }: { doc: Doc }) {
+function DocProfile({ doc, userSession }: { doc: Doc, userSession: UserSession }) {
+  const [codes, setCodes] = useState(doc.code);
+  const [automations, setAutomations] = useState(doc.automations);
   const router = useRouter();
 
-  const onDeleteCode = (codeId: string) => {
-    console.log(codeId);
+  const onDeleteCode = async (codeId: string) => {
+    setCodes(codes.filter(code => code._id !== codeId));
+    await axios.delete(`${API_ENDPOINT}/routes/links/${codeId}?userId=${userSession.user.userId}`);
   };
 
-  const onDeleteAutomation = (automationId: string) => {
-    console.log(automationId);
+  const onDeleteAutomation = async (automationId: string) => {
+    setAutomations(automations.filter(automation => automation._id !== automationId));
+    await axios.delete(`${API_ENDPOINT}/routes/automations/${automationId}?userId=${userSession.user.userId}`);
   }
 
   return <div className="pt-6">
@@ -34,9 +41,9 @@ function DocProfile({ doc }: { doc: Doc }) {
         <div className="my-2 space-y-2 w-full sm:w-3/4">
           <div className="space-y-1">
             {
-              doc.code.length > 0 && <div className="space-y-1">
+              codes.length > 0 && <div className="space-y-1">
               {
-                doc.code.map((code) => (
+                codes.map((code) => (
                   <Tooltip key={code._id} message="View on GitHub" isCentered={false}>
                     <button key={code._id} onClick={() => { window.open(code.url, '_target') }}>
                       <a key={code._id} target="_blank" className="inline-flex items-center px-3 py-0.5 rounded-full text-xs bg-green-100 text-green-700">
@@ -58,9 +65,9 @@ function DocProfile({ doc }: { doc: Doc }) {
               </div>
             }
             {
-              doc.automations.length > 0 && <div className="space-y-1">
+              automations.length > 0 && <div className="space-y-1">
                 {
-                  doc.automations.map((automation) => (
+                  automations.map((automation) => (
                     <Tooltip key={automation._id} message="Go to automations" isCentered={false}>
                       <button key={automation._id} onClick={() => { router.push('/automations') }}>
                         <a key={automation._id} className="inline-flex items-center px-3 py-0.5 rounded-full text-xs bg-amber-100 text-amber-700">
@@ -111,13 +118,14 @@ function DocProfile({ doc }: { doc: Doc }) {
 
 type ActivityBarProps = {
   events: Event[];
+  userSession: UserSession;
   selectedDoc?: Doc;
 }
 
-export default function ActivityBar({ events, selectedDoc }: ActivityBarProps) {
+export default function ActivityBar({ events, userSession, selectedDoc }: ActivityBarProps) {
   return (
     <div className="relative pl-6 lg:w-80">
-      {selectedDoc && <DocProfile doc={selectedDoc} />}
+      {selectedDoc && <DocProfile doc={selectedDoc} userSession={userSession} />}
         <div className="pt-6 pb-2">
           <h2 className="text-sm font-semibold">Activity</h2>
         </div>

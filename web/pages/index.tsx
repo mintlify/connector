@@ -13,7 +13,6 @@ import { getAutomationTypeIcon, getConnectionIcon } from '../helpers/Icons'
 import { useEffect, useState } from 'react'
 import timeAgo from '../services/timeago'
 import { API_ENDPOINT } from '../helpers/api'
-import Tooltip from '../components/Tooltip'
 import Head from 'next/head'
 import 'react-loading-skeleton/dist/skeleton.css'
 import LoadingItem from '../components/LoadingItem'
@@ -293,7 +292,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       </div>
       {/* Activity feed */}
       <div className="relative bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0 z-10">
-        <ActivityBar events={events} selectedDoc={selectedDoc} />
+        <ActivityBar events={events} selectedDoc={selectedDoc} userSession={userSession} />
       </div>
     </div>
     </Layout>
