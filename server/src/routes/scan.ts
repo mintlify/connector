@@ -52,18 +52,22 @@ export const scanDocsInOrg = async (orgId: string) => {
   const diffsAndContent = await Promise.all(getDifferencePromises);
 
   const diffAlerts: DiffAlert[] = [];
+  const sameContentDocs: DocType[] = [];
   diffsAndContent.forEach(({ diff, newContent }, i) => {
     const hasChanges = diff.some((diff) => (diff.added || diff.removed) && diff.value.trim());
+    const doc = docsFromOrg[i];
     if (hasChanges) {
       diffAlerts.push({
-        doc: docsFromOrg[i],
+        doc,
         newContent,
         diff
       });
+    } else {
+      sameContentDocs.push(doc);
     }
   });
 
-  const docUpdateQueries = diffAlerts.map(({ doc, newContent }) => {
+  const newContentUpdateQueries = diffAlerts.map(({ doc, newContent }) => {
     const updateStatus = getDocUpdateStatus(doc);
     switch (updateStatus) {
       case 'first-change':
@@ -88,8 +92,18 @@ export const scanDocsInOrg = async (orgId: string) => {
           }
         }
       }
-  })
+  });
 
+  const sameContentUpdateQueries = sameContentDocs.map((doc) => {
+    return {
+      updateOne: {
+        filter: { _id: doc._id },
+        update: { changeConfirmationCount: 0 }
+      }
+    }
+  });
+
+  const docUpdateQueries = newContentUpdateQueries.concat(sameContentUpdateQueries);
   const bulkWriteDocsPromise = Doc.bulkWrite(docUpdateQueries, {
     ordered: false
   });
