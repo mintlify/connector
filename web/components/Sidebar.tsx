@@ -1,7 +1,6 @@
 import { CogIcon, DocumentTextIcon } from '@heroicons/react/outline';
 import { PlusIcon } from '@heroicons/react/solid'
 import Link from 'next/link';
-import { useState } from 'react'
 import AddDocument from './commands/AddDocument'
 import AddAutomation from './commands/AddAutomation'
 import { User } from '../pages';
