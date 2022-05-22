@@ -22,7 +22,8 @@ import SignIn from '../components/SignIn'
 import Setup from '../components/Setup'
 import { Automation } from './automations'
 import { DocumentTextIcon } from '@heroicons/react/outline'
-import EventItem, { Event } from '../components/Event'
+import { Event } from '../components/Event'
+import ActivityBar from '../components/ActivityBar'
 
 type Code = {
   _id: string,
@@ -34,6 +35,7 @@ export type Doc = {
   _id: string,
   title: string,
   lastUpdatedAt: string,
+  createdAt: string,
   url: string,
   code: Code[],
   automations: Automation[],
@@ -64,7 +66,7 @@ export type User = {
 
 export default function Home({ userSession }: { userSession: UserSession }) {
   const [docs, setDocs] = useState<Doc[]>([]);
-  const [events, setEvents] = useState<Event[]>();
+  const [events, setEvents] = useState<Event[]>([]);
   const [selectedDoc, setSelectedDoc] = useState<Doc>();
   const [isAddingDoc, setIsAddingDoc] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -300,19 +302,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       {/* Activity feed */}
       <div className="relative bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0">
         <ClearSelectedFrame />
-        <div className="relative pl-6 lg:w-80 z-10">
-          <div className="pt-6 pb-2">
-            <h2 className="text-sm font-semibold">Activity</h2>
-          </div>
-          <div>
-            <ul role="list" className="divide-y divide-gray-200">
-              {events?.map((event) => (
-                <EventItem key={event._id} event={event} />
-              ))}
-            </ul>
-            <div className="py-4 text-sm border-t border-gray-200"></div>
-          </div>
-        </div>
+        <ActivityBar events={events} selectedDoc={selectedDoc} />
       </div>
     </div>
     </Layout>
