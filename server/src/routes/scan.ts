@@ -1,6 +1,6 @@
 import express from 'express';
 import * as Diff from 'diff';
-import Doc from '../models/Doc';
+import Doc, { DocType } from '../models/Doc';
 import Event, { EventType } from '../models/Event';
 import { getDataFromWebpage } from '../services/webscraper';
 import { triggerAutomationsForEvents } from '../automations';
@@ -19,8 +19,12 @@ type DiffAndContent = {
 type DiffAlert = {
   diff: Diff.Change[],
   newContent: string,
-  doc: any
+  doc: DocType
 }
+
+type DocUpdateStatus = 'first-change' | 'continuous-change' | 'event-trigger';
+
+const DIFF_CONFIRMATION_THRESHOLD = 2;
 
 const getDiffAndContent = async (url: string, previousContent: string, orgId: string): Promise<DiffAndContent> => {
   const { content } = await getDataFromWebpage(url, orgId);
@@ -28,6 +32,15 @@ const getDiffAndContent = async (url: string, previousContent: string, orgId: st
     diff: Diff.diffWords(previousContent, content),
     newContent: content
   }
+}
+
+const getDocUpdateStatus = (doc: DocType): DocUpdateStatus => {
+  if (doc.changeConfirmationCount == null) {
+    return 'first-change'
+  } else if (doc.changeConfirmationCount < DIFF_CONFIRMATION_THRESHOLD) {
+    return 'continuous-change'
+  }
+  return 'event-trigger';
 }
 
 export const scanDocsInOrg = async (orgId: string) => {
@@ -51,24 +64,47 @@ export const scanDocsInOrg = async (orgId: string) => {
   });
 
   const docUpdateQueries = diffAlerts.map(({ doc, newContent }) => {
-    return {
-      updateOne: {
-        filter: { _id: doc._id },
-        update: { content: newContent, lastUpdatedAt: new Date() }
+    const updateStatus = getDocUpdateStatus(doc);
+    switch (updateStatus) {
+      case 'first-change':
+        return {
+          updateOne: {
+            filter: { _id: doc._id },
+            update: { changeConfirmationCount: 1 }
+          }
+        }
+      case 'continuous-change':
+        return {
+          updateOne: {
+            filter: { _id: doc._id },
+            update: { changeConfirmationCount: doc.changeConfirmationCount! + 1 }
+          }
+        }
+      default:
+        return {
+          updateOne: {
+            filter: { _id: doc._id },
+            update: { content: newContent, changeConfirmationCount: 0, lastUpdatedAt: new Date(Date.now() - (1000 * 60 * DIFF_CONFIRMATION_THRESHOLD)) } // subtract by X minutes
+          }
+        }
       }
-    }
   })
 
   const bulkWriteDocsPromise = Doc.bulkWrite(docUpdateQueries, {
     ordered: false
   });
 
-  const newEvents: EventType[] = diffAlerts.map((alert) => {
-    return {
-      org: new mongoose.Types.ObjectId(orgId),
-      doc: alert.doc._id,
-      type: 'change',
-      change: alert.diff,
+  const newEvents: EventType[] = [];
+  
+  diffAlerts.forEach(({ doc, diff }) => {
+    const updateStatus = getDocUpdateStatus(doc);
+    if (updateStatus === 'event-trigger') {
+      newEvents.push({
+        org: new mongoose.Types.ObjectId(orgId),
+        doc: doc._id,
+        type: 'change',
+        change: diff,
+      })
     }
   });
   const insertManyEventsPromise = Event.insertMany(newEvents);
