@@ -9,10 +9,14 @@ export const getUserFromUserId = async (userId: string) => {
   return user;
 };
 
-export const getUserFromUserEmail = async (userEmail: string) => {
-  const {
-    data: { user },
-  }: { data: { user: any } } = await axios.get(`${API_ENDPOINT}/routes/user/by-email?email=${userEmail}`);
+export const getSubdomain = (host: string) => {
+  return host.split('.')[0];
+}
 
-  return user;
-};
+export const getOrgFromSubdomain = async (subdomain: string) => {
+  const {
+    data: { org },
+  }: { data: { org: any } } = await axios.get(`${API_ENDPOINT}/routes/org/subdomain/${subdomain}`);
+
+  return org;
+}

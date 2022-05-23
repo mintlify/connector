@@ -1,5 +1,5 @@
-import { NextApiResponse } from "next";
-import { getUserFromUserId } from "../../../helpers/user";
+import {  NextApiResponse } from "next";
+import { getOrgFromSubdomain, getSubdomain, getUserFromUserId } from "../../../helpers/user";
 import { loadStytch } from "../../../lib/loadStytch";
 import { withSession } from "../../../lib/withSession";
 import { redirectToVSCode } from "../login/vscode";
@@ -22,21 +22,28 @@ async function handler(req: any, res: NextApiResponse) {
       return res.end();
     }
 
+    const subdomain = getSubdomain(req.headers.host);
+    console.log({subdomain});
+    const [authUserData, user, org] = await Promise.all([client.users.get(response.user_id), getUserFromUserId(response.user_id), getOrgFromSubdomain(subdomain)]);
+
+    const { id: orgId, name: orgName } = org;
+
     const {
       name: { first_name, last_name },
       emails: [{ email }],
-    } = await client.users.get(response.user_id);
-    const user = await getUserFromUserId(response.user_id);
+    } = authUserData;
 
     const authSource = req.session.get("authSource");
 
     req.session.destroy();
     req.session.set("user", {
       user_id: response.user_id,
+      user,
       email,
       firstName: first_name,
       lastName: last_name,
-      user,
+      orgId,
+      orgName,
     });
 
     await req.session.save();

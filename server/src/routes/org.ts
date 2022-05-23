@@ -6,28 +6,22 @@ import mongoose from "mongoose";
 
 const orgRouter = express.Router();
 
-// Given an orgId from the request query, return the organization object that matches the id
-orgRouter.get("/", userMiddleware, async (req: any, res: express.Response) => {
-  const { orgId } = req.query;
-  const userOrgId = res.locals.user.org.toString();
+orgRouter.get('/subdomain/:subdomain', async (req, res) => {
+  const { subdomain } = req.params;
 
-  if (!orgId) return res.status(400).json({ error: "orgId not provided" });
-  if (userOrgId !== orgId) {
-    return res.status(403).json({ error: "User does not have permission" });
+  const org = await Org.findOne({subdomain});
+  if (org == null) {
+    res.send({org});
+    return;
   }
 
-  try {
-    const org = await Org.findById(new mongoose.Types.ObjectId(orgId.toString()))
-      .exec()
-      .catch((err) => {
-        throw new Error(err);
-      });
-
-    return res.status(200).json({ org });
-  } catch (error) {
-    return res.status(500).json({ error });
-  }
-});
+  return res.send({
+    org: {
+      id: org._id,
+      name: org.name
+    }
+  })
+})
 
 orgRouter.put("/:orgId/email-notifications", userMiddleware, async (req: express.Request, res: express.Response) => {
   const { orgId } = req.params;

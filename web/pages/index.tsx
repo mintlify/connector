@@ -43,10 +43,12 @@ export type Doc = {
 
 export type UserSession = {
   user_id: string,
+  user: User,
   email: string,
   firstName?: string,
   lastName?: string,
-  user: User
+  orgId?: string,
+  orgName?: string,
 }
 
 export type User = {
@@ -123,7 +125,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       <Head>
         <title>Finish setting up your account</title>
       </Head>
-      <Setup email={userSession.email} firstName={userSession.firstName} lastName={userSession.lastName} />
+      <Setup userSession={userSession} />
     </>;
   }
 

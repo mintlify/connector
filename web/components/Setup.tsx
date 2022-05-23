@@ -2,58 +2,31 @@ import { UserAddIcon } from "@heroicons/react/solid";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
-import { getUserFromUserEmail } from "../helpers/user";
 import { classNames } from "../helpers/functions";
+import { UserSession } from "../pages";
 
 type SetupProps = {
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  orgId?: string;
+  userSession: UserSession
 };
 
-export default function Setup({ email, firstName: initialFirstName, lastName: initialLastName }: SetupProps) {
+export default function Setup({ userSession }: SetupProps) {
   const router = useRouter();
-  const [firstName, setFirstName] = useState(initialFirstName || "");
-  const [lastName, setLastName] = useState(initialLastName || "");
-  const [orgName, setOrgName] = useState("");
+  const [firstName, setFirstName] = useState(userSession.firstName || "");
+  const [lastName, setLastName] = useState(userSession.lastName || "");
+  const [orgName, setOrgName] = useState(userSession.orgName || "");
   const [didUserExist, setDidUserExist] = useState<boolean>(false);
 
   const onSubmit = () => {
-    // don't create user if it already exists, update the user info instead.
-    if (didUserExist) {
-      router.push({
-        pathname: "/api/verify",
-        query: {
-          email,
-          firstName,
-          lastName,
-        },
-      });
-    } else {
-      router.push({
-        pathname: "/api/create",
-        query: {
-          email,
-          firstName,
-          lastName,
-          orgName,
-        },
-      });
-    }
+    router.push({
+      pathname: "/api/create",
+      query: {
+        email: userSession.email,
+        firstName,
+        lastName,
+        orgName,
+      },
+    });
   };
-
-  useEffect(() => {
-    async function getUserData() {
-      const user = await getUserFromUserEmail(email);
-      if (user) {
-        setOrgName(user.org.name);
-        setDidUserExist(true);
-      }
-    }
-
-    getUserData();
-  });
 
   return (
     <>
@@ -65,7 +38,7 @@ export default function Setup({ email, firstName: initialFirstName, lastName: in
             <p className="mt-2 text-center text-sm text-gray-600">
               Signed in with{" "}
               <a href="#" className="font-medium text-primary hover:text-hover">
-                {email}
+                {userSession.email}
               </a>
             </p>
           </div>
@@ -80,7 +53,7 @@ export default function Setup({ email, firstName: initialFirstName, lastName: in
                     type="text"
                     name="fname"
                     id="fname"
-                    className="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 rounded-md placeholder-gray-400"
+                    className="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 text-gray-800 rounded-md placeholder-gray-400"
                     placeholder="Richard"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
@@ -96,7 +69,7 @@ export default function Setup({ email, firstName: initialFirstName, lastName: in
                     type="text"
                     name="lname"
                     id="lname"
-                    className="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 rounded-md placeholder-gray-400"
+                    className="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 text-gray-800 rounded-md placeholder-gray-400"
                     placeholder="Hendricks"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
@@ -113,16 +86,11 @@ export default function Setup({ email, firstName: initialFirstName, lastName: in
                   type="text"
                   name="organization"
                   id="organization"
-                  className={classNames(
-                    "shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 rounded-md placeholder-gray-400",
-                    didUserExist
-                      ? "mt-1 block w-full border border-gray-300 bg-gray-100 text-gray-400 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-not-allowed"
-                      : ""
-                  )}
+                  className="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 bg-gray-100 text-gray-800 rounded-md placeholder-gray-400 hover:cursor-not-allowed"
                   placeholder="Pied Piper"
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
-                  disabled={didUserExist}
+                  disabled
                 />
               </div>
             </div>
