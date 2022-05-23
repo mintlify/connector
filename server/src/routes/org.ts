@@ -1,7 +1,7 @@
 import express from "express";
 import Org from "../models/Org";
 import User from "../models/User";
-import { userMiddleware } from "./user";
+import { checkIfUserHasVSCodeInstalled, userMiddleware } from "./user";
 import mongoose from "mongoose";
 
 const orgRouter = express.Router();
@@ -115,11 +115,12 @@ orgRouter.get('/:orgId/integrations', userMiddleware, async (req, res) => {
       return res.send({integrations: { github: false, notion: false, vscode: false, slack: false }})
     }
 
+    const isVSCodeInstalled = await checkIfUserHasVSCodeInstalled(res.locals.user.userId);
     const integrations = {
       github: org.integrations.github?.installations != null,
       notion: org.integrations.notion?.accessToken != null,
       slack: org.integrations.slack?.accessToken != null,
-      vscode: false,
+      vscode: isVSCodeInstalled, // dependent on the user
     }
     return res.send({integrations});
   } catch (error) {
