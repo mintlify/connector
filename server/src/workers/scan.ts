@@ -5,11 +5,16 @@ import { scanDocsInOrg } from '../routes/scan';
 
 const startScanWorker = () => {
   workQueue.process(MAX_JOBS_PER_WORKER, async (job) => {
-    const { orgId } = job.data;
-    const diffAlerts = await scanDocsInOrg(orgId);
-    return {
-      diffAlerts
-    };
+    try {
+      const { orgId } = job.data;
+      const diffAlerts = await scanDocsInOrg(orgId);
+      return {
+        diffAlerts
+      };
+    } catch (error) {
+      console.log(error);
+    }
+    
   });
 }
 
