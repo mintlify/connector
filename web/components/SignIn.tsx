@@ -19,7 +19,7 @@ export default function SignIn() {
           setOrgForAuth(org);
         }
       })
-  });
+  }, []);
 
   if (orgForAuth == null) {
     return <>
