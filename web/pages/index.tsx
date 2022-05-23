@@ -108,12 +108,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
   }, [userSession, selectedDoc, isAddingDoc]);
 
   if (!userSession) {
-    return <>
-      <Head>
-        <title>Sign in to Mintlify</title>
-      </Head>
-      <SignIn />
-    </>
+    return <SignIn />
   }
 
   const { user, org } = userSession;
