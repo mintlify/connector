@@ -28,13 +28,12 @@ export default function Sidebar({
   setIsAddDocumentOpen
 }: SidebarProps) {
 
-  const userId = user.userId;
   const fullName = user.firstName + ' ' + user.lastName;
 
   return (
     <>
     <AddDocument
-      userId={userId}
+      user={user}
       isOpen={isAddDocumentOpen}
       setIsOpen={setIsAddDocumentOpen}
       setIsAddingDoc={setIsAddingDoc}
