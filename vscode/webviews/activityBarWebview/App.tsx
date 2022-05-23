@@ -65,6 +65,10 @@ const formatSignInUrl = (signInUrl: string) => {
   return signInWithProtocol;
 };
 
+export const getSubdomain = (host: string) => {
+  return host.split('.')[0];
+};
+
 const App = () => {
   const initialState: State = vscode.getState() || initialStateData;
   const [state, setState] = useState<State>(initialState);
@@ -74,9 +78,15 @@ const App = () => {
     if (!state.user?.userId) {
       return;
     }
-    axios.get(`${state.API_ENDPOINT}/docs?userId=${state.user.userId}`)
+
+    axios.get(`${state.API_ENDPOINT}/docs`, {
+      params: {
+        userId: state.user.userId,
+        subdomain: getSubdomain(state.dashboardUrl)
+      }
+    })
       .then((res) => {
-        const { data: { docs, org } } = res;
+        const { data: { docs } } = res;
         updateState({...state, docs});
       });
   }, []);
@@ -90,6 +100,7 @@ const App = () => {
     event.preventDefault();
     const args = {
       userId: state.user.userId,
+      subdomain: getSubdomain(state.dashboardUrl),
       docId: state.selectedDoc._id,
       title: state.selectedDoc.title,
       org: state.codes[0].org,
@@ -113,7 +124,12 @@ const App = () => {
         break;
       case 'prefill-doc':
         const docId = message.args;
-        axios.get(`${state.API_ENDPOINT}/docs?userId=${state.user.userId}`)
+        axios.get(`${state.API_ENDPOINT}/docs`, {
+          params: {
+            userId: state.user.userId,
+            subdomain: getSubdomain(state.dashboardUrl)
+          }
+        })
           .then((res) => {
             const { data: { docs } } = res;
             const selectedDoc = docs.find(doc => doc._id === docId);

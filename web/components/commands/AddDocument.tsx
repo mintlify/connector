@@ -7,15 +7,16 @@ import axios from "axios"
 import { API_ENDPOINT } from "../../helpers/api"
 import Tooltip from "../Tooltip"
 import { getSubdomain } from "../../helpers/user"
+import { User } from "../../pages"
 
 type AddDocumentProps = {
-  userId: string
+  user: User
   isOpen: boolean
   setIsOpen: (isOpen: boolean) => void
   setIsAddingDoc?: (isAddingDoc: boolean) => void
 }
 
-export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc }: AddDocumentProps) {
+export default function AddDocument({ user, isOpen, setIsOpen, setIsAddingDoc }: AddDocumentProps) {
   const [query, setQuery] = useState("")
   const [placeholder, setPlaceholder] = useState("Add link")
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
@@ -99,7 +100,7 @@ export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc 
         url: formattedQuery,
       }, {
         params: {
-          userId,
+          userId: user.userId,
           subdomain: getSubdomain(window.location.host)
         }
       })
