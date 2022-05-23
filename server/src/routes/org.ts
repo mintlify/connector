@@ -2,7 +2,6 @@ import express from "express";
 import Org from "../models/Org";
 import User from "../models/User";
 import { checkIfUserHasVSCodeInstalled, userMiddleware } from "./user";
-import mongoose from "mongoose";
 
 const orgRouter = express.Router();
 
@@ -36,7 +35,7 @@ orgRouter.get('/subdomain/:subdomain/details', userMiddleware, async (req, res) 
   }
 })
 
-orgRouter.put("/:orgId/email-notifications", userMiddleware, async (req: express.Request, res: express.Response) => {
+orgRouter.put("/:orgId/notifications", userMiddleware, async (req: express.Request, res: express.Response) => {
   const { orgId } = req.params;
   const userOrgId = res.locals.user.org.toString();
   const { monthlyDigest, newsletter } = req.body;
@@ -57,32 +56,16 @@ orgRouter.put("/:orgId/email-notifications", userMiddleware, async (req: express
 });
 
 // Given an orgId from the request query, return all the user objects within that organization
-orgRouter.get("/list-users", async (req: any, res: express.Response) => {
+orgRouter.get("/users", async (req: any, res: express.Response) => {
   const { orgId } = req.query;
 
   if (!orgId) return res.status(400).json({ error: "orgId not provided" });
 
-  const users = await User.aggregate([
-    {
-      $match: {
-        org: new mongoose.Types.ObjectId(orgId.toString()),
-      },
-    },
-    {
-      $lookup: {
-        from: "orgs",
-        localField: "org",
-        foreignField: "_id",
-        as: "org",
-      },
-    },
-    {
-      $set: {
-        org: { $first: "$org" },
-      },
-    },
-  ]);
+  const org = await Org.findById(orgId);
 
+  if (org == null) return res.status(400).json({ error: 'Invalid organization ID' })
+
+  const users = await User.find({ userId: org.users });
   return res.status(200).json({ users });
 });
 

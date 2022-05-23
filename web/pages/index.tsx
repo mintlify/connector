@@ -57,6 +57,10 @@ export type UserSession = {
 export type Org = {
   _id: string,
   name: string,
+  notifications: {
+    monthlyDigest: boolean,
+    newsletter: boolean,
+  }
 }
 
 export type User = {

@@ -35,7 +35,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
   const [inviteErrorMessage, setInviteErrorMessage] = useState<string | undefined>(undefined)
   const [isSendingInvite, setIsSendingInvite] = useState(false)
   const [members, setMembers] = useState<User[]>([])
-  const [emailNotifications, setEmailNotifications] = useState<EmailNotifications>({
+  const [emailNotifications, setNotifications] = useState<EmailNotifications>({
     monthlyDigest: false,
     newsletter: false,
   })
@@ -43,13 +43,11 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
   useEffect(() => {
     if (user == null || org == null) return;
     // get all members of the organization
-    axios.get(`${API_ENDPOINT}/routes/org/list-users?orgId=${org._id}`).then((res) => {
+    axios.get(`${API_ENDPOINT}/routes/org/users?orgId=${org._id}`).then((res) => {
       setMembers(res.data.users)
-    })
-
-    axios.get(`${API_ENDPOINT}/routes/org?userId=${user.userId}&orgId=${org._id.toString()}`).then((res) => {
-      setEmailNotifications(res.data?.org?.notifications)
     });
+
+    setNotifications(org.notifications)
 
   }, [user, org])
 
@@ -103,9 +101,9 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
   }
 
   const updateEmailNotifications = async (newNotifications: EmailNotifications) => {
-    setEmailNotifications(newNotifications)
+    setNotifications(newNotifications)
     // update the organization's new notifications in the database
-    await axios.put(`${API_ENDPOINT}/routes/org/${org._id}/email-notifications?userId=${user.userId}`, {
+    await axios.put(`${API_ENDPOINT}/routes/org/${org._id}/notifications?userId=${user.userId}`, {
       ...newNotifications,
     })
   }
