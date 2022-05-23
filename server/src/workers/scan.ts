@@ -13,6 +13,7 @@ const startScanWorker = () => {
       };
     } catch (error) {
       console.log(error);
+      return;
     }
     
   });
