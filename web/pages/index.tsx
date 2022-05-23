@@ -107,11 +107,17 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       });
   }, [userSession, selectedDoc, isAddingDoc]);
 
+  console.log(1);
+
   if (!userSession) {
     return <SignIn />
   }
 
+  console.log(2);
+
   const { user, org } = userSession;
+
+  console.log(3);
 
   if (user == null) {
     return <>
@@ -122,9 +128,12 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     </>;
   }
 
+  console.log(4);
+
   if (org == null) {
     return <div>You do not have permission to this organization</div>
   }
+  console.log(5);
 
   const listMenu = [
     {
@@ -138,12 +147,18 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     }
   ]
 
+  console.log(6);
+
   const ClearSelectedFrame = () => {
     if (!selectedDoc) return null;
     return <div className="absolute inset-0" onClick={() => setSelectedDoc(undefined)}></div>
   }
 
+  console.log(7);
+
   const hasDocs = (docs && docs.length > 0) || isAddingDoc;
+
+  console.log(8);
 
   return (
     <>
