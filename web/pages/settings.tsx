@@ -10,6 +10,7 @@ import { API_ENDPOINT } from "../helpers/api"
 import { classNames } from "../helpers/functions"
 import { User } from "."
 import { updateSession } from "../helpers/session"
+import { useRouter } from "next/router"
 
 export type EmailNotifications = {
   monthlyDigest: boolean
@@ -23,10 +24,12 @@ const navigation = [
 ]
 
 export default function Settings({ userSession }: { userSession: UserSession }) {
-  const user = userSession.user
-  const [firstName, setFirstName] = useState(user.firstName)
-  const [lastName, setLastName] = useState(user.lastName)
-  const [orgName, setOrgName] = useState(user.org.name)
+  const { user, org } = userSession
+  
+  const router = useRouter();
+  const [firstName, setFirstName] = useState(user?.firstName)
+  const [lastName, setLastName] = useState(user?.lastName)
+  const [orgName, setOrgName] = useState(org?.name)
   const [invitedEmail, setInvitedEmail] = useState("")
   const [inviteErrorMessage, setInviteErrorMessage] = useState<string | undefined>(undefined)
   const [isSendingInvite, setIsSendingInvite] = useState(false)
@@ -37,19 +40,22 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
   })
 
   useEffect(() => {
+    if (user == null || org == null) return;
     // get all members of the organization
-    axios.get(`${API_ENDPOINT}/routes/org/list-users?orgId=${user.org._id}`).then((res) => {
+    axios.get(`${API_ENDPOINT}/routes/org/list-users?orgId=${org._id}`).then((res) => {
       setMembers(res.data.users)
     })
 
-    async function getEmailNotifications() {
-      await axios.get(`${API_ENDPOINT}/routes/org?userId=${user.userId}&orgId=${user.org._id.toString()}`).then((res) => {
-        setEmailNotifications(res.data?.org?.notifications)
-      })
-    }
+    axios.get(`${API_ENDPOINT}/routes/org?userId=${user.userId}&orgId=${org._id.toString()}`).then((res) => {
+      setEmailNotifications(res.data?.org?.notifications)
+    });
 
-    getEmailNotifications()
-  }, [user])
+  }, [user, org])
+
+  if (user == null || org == null) {
+    router.push('/');
+    return;
+  };
 
   const inviteMember = async (email: string) => {
     if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email.trim()) || email.trim() === "") {
@@ -64,7 +70,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
     await axios
       .post(`${API_ENDPOINT}/routes/user/invite-to-org`, {
         emails: [email],
-        orgId: user.org._id,
+        orgId: org._id,
       })
       .then((res) => {
         setMembers(members.concat(res.data.users))
@@ -89,7 +95,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
   }
 
   const onBlurOrgNameInput = async () => {
-    await axios.put(`${API_ENDPOINT}/routes/org/${user.org._id}/name?userId=${user.userId}`, {
+    await axios.put(`${API_ENDPOINT}/routes/org/${org._id}/name?userId=${user.userId}`, {
       name: orgName,
     })
     updateSession()
@@ -98,13 +104,13 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
   const updateEmailNotifications = async (newNotifications: EmailNotifications) => {
     setEmailNotifications(newNotifications)
     // update the organization's new notifications in the database
-    await axios.put(`${API_ENDPOINT}/routes/org/${user.org._id}/email-notifications?userId=${user.userId}`, {
+    await axios.put(`${API_ENDPOINT}/routes/org/${org._id}/email-notifications?userId=${user.userId}`, {
       ...newNotifications,
     })
   }
 
   return (
-    <Layout user={userSession.user}>
+    <Layout user={user}>
       <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
         <div className="my-6 lg:grid lg:grid-cols-12 lg:gap-x-5">
           <aside className="py-0 px-2 sm:px-6 lg:px-0 lg:col-span-4">
@@ -177,7 +183,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                         id="email-address"
                         autoComplete="email"
                         disabled
-                        value={userSession.user.email}
+                        value={user.email}
                         className="mt-1 block w-full border border-gray-300 bg-gray-100 text-gray-400 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                       />
                       <p className="text-sm mt-2 text-gray-500">

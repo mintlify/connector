@@ -10,17 +10,22 @@ export const userMiddleware = async (
   next: () => void
 ) => {
   const { userId } = req.query;
-
   if (!userId) {
     return res.status(400).send({ error: "userId not provided" });
   }
 
   const user = await User.findOne({ userId });
-
   if (user == null) {
     return res.status(400).send({ error: "Invalid userId" });
   }
 
+  const org = await Org.findOne({users: user.userId});
+  if (org == null) {
+    return res.status(400).send({ error: "User does not have access to any organization" });
+  }
+
+  // Add org to user Id
+  user.org = org._id;
   res.locals.user = user;
 
   next();
