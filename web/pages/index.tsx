@@ -42,11 +42,25 @@ export type Doc = {
 }
 
 export type UserSession = {
-  user_id: string,
-  email: string,
-  firstName?: string,
-  lastName?: string,
-  user: User
+  userId: string,
+  user?: User,
+  org?: Org,
+  tempAuthData?: {
+    email: string,
+    firstName?: string,
+    lastName?: string,
+    orgId?: string,
+    orgName?: string,
+  }
+}
+
+export type Org = {
+  _id: string,
+  name: string,
+  notifications: {
+    monthlyDigest: boolean,
+    newsletter: boolean,
+  }
 }
 
 export type User = {
@@ -55,11 +69,6 @@ export type User = {
   firstName: string,
   lastName: string,
   profilePicture?: string,
-  org: {
-    _id: string,
-    name: string,
-    integrations: Record<string, boolean>
-  }
   pending?: boolean;
 }
 
@@ -72,24 +81,12 @@ export default function Home({ userSession }: { userSession: UserSession }) {
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
   const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
 
-  const listMenu = [
-    {
-      name: 'Delete',
-      isRed: true,
-      onClick: (docId: string) => {
-        setDocs(docs.filter(doc => doc._id !== docId));
-        setSelectedDoc(undefined);
-        axios.delete(`${API_ENDPOINT}/routes/docs/${docId}?userId=${userSession.user.userId}`);
-      }
-    }
-  ]
-
   useEffect(() => {
     if (userSession == null) {
       return;
     }
 
-    const userId = userSession.user_id;
+    const userId = userSession.userId;
 
     axios.get(`${API_ENDPOINT}/routes/docs?userId=${userId}`)
       .then((docsResponse) => {
@@ -118,14 +115,32 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     </>
   }
 
-  if (userSession.user == null) {
+  const { user, org } = userSession;
+
+  if (user == null) {
     return <>
       <Head>
         <title>Finish setting up your account</title>
       </Head>
-      <Setup email={userSession.email} firstName={userSession.firstName} lastName={userSession.lastName} />
+      <Setup userSession={userSession} />
     </>;
   }
+
+  if (org == null) {
+    return <div>You do not have permission to this organization</div>
+  }
+
+  const listMenu = [
+    {
+      name: 'Delete',
+      isRed: true,
+      onClick: (docId: string) => {
+        setDocs(docs.filter(doc => doc._id !== docId));
+        setSelectedDoc(undefined);
+        axios.delete(`${API_ENDPOINT}/routes/docs/${docId}?userId=${userSession.userId}`);
+      }
+    }
+  ]
 
   const ClearSelectedFrame = () => {
     if (!selectedDoc) return null;
@@ -139,13 +154,14 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     <Head>
       <title>Mintlify Dashboard</title>
     </Head>
-    <Layout user={userSession.user}>
+    <Layout user={user} org={org}>
     <ClearSelectedFrame />
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
       {/* Left sidebar & main wrapper */}
       <div className="flex-1 min-w-0 xl:flex">
         <Sidebar
-          user={userSession.user}
+          org={org}
+          user={user}
           setIsAddingDoc={setIsAddingDoc}
           isAddAutomationOpen={isAddAutomationOpen}
           setIsAddAutomationOpen={setIsAddAutomationOpen}
@@ -295,7 +311,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
         <ActivityBar
           events={events}
           selectedDoc={selectedDoc}
-          userSession={userSession}
+          user={user}
           setIsAddAutomationOpen={setIsAddAutomationOpen}
         />
       </div>

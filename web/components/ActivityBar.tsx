@@ -6,18 +6,18 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { API_ENDPOINT } from '../helpers/api';
 import { getAutomationTypeIcon, getConnectionIcon } from '../helpers/Icons';
-import { Doc, UserSession } from '../pages';
+import { Doc, User } from '../pages';
 import timeAgo from '../services/timeago';
 import EventItem, { Event } from './Event';
 import Tooltip from './Tooltip';
 
 type DocProfileProps = {
   doc: Doc,
-  userSession: UserSession,
+  user: User,
   setIsAddAutomationOpen: (isOpen: boolean) => void;
 }
 
-function DocProfile({ doc, userSession, setIsAddAutomationOpen }: DocProfileProps) {
+function DocProfile({ doc, user, setIsAddAutomationOpen }: DocProfileProps) {
   const [codes, setCodes] = useState(doc.code);
   const [automations, setAutomations] = useState(doc.automations);
   const [isVSCodeInstalled, setIsVSCodeInstalled] = useState(false);
@@ -29,22 +29,22 @@ function DocProfile({ doc, userSession, setIsAddAutomationOpen }: DocProfileProp
   }, [doc]);
 
   useEffect(() => {
-    axios.get(`${API_ENDPOINT}/routes/user/${userSession.user.userId}/install-vscode`)
+    axios.get(`${API_ENDPOINT}/routes/user/${user.userId}/install-vscode`)
       .then(({ data }) => {
         if (data.isVSCodeInstalled) {
           setIsVSCodeInstalled(data.isVSCodeInstalled)
         }
       })
-  }, [userSession.user.userId]);
+  }, [user.userId]);
 
   const onDeleteCode = async (codeId: string) => {
     setCodes(codes.filter(code => code._id !== codeId));
-    await axios.delete(`${API_ENDPOINT}/routes/links/${codeId}?userId=${userSession.user.userId}`);
+    await axios.delete(`${API_ENDPOINT}/routes/links/${codeId}?userId=${user.userId}`);
   };
 
   const onDeleteAutomation = async (automationId: string) => {
     setAutomations(automations.filter(automation => automation._id !== automationId));
-    await axios.delete(`${API_ENDPOINT}/routes/automations/${automationId}?userId=${userSession.user.userId}`);
+    await axios.delete(`${API_ENDPOINT}/routes/automations/${automationId}?userId=${user.userId}`);
   }
 
   const vscodeUrl = isVSCodeInstalled ? `vscode://mintlify.connector/prefill-doc?docId=${doc._id}` : 'vscode:extension/mintlify.connector';
@@ -142,16 +142,16 @@ function DocProfile({ doc, userSession, setIsAddAutomationOpen }: DocProfileProp
 
 type ActivityBarProps = {
   events: Event[];
-  userSession: UserSession;
+  user: User;
   setIsAddAutomationOpen: (isOpen: boolean) => void;
   selectedDoc?: Doc;
 }
 
-export default function ActivityBar({ events, userSession, selectedDoc, setIsAddAutomationOpen }: ActivityBarProps) {
+export default function ActivityBar({ events, user, selectedDoc, setIsAddAutomationOpen }: ActivityBarProps) {
   return (
     <div className="relative pl-6 lg:w-80">
-      {selectedDoc && <DocProfile doc={selectedDoc} userSession={userSession} setIsAddAutomationOpen={setIsAddAutomationOpen} />}
-        <div className="pt-6 pb-2">
+      {selectedDoc && <DocProfile doc={selectedDoc} user={user} setIsAddAutomationOpen={setIsAddAutomationOpen} />}
+        <div className="pt-4 pb-2">
           <h2 className="text-sm font-semibold">Activity</h2>
         </div>
         <div>

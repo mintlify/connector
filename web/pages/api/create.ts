@@ -5,28 +5,25 @@ import { withSession } from "../../lib/withSession";
 import { redirectToVSCode } from "./login/vscode";
 
 async function handler(req: any, res: NextApiResponse) {
-  const { email, firstName, lastName, orgName } = req.query;
-  const { user_id } = req.session.get("user");
+  const { email, firstName, lastName, orgId } = req.query;
+  const { userId } = req.session.get("user");
 
   const {
-    data: { user },
-  } = await axios.post(`${API_ENDPOINT}/routes/user`, {
-    userId: user_id,
+    data: { user, org },
+  } = await axios.post(`${API_ENDPOINT}/routes/user/${userId}/join/${orgId}`, {
     email,
     firstName,
     lastName,
-    orgName,
   });
 
   req.session.destroy();
   req.session.set("user", {
-    user_id,
-    email,
-    firstName,
-    lastName,
+    userId,
     user,
+    org,
   });
   await req.session.save();
+
   if (req.session.get('authSource')?.source === 'vscode') {
     return redirectToVSCode(res, user);
   }

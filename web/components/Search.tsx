@@ -5,7 +5,7 @@ import { DocumentTextIcon, ExclamationIcon } from '@heroicons/react/outline'
 import { classNames } from '../helpers/functions'
 import axios from 'axios'
 import { API_ENDPOINT } from '../helpers/api'
-import { User } from '../pages'
+import { Org, User } from '../pages'
 import { getAutomationTypeIcon } from '../helpers/Icons'
 import { AutomationType } from '../pages/automations'
 import { useRouter } from 'next/router'
@@ -32,11 +32,12 @@ type SearchResults = {
 
 type SearchProps = {
   user: User,
+  org: Org,
   isOpen: boolean,
   setIsOpen: (isOpen: boolean) => void,
 }
 
-export default function Search({ user, isOpen, setIsOpen }: SearchProps) {
+export default function Search({ user, org, isOpen, setIsOpen }: SearchProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResults>({ docs: [], automations: [] });
 
@@ -46,11 +47,11 @@ export default function Search({ user, isOpen, setIsOpen }: SearchProps) {
       return;
     }
 
-    axios.get(`${API_ENDPOINT}/routes/search?query=${query}&orgId=${user.org._id}`)
+    axios.get(`${API_ENDPOINT}/routes/search?query=${query}&orgId=${org._id}`)
       .then(({ data: { results } }: { data: { results: SearchResults } }) => {
         setResults(results)
       })
-  }, [query, user]);
+  }, [query, user, org._id]);
 
   const router = useRouter();
 
