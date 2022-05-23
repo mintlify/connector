@@ -11,6 +11,7 @@ import { classNames } from "../helpers/functions"
 import { User } from "."
 import { updateSession } from "../helpers/session"
 import { useRouter } from "next/router"
+import Head from "next/head"
 
 export type EmailNotifications = {
   monthlyDigest: boolean
@@ -110,6 +111,10 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
   }
 
   return (
+    <>
+    <Head>
+      <title>Settings</title>
+    </Head>
     <Layout user={user} org={org}>
       <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
         <div className="my-6 lg:grid lg:grid-cols-12 lg:gap-x-5">
@@ -412,6 +417,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
         </div>
       </div>
     </Layout>
+    </>
   )
 }
 
