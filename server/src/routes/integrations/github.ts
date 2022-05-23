@@ -76,6 +76,7 @@ const getInstallationRepositories = async (accessToken: string, installations: a
 const githubRouter = Router();
 
 githubRouter.get('/install', (req, res) => {
+  try {
     const { org } = req.query;
     if (!org) {
       return res.send('Organization ID is required');
@@ -88,9 +89,14 @@ githubRouter.get('/install', (req, res) => {
     urlParsed.searchParams.append('state', encodedState);
     const url = urlParsed.toString();
     return res.redirect(url);
+  } catch (error) {
+    return res.status(500).send({error});
+  }
+    
 });
   
 githubRouter.get('/authorization', async (req, res) => {
+  try {
     const { code, state } = req.query;
     if (code == null) return res.status(403).send('Invalid or missing grant code');
     if (state == null) return res.status(403).send('No state provided');
@@ -114,6 +120,10 @@ githubRouter.get('/authorization', async (req, res) => {
   
     await Org.findByIdAndUpdate(org, { "integrations.github": { ...response, installations: installationsWithRepositories }})
     return res.redirect('https://github.com');
+  } catch (error) {
+    return res.status(500).send({error});
+  }
+    
 });
 
 export default githubRouter;
