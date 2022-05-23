@@ -7,7 +7,7 @@ export type OrgType = {
   createdAt: Date;
   logo: string;
   favicon: string;
-  integrations: {
+  integrations?: {
     slack?: {
       accessToken: string;
       appId: string;
@@ -44,7 +44,7 @@ const OrgSchema = new Schema({
   users: { type: [String], default: []},
   logo: { type: String, required: true },
   favicon: { type: String, required: true },
-  integrations: {
+  integrations?: {
     github: Object,
     slack: {
       accessToken: { type: String },

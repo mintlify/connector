@@ -30,11 +30,10 @@ orgRouter.get('/subdomain/:subdomain/details', userMiddleware, async (req, res) 
 
   try {
     const org = await Org.findOne({subdomain, users: userId});
-    const orgFormatted = {
-      ...org,
-      integrations: undefined, // removed for cookies and security
+    if (org) {
+      org.integrations = undefined;
     }
-    return res.json({org: orgFormatted});
+    return res.json({org});
   }
   catch (error) {
     return res.status(400).send({error})
