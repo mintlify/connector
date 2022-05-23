@@ -1,5 +1,6 @@
 import {  NextApiResponse } from "next";
-import { getOrgFromSubdomain, getSubdomain, getUserFromUserId } from "../../../helpers/user";
+import { User } from "../..";
+import { getOrgFromSubdomain, getOrgFromSubdomainForAuth, getSubdomain, getUserFromUserId } from "../../../helpers/user";
 import { loadStytch } from "../../../lib/loadStytch";
 import { withSession } from "../../../lib/withSession";
 import { redirectToVSCode } from "../login/vscode";
@@ -23,33 +24,45 @@ async function handler(req: any, res: NextApiResponse) {
     }
 
     const subdomain = getSubdomain(req.headers.host);
-    const [authUserData, user, org] = await Promise.all([client.users.get(response.user_id), getUserFromUserId(response.user_id), getOrgFromSubdomain(subdomain)]);
-
-    const { id: orgId, name: orgName } = org;
-
-    const {
-      name: { first_name, last_name },
-      emails: [{ email }],
-    } = authUserData;
+    const existingUser: User = await getUserFromUserId(response.user_id);
 
     const authSource = req.session.get("authSource");
-
     req.session.destroy();
-    req.session.set("user", {
-      userId: response.user_id,
-      user,
-      email,
-      firstName: first_name,
-      lastName: last_name,
-      orgId,
-      orgName,
-    });
 
-    await req.session.save();
-    if (authSource?.source === 'vscode') {
-      return redirectToVSCode(res, user);
+    if (existingUser) {
+      // For existing users
+      const org = await getOrgFromSubdomain(subdomain, existingUser.userId)
+      req.session.set("user", {
+        userId: response.user_id,
+        user: existingUser,
+        org,
+      });
+      if (authSource?.source === 'vscode') {
+        redirectToVSCode(res, existingUser);
+        return;
+      }
+    } else {
+      // For new users
+      const [authUserData, orgForAuth] = await Promise.all([client.users.get(response.user_id), getOrgFromSubdomainForAuth(subdomain)]);
+      const { id: orgId, name: orgName } = orgForAuth;
+
+      const {
+        name: { first_name, last_name },
+        emails: [{ email }],
+      } = authUserData;
+      req.session.set("user", {
+        userId: response.user_id,
+        tempAuthData: {
+          email,
+          firstName: first_name,
+          lastName: last_name,
+          orgId,
+          orgName,
+        }
+      });
     }
 
+    await req.session.save();
     return res.redirect("/");
   } catch (e) {
     const errorString = JSON.stringify(e);

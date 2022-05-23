@@ -10,18 +10,20 @@ type SetupProps = {
 
 export default function Setup({ userSession }: SetupProps) {
   const router = useRouter();
-  const [firstName, setFirstName] = useState(userSession.firstName || "");
-  const [lastName, setLastName] = useState(userSession.lastName || "");
-  const [orgName, setOrgName] = useState(userSession.orgName || "");
+
+  const tempAuthData = userSession.tempAuthData!;
+  const [firstName, setFirstName] = useState(tempAuthData.firstName || "");
+  const [lastName, setLastName] = useState(tempAuthData.lastName || "");
+  const [orgName, setOrgName] = useState(tempAuthData.orgName || "");
 
   const onSubmit = () => {
     router.push({
       pathname: "/api/create",
       query: {
-        email: userSession.email,
+        email: tempAuthData.email,
         firstName,
         lastName,
-        orgId: userSession.orgId,
+        orgId: tempAuthData?.orgId,
       },
     });
   };
@@ -36,7 +38,7 @@ export default function Setup({ userSession }: SetupProps) {
             <p className="mt-2 text-center text-sm text-gray-600">
               Signed in with{" "}
               <a href="#" className="font-medium text-primary hover:text-hover">
-                {userSession.email}
+                {tempAuthData.email}
               </a>
             </p>
           </div>

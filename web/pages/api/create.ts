@@ -9,7 +9,7 @@ async function handler(req: any, res: NextApiResponse) {
   const { userId } = req.session.get("user");
 
   const {
-    data: { user },
+    data: { user, org },
   } = await axios.post(`${API_ENDPOINT}/routes/user/${userId}/join/${orgId}`, {
     email,
     firstName,
@@ -20,7 +20,7 @@ async function handler(req: any, res: NextApiResponse) {
   req.session.set("user", {
     userId,
     user,
-    orgId,
+    org,
   });
   await req.session.save();
 

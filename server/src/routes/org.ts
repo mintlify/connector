@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 
 const orgRouter = express.Router();
 
-orgRouter.get('/subdomain/:subdomain', async (req, res) => {
+orgRouter.get('/subdomain/:subdomain/auth', async (req, res) => {
   const { subdomain } = req.params;
 
   const org = await Org.findOne({subdomain});
@@ -21,6 +21,19 @@ orgRouter.get('/subdomain/:subdomain', async (req, res) => {
       name: org.name
     }
   })
+})
+
+orgRouter.get('/subdomain/:subdomain/details', userMiddleware, async (req, res) => {
+  const { subdomain } = req.params;
+  const { userId } = res.locals.user;
+
+  try {
+    const org = await Org.findOne({subdomain, users: userId});
+    return res.json({org});
+  }
+  catch (error) {
+    return res.status(400).send({error})
+  }
 })
 
 orgRouter.put("/:orgId/email-notifications", userMiddleware, async (req: express.Request, res: express.Response) => {

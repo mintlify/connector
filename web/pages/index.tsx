@@ -42,13 +42,21 @@ export type Doc = {
 }
 
 export type UserSession = {
-  user_id: string,
-  user: User,
-  email: string,
-  firstName?: string,
-  lastName?: string,
-  orgId?: string,
-  orgName?: string,
+  userId: string,
+  user?: User,
+  org?: Org,
+  tempAuthData?: {
+    email: string,
+    firstName?: string,
+    lastName?: string,
+    orgId?: string,
+    orgName?: string,
+  }
+}
+
+export type Org = {
+  _id: string,
+  name: string,
 }
 
 export type User = {
@@ -60,7 +68,6 @@ export type User = {
   org: {
     _id: string,
     name: string,
-    integrations: Record<string, boolean>
   }
   pending?: boolean;
 }
@@ -74,24 +81,12 @@ export default function Home({ userSession }: { userSession: UserSession }) {
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
   const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
 
-  const listMenu = [
-    {
-      name: 'Delete',
-      isRed: true,
-      onClick: (docId: string) => {
-        setDocs(docs.filter(doc => doc._id !== docId));
-        setSelectedDoc(undefined);
-        axios.delete(`${API_ENDPOINT}/routes/docs/${docId}?userId=${userSession.user.userId}`);
-      }
-    }
-  ]
-
   useEffect(() => {
     if (userSession == null) {
       return;
     }
 
-    const userId = userSession.user_id;
+    const userId = userSession.userId;
 
     axios.get(`${API_ENDPOINT}/routes/docs?userId=${userId}`)
       .then((docsResponse) => {
@@ -129,6 +124,22 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     </>;
   }
 
+  if (userSession.org == null) {
+    return <div>You do not have permission to this organization</div>
+  }
+
+  const listMenu = [
+    {
+      name: 'Delete',
+      isRed: true,
+      onClick: (docId: string) => {
+        setDocs(docs.filter(doc => doc._id !== docId));
+        setSelectedDoc(undefined);
+        axios.delete(`${API_ENDPOINT}/routes/docs/${docId}?userId=${userSession.userId}`);
+      }
+    }
+  ]
+
   const ClearSelectedFrame = () => {
     if (!selectedDoc) return null;
     return <div className="absolute inset-0" onClick={() => setSelectedDoc(undefined)}></div>
@@ -147,6 +158,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       {/* Left sidebar & main wrapper */}
       <div className="flex-1 min-w-0 xl:flex">
         <Sidebar
+          org={userSession.org}
           user={userSession.user}
           setIsAddingDoc={setIsAddingDoc}
           isAddAutomationOpen={isAddAutomationOpen}
