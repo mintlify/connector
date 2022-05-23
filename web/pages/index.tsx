@@ -57,6 +57,7 @@ export type UserSession = {
 export type Org = {
   _id: string,
   name: string,
+  subdomain: string,
   notifications: {
     monthlyDigest: boolean,
     newsletter: boolean,
@@ -152,7 +153,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
   return (
     <>
     <Head>
-      <title>Mintlify Dashboard</title>
+      <title>{org.name} Dashboard</title>
     </Head>
     <Layout user={user} org={org}>
     <ClearSelectedFrame />

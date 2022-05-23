@@ -28,7 +28,11 @@ export type OrgType = {
       installations: Object[];
     };
   };
-  users: string[]
+  users: string[],
+  notifications: {
+    monthlyDigest: boolean,
+    newsletter: boolean,
+  }
 };
 
 const OrgSchema = new Schema({
