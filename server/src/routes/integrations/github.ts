@@ -22,14 +22,19 @@ type GitHubAuthData = {
 const githubRedirectUrl = `${ENDPOINT}/routes/integrations/github/authorization`;
 
 const getGitHubAccessTokenFromCode = async (code: string, state: Object): Promise<GitHubAuthData> => {
-  const { data }: { data: string } = await axios.post('https://github.com/login/oauth/access_token', {
-    client_id: process.env.GITHUB_CLIENT_ID,
-    client_secret: process.env.GITHUB_CLIENT_SECRET,
-    code,
-    redirect_uri: githubRedirectUrl,
-    state,
-  });
-  return { response: data }
+  try {
+    const response = await axios.post('https://github.com/login/oauth/access_token', {
+      client_id: process.env.GITHUB_CLIENT_ID,
+      client_secret: process.env.GITHUB_CLIENT_SECRET,
+      code,
+      redirect_uri: githubRedirectUrl,
+      state,
+    });
+    return { response: response.data }
+  } catch (error) {
+    throw error;
+  }
+  
 }
 
 const getGitHubInstallations = async (accessToken: string) => {
@@ -75,10 +80,8 @@ githubRouter.get('/install', (req, res) => {
     urlParsed.searchParams.append('state', encodedState);
     const url = urlParsed.toString();
     return res.redirect(url);
-  } catch (error: any) {
-    console.log('INSTALL ERROR');
-    console.log(error);
-    return res.status(500).send(error?.data);
+  } catch (error) {
+    return res.status(500).send(error);
   }
     
 });
