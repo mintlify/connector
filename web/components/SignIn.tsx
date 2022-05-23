@@ -2,7 +2,7 @@ import { LockClosedIcon, MailIcon } from "@heroicons/react/solid"
 import Link from "next/link"
 import axios from "axios"
 import { useEffect, useState } from "react"
-import { getOrgFromSubdomainForAuth } from "../helpers/user"
+import { getOrgFromSubdomainForAuth, getSubdomain } from "../helpers/user"
 import Head from "next/head"
 
 const defaultOrgTitle = 'your account';
@@ -14,9 +14,10 @@ export default function SignIn() {
   const [isSubmitted, setIsSubmitted] = useState(false)
 
   useEffect(() => {
-    getOrgFromSubdomainForAuth(window.location.host)
+    const subdomain = getSubdomain(window.location.host);
+    getOrgFromSubdomainForAuth(subdomain)
       .then((org) => {
-        if (org.name) {
+        if (org?.name) {
           setOrgTitle(`${org.name}`);
         }
       })
