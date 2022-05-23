@@ -1,7 +1,14 @@
 import express from "express";
 import Org from "../models/Org";
 import User from "../models/User";
-import { removeUnneededDataFromOrg } from "./org";
+
+export const removeUnneededDataFromOrg = (org?: any) => {
+  if (org) {
+    org.integrations = undefined;
+  }
+
+  return org;
+}
 
 const userRouter = express.Router();
 

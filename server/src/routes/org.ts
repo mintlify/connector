@@ -1,17 +1,9 @@
 import express from "express";
 import Org from "../models/Org";
 import User from "../models/User";
-import { checkIfUserHasVSCodeInstalled, userMiddleware } from "./user";
+import { checkIfUserHasVSCodeInstalled, removeUnneededDataFromOrg, userMiddleware } from "./user";
 
 const orgRouter = express.Router();
-
-export const removeUnneededDataFromOrg = (org?: any) => {
-  if (org) {
-    org.integrations = undefined;
-  }
-
-  return org;
-}
 
 orgRouter.get('/subdomain/:subdomain/auth', async (req, res) => {
   const { subdomain } = req.params;
