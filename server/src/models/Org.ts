@@ -44,7 +44,7 @@ const OrgSchema = new Schema({
   users: { type: [String], default: []},
   logo: { type: String, required: true },
   favicon: { type: String, required: true },
-  integrations?: {
+  integrations: {
     github: Object,
     slack: {
       accessToken: { type: String },
