@@ -75,10 +75,10 @@ githubRouter.get('/install', (req, res) => {
     urlParsed.searchParams.append('state', encodedState);
     const url = urlParsed.toString();
     return res.redirect(url);
-  } catch (error) {
+  } catch (error: any) {
     console.log('INSTALL ERROR');
     console.log(error);
-    return res.status(500).send({error});
+    return res.status(500).send(error?.data);
   }
     
 });
