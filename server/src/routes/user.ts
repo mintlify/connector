@@ -9,7 +9,7 @@ export const userMiddleware = async (
   res: express.Response,
   next: () => void
 ) => {
-  const { userId } = req.query;
+  const { userId, subdomain } = req.query;
   if (!userId) {
     return res.status(400).send({ error: "userId not provided" });
   }
@@ -19,7 +19,11 @@ export const userMiddleware = async (
     return res.status(400).send({ error: "Invalid userId" });
   }
 
-  const org = await Org.findOne({users: user.userId});
+  const orgQuery: { users: string, subdomain?: string } = { users: user.userId };
+  if (subdomain) {
+    orgQuery.subdomain = subdomain as string;
+  }
+  const org = await Org.findOne(orgQuery);
   if (org == null) {
     return res.status(400).send({ error: "User does not have access to any organization" });
   }

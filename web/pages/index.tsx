@@ -23,6 +23,7 @@ import { Automation } from './automations'
 import { DocumentTextIcon } from '@heroicons/react/outline'
 import { Event } from '../components/Event'
 import ActivityBar from '../components/ActivityBar'
+import { getSubdomain } from '../helpers/user'
 
 type Code = {
   _id: string,
@@ -83,13 +84,18 @@ export default function Home({ userSession }: { userSession: UserSession }) {
   const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
 
   useEffect(() => {
-    if (userSession == null) {
+    if (userSession == null || userSession.user == null || userSession.org == null) {
       return;
     }
 
     const userId = userSession.userId;
 
-    axios.get(`${API_ENDPOINT}/routes/docs?userId=${userId}`)
+    axios.get(`${API_ENDPOINT}/routes/docs`, {
+      params: {
+        userId: userId,
+        subdomain: getSubdomain(window.location.host)
+      }
+    })
       .then((docsResponse) => {
         const { docs } = docsResponse.data;
         setDocs(docs);
