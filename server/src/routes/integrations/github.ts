@@ -108,10 +108,10 @@ githubRouter.get('/authorization', async (req, res) => {
   
     await Org.findByIdAndUpdate(org, { "integrations.github": { ...response, installations: installationsWithRepositories }})
     return res.redirect('https://github.com');
-  } catch (error) {
+  } catch (error: any) {
     console.log('AUTH ERROR');
     console.log(error);
-    return res.status(500).send({error});
+    return res.status(500).send(error?.data);
   }
     
 });
