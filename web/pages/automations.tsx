@@ -130,7 +130,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
     <Head>
       <title>Automations</title>
     </Head>
-    <Layout user={user}>
+    <Layout user={user} org={org}>
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
       {/* Left sidebar & main wrapper */}
       <div className="flex-1 min-w-0 xl:flex">

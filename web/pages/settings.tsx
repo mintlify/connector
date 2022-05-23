@@ -110,7 +110,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
   }
 
   return (
-    <Layout user={user}>
+    <Layout user={user} org={org}>
       <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
         <div className="my-6 lg:grid lg:grid-cols-12 lg:gap-x-5">
           <aside className="py-0 px-2 sm:px-6 lg:px-0 lg:col-span-4">

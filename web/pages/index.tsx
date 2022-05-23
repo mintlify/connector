@@ -111,7 +111,9 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     </>
   }
 
-  if (userSession.user == null) {
+  const { user, org } = userSession;
+
+  if (user == null) {
     return <>
       <Head>
         <title>Finish setting up your account</title>
@@ -120,7 +122,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     </>;
   }
 
-  if (userSession.org == null) {
+  if (org == null) {
     return <div>You do not have permission to this organization</div>
   }
 
@@ -148,14 +150,14 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     <Head>
       <title>Mintlify Dashboard</title>
     </Head>
-    <Layout user={userSession.user}>
+    <Layout user={user} org={org}>
     <ClearSelectedFrame />
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
       {/* Left sidebar & main wrapper */}
       <div className="flex-1 min-w-0 xl:flex">
         <Sidebar
-          org={userSession.org}
-          user={userSession.user}
+          org={org}
+          user={user}
           setIsAddingDoc={setIsAddingDoc}
           isAddAutomationOpen={isAddAutomationOpen}
           setIsAddAutomationOpen={setIsAddAutomationOpen}
@@ -305,7 +307,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
         <ActivityBar
           events={events}
           selectedDoc={selectedDoc}
-          userSession={userSession}
+          user={user}
           setIsAddAutomationOpen={setIsAddAutomationOpen}
         />
       </div>
