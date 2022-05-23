@@ -1,4 +1,5 @@
 import axios from 'axios';
+import prependHttp from 'prepend-http';
 import { Listbox } from '@headlessui/react';
 import React, { useEffect, useState } from 'react';
 import ReactTooltip from 'react-tooltip';
@@ -28,6 +29,7 @@ export type Code = {
 
 export type State = {
   user?: any,
+  dashboardUrl: string;
   selectedDoc: Doc;
   codes: Code[];
   API_ENDPOINT: string;
@@ -41,28 +43,42 @@ const initialDoc: Doc = {
   isDefault: true,
 };
 
-function classNames(...classes) {
+const initialStateData: State = {
+  docs: [initialDoc],
+  selectedDoc: initialDoc,
+  codes: [],
+  dashboardUrl: '',
+  API_ENDPOINT: 'https://connect.mintlify.com/routes'
+};
+
+const classNames = (...classes) => {
   return classes.filter(Boolean).join(' ');
-}
+};
+
+const formatSignInUrl = (signInUrl: string) => {
+  let signInWithProtocol = prependHttp(signInUrl);
+  const lastCharacter = signInWithProtocol[signInWithProtocol.length - 1];
+  if (lastCharacter === '/') {
+    signInWithProtocol = signInWithProtocol.slice(0, -1);
+  }
+
+  return signInWithProtocol;
+};
 
 const App = () => {
-  const initialState: State = vscode.getState() || {
-    docs: [initialDoc],
-    selectedDoc: initialDoc,
-    codes: [],
-    API_ENDPOINT: 'https://connect.mintlify.com/routes'
-  };
+  const initialState: State = vscode.getState() || initialStateData;
   const [state, setState] = useState<State>(initialState);
+  const [signInUrl, setSignInUrl] = useState<string>('');
 
   useEffect(() => {
     if (!state.user?.userId) {
       return;
     }
     axios.get(`${state.API_ENDPOINT}/docs?userId=${state.user.userId}`)
-    .then((res) => {
-      const { data: { docs } } = res;
-      updateState({...state, docs});
-    });
+      .then((res) => {
+        const { data: { docs, org } } = res;
+        updateState({...state, docs});
+      });
   }, []);
 
   const updateState = (state: State) => {
@@ -80,7 +96,7 @@ const App = () => {
       codes: state.codes,
     };
     vscode.postMessage({ command: 'link-submit', args });
-    updateState({...initialState, user: state.user, docs: state.docs });
+    updateState({...state, codes: [] });
   };
 
   window.addEventListener('message', event => {
@@ -92,7 +108,19 @@ const App = () => {
         break;
       case 'auth':
         const user = message.args;
-        updateState({...state, user});
+        const dashboardUrl = formatSignInUrl(signInUrl);
+        updateState({...initialState, user, dashboardUrl});
+        break;
+      case 'prefill-doc':
+        const docId = message.args;
+        axios.get(`${state.API_ENDPOINT}/docs?userId=${state.user.userId}`)
+          .then((res) => {
+            const { data: { docs } } = res;
+            const selectedDoc = docs.find(doc => doc._id === docId);
+            if (selectedDoc) {
+              updateState({...state, docs, selectedDoc, codes: []});
+            }
+          });
         break;
       case 'post-code':
         const code = message.args;
@@ -142,7 +170,8 @@ const App = () => {
   };
 
   const onClickSignIn = () => {
-    vscode.postMessage({ command: 'login' });
+    let signInWithProtocol = formatSignInUrl(signInUrl);
+    vscode.postMessage({ command: 'login', args: signInWithProtocol });
   };
 
   const onLogout = () => {
@@ -163,10 +192,19 @@ const App = () => {
         <p className="mt-1">
           Sign in to your account to continue
         </p>
+        <p className="mt-1 font-medium">Dashboard URL</p>
+        <input
+          className="text-sm"
+          type="text"
+          value={signInUrl}
+          onChange={(e) => setSignInUrl(e.target.value)}
+          placeholder="name.mintlify.com"
+        />
         <button
           type="submit"
-          className="flex items-center justify-center submit mt-2"
+          className={classNames("flex items-center justify-center submit mt-2", !signInUrl ? 'opacity-50 hover:cursor-default' : 'opacity-100 hover:cursor-pointer')}
           onClick={onClickSignIn}
+          disabled={!signInUrl}
         >
           <LockClosedIcon className="mr-1 h-4 w-4" aria-hidden="true" />
           Sign in with Mintlify
@@ -179,7 +217,7 @@ const App = () => {
           Link your code to documentation
         </p>
         <p>
-          <a className="cursor-pointer" href="https://mintlify.com">Open Dashboard</a>
+          <a className="cursor-pointer" href={state.dashboardUrl}>Open Dashboard</a>
         </p>
         <form className="mt-3" onSubmit={handleSubmit}>
           <label htmlFor="url" className="block">

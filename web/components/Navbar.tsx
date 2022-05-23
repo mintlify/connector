@@ -10,7 +10,7 @@ import { classNames } from '../helpers/functions'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import ProfilePicture from './ProfilePicture'
-import { User } from '../pages'
+import { Org, User } from '../pages'
 import Search from './Search'
 
 const navigation = [
@@ -35,7 +35,12 @@ const navButtonClass = (isActive: boolean) => {
     : 'text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer'
 }
 
-export default function Navbar({ user }: { user: User }) {
+type NavbarProps = {
+  user: User,
+  org: Org
+}
+
+export default function Navbar({ user, org }: NavbarProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const router = useRouter();
 
@@ -47,6 +52,7 @@ export default function Navbar({ user }: { user: User }) {
     <>
     <Search
       user={user}
+      org={org}
       isOpen={isSearchOpen}
       setIsOpen={setIsSearchOpen}
     />

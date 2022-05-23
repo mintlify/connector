@@ -9,55 +9,32 @@ export const userMiddleware = async (
   res: express.Response,
   next: () => void
 ) => {
-  const { userId } = req.query;
-
+  const { userId, subdomain } = req.query;
   if (!userId) {
     return res.status(400).send({ error: "userId not provided" });
   }
 
   const user = await User.findOne({ userId });
-
   if (user == null) {
     return res.status(400).send({ error: "Invalid userId" });
   }
 
+  const orgQuery: { users: string, subdomain?: string } = { users: user.userId };
+  if (subdomain) {
+    orgQuery.subdomain = subdomain as string;
+  }
+  const org = await Org.findOne(orgQuery);
+  if (org == null) {
+    return res.status(400).send({ error: "User does not have access to any organization" });
+  }
+
+  // Add org to user Id
+  user.org = org._id;
   res.locals.user = user;
 
   next();
   return;
 };
-
-userRouter.get(
-  "/by-email",
-  async (req: express.Request, res: express.Response) => {
-    const { email } = req.query;
-
-    const users = await User.aggregate([
-      {
-        $match: {
-          email,
-        },
-      },
-      {
-        $lookup: {
-          from: "orgs",
-          localField: "org",
-          foreignField: "_id",
-          as: "org",
-        },
-      },
-      {
-        $set: {
-          org: { $first: "$org" },
-        },
-      },
-    ]);
-
-    const user = users[0];
-
-    return res.status(200).json({ user });
-  }
-);
 
 /**
  * Given emails as an array of strings & orgId as a string from the request body,
@@ -90,31 +67,6 @@ userRouter.post(
     }
 
     return res.status(200).json({ users });
-  }
-);
-
-// verify the user who was invited to Mintlify
-userRouter.put(
-  "/verify",
-  async (req: express.Request, res: express.Response) => {
-    const { userId, email, firstName, lastName } = req.body;
-    // check null values
-    if (!(userId && email && firstName && lastName))
-      return res.status(400).json({
-        error:
-          "Must fully provide 4 nonempty fields: userId, email, firstName, lastName",
-      });
-
-    try {
-      const user = await User.findOneAndUpdate(
-        { email },
-        { userId, firstName, lastName, pending: false },
-        { new: true }
-      );
-      return res.status(200).json({ user });
-    } catch (error) {
-      return res.status(500).json({ error });
-    }
   }
 );
 
@@ -155,22 +107,21 @@ userRouter.get("/:userId", async (req, res) => {
   return res.send({ user });
 });
 
-userRouter.post("/", async (req: express.Request, res: express.Response) => {
-  const { userId, email, firstName, lastName, orgName } = req.body;
+userRouter.post("/:userId/join/:orgId", async (req: express.Request, res: express.Response) => {
+  const { userId, orgId } = req.params;
+  const { email, firstName, lastName } = req.body;
 
-  const org = await Org.create({
-    name: orgName,
-  });
-
+  // add users not already existing
+  const org = await Org.findOneAndUpdate({ _id: orgId, users: { $ne: userId } }, {
+    $push: { users: userId }
+  }, { new: true })
   const user = await User.create({
     userId,
     email,
     firstName,
     lastName,
-    org: org._id,
-    pending: false,
   });
-  return res.send({ user });
+  return res.send({ user, org });
 });
 
 userRouter.put("/:userId/firstname", async (req, res) => {
@@ -204,5 +155,32 @@ userRouter.put("/:userId/lastname", async (req, res) => {
     return res.status(500).send({ error });
   }
 });
+
+export const checkIfUserHasVSCodeInstalled = async (userId: string) => {
+  const user = await User.findOne({userId});
+  return user?.isVSCodeInstalled === true;
+}
+
+userRouter.get('/:userId/install-vscode', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const isVSCodeInstalled = checkIfUserHasVSCodeInstalled(userId);
+    return res.send({isVSCodeInstalled});
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
+})
+
+userRouter.put('/:userId/install-vscode', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    await User.findOneAndUpdate({userId}, { isVSCodeInstalled: true });
+    return res.end();
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
+})
 
 export default userRouter;

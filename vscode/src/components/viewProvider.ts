@@ -32,6 +32,11 @@ export class ViewProvider implements WebviewViewProvider {
 			this._view?.webview.postMessage({ command: 'auth', args: user });
 		}
 
+		public prefillDoc(docId: string): void {
+			this.show();
+			this._view?.webview.postMessage({ command: 'prefill-doc', args: docId });
+		}
+
 		public logout(): void {
 			this._view?.webview.postMessage({ command: 'logout' });
 		}
@@ -49,7 +54,7 @@ export class ViewProvider implements WebviewViewProvider {
 			webviewView.webview.onDidReceiveMessage(async message => {
 				switch (message.command) {
 					case 'login':
-						openLogin();
+						openLogin(message.args);
 						break;
 					case 'link-submit':
 						{
@@ -92,7 +97,7 @@ export class ViewProvider implements WebviewViewProvider {
 				<meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
 				<meta name="theme-color" content="#000000">
 				<title>Mintlify</title>
-				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; connect-src https://connect.mintlify.com; img-src vscode-resource: https:; script-src 'nonce-${nonce}';style-src vscode-resource: 'unsafe-inline' http: https: data:;">
+				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; connect-src https://connect.mintlify.com http://localhost:5000; img-src vscode-resource: https:; script-src 'nonce-${nonce}';style-src vscode-resource: 'unsafe-inline' http: https: data:;">
 			</head>
 
 			<body>

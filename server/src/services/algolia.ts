@@ -60,8 +60,8 @@ export const updateDocContentForSearch = async (doc: DocType, newContent: string
     await docsIndex.saveObject(record);
 }
 
-export const deleteDocForSearch = async (objectID: string) => {
-    await docsIndex.deleteObject(objectID);
+export const deleteDocForSearch = async (objectID: string): Promise<any> => {
+    return docsIndex.deleteObject(objectID);
 }
 
 export const indexAutomationForSearch = async (automation: AutomationType) => {

@@ -1,35 +1,41 @@
 import express from "express";
 import Org from "../models/Org";
 import User from "../models/User";
-import { userMiddleware } from "./user";
-import mongoose from "mongoose";
+import { checkIfUserHasVSCodeInstalled, userMiddleware } from "./user";
 
 const orgRouter = express.Router();
 
-// Given an orgId from the request query, return the organization object that matches the id
-orgRouter.get("/", userMiddleware, async (req: any, res: express.Response) => {
-  const { orgId } = req.query;
-  const userOrgId = res.locals.user.org.toString();
+orgRouter.get('/subdomain/:subdomain/auth', async (req, res) => {
+  const { subdomain } = req.params;
 
-  if (!orgId) return res.status(400).json({ error: "orgId not provided" });
-  if (userOrgId !== orgId) {
-    return res.status(403).json({ error: "User does not have permission" });
+  const org = await Org.findOne({subdomain});
+  if (org == null) {
+    res.send({org});
+    return;
   }
+
+  return res.send({
+    org: {
+      id: org._id,
+      name: org.name
+    }
+  })
+})
+
+orgRouter.get('/subdomain/:subdomain/details', userMiddleware, async (req, res) => {
+  const { subdomain } = req.params;
+  const { userId } = res.locals.user;
 
   try {
-    const org = await Org.findById(new mongoose.Types.ObjectId(orgId.toString()))
-      .exec()
-      .catch((err) => {
-        throw new Error(err);
-      });
-
-    return res.status(200).json({ org });
-  } catch (error) {
-    return res.status(500).json({ error });
+    const org = await Org.findOne({subdomain, users: userId});
+    return res.json({org});
   }
-});
+  catch (error) {
+    return res.status(400).send({error})
+  }
+})
 
-orgRouter.put("/:orgId/email-notifications", userMiddleware, async (req: express.Request, res: express.Response) => {
+orgRouter.put("/:orgId/notifications", userMiddleware, async (req: express.Request, res: express.Response) => {
   const { orgId } = req.params;
   const userOrgId = res.locals.user.org.toString();
   const { monthlyDigest, newsletter } = req.body;
@@ -50,32 +56,16 @@ orgRouter.put("/:orgId/email-notifications", userMiddleware, async (req: express
 });
 
 // Given an orgId from the request query, return all the user objects within that organization
-orgRouter.get("/list-users", async (req: any, res: express.Response) => {
+orgRouter.get("/users", async (req: any, res: express.Response) => {
   const { orgId } = req.query;
 
   if (!orgId) return res.status(400).json({ error: "orgId not provided" });
 
-  const users = await User.aggregate([
-    {
-      $match: {
-        org: new mongoose.Types.ObjectId(orgId.toString()),
-      },
-    },
-    {
-      $lookup: {
-        from: "orgs",
-        localField: "org",
-        foreignField: "_id",
-        as: "org",
-      },
-    },
-    {
-      $set: {
-        org: { $first: "$org" },
-      },
-    },
-  ]);
+  const org = await Org.findById(orgId);
 
+  if (org == null) return res.status(400).json({ error: 'Invalid organization ID' })
+
+  const users = await User.find({ userId: org.users });
   return res.status(200).json({ users });
 });
 
@@ -115,11 +105,12 @@ orgRouter.get('/:orgId/integrations', userMiddleware, async (req, res) => {
       return res.send({integrations: { github: false, notion: false, vscode: false, slack: false }})
     }
 
+    const isVSCodeInstalled = await checkIfUserHasVSCodeInstalled(res.locals.user.userId);
     const integrations = {
       github: org.integrations.github?.installations != null,
       notion: org.integrations.notion?.accessToken != null,
       slack: org.integrations.slack?.accessToken != null,
-      vscode: false,
+      vscode: isVSCodeInstalled, // dependent on the user
     }
     return res.send({integrations});
   } catch (error) {

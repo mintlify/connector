@@ -1,20 +1,23 @@
 import { NextApiResponse } from "next";
-import { getUserFromUserId } from "../../helpers/user";
+import { getOrgFromSubdomain, getSubdomain, getUserFromUserId } from "../../helpers/user";
 import { withSession } from "../../lib/withSession";
 
 async function handler(req: any, res: NextApiResponse) {
   // await req.session.destroy();
   const userSession = req.session.get('user');
 
-  if (!userSession?.user_id) {
+  if (!userSession?.userId) {
     return res.redirect('/');
   }
 
-  const user = await getUserFromUserId(userSession.user_id);
+  const user = await getUserFromUserId(userSession.userId);
+  const subdomain = getSubdomain(req.headers.host);
+  const org = await getOrgFromSubdomain(subdomain, userSession.userId);
 
   req.session.set('user', {
     ...userSession,
-    user
+    user,
+    org,
   });
 
   await req.session.save();

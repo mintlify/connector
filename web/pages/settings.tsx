@@ -1,104 +1,119 @@
-import Layout from "../components/layout";
-import { BellIcon, UserCircleIcon, UserGroupIcon } from "@heroicons/react/outline";
-import { GetServerSideProps } from "next";
-import { withSession } from "../lib/withSession";
-import { UserSession } from ".";
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import axios from "axios";
-import { API_ENDPOINT } from "../helpers/api";
-import { classNames } from "../helpers/functions";
-import { User } from ".";
-import { updateSession } from "../helpers/session";
+import Layout from "../components/layout"
+import { BellIcon, UserCircleIcon, UserGroupIcon } from "@heroicons/react/outline"
+import { GetServerSideProps } from "next"
+import { withSession } from "../lib/withSession"
+import { UserSession } from "."
+import { useState, useEffect } from "react"
+import Link from "next/link"
+import axios from "axios"
+import { API_ENDPOINT } from "../helpers/api"
+import { classNames } from "../helpers/functions"
+import { User } from "."
+import { updateSession } from "../helpers/session"
+import { useRouter } from "next/router"
+import Head from "next/head"
 
 export type EmailNotifications = {
-  monthlyDigest: boolean;
-  newsletter: boolean;
-};
+  monthlyDigest: boolean
+  newsletter: boolean
+}
 
 const navigation = [
   { name: "Account", href: "#setting-account", icon: UserCircleIcon },
   { name: "Organization", href: "#setting-organization", icon: UserGroupIcon },
   { name: "Notifications", href: "#setting-notifications", icon: BellIcon },
-];
+]
 
 export default function Settings({ userSession }: { userSession: UserSession }) {
-  const user = userSession.user;
-  const [firstName, setFirstName] = useState(user.firstName);
-  const [lastName, setLastName] = useState(user.lastName);
-  const [orgName, setOrgName] = useState(user.org.name);
-  const [invitedEmail, setInvitedEmail] = useState("");
-  const [isSendingInvite, setIsSendingInvite] = useState(false);
-  const [members, setMembers] = useState<User[]>([]);
-  const [emailNotifications, setEmailNotifications] = useState<EmailNotifications>({
+  const { user, org } = userSession
+  
+  const router = useRouter();
+  const [firstName, setFirstName] = useState(user?.firstName)
+  const [lastName, setLastName] = useState(user?.lastName)
+  const [orgName, setOrgName] = useState(org?.name)
+  const [invitedEmail, setInvitedEmail] = useState("")
+  const [inviteErrorMessage, setInviteErrorMessage] = useState<string | undefined>(undefined)
+  const [isSendingInvite, setIsSendingInvite] = useState(false)
+  const [members, setMembers] = useState<User[]>([])
+  const [emailNotifications, setNotifications] = useState<EmailNotifications>({
     monthlyDigest: false,
     newsletter: false,
-  });
+  })
 
   useEffect(() => {
+    if (user == null || org == null) return;
     // get all members of the organization
-    axios.get(`${API_ENDPOINT}/routes/org/list-users?orgId=${user.org._id}`).then((res) => {
-      setMembers(res.data.users);
+    axios.get(`${API_ENDPOINT}/routes/org/users?orgId=${org._id}`).then((res) => {
+      setMembers(res.data.users)
     });
 
-    async function getEmailNotifications() {
-      await axios.get(`${API_ENDPOINT}/routes/org?userId=${user.userId}&orgId=${user.org._id.toString()}`).then((res) => {
-        setEmailNotifications(res.data?.org?.notifications);
-      });
-    }
+    setNotifications(org.notifications)
 
-    getEmailNotifications();
-  }, [user]);
+  }, [user, org])
+
+  if (user == null || org == null) {
+    router.push('/');
+    return;
+  };
 
   const inviteMember = async (email: string) => {
+    if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email.trim()) || email.trim() === "") {
+      setInviteErrorMessage("Please enter a valid email address.")
+      return
+    }
+
     // disable the add member button before sending the invitation
-    setIsSendingInvite(true);
-    setInvitedEmail("");
+    setIsSendingInvite(true)
+    setInvitedEmail("")
     // create a pending account by calling the invitation API
     await axios
       .post(`${API_ENDPOINT}/routes/user/invite-to-org`, {
         emails: [email],
-        orgId: user.org._id,
+        orgId: org._id,
       })
       .then((res) => {
-        setMembers(members.concat(res.data.users));
+        setMembers(members.concat(res.data.users))
       })
     // send login invitation
-    await axios.post("/api/login/magiclink", { email });
-    setIsSendingInvite(false);
-  };
+    await axios.post("/api/login/magiclink", { email })
+    setIsSendingInvite(false)
+  }
 
   const onBlurFirstNameInput = async () => {
     await axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/firstname`, {
       firstName,
     })
-    updateSession();
-  };
+    updateSession()
+  }
 
   const onBlurLastNameInput = async () => {
     await axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/lastname`, {
       lastName,
     })
-    updateSession();
-  };
+    updateSession()
+  }
 
   const onBlurOrgNameInput = async () => {
-    await axios.put(`${API_ENDPOINT}/routes/org/${user.org._id}/name?userId=${user.userId}`, {
+    await axios.put(`${API_ENDPOINT}/routes/org/${org._id}/name?userId=${user.userId}`, {
       name: orgName,
     })
-    updateSession();
-  };
+    updateSession()
+  }
 
   const updateEmailNotifications = async (newNotifications: EmailNotifications) => {
-    setEmailNotifications(newNotifications);
+    setNotifications(newNotifications)
     // update the organization's new notifications in the database
-    await axios.put(`${API_ENDPOINT}/routes/org/${user.org._id}/email-notifications?userId=${user.userId}`, {
+    await axios.put(`${API_ENDPOINT}/routes/org/${org._id}/notifications?userId=${user.userId}`, {
       ...newNotifications,
-    });
-  };
+    })
+  }
 
   return (
-    <Layout user={userSession.user}>
+    <>
+    <Head>
+      <title>Settings</title>
+    </Head>
+    <Layout user={user} org={org}>
       <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
         <div className="my-6 lg:grid lg:grid-cols-12 lg:gap-x-5">
           <aside className="py-0 px-2 sm:px-6 lg:px-0 lg:col-span-4">
@@ -171,8 +186,8 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                         id="email-address"
                         autoComplete="email"
                         disabled
-                        value={userSession.user.email}
-                        className="mt-1 block w-full border border-gray-300 bg-gray-100 text-gray-400 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        value={user.email}
+                        className="mt-1 block w-full border border-gray-300 bg-gray-100 text-gray-400 rounded-md shadow-sm py-2 px-3 focus:outline-none sm:text-sm"
                       />
                       <p className="text-sm mt-2 text-gray-500">
                         <Link href="mailto:hi@mintlify.com">
@@ -214,6 +229,31 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                     </div>
 
                     <div className="col-span-3">
+                      <label htmlFor="company-website" className="block text-sm font-medium text-gray-700">
+                        Domain
+                      </label>
+                      <div className="mt-1 flex rounded-md shadow-sm">
+                        <input
+                          type="text"
+                          name="company-website"
+                          id="company-website"
+                          className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-md focus:ring-primary focus:border-primary sm:text-sm bg-gray-100 text-gray-400 border-gray-300"
+                          value={org.subdomain}
+                          disabled
+                        />
+                        <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-white text-gray-500 sm:text-sm">
+                          .mintlify.com
+                        </span>
+                      </div>
+                      <p className="text-sm mt-2 text-gray-500">
+                        <Link href="mailto:hi@mintlify.com">
+                          <span className="text-primary font-medium cursor-pointer">Contact support</span>
+                        </Link>{" "}
+                        to change the domain address
+                      </p>
+                    </div>
+
+                    <div className="col-span-3">
                       <div className="space-y-5">
                         <div className="sm:flex sm:items-center">
                           <div className="sm:flex-auto">
@@ -231,17 +271,21 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                               placeholder="Email address"
                               aria-describedby="add-team-members-helper"
                               value={invitedEmail}
-                              onChange={(e) => setInvitedEmail(e.target.value)}
+                              onChange={(e) => {
+                                setInviteErrorMessage(undefined)
+                                setInvitedEmail(e.target.value)
+                              }}
                               required
                             />
+                            {inviteErrorMessage && <div className="text-red-500 pt-2 pl-2">{inviteErrorMessage}</div>}
                           </div>
                           <span className="ml-3">
                             <button
                               type="button"
                               disabled={isSendingInvite}
                               onClick={(e) => {
-                                e.preventDefault();
-                                inviteMember(invitedEmail);
+                                e.preventDefault()
+                                inviteMember(invitedEmail)
                               }}
                               className="inline-flex items-center justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-hover focus:outline-none focus:ring-0 focus:ring-offset-2 sm:w-auto"
                             >
@@ -396,13 +440,14 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
         </div>
       </div>
     </Layout>
-  );
+    </>
+  )
 }
 
 const getServerSidePropsHandler: GetServerSideProps = async ({ req }: any) => {
-  const userSession = req.session.get("user") ?? null;
-  const props = { userSession };
-  return { props };
-};
+  const userSession = req.session.get("user") ?? null
+  const props = { userSession }
+  return { props }
+}
 
-export const getServerSideProps = withSession(getServerSidePropsHandler);
+export const getServerSideProps = withSession(getServerSidePropsHandler)

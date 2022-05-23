@@ -9,6 +9,7 @@ export type DocType = {
     title?: string;
     lastUpdatedAt: Date;
     createdAt: Date;
+    changeConfirmationCount?: number;
 };
 
 const DocSchema = new Schema({
@@ -21,6 +22,7 @@ const DocSchema = new Schema({
     lastUpdatedAt: { type: Date, default: Date.now },
     createdAt: { type: Date, default: Date.now },
     createdBy: { type: Schema.Types.ObjectId },
+    changeConfirmationCount: { type: Number }
 });
 
 const Doc = mongoose.model<DocType>('Doc', DocSchema, 'docs');

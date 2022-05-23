@@ -23,59 +23,51 @@ const githubRedirectUrl = `${ENDPOINT}/routes/integrations/github/authorization`
 
 const getGitHubAccessTokenFromCode = async (code: string, state: Object): Promise<GitHubAuthData> => {
   try {
-    const { data }: { data: string } = await axios.post('https://github.com/login/oauth/access_token', {
+    const response = await axios.post('https://github.com/login/oauth/access_token', {
       client_id: process.env.GITHUB_CLIENT_ID,
       client_secret: process.env.GITHUB_CLIENT_SECRET,
       code,
       redirect_uri: githubRedirectUrl,
       state,
     });
-    return { response: data }
+    return { response: response.data }
+  } catch (error) {
+    throw error;
   }
-  catch (error: any) {
-    return { error };
-  }
+  
 }
 
 const getGitHubInstallations = async (accessToken: string) => {
-  try {
-    const { data: { installations } }: { data: { installations: Object[] } }  = await axios.get('https://api.github.com/user/installations', {
-      headers: {
-        'Authorization': `token ${accessToken}`
-      }
-    })
+  const { data: { installations } }: { data: { installations: Object[] } }  = await axios.get('https://api.github.com/user/installations', {
+    headers: {
+      'Authorization': `token ${accessToken}`
+    }
+  })
 
-    return installations
-  } catch (error: any) {
-    return []
-  }
+  return installations
 }
 
 const getInstallationRepositories = async (accessToken: string, installations: any[]) => {
-  try {
-    const getInstalledRepoPromises = installations.map((installation) => {
-      return axios.get(`https://api.github.com/user/installations/${installation.id}/repositories`, {
-        headers: {
-          'Authorization': `token ${accessToken}`
-        }
-      });
+  const getInstalledRepoPromises = installations.map((installation) => {
+    return axios.get(`https://api.github.com/user/installations/${installation.id}/repositories`, {
+      headers: {
+        'Authorization': `token ${accessToken}`
+      }
     });
+  });
 
-    const installedReposRes = await Promise.all(getInstalledRepoPromises);
-    const installedRepos = installedReposRes.map(({ data: { repositories } }) => {
-      return repositories;
-    });
+  const installedReposRes = await Promise.all(getInstalledRepoPromises);
+  const installedRepos = installedReposRes.map(({ data: { repositories } }) => {
+    return repositories;
+  });
 
-    return installedRepos;
-
-  } catch (error: any) {
-    return []
-  }
+  return installedRepos;
 }
 
 const githubRouter = Router();
 
 githubRouter.get('/install', (req, res) => {
+  try {
     const { org } = req.query;
     if (!org) {
       return res.send('Organization ID is required');
@@ -88,9 +80,14 @@ githubRouter.get('/install', (req, res) => {
     urlParsed.searchParams.append('state', encodedState);
     const url = urlParsed.toString();
     return res.redirect(url);
+  } catch (error) {
+    return res.status(500).send(error);
+  }
+    
 });
   
 githubRouter.get('/authorization', async (req, res) => {
+  try {
     const { code, state } = req.query;
     if (code == null) return res.status(403).send('Invalid or missing grant code');
     if (state == null) return res.status(403).send('No state provided');
@@ -114,6 +111,12 @@ githubRouter.get('/authorization', async (req, res) => {
   
     await Org.findByIdAndUpdate(org, { "integrations.github": { ...response, installations: installationsWithRepositories }})
     return res.redirect('https://github.com');
+  } catch (error: any) {
+    console.log('AUTH ERROR');
+    console.log(error);
+    return res.status(500).send(error?.data);
+  }
+    
 });
 
 export default githubRouter;

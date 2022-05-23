@@ -1,4 +1,4 @@
-import { GetServerSideProps, NextPage } from "next";
+import { GetServerSideProps } from "next";
 import Sidebar from "../components/Sidebar";
 import { classNames } from "../helpers/functions";
 import Layout from "../components/layout";
@@ -13,6 +13,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Skeleton from "react-loading-skeleton";
+import { useRouter } from "next/router";
 
 export type DestinationType = 'slack' | 'email' | 'webhook';
 export type AutomationType = 'doc' | 'code';
@@ -65,6 +66,7 @@ const getIntegrations = (orgId: string) => {
 }
 
 export default function Automations({ userSession }: { userSession: UserSession }) {
+  const router = useRouter();
   const [automations, setAutomations] = useState<Automation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
@@ -72,22 +74,13 @@ export default function Automations({ userSession }: { userSession: UserSession 
   const [isAddingAutomation, setIsAddingAutomation] = useState<boolean>(false);
   const [integrationsStatus, setIntegrationsStatus] = useState<{ [key: string]: boolean }>();
 
-  const user = userSession.user;
-
-  const integrations = getIntegrations(user.org._id);
-
-  const listMenu = [
-    {
-      name: 'Delete',
-      isRed: true,
-      onClick: (automationId: string) => {
-        setAutomations(automations.filter(automation => automation._id !== automationId));
-        axios.delete(`${API_ENDPOINT}/routes/automations/${automationId}?userId=${userSession.user.userId}`);
-      }
-    }
-  ]
+  const { user, org } = userSession;
 
   useEffect(() => {
+    if (user == null || org == null) {
+      return;
+    }
+
     axios.get(`${API_ENDPOINT}/routes/automations?userId=${user.userId}`)
       .then(({ data }) => {
         const { automations } = data;
@@ -97,12 +90,30 @@ export default function Automations({ userSession }: { userSession: UserSession 
         setIsLoading(false);
       });
 
-    axios.get(`${API_ENDPOINT}/routes/org/${user.org._id}/integrations?userId=${user.userId}`)
+    axios.get(`${API_ENDPOINT}/routes/org/${org._id}/integrations?userId=${user.userId}`)
       .then(({ data }) => {
         const { integrations } = data;
         setIntegrationsStatus(integrations);
       })
-  }, [user, isAddingAutomation]);
+  }, [user, org, isAddingAutomation]);
+
+  if (user == null || org == null) {
+    router.push('/');
+    return;
+  }
+
+  const listMenu = [
+    {
+      name: 'Delete',
+      isRed: true,
+      onClick: (automationId: string) => {
+        setAutomations(automations.filter(automation => automation._id !== automationId));
+        axios.delete(`${API_ENDPOINT}/routes/automations/${automationId}?userId=${user.userId}`);
+      }
+    }
+  ]
+
+  const integrations = getIntegrations(org._id);
 
   const handleToggleSwitch = async (automationId: string, isActive: boolean) => {
     axios.put(`${API_ENDPOINT}/routes/automations/active?userId=${user.userId}`, { automationId, isActive })
@@ -119,12 +130,13 @@ export default function Automations({ userSession }: { userSession: UserSession 
     <Head>
       <title>Automations</title>
     </Head>
-    <Layout user={userSession.user}>
+    <Layout user={user} org={org}>
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
       {/* Left sidebar & main wrapper */}
       <div className="flex-1 min-w-0 xl:flex">
         <Sidebar
-          user={userSession.user}
+          user={user}
+          org={org}
           isAddAutomationOpen={isAddAutomationOpen}
           setIsAddAutomationOpen={setIsAddAutomationOpen}
           isAddDocumentOpen={isAddDocumentOpen}
@@ -169,7 +181,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
                     <div className="flex items-center justify-between">
                       <div className="flex space-x-2 items-center">
                         { getAutomationTypeIcon(automation.type, 8, 5) }
-                        <p className="text-sm font-medium text-gray-700 truncate">{automation.name}</p>
+                        <p className="text-sm font-medium text-gray-700">{automation.name}</p>
                       </div>
                       <div className="ml-2 flex-shrink-0 flex items-center space-x-2">
                       <Switch
@@ -267,7 +279,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
                       <p className="text-sm font-medium text-gray-900">{integration.name}</p>
                       <div className="flex space-x-0.5 items-center">
                         <p className="text-xs text-gray-500 truncate">{ integrationsStatus == null ? <Skeleton width={56} /> : integrationsStatus[integration.id] ? 'Installed' : 'Not installed'}</p>
-                        { integrationsStatus != null && integrationsStatus[integration.id] ? <CheckCircleIcon className="h-3 w-3 text-green-600" /> : null }
+                        { integrationsStatus != null && integrationsStatus[integration.id] ? <CheckCircleIcon className="h-3 w-3 text-green-700" /> : null }
                       </div>
                     </a>
                   </div>

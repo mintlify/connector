@@ -132,6 +132,7 @@
     "@tailwindcss/forms": "^0.5.1",
     "postcss-loader": "^6.2.1",
     "postcss-preset-env": "^7.5.0",
+    "prepend-http": "^4.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-tooltip": "^4.2.21"

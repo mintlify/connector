@@ -1,9 +1,12 @@
+import axios from "axios";
 import { NextApiResponse } from "next";
 import { User } from "../..";
+import { API_ENDPOINT } from "../../../helpers/api";
 import { withSession } from "../../../lib/withSession";
 
 export const redirectToVSCode = (res: NextApiResponse, user: User) => {
-  const userQuery = `user=${JSON.stringify(user)}`
+  axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/install-vscode`);
+  const userQuery = `user=${JSON.stringify(user)}`;
   return res.redirect(`vscode://mintlify.connector/auth?${userQuery}`);
 }
 

@@ -13,7 +13,6 @@ import { getAutomationTypeIcon, getConnectionIcon } from '../helpers/Icons'
 import { useEffect, useState } from 'react'
 import timeAgo from '../services/timeago'
 import { API_ENDPOINT } from '../helpers/api'
-import Tooltip from '../components/Tooltip'
 import Head from 'next/head'
 import 'react-loading-skeleton/dist/skeleton.css'
 import LoadingItem from '../components/LoadingItem'
@@ -22,7 +21,9 @@ import SignIn from '../components/SignIn'
 import Setup from '../components/Setup'
 import { Automation } from './automations'
 import { DocumentTextIcon } from '@heroicons/react/outline'
-import EventItem, { Event } from '../components/Event'
+import { Event } from '../components/Event'
+import ActivityBar from '../components/ActivityBar'
+import { getSubdomain } from '../helpers/user'
 
 type Code = {
   _id: string,
@@ -34,6 +35,7 @@ export type Doc = {
   _id: string,
   title: string,
   lastUpdatedAt: string,
+  createdAt: string,
   url: string,
   code: Code[],
   automations: Automation[],
@@ -41,11 +43,26 @@ export type Doc = {
 }
 
 export type UserSession = {
-  user_id: string,
-  email: string,
-  firstName?: string,
-  lastName?: string,
-  user: User
+  userId: string,
+  user?: User,
+  org?: Org,
+  tempAuthData?: {
+    email: string,
+    firstName?: string,
+    lastName?: string,
+    orgId?: string,
+    orgName?: string,
+  }
+}
+
+export type Org = {
+  _id: string,
+  name: string,
+  subdomain: string,
+  notifications: {
+    monthlyDigest: boolean,
+    newsletter: boolean,
+  }
 }
 
 export type User = {
@@ -54,43 +71,31 @@ export type User = {
   firstName: string,
   lastName: string,
   profilePicture?: string,
-  org: {
-    _id: string,
-    name: string,
-    integrations: Record<string, boolean>
-  }
   pending?: boolean;
 }
 
 export default function Home({ userSession }: { userSession: UserSession }) {
   const [docs, setDocs] = useState<Doc[]>([]);
-  const [events, setEvents] = useState<Event[]>();
+  const [events, setEvents] = useState<Event[]>([]);
   const [selectedDoc, setSelectedDoc] = useState<Doc>();
   const [isAddingDoc, setIsAddingDoc] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
   const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
 
-  const listMenu = [
-    {
-      name: 'Delete',
-      isRed: true,
-      onClick: (docId: string) => {
-        setDocs(docs.filter(doc => doc._id !== docId));
-        setSelectedDoc(undefined);
-        axios.delete(`${API_ENDPOINT}/routes/docs/${docId}?userId=${userSession.user.userId}`);
-      }
-    }
-  ]
-
   useEffect(() => {
-    if (userSession == null) {
+    if (userSession == null || userSession.user == null || userSession.org == null) {
       return;
     }
 
-    const userId = userSession.user_id;
+    const userId = userSession.userId;
 
-    axios.get(`${API_ENDPOINT}/routes/docs?userId=${userId}`)
+    axios.get(`${API_ENDPOINT}/routes/docs`, {
+      params: {
+        userId: userId,
+        subdomain: getSubdomain(window.location.host)
+      }
+    })
       .then((docsResponse) => {
         const { docs } = docsResponse.data;
         setDocs(docs);
@@ -109,22 +114,35 @@ export default function Home({ userSession }: { userSession: UserSession }) {
   }, [userSession, selectedDoc, isAddingDoc]);
 
   if (!userSession) {
-    return <>
-      <Head>
-        <title>Sign in to Mintlify</title>
-      </Head>
-      <SignIn />
-    </>
+    return <SignIn />
   }
 
-  if (userSession.user == null) {
+  const { user, org } = userSession;
+
+  if (user == null) {
     return <>
       <Head>
         <title>Finish setting up your account</title>
       </Head>
-      <Setup email={userSession.email} firstName={userSession.firstName} lastName={userSession.lastName} />
+      <Setup userSession={userSession} />
     </>;
   }
+
+  if (org == null) {
+    return <div>You do not have permission to this organization</div>
+  }
+
+  const listMenu = [
+    {
+      name: 'Delete',
+      isRed: true,
+      onClick: (docId: string) => {
+        setDocs(docs.filter(doc => doc._id !== docId));
+        setSelectedDoc(undefined);
+        axios.delete(`${API_ENDPOINT}/routes/docs/${docId}?userId=${userSession.userId}`);
+      }
+    }
+  ]
 
   const ClearSelectedFrame = () => {
     if (!selectedDoc) return null;
@@ -136,15 +154,16 @@ export default function Home({ userSession }: { userSession: UserSession }) {
   return (
     <>
     <Head>
-      <title>Mintlify Dashboard</title>
+      <title>{org.name} Dashboard</title>
     </Head>
-    <Layout user={userSession.user}>
+    <Layout user={user} org={org}>
     <ClearSelectedFrame />
     <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
       {/* Left sidebar & main wrapper */}
-      <div className="flex-1 min-w-0 xl:flex z-10">
+      <div className="flex-1 min-w-0 xl:flex">
         <Sidebar
-          user={userSession.user}
+          org={org}
+          user={user}
           setIsAddingDoc={setIsAddingDoc}
           isAddAutomationOpen={isAddAutomationOpen}
           setIsAddAutomationOpen={setIsAddAutomationOpen}
@@ -268,23 +287,15 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                       <div className="flex flex-shrink-0 space-x-1">
                         <div className="h-6 w-6"></div>
                         {doc.code.map((code) => (
-                          <Tooltip key={code._id} message={`Connected to ${code.file}`}>
-                            <Link href={code.url}>
-                              <a className="hover:opacity-75" target="_blank">
-                                {getConnectionIcon(6, 4)}
-                              </a>
-                            </Link>
-                          </Tooltip>
+                          <a key={code._id} >
+                            {getConnectionIcon(6, 4)}
+                          </a>
                         ))}
                         {
                           doc.automations.map((automation) => (
-                            <Tooltip key="auto" message={automation.name}>
-                              <Link href='/automations'>
-                                <a className="hover:opacity-50">
-                                {getAutomationTypeIcon(automation.type, 6, 4)}
-                                </a>
-                              </Link>
-                            </Tooltip>
+                          <a key={automation._id}>
+                            {getAutomationTypeIcon(automation.type, 6, 4)}
+                          </a>
                           ))
                         }
                       </div>
@@ -298,21 +309,13 @@ export default function Home({ userSession }: { userSession: UserSession }) {
         </div>
       </div>
       {/* Activity feed */}
-      <div className="relative bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0">
-        <ClearSelectedFrame />
-        <div className="relative pl-6 lg:w-80 z-10">
-          <div className="pt-6 pb-2">
-            <h2 className="text-sm font-semibold">Activity</h2>
-          </div>
-          <div>
-            <ul role="list" className="divide-y divide-gray-200">
-              {events?.map((event) => (
-                <EventItem key={event._id} event={event} />
-              ))}
-            </ul>
-            <div className="py-4 text-sm border-t border-gray-200"></div>
-          </div>
-        </div>
+      <div className="relative bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0 z-10">
+        <ActivityBar
+          events={events}
+          selectedDoc={selectedDoc}
+          user={user}
+          setIsAddAutomationOpen={setIsAddAutomationOpen}
+        />
       </div>
     </div>
     </Layout>

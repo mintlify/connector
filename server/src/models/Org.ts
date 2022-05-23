@@ -3,6 +3,7 @@ import mongoose, { Schema, Types } from "mongoose";
 export type OrgType = {
   _id: Types.ObjectId;
   name: string;
+  subdomain: string;
   createdAt: Date;
   integrations: {
     slack?: {
@@ -27,11 +28,18 @@ export type OrgType = {
       installations: Object[];
     };
   };
+  users: string[],
+  notifications: {
+    monthlyDigest: boolean,
+    newsletter: boolean,
+  }
 };
 
 const OrgSchema = new Schema({
   name: { type: String, required: true },
+  subdomain: { type: String, required: true, unique: true },
   createdAt: { type: Date, default: Date.now },
+  users: { type: [String], default: []},
   integrations: {
     github: Object,
     slack: {

@@ -1,14 +1,14 @@
 import { CogIcon, DocumentTextIcon } from '@heroicons/react/outline';
 import { PlusIcon } from '@heroicons/react/solid'
 import Link from 'next/link';
-import { useState } from 'react'
 import AddDocument from './commands/AddDocument'
 import AddAutomation from './commands/AddAutomation'
-import { User } from '../pages';
+import { Org, User } from '../pages';
 import ProfilePicture from './ProfilePicture';
 
 type SidebarProps = {
   user: User;
+  org: Org;
   setIsAddingDoc?: (isAddingDoc: boolean) => void;
   setIsAddingAutomation?: (isAddingAutomation: boolean) => void;
   isAddDocumentOpen: boolean;
@@ -19,6 +19,7 @@ type SidebarProps = {
 
 export default function Sidebar({
   user,
+  org,
   setIsAddingDoc,
   setIsAddingAutomation,
   isAddAutomationOpen,
@@ -61,7 +62,7 @@ export default function Sidebar({
                   <div className="text-sm font-medium text-gray-900">{fullName}</div>
                   <a href="#" className="group flex items-center space-x-1 group-hover:text-gray-900">
                     <span className="text-sm text-gray-500 font-medium">
-                      {user.org.name}
+                      {org.name}
                     </span>
                   </a>
                 </div>

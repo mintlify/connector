@@ -1,10 +1,11 @@
 import { Fragment, useState } from "react"
 import { Combobox, Dialog, Transition } from "@headlessui/react"
-import { PlusIcon, LinkIcon } from "@heroicons/react/solid"
+import { PlusIcon, LinkIcon, ExclamationCircleIcon } from "@heroicons/react/solid"
 import { classNames } from "../../helpers/functions"
 import { ConfluenceIcon, GoogleDocsIcon, NotionIcon } from "../../helpers/Icons"
 import axios from "axios"
 import { API_ENDPOINT } from "../../helpers/api"
+import Tooltip from "../Tooltip"
 
 type AddDocumentProps = {
   userId: string
@@ -106,8 +107,8 @@ export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc 
   }
 
   return (
-    <Transition.Root show={isOpen} as={Fragment} afterLeave={() => setQuery("")} appear>
-      <Dialog as="div" className="relative z-10" onClose={setIsOpen}>
+    <Transition.Root show={isOpen} as={Fragment} afterLeave={() => { setErrorMessage(''); setQuery('') }} appear>
+      <Dialog as="div" className="relative z-20" onClose={setIsOpen}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-200"
@@ -130,10 +131,16 @@ export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc 
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <Dialog.Panel className="mx-auto max-w-2xl transform divide-y divide-gray-100 overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
+            <Dialog.Panel className="mx-auto max-w-2xl transform divide-y divide-gray-100 rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
               <Combobox onChange={() => onEnter()} value={query}>
                 <div className="relative rounded-xl">
-                  <PlusIcon className="pointer-events-none absolute top-3.5 left-4 h-5 w-5 text-gray-400" aria-hidden="true" />
+                  <div className="pointer-events-none absolute top-3.5 left-4">
+                  {
+                    errorMessage
+                      ? <Tooltip message={errorMessage} isAlwaysOpen><ExclamationCircleIcon className="h-5 w-5 text-red-500" aria-hidden="true" /></Tooltip>
+                      : <PlusIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                  }
+                  </div>
                   <Combobox.Input
                     className="h-12 w-full rounded-t-xl bg-transparent pl-11 pr-4 border-0 text-gray-800 placeholder-gray-400 sm:text-sm focus:outline-none focus:ring-0"
                     placeholder={placeholder}
@@ -144,11 +151,6 @@ export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc 
                     }}
                     onKeyDown={({ key }: { key: string }) => key === "Enter" && onEnter()}
                   />
-                  {errorMessage && (
-                    <div className="pointer-events-none flex items-center absolute top-3.5 right-4 h-5 bg-red-600 text-white text-xs px-2 rounded-md">
-                      {errorMessage}
-                    </div>
-                  )}
                 </div>
                 <Combobox.Options static className="max-h-80 scroll-py-2 divide-y divide-gray-100 overflow-y-auto">
                   <li className="p-2">

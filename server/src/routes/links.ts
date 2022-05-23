@@ -26,4 +26,16 @@ linksRouter.put('/', userMiddleware, async (req, res) => {
     }
 });
 
+linksRouter.delete('/:codeId', userMiddleware, async (req, res) => {
+    const { codeId } = req.params;
+    const { org } = res.locals.user;
+    
+    try {
+      await Code.findOneAndDelete({ _id: codeId, org });
+      res.end();
+    } catch (error) {
+      res.status(500).send({error})
+    }
+  })
+
 export default linksRouter;
