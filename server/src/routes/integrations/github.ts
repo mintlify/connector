@@ -22,55 +22,41 @@ type GitHubAuthData = {
 const githubRedirectUrl = `${ENDPOINT}/routes/integrations/github/authorization`;
 
 const getGitHubAccessTokenFromCode = async (code: string, state: Object): Promise<GitHubAuthData> => {
-  try {
-    const { data }: { data: string } = await axios.post('https://github.com/login/oauth/access_token', {
-      client_id: process.env.GITHUB_CLIENT_ID,
-      client_secret: process.env.GITHUB_CLIENT_SECRET,
-      code,
-      redirect_uri: githubRedirectUrl,
-      state,
-    });
-    return { response: data }
-  }
-  catch (error: any) {
-    return { error };
-  }
+  const { data }: { data: string } = await axios.post('https://github.com/login/oauth/access_token', {
+    client_id: process.env.GITHUB_CLIENT_ID,
+    client_secret: process.env.GITHUB_CLIENT_SECRET,
+    code,
+    redirect_uri: githubRedirectUrl,
+    state,
+  });
+  return { response: data }
 }
 
 const getGitHubInstallations = async (accessToken: string) => {
-  try {
-    const { data: { installations } }: { data: { installations: Object[] } }  = await axios.get('https://api.github.com/user/installations', {
-      headers: {
-        'Authorization': `token ${accessToken}`
-      }
-    })
+  const { data: { installations } }: { data: { installations: Object[] } }  = await axios.get('https://api.github.com/user/installations', {
+    headers: {
+      'Authorization': `token ${accessToken}`
+    }
+  })
 
-    return installations
-  } catch (error: any) {
-    return []
-  }
+  return installations
 }
 
 const getInstallationRepositories = async (accessToken: string, installations: any[]) => {
-  try {
-    const getInstalledRepoPromises = installations.map((installation) => {
-      return axios.get(`https://api.github.com/user/installations/${installation.id}/repositories`, {
-        headers: {
-          'Authorization': `token ${accessToken}`
-        }
-      });
+  const getInstalledRepoPromises = installations.map((installation) => {
+    return axios.get(`https://api.github.com/user/installations/${installation.id}/repositories`, {
+      headers: {
+        'Authorization': `token ${accessToken}`
+      }
     });
+  });
 
-    const installedReposRes = await Promise.all(getInstalledRepoPromises);
-    const installedRepos = installedReposRes.map(({ data: { repositories } }) => {
-      return repositories;
-    });
+  const installedReposRes = await Promise.all(getInstalledRepoPromises);
+  const installedRepos = installedReposRes.map(({ data: { repositories } }) => {
+    return repositories;
+  });
 
-    return installedRepos;
-
-  } catch (error: any) {
-    return []
-  }
+  return installedRepos;
 }
 
 const githubRouter = Router();
@@ -90,6 +76,8 @@ githubRouter.get('/install', (req, res) => {
     const url = urlParsed.toString();
     return res.redirect(url);
   } catch (error) {
+    console.log('INSTALL ERROR');
+    console.log(error);
     return res.status(500).send({error});
   }
     
@@ -121,6 +109,8 @@ githubRouter.get('/authorization', async (req, res) => {
     await Org.findByIdAndUpdate(org, { "integrations.github": { ...response, installations: installationsWithRepositories }})
     return res.redirect('https://github.com');
   } catch (error) {
+    console.log('AUTH ERROR');
+    console.log(error);
     return res.status(500).send({error});
   }
     
