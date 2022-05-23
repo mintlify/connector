@@ -19,7 +19,7 @@ type AddDocumentProps = {
 export default function AddDocument({ user, isOpen, setIsOpen, setIsAddingDoc }: AddDocumentProps) {
   const [query, setQuery] = useState("")
   const [placeholder, setPlaceholder] = useState("Add link")
-  const [errorMessage, setErrorMessage] = useState<string | undefined>();
+  const [errorMessage, setErrorMessage] = useState<string | undefined>()
 
   const actions = [
     {
@@ -83,12 +83,12 @@ export default function AddDocument({ user, isOpen, setIsOpen, setIsAddingDoc }:
     let formattedQuery: string = query.trim()
 
     // prepend `https://` to the url if it's missing
-    if (!formattedQuery.startsWith("http://") && !formattedQuery.startsWith("https://"))
+    if (!formattedQuery.toLowerCase().startsWith("http://") && !formattedQuery.toLowerCase().startsWith("https://"))
       formattedQuery = `https://${formattedQuery}`
 
     // check if the url is valid & the website is alive
     if (!isUrlValid(formattedQuery) || !isUrlAlive(formattedQuery)) {
-      setErrorMessage('Invalid URL')
+      setErrorMessage("Invalid URL")
       return
     }
 
@@ -153,7 +153,7 @@ export default function AddDocument({ user, isOpen, setIsOpen, setIsAddingDoc }:
                     placeholder={placeholder}
                     value={query}
                     onChange={(event) => {
-                      setErrorMessage(undefined);
+                      setErrorMessage(undefined)
                       setQuery(event.target.value)
                     }}
                     onKeyDown={({ key }: { key: string }) => key === "Enter" && onEnter()}
