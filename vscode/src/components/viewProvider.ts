@@ -53,7 +53,7 @@ export class ViewProvider implements WebviewViewProvider {
 			webviewView.webview.onDidReceiveMessage(async message => {
 				switch (message.command) {
 					case 'login':
-						openLogin();
+						openLogin(message.args);
 						break;
 					case 'link-submit':
 						{
