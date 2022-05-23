@@ -9,7 +9,7 @@ const UserSchema = new Schema({
     profilePicture: { type: String },
     createdAt: { type: Date, default: Date.now },
     role: { type: String },
-    pending: {type: Boolean, default: true, required: true},
+    pending: {type: Boolean, default: false, required: true},
     isVSCodeInstalled: { type: Boolean, default: false }
 });
 

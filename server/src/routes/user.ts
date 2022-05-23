@@ -27,38 +27,6 @@ export const userMiddleware = async (
   return;
 };
 
-userRouter.get(
-  "/by-email",
-  async (req: express.Request, res: express.Response) => {
-    const { email } = req.query;
-
-    const users = await User.aggregate([
-      {
-        $match: {
-          email,
-        },
-      },
-      {
-        $lookup: {
-          from: "orgs",
-          localField: "org",
-          foreignField: "_id",
-          as: "org",
-        },
-      },
-      {
-        $set: {
-          org: { $first: "$org" },
-        },
-      },
-    ]);
-
-    const user = users[0];
-
-    return res.status(200).json({ user });
-  }
-);
-
 /**
  * Given emails as an array of strings & orgId as a string from the request body,
  * invite the users with the provided emails to the org through stytch.
@@ -90,31 +58,6 @@ userRouter.post(
     }
 
     return res.status(200).json({ users });
-  }
-);
-
-// verify the user who was invited to Mintlify
-userRouter.put(
-  "/verify",
-  async (req: express.Request, res: express.Response) => {
-    const { userId, email, firstName, lastName } = req.body;
-    // check null values
-    if (!(userId && email && firstName && lastName))
-      return res.status(400).json({
-        error:
-          "Must fully provide 4 nonempty fields: userId, email, firstName, lastName",
-      });
-
-    try {
-      const user = await User.findOneAndUpdate(
-        { email },
-        { userId, firstName, lastName, pending: false },
-        { new: true }
-      );
-      return res.status(200).json({ user });
-    } catch (error) {
-      return res.status(500).json({ error });
-    }
   }
 );
 
@@ -155,20 +98,18 @@ userRouter.get("/:userId", async (req, res) => {
   return res.send({ user });
 });
 
-userRouter.post("/", async (req: express.Request, res: express.Response) => {
-  const { userId, email, firstName, lastName, orgName } = req.body;
+userRouter.post("/:userId/join/:orgId", async (req: express.Request, res: express.Response) => {
+  const { userId, orgId } = req.params;
+  const { email, firstName, lastName } = req.body;
 
-  const org = await Org.create({
-    name: orgName,
-  });
-
+  await Org.findByIdAndUpdate(orgId, {
+    $push: { users: userId }
+  })
   const user = await User.create({
     userId,
     email,
     firstName,
     lastName,
-    org: org._id,
-    pending: false,
   });
   return res.send({ user });
 });

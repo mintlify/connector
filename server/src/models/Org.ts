@@ -28,12 +28,14 @@ export type OrgType = {
       installations: Object[];
     };
   };
+  users: string[]
 };
 
 const OrgSchema = new Schema({
   name: { type: String, required: true },
   subdomain: { type: String, required: true, unique: true },
   createdAt: { type: Date, default: Date.now },
+  users: { type: [String], default: []},
   integrations: {
     github: Object,
     slack: {

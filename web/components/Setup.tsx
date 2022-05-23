@@ -1,8 +1,7 @@
 import { UserAddIcon } from "@heroicons/react/solid";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
-import { classNames } from "../helpers/functions";
+import { useState } from "react";
 import { UserSession } from "../pages";
 
 type SetupProps = {
@@ -14,7 +13,6 @@ export default function Setup({ userSession }: SetupProps) {
   const [firstName, setFirstName] = useState(userSession.firstName || "");
   const [lastName, setLastName] = useState(userSession.lastName || "");
   const [orgName, setOrgName] = useState(userSession.orgName || "");
-  const [didUserExist, setDidUserExist] = useState<boolean>(false);
 
   const onSubmit = () => {
     router.push({
@@ -23,7 +21,7 @@ export default function Setup({ userSession }: SetupProps) {
         email: userSession.email,
         firstName,
         lastName,
-        orgName,
+        orgId: userSession.orgId,
       },
     });
   };
