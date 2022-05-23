@@ -151,7 +151,7 @@ export default function ActivityBar({ events, userSession, selectedDoc, setIsAdd
   return (
     <div className="relative pl-6 lg:w-80">
       {selectedDoc && <DocProfile doc={selectedDoc} userSession={userSession} setIsAddAutomationOpen={setIsAddAutomationOpen} />}
-        <div className="pt-6 pb-2">
+        <div className="pt-4 pb-2">
           <h2 className="text-sm font-semibold">Activity</h2>
         </div>
         <div>
