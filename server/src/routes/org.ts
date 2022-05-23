@@ -17,7 +17,9 @@ orgRouter.get('/subdomain/:subdomain/auth', async (req, res) => {
   return res.send({
     org: {
       id: org._id,
-      name: org.name
+      name: org.name,
+      logo: org.logo,
+      favicon: org.favicon,
     }
   })
 })

@@ -58,6 +58,8 @@ export type UserSession = {
 export type Org = {
   _id: string,
   name: string,
+  logo: string,
+  favicon: string,
   subdomain: string,
   notifications: {
     monthlyDigest: boolean,
@@ -163,6 +165,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
   return (
     <>
     <Head>
+      <link rel="shortcut icon" href={org.favicon} type="image/x-icon" />
       <title>{org.name} Dashboard</title>
     </Head>
     <Layout user={user} org={org}>

@@ -127,6 +127,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
   return (
     <>
     <Head>
+      <link rel="shortcut icon" href={org.favicon} type="image/x-icon" />
       <title>Settings</title>
     </Head>
     <Layout user={user} org={org}>

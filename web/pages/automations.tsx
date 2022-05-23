@@ -149,6 +149,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
   return (
     <>
     <Head>
+      <link rel="shortcut icon" href={org.favicon} type="image/x-icon" />
       <title>Automations</title>
     </Head>
     <Layout user={user} org={org}>

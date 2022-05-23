@@ -5,6 +5,8 @@ export type OrgType = {
   name: string;
   subdomain: string;
   createdAt: Date;
+  logo: string;
+  favicon: string;
   integrations: {
     slack?: {
       accessToken: string;
@@ -40,6 +42,8 @@ const OrgSchema = new Schema({
   subdomain: { type: String, required: true, unique: true },
   createdAt: { type: Date, default: Date.now },
   users: { type: [String], default: []},
+  logo: { type: String, required: true },
+  favicon: { type: String, required: true },
   integrations: {
     github: Object,
     slack: {

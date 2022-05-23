@@ -14,10 +14,17 @@ export const getSubdomain = (host: string) => {
   return host.split('.')[0];
 }
 
+export type OrgForAuth = {
+  id: string,
+  name: string,
+  favicon: string,
+  logo: string,
+}
+
 export const getOrgFromSubdomainForAuth = async (subdomain: string) => {
   const {
     data: { org },
-  }: { data: { org: Org } } = await axios.get(`${API_ENDPOINT}/routes/org/subdomain/${subdomain}/auth`);
+  }: { data: { org: OrgForAuth } } = await axios.get(`${API_ENDPOINT}/routes/org/subdomain/${subdomain}/auth`);
 
   return org;
 }

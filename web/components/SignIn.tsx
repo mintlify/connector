@@ -2,13 +2,11 @@ import { LockClosedIcon, MailIcon } from "@heroicons/react/solid"
 import Link from "next/link"
 import axios from "axios"
 import { useEffect, useState } from "react"
-import { getOrgFromSubdomainForAuth, getSubdomain } from "../helpers/user"
+import { getOrgFromSubdomainForAuth, getSubdomain, OrgForAuth } from "../helpers/user"
 import Head from "next/head"
 
-const defaultOrgTitle = 'your account';
-
 export default function SignIn() {
-  const [orgTitle, setOrgTitle] = useState(defaultOrgTitle);
+  const [orgForAuth, setOrgForAuth] = useState<OrgForAuth>();
   const [email, setEmail] = useState("")
   const [emailErrorMessage, setEmailErrorMessage] = useState<string | undefined>(undefined)
   const [isSubmitted, setIsSubmitted] = useState(false)
@@ -16,16 +14,16 @@ export default function SignIn() {
   useEffect(() => {
     const subdomain = getSubdomain(window.location.host);
     getOrgFromSubdomainForAuth(subdomain)
-      .then((org) => {
-        if (org?.name) {
-          setOrgTitle(`${org.name}`);
+      .then((org: OrgForAuth) => {
+        if (org) {
+          setOrgForAuth(org);
         }
       })
   });
 
-  if (orgTitle === defaultOrgTitle) {
+  if (orgForAuth == null) {
     return <>
-    <Head>
+      <Head>
         <title>Mintlify | Continuous Documentation Platform</title>
       </Head>
     <div className="fixed inset-0 bg-gray-50"></div>
@@ -45,13 +43,14 @@ export default function SignIn() {
   return (
     <>
       <Head>
-        <title>Sign in to {orgTitle}</title>
+        <link rel="shortcut icon" href={orgForAuth.favicon} type="image/x-icon" />
+        <title>Sign in to {orgForAuth.name}</title>
       </Head>
       <div className="min-h-screen flex items-center bg-gray-50 justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-sm w-full">
           <div>
             <img className="mx-auto h-12 w-auto" src="/assets/mintlify.svg" alt="Mintlify" />
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to {orgTitle}</h2>
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to {orgForAuth.name}</h2>
             <p className="mt-2 text-center text-sm text-gray-600">
               Or{" "}
               <span className="font-medium text-primary">

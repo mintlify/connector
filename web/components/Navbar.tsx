@@ -65,13 +65,8 @@ export default function Navbar({ user, org }: NavbarProps) {
                 <Link href="/">
                   <button className="flex-shrink-0">
                     <img
-                      className="block lg:hidden h-5 w-auto"
-                      src="/assets/mintlify-worded.svg"
-                      alt="Mintlify"
-                    />
-                    <img
-                      className="hidden lg:block h-5 w-auto"
-                      src="/assets/mintlify-worded.svg"
+                      className="block h-5 w-auto"
+                      src={org.logo || "/assets/mintlify-worded.svg"}
                       alt="Mintlify"
                     />
                   </button>
