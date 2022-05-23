@@ -56,13 +56,12 @@ orgRouter.put("/:orgId/notifications", userMiddleware, async (req: express.Reque
 });
 
 // Given an orgId from the request query, return all the user objects within that organization
-orgRouter.get("/users", async (req: any, res: express.Response) => {
-  const { orgId } = req.query;
+orgRouter.get("/users", userMiddleware, async (_: any, res: express.Response) => {
+  const orgId = res.locals.user.org;
 
   if (!orgId) return res.status(400).json({ error: "orgId not provided" });
 
   const org = await Org.findById(orgId);
-
   if (org == null) return res.status(400).json({ error: 'Invalid organization ID' })
 
   const users = await User.find({ userId: org.users });

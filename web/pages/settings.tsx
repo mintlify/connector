@@ -12,6 +12,7 @@ import { User } from "."
 import { updateSession } from "../helpers/session"
 import { useRouter } from "next/router"
 import Head from "next/head"
+import { getSubdomain } from "../helpers/user"
 
 export type EmailNotifications = {
   monthlyDigest: boolean
@@ -43,7 +44,12 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
   useEffect(() => {
     if (user == null || org == null) return;
     // get all members of the organization
-    axios.get(`${API_ENDPOINT}/routes/org/users?orgId=${org._id}`).then((res) => {
+    axios.get(`${API_ENDPOINT}/routes/org/users`, {
+      params: {
+        userId: user.userId,
+        subdomain: getSubdomain(window.location.host)
+      }
+    }).then((res) => {
       setMembers(res.data.users)
     });
 
@@ -94,8 +100,13 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
   }
 
   const onBlurOrgNameInput = async () => {
-    await axios.put(`${API_ENDPOINT}/routes/org/${org._id}/name?userId=${user.userId}`, {
+    await axios.put(`${API_ENDPOINT}/routes/org/${org._id}/name`, {
       name: orgName,
+    }, {
+      params: {
+        userId: user.userId,
+        subdomain: getSubdomain(window.location.host)
+      }
     })
     updateSession()
   }
@@ -103,8 +114,13 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
   const updateEmailNotifications = async (newNotifications: EmailNotifications) => {
     setNotifications(newNotifications)
     // update the organization's new notifications in the database
-    await axios.put(`${API_ENDPOINT}/routes/org/${org._id}/notifications?userId=${user.userId}`, {
+    await axios.put(`${API_ENDPOINT}/routes/org/${org._id}/notifications`, {
       ...newNotifications,
+    }, {
+      params: {
+        userId: user.userId,
+        subdomain: getSubdomain(window.location.host)
+      }
     })
   }
 

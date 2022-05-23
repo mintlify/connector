@@ -1,4 +1,5 @@
 import axios from "axios";
+import { Org } from "../pages";
 import { API_ENDPOINT } from "./api";
 
 export const getUserFromUserId = async (userId: string) => {
@@ -16,7 +17,7 @@ export const getSubdomain = (host: string) => {
 export const getOrgFromSubdomainForAuth = async (subdomain: string) => {
   const {
     data: { org },
-  }: { data: { org: any } } = await axios.get(`${API_ENDPOINT}/routes/org/subdomain/${subdomain}/auth`);
+  }: { data: { org: Org } } = await axios.get(`${API_ENDPOINT}/routes/org/subdomain/${subdomain}/auth`);
 
   return org;
 }
@@ -24,7 +25,12 @@ export const getOrgFromSubdomainForAuth = async (subdomain: string) => {
 export const getOrgFromSubdomain = async (subdomain: string, userId: string) => {
   const {
     data: { org },
-  }: { data: { org: any } } = await axios.get(`${API_ENDPOINT}/routes/org/subdomain/${subdomain}/details?userId=${userId}`);
+  }: { data: { org: Org } } = await axios.get(`${API_ENDPOINT}/routes/org/subdomain/${subdomain}/details`, {
+    params: {
+      userId,
+      subdomain
+    }
+  });
 
   return org;
 }

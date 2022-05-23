@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { API_ENDPOINT } from '../helpers/api';
 import { getAutomationTypeIcon, getConnectionIcon } from '../helpers/Icons';
+import { getSubdomain } from '../helpers/user';
 import { Doc, User } from '../pages';
 import timeAgo from '../services/timeago';
 import EventItem, { Event } from './Event';
@@ -39,12 +40,22 @@ function DocProfile({ doc, user, setIsAddAutomationOpen }: DocProfileProps) {
 
   const onDeleteCode = async (codeId: string) => {
     setCodes(codes.filter(code => code._id !== codeId));
-    await axios.delete(`${API_ENDPOINT}/routes/links/${codeId}?userId=${user.userId}`);
+    await axios.delete(`${API_ENDPOINT}/routes/links/${codeId}`, {
+      params: {
+        userId: user.userId,
+        subdomain: getSubdomain(window.location.host)
+      }
+    });
   };
 
   const onDeleteAutomation = async (automationId: string) => {
     setAutomations(automations.filter(automation => automation._id !== automationId));
-    await axios.delete(`${API_ENDPOINT}/routes/automations/${automationId}?userId=${user.userId}`);
+    await axios.delete(`${API_ENDPOINT}/routes/automations/${automationId}`, {
+      params: {
+        userId: user.userId,
+        subdomain: getSubdomain(window.location.host)
+      }
+    });
   }
 
   const vscodeUrl = isVSCodeInstalled ? `vscode://mintlify.connector/prefill-doc?docId=${doc._id}` : 'vscode:extension/mintlify.connector';

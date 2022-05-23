@@ -104,9 +104,13 @@ export default function Home({ userSession }: { userSession: UserSession }) {
         setIsLoading(false);
       })
     
-    let eventsQuery = `${API_ENDPOINT}/routes/events?userId=${userId}`;
-    if (selectedDoc) eventsQuery += `&doc=${selectedDoc._id}`;
-    axios.get(eventsQuery)
+    axios.get(`${API_ENDPOINT}/routes/events`, {
+      params: {
+        userId,
+        subdomain: getSubdomain(window.location.host),
+        doc: selectedDoc ? selectedDoc._id : undefined
+      }
+    })
       .then((eventsResponse) => {
         const { events } = eventsResponse.data;
         setEvents(events);
@@ -139,7 +143,12 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       onClick: (docId: string) => {
         setDocs(docs.filter(doc => doc._id !== docId));
         setSelectedDoc(undefined);
-        axios.delete(`${API_ENDPOINT}/routes/docs/${docId}?userId=${userSession.userId}`);
+        axios.delete(`${API_ENDPOINT}/routes/docs/${docId}`, {
+          params: {
+            userId: userSession.userId,
+            subdomain: getSubdomain(window.location.host)
+          }
+        });
       }
     }
   ]

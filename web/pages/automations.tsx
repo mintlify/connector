@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Skeleton from "react-loading-skeleton";
 import { useRouter } from "next/router";
+import { getSubdomain } from "../helpers/user";
 
 export type DestinationType = 'slack' | 'email' | 'webhook';
 export type AutomationType = 'doc' | 'code';
@@ -81,7 +82,12 @@ export default function Automations({ userSession }: { userSession: UserSession 
       return;
     }
 
-    axios.get(`${API_ENDPOINT}/routes/automations?userId=${user.userId}`)
+    axios.get(`${API_ENDPOINT}/routes/automations`, {
+      params: {
+        userId: user.userId,
+        subdomain: getSubdomain(window.location.host)
+      }
+    })
       .then(({ data }) => {
         const { automations } = data;
         setAutomations(automations);
@@ -90,7 +96,12 @@ export default function Automations({ userSession }: { userSession: UserSession 
         setIsLoading(false);
       });
 
-    axios.get(`${API_ENDPOINT}/routes/org/${org._id}/integrations?userId=${user.userId}`)
+    axios.get(`${API_ENDPOINT}/routes/org/${org._id}/integrations`, {
+      params: {
+        userId: user.userId,
+        subdomain: getSubdomain(window.location.host)
+      }
+    })
       .then(({ data }) => {
         const { integrations } = data;
         setIntegrationsStatus(integrations);
@@ -108,7 +119,12 @@ export default function Automations({ userSession }: { userSession: UserSession 
       isRed: true,
       onClick: (automationId: string) => {
         setAutomations(automations.filter(automation => automation._id !== automationId));
-        axios.delete(`${API_ENDPOINT}/routes/automations/${automationId}?userId=${user.userId}`);
+        axios.delete(`${API_ENDPOINT}/routes/automations/${automationId}`, {
+          params: {
+            userId: user.userId,
+            subdomain: getSubdomain(window.location.host)
+          }
+        });
       }
     }
   ]
@@ -116,7 +132,12 @@ export default function Automations({ userSession }: { userSession: UserSession 
   const integrations = getIntegrations(org._id);
 
   const handleToggleSwitch = async (automationId: string, isActive: boolean) => {
-    axios.put(`${API_ENDPOINT}/routes/automations/active?userId=${user.userId}`, { automationId, isActive })
+    axios.put(`${API_ENDPOINT}/routes/automations/active`, { automationId, isActive }, {
+      params: {
+        userId: user.userId,
+        subdomain: getSubdomain(window.location.host)
+      }
+    })
       .then(() => {
         const newAutomations = automations.map(automation => (automation._id === automationId) ? {...automation, isActive} : automation);
         setAutomations(newAutomations);

@@ -9,6 +9,7 @@ import { automationMap } from './AddAutomation';
 import axios from 'axios';
 import { API_ENDPOINT } from '../../helpers/api';
 import { Doc, User } from '../../pages';
+import { getSubdomain } from '../../helpers/user';
 
 type Source = {
   _id: string;
@@ -96,7 +97,12 @@ export default function AutomationConfig({ user, automationType, onCancel, setIs
   
   useEffect(() => {
     if (automationType === 'doc') {
-      axios.get(`${API_ENDPOINT}/routes/docs?userId=${user.userId}`)
+      axios.get(`${API_ENDPOINT}/routes/docs`, {
+        params: {
+          userId: user.userId,
+          subdomain: getSubdomain(window.location.host),
+        }
+      })
         .then((docsResponse) => {
           const { docs } = docsResponse.data;
           const formattedDocs = docs.map((doc: Doc) => {
@@ -113,7 +119,12 @@ export default function AutomationConfig({ user, automationType, onCancel, setIs
     }
 
     else if (automationType === 'code') {
-      axios.get(`${API_ENDPOINT}/routes/org/repos?userId=${user.userId}`)
+      axios.get(`${API_ENDPOINT}/routes/org/repos`, {
+        params: {
+          userId: user.userId,
+          subdomain: getSubdomain(window.location.host)
+        }
+      })
         .then((reposResponse) => {
           const { repos } = reposResponse.data;
           const formattedRepos= repos.map((repo: string) => {
@@ -149,12 +160,17 @@ export default function AutomationConfig({ user, automationType, onCancel, setIs
     if (setIsAddingAutomation) {
       setIsAddingAutomation(true);
     }
-    await axios.post(`${API_ENDPOINT}/routes/automations?userId=${user.userId}`, {
+    await axios.post(`${API_ENDPOINT}/routes/automations`, {
       type: automationType,
       sourceValue: automationType === 'code' ? selectedRepo.name : selectedDoc._id,
       destinationType: selectedDestinationType.id,
       destinationValue,
       name: name ? name : namePlaceholder
+    }, {
+      params: {
+        userId: user.userId,
+        subdomain: getSubdomain(window.location.host)
+      }
     });
     if (setIsAddingAutomation) {
       setIsAddingAutomation(false);

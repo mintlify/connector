@@ -6,6 +6,7 @@ import { ConfluenceIcon, GoogleDocsIcon, NotionIcon } from "../../helpers/Icons"
 import axios from "axios"
 import { API_ENDPOINT } from "../../helpers/api"
 import Tooltip from "../Tooltip"
+import { getSubdomain } from "../../helpers/user"
 
 type AddDocumentProps = {
   userId: string
@@ -94,8 +95,13 @@ export default function AddDocument({ userId, isOpen, setIsOpen, setIsAddingDoc 
       setIsAddingDoc(true)
     }
     axios
-      .post(`${API_ENDPOINT}/routes/docs?userId=${userId}`, {
+      .post(`${API_ENDPOINT}/routes/docs`, {
         url: formattedQuery,
+      }, {
+        params: {
+          userId,
+          subdomain: getSubdomain(window.location.host)
+        }
       })
       .then(() => {
         if (setIsAddingDoc) {
