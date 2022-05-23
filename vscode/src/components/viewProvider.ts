@@ -33,6 +33,7 @@ export class ViewProvider implements WebviewViewProvider {
 		}
 
 		public prefillDoc(docId: string): void {
+			this.show();
 			this._view?.webview.postMessage({ command: 'prefill-doc', args: docId });
 		}
 
