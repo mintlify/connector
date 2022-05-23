@@ -135,7 +135,10 @@ export default function Home({ userSession }: { userSession: UserSession }) {
   }
 
   if (org == null) {
-    return <div>You do not have permission to this organization</div>
+    return <div>
+      You do not have permission to this organization
+      <Link href="/api/logout">Logout</Link>
+    </div>
   }
 
   const listMenu = [

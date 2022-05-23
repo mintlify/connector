@@ -124,6 +124,19 @@ userRouter.post("/:userId/join/:orgId", async (req: express.Request, res: expres
   return res.send({ user, org });
 });
 
+userRouter.post("/:userId/join/existing/:subdomain", async (req: express.Request, res: express.Response) => {
+  const { userId, subdomain } = req.params;
+
+  const [user, org] = await Promise.all([User.findOne({userId}), Org.findOne({ subdomain })]);
+
+  if (user == null || org == null || org.users.includes(userId)) {
+    return res.send({ user, org });
+  }
+
+  const newOrg = await Org.findOneAndUpdate({ subdomain }, { $push: { users: userId } }, { new: true })
+  return res.send({ user, org: newOrg });
+});
+
 userRouter.put("/:userId/firstname", async (req, res) => {
   const { userId } = req.params;
   const { firstName } = req.body;

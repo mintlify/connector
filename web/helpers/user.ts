@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Org } from "../pages";
+import { Org, User } from "../pages";
 import { API_ENDPOINT } from "./api";
 
 export const getUserFromUserId = async (userId: string) => {
@@ -40,4 +40,12 @@ export const getOrgFromSubdomain = async (subdomain: string, userId: string) => 
   });
 
   return org;
+}
+
+export const getOrgFromSubdomainAndPotentiallyJoin = async (subdomain: string, userId: string) => {
+  const {
+    data,
+  }: { data: { user: User, org: Org } } = await axios.post(`${API_ENDPOINT}/routes/user/${userId}/join/existing/${subdomain}`);
+
+  return data;
 }

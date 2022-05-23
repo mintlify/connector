@@ -1,6 +1,6 @@
 import {  NextApiResponse } from "next";
 import { User } from "../..";
-import { getOrgFromSubdomain, getOrgFromSubdomainForAuth, getSubdomain, getUserFromUserId } from "../../../helpers/user";
+import { getOrgFromSubdomainAndPotentiallyJoin, getOrgFromSubdomain, getOrgFromSubdomainForAuth, getSubdomain, getUserFromUserId } from "../../../helpers/user";
 import { loadStytch } from "../../../lib/loadStytch";
 import { withSession } from "../../../lib/withSession";
 import { redirectToVSCode } from "../login/vscode";
@@ -31,7 +31,13 @@ async function handler(req: any, res: NextApiResponse) {
 
     if (existingUser) {
       // For existing users
-      const org = await getOrgFromSubdomain(subdomain, existingUser.userId)
+      const { org } = await getOrgFromSubdomainAndPotentiallyJoin(subdomain, existingUser.userId)
+      // TBD: Show that you do not have access
+      if (org == null) {
+        res.redirect('/');
+        return;
+      }
+      
       req.session.set("user", {
         userId: response.user_id,
         user: existingUser,
