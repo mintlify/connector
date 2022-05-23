@@ -1,6 +1,7 @@
 import express from "express";
 import Org from "../models/Org";
 import User from "../models/User";
+import { removeUnneededDataFromOrg } from "./org";
 
 const userRouter = express.Router();
 
@@ -121,7 +122,8 @@ userRouter.post("/:userId/join/:orgId", async (req: express.Request, res: expres
     firstName,
     lastName,
   });
-  return res.send({ user, org });
+
+  return res.send({ user, org: removeUnneededDataFromOrg(org) });
 });
 
 userRouter.post("/:userId/join/existing/:subdomain", async (req: express.Request, res: express.Response) => {
@@ -130,11 +132,11 @@ userRouter.post("/:userId/join/existing/:subdomain", async (req: express.Request
   const [user, org] = await Promise.all([User.findOne({userId}), Org.findOne({ subdomain })]);
 
   if (user == null || org == null || org.users.includes(userId)) {
-    return res.send({ user, org });
+    return res.send({ user, org: removeUnneededDataFromOrg(org) });
   }
 
   const newOrg = await Org.findOneAndUpdate({ subdomain }, { $push: { users: userId } }, { new: true })
-  return res.send({ user, org: newOrg });
+  return res.send({ user, org: removeUnneededDataFromOrg(newOrg) });
 });
 
 userRouter.put("/:userId/firstname", async (req, res) => {

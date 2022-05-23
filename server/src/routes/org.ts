@@ -5,6 +5,14 @@ import { checkIfUserHasVSCodeInstalled, userMiddleware } from "./user";
 
 const orgRouter = express.Router();
 
+export const removeUnneededDataFromOrg = (org?: any) => {
+  if (org) {
+    org.integrations = undefined;
+  }
+
+  return org;
+}
+
 orgRouter.get('/subdomain/:subdomain/auth', async (req, res) => {
   const { subdomain } = req.params;
 
@@ -30,10 +38,8 @@ orgRouter.get('/subdomain/:subdomain/details', userMiddleware, async (req, res) 
 
   try {
     const org = await Org.findOne({subdomain, users: userId});
-    if (org) {
-      org.integrations = undefined;
-    }
-    return res.json({org});
+    const formattedOrg = removeUnneededDataFromOrg(org);
+    return res.json({org: formattedOrg});
   }
   catch (error) {
     return res.status(400).send({error})
