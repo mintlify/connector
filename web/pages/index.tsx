@@ -23,6 +23,7 @@ import { Automation } from './automations'
 import { DocumentTextIcon } from '@heroicons/react/outline'
 import { Event } from '../components/Event'
 import ActivityBar from '../components/ActivityBar'
+import { getSubdomain } from '../helpers/user'
 
 type Code = {
   _id: string,
@@ -57,6 +58,7 @@ export type UserSession = {
 export type Org = {
   _id: string,
   name: string,
+  subdomain: string,
   notifications: {
     monthlyDigest: boolean,
     newsletter: boolean,
@@ -82,13 +84,18 @@ export default function Home({ userSession }: { userSession: UserSession }) {
   const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
 
   useEffect(() => {
-    if (userSession == null) {
+    if (userSession == null || userSession.user == null || userSession.org == null) {
       return;
     }
 
     const userId = userSession.userId;
 
-    axios.get(`${API_ENDPOINT}/routes/docs?userId=${userId}`)
+    axios.get(`${API_ENDPOINT}/routes/docs`, {
+      params: {
+        userId: userId,
+        subdomain: getSubdomain(window.location.host)
+      }
+    })
       .then((docsResponse) => {
         const { docs } = docsResponse.data;
         setDocs(docs);
@@ -107,12 +114,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
   }, [userSession, selectedDoc, isAddingDoc]);
 
   if (!userSession) {
-    return <>
-      <Head>
-        <title>Sign in to Mintlify</title>
-      </Head>
-      <SignIn />
-    </>
+    return <SignIn />
   }
 
   const { user, org } = userSession;
@@ -152,7 +154,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
   return (
     <>
     <Head>
-      <title>Mintlify Dashboard</title>
+      <title>{org.name} Dashboard</title>
     </Head>
     <Layout user={user} org={org}>
     <ClearSelectedFrame />

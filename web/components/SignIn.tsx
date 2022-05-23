@@ -1,12 +1,36 @@
 import { LockClosedIcon, MailIcon } from "@heroicons/react/solid"
 import Link from "next/link"
 import axios from "axios"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { getOrgFromSubdomainForAuth, getSubdomain } from "../helpers/user"
+import Head from "next/head"
+
+const defaultOrgTitle = 'your account';
 
 export default function SignIn() {
+  const [orgTitle, setOrgTitle] = useState(defaultOrgTitle);
   const [email, setEmail] = useState("")
   const [emailErrorMessage, setEmailErrorMessage] = useState<string | undefined>(undefined)
   const [isSubmitted, setIsSubmitted] = useState(false)
+
+  useEffect(() => {
+    const subdomain = getSubdomain(window.location.host);
+    getOrgFromSubdomainForAuth(subdomain)
+      .then((org) => {
+        if (org?.name) {
+          setOrgTitle(`${org.name}`);
+        }
+      })
+  });
+
+  if (orgTitle === defaultOrgTitle) {
+    return <>
+    <Head>
+        <title>Mintlify | Continuous Documentation Platform</title>
+      </Head>
+    <div className="fixed inset-0 bg-gray-50"></div>
+    </>
+  }
 
   const onSubmit = () => {
     if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email.trim()) || email.trim() === "") {
@@ -20,16 +44,19 @@ export default function SignIn() {
 
   return (
     <>
+      <Head>
+        <title>Sign in to {orgTitle}</title>
+      </Head>
       <div className="min-h-screen flex items-center bg-gray-50 justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-sm w-full">
           <div>
             <img className="mx-auto h-12 w-auto" src="/assets/mintlify.svg" alt="Mintlify" />
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to {orgTitle}</h2>
             <p className="mt-2 text-center text-sm text-gray-600">
               Or{" "}
-              <a href="#" className="font-medium text-primary hover:text-hover">
+              <span className="font-medium text-primary">
                 create a new account
-              </a>
+              </span>
             </p>
           </div>
           {isSubmitted && (

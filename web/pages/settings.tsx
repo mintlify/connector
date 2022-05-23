@@ -187,7 +187,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                         autoComplete="email"
                         disabled
                         value={user.email}
-                        className="mt-1 block w-full border border-gray-300 bg-gray-100 text-gray-400 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        className="mt-1 block w-full border border-gray-300 bg-gray-100 text-gray-400 rounded-md shadow-sm py-2 px-3 focus:outline-none sm:text-sm"
                       />
                       <p className="text-sm mt-2 text-gray-500">
                         <Link href="mailto:hi@mintlify.com">
@@ -226,6 +226,31 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                           onBlur={onBlurOrgNameInput}
                         />
                       </div>
+                    </div>
+
+                    <div className="col-span-3">
+                      <label htmlFor="company-website" className="block text-sm font-medium text-gray-700">
+                        Domain
+                      </label>
+                      <div className="mt-1 flex rounded-md shadow-sm">
+                        <input
+                          type="text"
+                          name="company-website"
+                          id="company-website"
+                          className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-md focus:ring-primary focus:border-primary sm:text-sm bg-gray-100 text-gray-400 border-gray-300"
+                          value={org.subdomain}
+                          disabled
+                        />
+                        <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-white text-gray-500 sm:text-sm">
+                          .mintlify.com
+                        </span>
+                      </div>
+                      <p className="text-sm mt-2 text-gray-500">
+                        <Link href="mailto:hi@mintlify.com">
+                          <span className="text-primary font-medium cursor-pointer">Contact support</span>
+                        </Link>{" "}
+                        to change the domain address
+                      </p>
                     </div>
 
                     <div className="col-span-3">
