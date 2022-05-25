@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Router } from 'express';
+import { ISDEV } from '../../helpers/environment';
 
 import { ENDPOINT } from '../../helpers/github/octokit';
 import Org from '../../models/Org';
@@ -71,9 +72,18 @@ notionRouter.get('/install', (req, res) => {
     if (error) return res.status(403).send('Invalid grant code')
     if (state == null) return res.status(403).send('No state provided');
   
-    const  { org } = JSON.parse(decodeURIComponent(state as string));
-    await Org.findByIdAndUpdate(org, { "integrations.notion": { ...response } })
-    return res.redirect('https://notion.so');
+    const  { org: orgId } = JSON.parse(decodeURIComponent(state as string));
+    const org = await Org.findByIdAndUpdate(orgId, { "integrations.notion": { ...response } });
+
+    if (org == null) {
+        return res.status(403).send({ error: 'Invalid organization ID' });
+    }
+
+    if (ISDEV) {
+        return res.redirect(org.subdomain);
+    }
+
+    return res.redirect(`https://${org.subdomain}.mintlify.com`);
 });
 
 export default notionRouter;

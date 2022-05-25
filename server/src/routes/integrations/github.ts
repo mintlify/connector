@@ -1,7 +1,8 @@
 import axios from "axios";
 import { Router } from 'express';
 import queryString from 'query-string';
-import { ENDPOINT, ISDEV } from "../../helpers/github/octokit"
+import { ISDEV } from "../../helpers/environment";
+import { ENDPOINT } from "../../helpers/github/octokit"
 import Org from '../../models/Org';
 
 type GitHubAuthResponse = {
@@ -113,7 +114,7 @@ githubRouter.get('/authorization', async (req, res) => {
       return res.status(403).send({error: 'Invalid Organization ID'})
     }
 
-    if (process.env.NODE_ENV !== 'production') {
+    if (ISDEV) {
       return res.redirect(org.subdomain);
     }
 
