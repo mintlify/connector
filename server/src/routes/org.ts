@@ -1,7 +1,7 @@
 import express from "express";
 import Org from "../models/Org";
 import User from "../models/User";
-import { checkIfUserHasVSCodeInstalled, userMiddleware } from "./user";
+import { checkIfUserHasVSCodeInstalled, removeUnneededDataFromOrg, userMiddleware } from "./user";
 
 const orgRouter = express.Router();
 
@@ -30,10 +30,8 @@ orgRouter.get('/subdomain/:subdomain/details', userMiddleware, async (req, res) 
 
   try {
     const org = await Org.findOne({subdomain, users: userId});
-    if (org) {
-      org.integrations = undefined;
-    }
-    return res.json({org});
+    const formattedOrg = removeUnneededDataFromOrg(org);
+    return res.json({org: formattedOrg});
   }
   catch (error) {
     return res.status(400).send({error})
@@ -112,7 +110,7 @@ orgRouter.get('/:orgId/integrations', userMiddleware, async (req, res) => {
     const isVSCodeInstalled = await checkIfUserHasVSCodeInstalled(res.locals.user.userId);
     const integrations = {
       github: org.integrations.github?.installations != null,
-      notion: org.integrations.notion?.accessToken != null,
+      notion: org.integrations.notion?.access_token != null,
       slack: org.integrations.slack?.accessToken != null,
       vscode: isVSCodeInstalled, // dependent on the user
     }

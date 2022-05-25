@@ -1,4 +1,5 @@
 import Analytics from 'analytics-node';
+import { ISDEV } from '../helpers/environment';
 const analytics = new Analytics('pkG5P17lwtHkBOY1b8svfKfyRmPctvER');
 
 type Properties = {
@@ -6,7 +7,7 @@ type Properties = {
 }
 
 const runIfProduction = (func: () => void) => {
-  if (process.env.NODE_ENV === 'production') {
+  if (!ISDEV) {
     func();
   }
 }

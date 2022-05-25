@@ -65,7 +65,8 @@ const formatSignInUrl = (signInUrl: string) => {
   return signInWithProtocol;
 };
 
-export const getSubdomain = (host: string) => {
+export const getSubdomain = (url: string) => {
+  const host = url.replace(/^https?:\/\//, '');
   return host.split('.')[0];
 };
 

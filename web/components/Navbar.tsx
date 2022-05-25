@@ -15,7 +15,7 @@ import Search from './Search'
 
 const navigation = [
   {
-    name: 'Overview',
+    name: 'Documentation',
     href: '/',
   },
   {

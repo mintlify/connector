@@ -1,6 +1,6 @@
 import { Context } from "probot";
+import { ISDEV } from "../environment";
 
-export const ISDEV = process.env.NODE_ENV === 'development';
 export const ADMIN_LOGIN = ISDEV ? 'mintlify-connect-dev' : 'mintlify-connect';
 export const ENDPOINT = ISDEV ? 'http://localhost:5000' : 'https://connect.mintlify.com'
 

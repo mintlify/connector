@@ -1,11 +1,12 @@
 import axios from 'axios';
 import { Router } from 'express';
+import { ISDEV } from '../../helpers/environment';
 
 import { ENDPOINT } from '../../helpers/github/octokit';
 import Org from '../../models/Org';
 
 const clientId = 'ec770c41-07f8-44bd-a4d8-66d30e9786c8';
-const redirectUrl = `${ENDPOINT}/routes/notion/authorization`;
+const redirectUrl = `${ENDPOINT}/routes/integrations/notion/authorization`;
 
 const getNotionInstallURL = (state?: string) => {
     const url = new URL('https://api.notion.com/v1/oauth/authorize');
@@ -67,13 +68,21 @@ notionRouter.get('/install', (req, res) => {
     if (code == null) return res.status(403).send('Invalid or missing grant code');
   
     const { response, error } = await getNotionAccessTokenFromCode(code as string);
-  
     if (error) return res.status(403).send('Invalid grant code')
     if (state == null) return res.status(403).send('No state provided');
   
-    const  { org } = JSON.parse(decodeURIComponent(state as string));
-    await Org.findByIdAndUpdate(org, { "integrations.notion": { ...response } })
-    return res.redirect('https://notion.so');
+    const  { org: orgId } = JSON.parse(decodeURIComponent(state as string));
+    const org = await Org.findByIdAndUpdate(orgId, { "integrations.notion": { ...response } });
+
+    if (org == null) {
+        return res.status(403).send({ error: 'Invalid organization ID' });
+    }
+
+    if (ISDEV) {
+        return res.redirect(org.subdomain);
+    }
+
+    return res.redirect(`https://${org.subdomain}.mintlify.com`);
 });
 
 export default notionRouter;

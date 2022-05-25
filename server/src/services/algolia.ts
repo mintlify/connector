@@ -28,6 +28,7 @@ export const searchDocsAndAutomations = async (query: string, orgId: string): Pr
             filters: `org:${orgId}`
         }
       }];
+    
     const { results } = await client.multipleQueries(queries);
     return {
         docs: results[0].hits,
