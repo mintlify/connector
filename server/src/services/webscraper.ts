@@ -79,7 +79,7 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
   let scrapingMethod: ScrapingMethod = getScrapingMethod(url);
   const org = await Org.findById(orgId);
   if (scrapingMethod === 'notion-private' && org?.integrations?.notion) {
-    const notionAccessToken = org.integrations.notion.accessToken;
+    const notionAccessToken = org.integrations.notion.access_token;
     const notionContent = await getNotionContent(url, notionAccessToken);
     return {
       method: 'notion-private',
