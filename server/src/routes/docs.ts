@@ -58,8 +58,8 @@ docsRouter.get('/', userMiddleware, async (_, res) => {
       {
         $lookup: {
           from: 'code',
-          let: { doc: '$_id' },
-          pipeline: [{ $match: { $expr: { $and: [{ $eq: ['$doc', '$$doc'] }] } } }, { $project: { stock_item: 0, _id: 0 } }],
+          foreignField: 'doc',
+          localField: '_id',
           as: 'code',
         },
       },
