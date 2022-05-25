@@ -1,7 +1,6 @@
 import axios from "axios";
 import { Router } from 'express';
 import queryString from 'query-string';
-
 import { ENDPOINT, ISDEV } from "../../helpers/github/octokit"
 import Org from '../../models/Org';
 
@@ -85,7 +84,7 @@ githubRouter.get('/install', (req, res) => {
   }
     
 });
-  
+
 githubRouter.get('/authorization', async (req, res) => {
   try {
     const { code, state } = req.query;
@@ -96,7 +95,7 @@ githubRouter.get('/authorization', async (req, res) => {
     const { response: rawResponse, error } = await getGitHubAccessTokenFromCode(code as string, parsedState);
     if (error || !rawResponse) return res.status(403).send('Invalid grant code');
     
-    const { org } = parsedState;
+    const { org: orgId } = parsedState;
     const response = queryString.parse(rawResponse) as unknown as GitHubAuthResponse;
     const { access_token } = response;
   
@@ -107,16 +106,22 @@ githubRouter.get('/authorization', async (req, res) => {
         ...installation,
         repositories: repositories[i]
       }
-    })
+    });
   
-    await Org.findByIdAndUpdate(org, { "integrations.github": { ...response, installations: installationsWithRepositories }})
-    return res.redirect('https://github.com');
+    const org = await Org.findByIdAndUpdate(orgId, { "integrations.github": { ...response, installations: installationsWithRepositories }})
+    if (org == null) {
+      return res.status(403).send({error: 'Invalid Organization ID'})
+    }
+
+    if (process.env.NODE_ENV !== 'production') {
+      return res.redirect(org.subdomain);
+    }
+
+    return res.redirect(`https://${org.subdomain}.mintlify.com`);
+
   } catch (error: any) {
-    console.log('AUTH ERROR');
-    console.log(error);
     return res.status(500).send(error?.data);
   }
-    
 });
 
 export default githubRouter;
