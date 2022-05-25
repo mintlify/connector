@@ -32,7 +32,7 @@ export default function AddDocument({ user, isOpen, setIsOpen, setIsAddingDoc }:
     {
       name: "Add Notion page",
       icon: (className: string, isActive: boolean) => <NotionIcon className={className} isActive={isActive} />,
-      filter: (query: string) => !query || query.includes("notion.site"),
+      filter: (query: string) => !query || query.includes("notion.site") || query.includes("notion.so"),
       onActive: () => setPlaceholder("https://notion.site/"),
     },
     {
@@ -96,14 +96,18 @@ export default function AddDocument({ user, isOpen, setIsOpen, setIsAddingDoc }:
       setIsAddingDoc(true)
     }
     axios
-      .post(`${API_ENDPOINT}/routes/docs`, {
-        url: formattedQuery,
-      }, {
-        params: {
-          userId: user.userId,
-          subdomain: getSubdomain(window.location.host)
+      .post(
+        `${API_ENDPOINT}/routes/docs`,
+        {
+          url: formattedQuery,
+        },
+        {
+          params: {
+            userId: user.userId,
+            subdomain: getSubdomain(window.location.host),
+          },
         }
-      })
+      )
       .then(() => {
         if (setIsAddingDoc) {
           setIsAddingDoc(false)
@@ -114,7 +118,15 @@ export default function AddDocument({ user, isOpen, setIsOpen, setIsAddingDoc }:
   }
 
   return (
-    <Transition.Root show={isOpen} as={Fragment} afterLeave={() => { setErrorMessage(''); setQuery('') }} appear>
+    <Transition.Root
+      show={isOpen}
+      as={Fragment}
+      afterLeave={() => {
+        setErrorMessage("")
+        setQuery("")
+      }}
+      appear
+    >
       <Dialog as="div" className="relative z-20" onClose={setIsOpen}>
         <Transition.Child
           as={Fragment}
@@ -142,11 +154,13 @@ export default function AddDocument({ user, isOpen, setIsOpen, setIsAddingDoc }:
               <Combobox onChange={() => onEnter()} value={query}>
                 <div className="relative rounded-xl">
                   <div className="pointer-events-none absolute top-3.5 left-4">
-                  {
-                    errorMessage
-                      ? <Tooltip message={errorMessage} isAlwaysOpen><ExclamationCircleIcon className="h-5 w-5 text-red-500" aria-hidden="true" /></Tooltip>
-                      : <PlusIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                  }
+                    {errorMessage ? (
+                      <Tooltip message={errorMessage} isAlwaysOpen>
+                        <ExclamationCircleIcon className="h-5 w-5 text-red-500" aria-hidden="true" />
+                      </Tooltip>
+                    ) : (
+                      <PlusIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                    )}
                   </div>
                   <Combobox.Input
                     className="h-12 w-full rounded-t-xl bg-transparent pl-11 pr-4 border-0 text-gray-800 placeholder-gray-400 sm:text-sm focus:outline-none focus:ring-0"
