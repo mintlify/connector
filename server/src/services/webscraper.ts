@@ -111,9 +111,12 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
   // Only switch scraping method if other from url
   scrapingMethod = scrapingMethod === 'other' ? possiblyGetWebScrapingMethod($) : scrapingMethod;
 
-  const title = $('title').text().trim();
+  const title = $('title').first().text().trim();
   let favicon = $('link[rel="shortcut icon"]').attr('href') || $('link[rel="icon"]').attr('href');
-  if (favicon?.startsWith('/')) {
+  if (favicon?.startsWith('//')) {
+    favicon = `https:${favicon}`;
+  }
+  else if (favicon?.startsWith('/')) {
     const urlParsed = new URL(url);
     favicon = `${urlParsed.origin}${favicon}`;
   }
@@ -121,6 +124,7 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
   $('iframe').remove();
   $('script').remove();
   $('style').remove();
+  $('title').remove();
 
   let content;
 
