@@ -1,9 +1,10 @@
 import * as cheerio from 'cheerio';
-import { getNotionContent, isNotionUrl } from './notion';
+import { isNotionUrl } from './notion';
 import { isGoogleDocsUrl, getGoogleDocsData } from './googleDocs';
 import validUrl from 'valid-url';
 import Org from '../models/Org';
 import { getContentFromHTML } from '../helpers/routes/domparsing';
+import { getNotionPageData } from './notion';
 const webScrapingApiClient = require('webscrapingapi');
 
 const client = new webScrapingApiClient(process.env.WEBSCRAPER_KEY);
@@ -80,12 +81,7 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
   const org = await Org.findById(orgId);
   if (scrapingMethod === 'notion-private' && org?.integrations?.notion) {
     const notionAccessToken = org.integrations.notion.accessToken;
-    const notionContent = await getNotionContent(url, notionAccessToken);
-    return {
-      method: 'notion-private',
-      title: 'title', // to fix
-      content: notionContent,
-    };
+    return await getNotionPageData(url, notionAccessToken);
   }
   // Only use the Google API to handle unpublished Google Docs for now since it doesn't work with published document yet.
   else if (scrapingMethod === 'googledocs' && !url.includes('/pub')) {
