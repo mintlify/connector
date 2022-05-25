@@ -68,6 +68,8 @@ notionRouter.get('/install', (req, res) => {
     if (code == null) return res.status(403).send('Invalid or missing grant code');
   
     const { response, error } = await getNotionAccessTokenFromCode(code as string);
+
+    console.log({response});
   
     if (error) return res.status(403).send('Invalid grant code')
     if (state == null) return res.status(403).send('No state provided');
