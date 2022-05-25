@@ -20,11 +20,11 @@ export type OrgType = {
       configurationUrl: string;
     };
     notion?: {
-      accessToken: string;
-      botId?: string;
-      workspaceId?: string;
-      workspaceName?: string;
-      workspaceIcon?: string;
+      access_token: string;
+      bot_id?: string;
+      workspace_id?: string;
+      workspace_name?: string;
+      workspace_icon?: string;
     };
     github?: {
       installations: Object[];
@@ -58,11 +58,11 @@ const OrgSchema = new Schema({
       configurationUrl: { type: String },
     },
     notion: {
-      accessToken: { type: String },
-      botId: { type: String },
-      workspaceId: { type: String },
-      workspaceName: { type: String },
-      workspaceIcon: { type: String },
+      access_token: { type: String },
+      bot_id: { type: String },
+      workspace_id: { type: String },
+      workspace_name: { type: String },
+      workspace_icon: { type: String },
     },
   },
   notifications: {

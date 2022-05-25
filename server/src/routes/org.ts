@@ -110,7 +110,7 @@ orgRouter.get('/:orgId/integrations', userMiddleware, async (req, res) => {
     const isVSCodeInstalled = await checkIfUserHasVSCodeInstalled(res.locals.user.userId);
     const integrations = {
       github: org.integrations.github?.installations != null,
-      notion: org.integrations.notion?.accessToken != null,
+      notion: org.integrations.notion?.access_token != null,
       slack: org.integrations.slack?.accessToken != null,
       vscode: isVSCodeInstalled, // dependent on the user
     }
