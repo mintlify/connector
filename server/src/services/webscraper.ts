@@ -80,7 +80,7 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
   let scrapingMethod: ScrapingMethod = getScrapingMethod(url);
   const org = await Org.findById(orgId);
   if (scrapingMethod === 'notion-private' && org?.integrations?.notion) {
-    const notionAccessToken = org.integrations.notion.accessToken;
+    const notionAccessToken = org.integrations.notion.access_token;
     return await getNotionPageData(url, notionAccessToken);
   }
   // Only use the Google API to handle unpublished Google Docs for now since it doesn't work with published document yet.
@@ -111,8 +111,7 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
   let favicon = $('link[rel="shortcut icon"]').attr('href') || $('link[rel="icon"]').attr('href');
   if (favicon?.startsWith('//')) {
     favicon = `https:${favicon}`;
-  }
-  else if (favicon?.startsWith('/')) {
+  } else if (favicon?.startsWith('/')) {
     const urlParsed = new URL(url);
     favicon = `${urlParsed.origin}${favicon}`;
   }
