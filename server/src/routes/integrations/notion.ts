@@ -75,6 +75,7 @@ notionRouter.get('/install', (req, res) => {
     if (state == null) return res.status(403).send('No state provided');
   
     const  { org: orgId } = JSON.parse(decodeURIComponent(state as string));
+    console.log(orgId)
     const org = await Org.findByIdAndUpdate(orgId, { "integrations.notion": { ...response } });
 
     if (org == null) {
