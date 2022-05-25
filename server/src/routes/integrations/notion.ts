@@ -6,7 +6,7 @@ import { ENDPOINT } from '../../helpers/github/octokit';
 import Org from '../../models/Org';
 
 const clientId = 'ec770c41-07f8-44bd-a4d8-66d30e9786c8';
-const redirectUrl = `${ENDPOINT}/routes/notion/authorization`;
+const redirectUrl = `${ENDPOINT}/routes/integrations/notion/authorization`;
 
 const getNotionInstallURL = (state?: string) => {
     const url = new URL('https://api.notion.com/v1/oauth/authorize');
