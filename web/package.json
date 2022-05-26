@@ -20,6 +20,7 @@
     "react-dom": "18.1.0",
     "react-hotkeys-hook": "^3.4.6",
     "react-loading-skeleton": "^3.1.0",
+    "react-use-intercom": "^1.5.2",
     "stytch": "^5.1.4"
   },
   "devDependencies": {

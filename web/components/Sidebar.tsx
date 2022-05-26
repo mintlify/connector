@@ -1,4 +1,5 @@
-import { CogIcon, DocumentTextIcon } from '@heroicons/react/outline';
+import { useIntercom } from 'react-use-intercom';
+import { ChatAlt2Icon, CogIcon, DocumentTextIcon } from '@heroicons/react/outline';
 import { PlusIcon } from '@heroicons/react/solid'
 import Link from 'next/link';
 import AddDocument from './commands/AddDocument'
@@ -28,7 +29,14 @@ export default function Sidebar({
   setIsAddDocumentOpen
 }: SidebarProps) {
 
+  const { boot, show } = useIntercom();
+
   const fullName = user.firstName + ' ' + user.lastName;
+
+  const onClickHelp = () => {
+    boot({ userId: user.userId, email: user.email })
+    show();
+  }
 
   return (
     <>
@@ -99,6 +107,12 @@ export default function Sidebar({
                   <span className="text-sm font-medium">Settings</span>
                 </div>
               </Link>
+              <button onClick={onClickHelp}>
+                <div className="flex items-center space-x-2 cursor-pointer text-gray-500 hover:text-gray-700">
+                  <ChatAlt2Icon className="h-5 w-5" aria-hidden="true" />
+                  <span className="text-sm font-medium">Help</span>
+                </div>
+              </button>
             </div>
           </div>
         </div>
