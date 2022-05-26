@@ -7,6 +7,7 @@ import Doc from '../models/Doc';
 import Event from '../models/Event';
 import { getDataFromWebpage } from '../services/webscraper';
 import { deleteDocForSearch, indexDocForSearch } from '../services/algolia';
+import { track } from '../services/segment';
 
 const docsRouter = express.Router();
 
@@ -41,6 +42,11 @@ export const createDocFromUrl = async (url: string, orgId: string, userId: Types
       new: true,
     }
   );
+
+  track(userId.toString(), "Add document", {
+    doc: doc._id.toString(),
+    method,
+  })
 
   return { content, doc };
 };

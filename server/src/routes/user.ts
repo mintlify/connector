@@ -1,6 +1,7 @@
 import express from "express";
 import Org from "../models/Org";
 import User from "../models/User";
+import { identify } from "../services/segment";
 
 export const removeUnneededDataFromOrg = (org?: any) => {
   if (org) {
@@ -129,6 +130,13 @@ userRouter.post("/:userId/join/:orgId", async (req: express.Request, res: expres
     firstName,
     lastName,
   });
+
+  identify(userId, {
+    email,
+    firstName,
+    lastName,
+    org: orgId
+  })
 
   return res.send({ user, org: removeUnneededDataFromOrg(org) });
 });
