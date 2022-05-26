@@ -22,7 +22,7 @@ export const publishMessage = async (text: string, channel: string, token: strin
     if (err === 'channel_not_found') {
       const url = 'https://slack.com/api/conversations.create';
       await axios.post(url, {
-        name: channel.substring(1)
+        name: channel
       }, { headers: { authorization: `Bearer ${token}` } });
       await postMessage();
     }
