@@ -3,7 +3,6 @@ import cors from "cors";
 import morgan from "morgan";
 import scanRouter from "./scan";
 import integrationsRouter from "./integrations";
-import v01Router from "./v01";
 import docsRouter from "./docs";
 import alertsRouter from "./alerts";
 import eventsRouter from "./events";
@@ -33,8 +32,6 @@ headRouter.use("/alerts", alertsRouter);
 headRouter.use("/events", eventsRouter);
 headRouter.use("/links", linksRouter);
 headRouter.use("/search", searchRouter);
-// GitHub
-headRouter.use("/v01", v01Router);
 // Integrations
 headRouter.use("/integrations", integrationsRouter);
 // Cron job

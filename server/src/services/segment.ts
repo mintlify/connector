@@ -1,6 +1,6 @@
 import Analytics from 'analytics-node';
 import { ISDEV } from '../helpers/environment';
-const analytics = new Analytics('pkG5P17lwtHkBOY1b8svfKfyRmPctvER');
+const analytics = new Analytics('bf8hsjcBvTzq19SYFInfAFt3MueacGNV');
 
 type Properties = {
   [key: string]: string | number | boolean | Date | string[]
