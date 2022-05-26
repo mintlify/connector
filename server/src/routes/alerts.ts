@@ -16,7 +16,8 @@ alertsRouter.post('/', async (req, res) => {
 
     if (files == null || owner == null || repo == null) return res.status(400).end();
 
-    const codes = await Code.find({ org: owner, repo });
+    const codes = await Code.find({ gitOrg: owner, repo });
+    
     if (codes.length === 0) {
         return res.status(200).send({alerts: []});
     }
