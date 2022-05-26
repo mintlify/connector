@@ -100,6 +100,7 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
 
   if (!response.success) {
     console.log(url);
+    console.log(response);
     throw 'Error fetching results';
   }
 

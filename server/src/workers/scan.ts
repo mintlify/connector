@@ -12,8 +12,6 @@ const startScanWorker = () => {
         diffAlerts
       };
     } catch (error) {
-      const { orgId } = job.data;
-      console.log('Error detected for orgId', orgId)
       console.log(error);
       return;
     }
