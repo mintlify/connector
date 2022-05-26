@@ -113,6 +113,7 @@ export default function AddDocument({ user, isOpen, setIsOpen, setIsAddingDoc }:
           setIsAddingDoc(false)
         }
       })
+      .catch((error) => console.log("Error from adding docs: ", error))
 
     setIsOpen(false)
   }
