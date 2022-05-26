@@ -67,6 +67,11 @@ alertsRouter.post('/', async (req, res) => {
             return event;
         });
         await Event.insertMany(events);
+
+        track(org._id.toString(), 'GitHub alert triggered', {
+            isOrg: true,
+            numberOfEvents: events.length,
+        })
     }
     
     return res.status(200).send({alerts});

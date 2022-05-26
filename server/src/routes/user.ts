@@ -1,7 +1,7 @@
 import express from "express";
 import Org from "../models/Org";
 import User from "../models/User";
-import { identify } from "../services/segment";
+import { identify, track } from "../services/segment";
 
 export const removeUnneededDataFromOrg = (org?: any) => {
   if (org) {
@@ -50,10 +50,9 @@ export const userMiddleware = async (
  * invite the users with the provided emails to the org through stytch.
  * Return the new array users through the response.
  */
-userRouter.post(
-  "/invite-to-org",
-  async (req: express.Request, res: express.Response) => {
-    const { emails, orgId } = req.body;
+userRouter.post("/invite-to-org", userMiddleware, async (req: express.Request, res: express.Response) => {
+    const { emails } = req.body;
+    const orgId = res.locals.user.org;
 
     let inviteUsers: any = [];
 
@@ -65,14 +64,18 @@ userRouter.post(
     let users: any[] = [];
 
     try {
-      await Promise.allSettled(inviteUsers).then((results) => {
-        results.forEach((result: any) => {
-          if (result.status !== "fulfilled") throw new Error(result.reason);
-          users.push(result.value);
-        });
+      const results = await Promise.allSettled(inviteUsers);
+      results.forEach((result: any) => {
+        if (result.status !== "fulfilled") throw new Error(result.reason);
+        users.push(result.value);
       });
-    } catch (err) {
-      return res.status(500).json({ err });
+
+      track(res.locals.user.userId, 'Invite member', {
+        numberOfUsers: users.length,
+        org: orgId.toString()
+      })
+    } catch (error) {
+      return res.status(500).json({ error });
     }
 
     return res.status(200).json({ users });

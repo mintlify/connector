@@ -8,6 +8,7 @@ import { updateDocContentForSearch } from '../services/algolia';
 import { workQueue } from '../workers';
 import mongoose from 'mongoose';
 import Org from '../models/Org';
+import { track } from '../services/segment';
 
 const scanRouter = express.Router();
 
@@ -118,6 +119,10 @@ export const scanDocsInOrg = async (orgId: string) => {
         doc: doc._id,
         type: 'change',
         change: diff,
+      })
+
+      track(orgId, 'Change detected', {
+        isOrg: true,
       })
     }
   });

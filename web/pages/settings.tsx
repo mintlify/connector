@@ -75,7 +75,10 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
     await axios
       .post(`${API_ENDPOINT}/routes/user/invite-to-org`, {
         emails: [email],
-        orgId: org._id,
+      }, {
+        params: {
+          userId: user.userId,
+        }
       })
       .then((res) => {
         setMembers(members.concat(res.data.users))
