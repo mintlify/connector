@@ -47,7 +47,12 @@ export default function Search({ user, org, isOpen, setIsOpen }: SearchProps) {
       return;
     }
 
-    axios.get(`${API_ENDPOINT}/routes/search?query=${query}&orgId=${org._id}`)
+    axios.get(`${API_ENDPOINT}/routes/search`, {
+      params: {
+        query,
+        orgId: org._id
+      }
+    })
       .then(({ data: { results } }: { data: { results: SearchResults } }) => {
         setResults(results)
       })
@@ -68,6 +73,12 @@ export default function Search({ user, org, isOpen, setIsOpen }: SearchProps) {
       setIsOpen(false);
       return
     }
+
+    axios.get(`${API_ENDPOINT}/routes/search/click`, {
+      params: {
+        userId: user.userId,
+      }
+    })
 
     window.open(result.url, '_blank')
   }

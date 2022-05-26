@@ -1,6 +1,7 @@
 import express from 'express';
 import Code, { CodeType } from '../models/Code';
 import Doc from '../models/Doc';
+import { track } from '../services/segment';
 import { userMiddleware } from './user';
 
 const linksRouter = express.Router();
@@ -19,6 +20,11 @@ linksRouter.put('/', userMiddleware, async (req, res) => {
             return Code.create(code);
         });
         await Promise.all(codePromises);
+
+        track(res.locals.user.userId, 'Add code link', {
+          doc: docId.toString(),
+        })
+
         return res.end();
     }
     catch (error) {
