@@ -11,7 +11,7 @@ const getSlackAuthUrl = (state?: string) => {
     const url = new URL('https://slack.com/oauth/v2/authorize');
     url.searchParams.append('client_id', clientId);
     url.searchParams.append('redirect_uri', redirectUri);
-    url.searchParams.append('scope', 'incoming-webhook,channels:manage,channels:read,chat:write,chat:write.customize,chat:write.public');
+    url.searchParams.append('scope', 'channels:read,chat:write,chat:write.public,chat:write.customize,channels:manage');
     if (state) {
       url.searchParams.append('state', state);
   }
