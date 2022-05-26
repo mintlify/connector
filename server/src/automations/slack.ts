@@ -12,8 +12,12 @@ dotenv.config();
 export const publishMessage = async (text: string, channel: string, token: string) => {
   const postMessage = async () => {
     const messageUrl = 'https://slack.com/api/chat.postMessage';
+    let formattedChannel = channel;
+    if (channel.charAt(0) !== '#') {
+      formattedChannel = `#${channel}`;
+    } 
     return await axios.post(messageUrl, {
-      channel: channel,
+      channel: formattedChannel,
       text,
       mrkdwn: true
     }, { headers: { authorization: `Bearer ${token}` } });
