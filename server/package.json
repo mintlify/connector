@@ -12,7 +12,6 @@
     "probot-app"
   ],
   "scripts": {
-    "postinstall": "cd ./node_modules/@mintlify/grove/parser && npm run build",
     "build": "tsc",
     "start": "probot run ./lib/index.js",
     "cron": "node ./lib/cron/index.js",
@@ -23,7 +22,6 @@
     "test": "jest"
   },
   "dependencies": {
-    "@mintlify/grove": "^1.0.13",
     "@notionhq/client": "^1.0.4",
     "@octokit/auth-app": "^3.6.1",
     "@types/analytics-node": "^3.1.8",
