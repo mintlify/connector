@@ -5,6 +5,7 @@ export type DocType = {
     org: string;
     url: string;
     method: string;
+    favicon?: string;
     content?: string;
     title?: string;
     lastUpdatedAt: Date;
