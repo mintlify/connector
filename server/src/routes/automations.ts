@@ -2,8 +2,8 @@ import express from 'express';
 import mongoose from 'mongoose';
 import Automation, { AutomationSourceType } from '../models/Automation';
 import { deleteAutomationForSearch, indexAutomationForSearch } from '../services/algolia';
+import { track } from '../services/segment';
 import { userMiddleware } from './user';
-
 
 const automationsRouter = express.Router();
 
@@ -55,9 +55,15 @@ automationsRouter.post('/', userMiddleware, async (req, res) => {
     },
     name,
     createdBy: res.locals.user._id
-  })
+  });
 
   indexAutomationForSearch(automation);
+
+  track(res.locals.user.userId, 'Add automation', {
+    type,
+    org: org.toString(),
+  })
+
   return res.send({automation});
 });
 

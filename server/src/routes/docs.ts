@@ -43,12 +43,7 @@ export const createDocFromUrl = async (url: string, orgId: string, userId: Types
     }
   );
 
-  track(userId.toString(), "Add document", {
-    doc: doc._id.toString(),
-    method,
-  })
-
-  return { content, doc };
+  return { content, doc, method };
 };
 
 docsRouter.get('/', userMiddleware, async (_, res) => {
@@ -88,10 +83,16 @@ docsRouter.post('/', userMiddleware, async (req, res) => {
   const { url } = req.body;
   const org = res.locals.user.org;
   try {
-    const { content, doc } = await createDocFromUrl(url, org, res.locals.user._id);
+    const { content, doc, method } = await createDocFromUrl(url, org, res.locals.user._id);
     if (doc != null) {
       await createEvent(org, doc._id, 'add', {});
       indexDocForSearch(doc);
+
+      track(res.locals.user.userId, "Add documentation", {
+        doc: doc._id.toString(),
+        method,
+        org: org.toString(),
+      })
     }
     res.send({ content });
   } catch (error) {
