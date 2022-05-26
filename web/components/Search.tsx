@@ -15,7 +15,8 @@ type DocResult = {
   name: string,
   content: string,
   url: string,
-  org: string
+  org: string,
+  favicon?: string,
 }
 
 type AutomationResult = {
@@ -149,10 +150,14 @@ export default function Search({ user, org, isOpen, setIsOpen }: SearchProps) {
                             >
                               {({ active }) => (
                                 <>
-                                  <DocumentTextIcon
-                                    className={classNames('h-6 w-6 flex-none', active ? 'text-white' : 'text-gray-400')}
-                                    aria-hidden="true"
-                                  />
+                                {
+                                  docResult.favicon
+                                    ? <img className={classNames('h-6 w-6 flex-none', active ? 'grayscale brightness-200' : '')} src={docResult.favicon} alt="Logo" />
+                                    : <DocumentTextIcon
+                                        className={classNames('h-6 w-6 flex-none', active ? 'text-white' : 'text-gray-400')}
+                                        aria-hidden="true"
+                                      />
+                                }
                                   <span className="ml-2 flex-auto truncate">{docResult.name}</span>
                                 </>
                               )}
