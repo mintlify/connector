@@ -1,6 +1,6 @@
 import { expect } from '@jest/globals';
 import { createMessage } from '../src/helpers/routes/messages';
-import { getAlertsForAllFiles, getAlertsForFile } from '../src/helpers/routes/v01Alerts';
+import { getAlertsForAllFiles, getAlertsForFile } from '../src/helpers/routes/alerts';
 import { checkIfUrl } from '../src/helpers/routes/links';
 import { Alert, Change } from '../src/helpers/github/types';
 import { FileInfo } from '../src/helpers/github/patch';
