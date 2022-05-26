@@ -34,7 +34,7 @@ export default function Sidebar({
   const fullName = user.firstName + ' ' + user.lastName;
 
   const onClickHelp = () => {
-    boot({ userId: user.userId, email: user.email })
+    boot({ userId: user.userId, email: user.email, company: { companyId: org._id, name: org.name } })
     show();
   }
 
