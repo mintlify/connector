@@ -164,6 +164,7 @@ async function getExtensionConfig(target, mode, env) {
 
   if (target === 'webworker') {
 		plugins.push(new ProvidePlugin({
+			'process.env.NODE_ENV': JSON.stringify('production'),
 			process: join(
 				__dirname,
 				'node_modules',
