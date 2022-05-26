@@ -87,6 +87,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
 
   useEffect(() => {
     if (userSession == null || userSession.user == null || userSession.org == null) {
+      console.log('USER SESSION DATA IS NULL');
       return;
     }
 
