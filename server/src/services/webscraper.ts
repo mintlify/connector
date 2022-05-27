@@ -7,8 +7,6 @@ import { getContentFromHTML } from '../helpers/routes/domparsing';
 import { getNotionPageData } from './notion';
 const webScrapingApiClient = require('webscrapingapi');
 
-const client = new webScrapingApiClient(process.env.WEBSCRAPER_KEY);
-
 type URLScrapingMethod = 'notion-private' | 'googledocs' | 'other';
 type WebScrapingMethod = 'readme' | 'stoplight' | 'docusaurus' | 'github' | 'notion-public' | 'confluence-public' | 'web';
 
@@ -90,6 +88,8 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
   }
 
   const waitFor = getWaitTime(url);
+  const webscraperKey = Math.random() < 0.5 ? process.env.WEBSCRAPER_KEY_1 : process.env.WEBSCRAPER_KEY_2
+  const client = new webScrapingApiClient(webscraperKey);
   const response = await client.get(url, {
     render_js: 1,
     proxy_type: 'datacenter',
