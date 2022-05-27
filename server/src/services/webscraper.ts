@@ -5,7 +5,7 @@ import validUrl from 'valid-url';
 import Org from '../models/Org';
 import { getContentFromHTML } from '../helpers/routes/domparsing';
 import { getNotionPageData } from './notion';
-const webScrapingApiClient = require('webscrapingapi');
+import axios from 'axios';
 
 type URLScrapingMethod = 'notion-private' | 'googledocs' | 'other';
 type WebScrapingMethod = 'readme' | 'stoplight' | 'docusaurus' | 'github' | 'notion-public' | 'confluence-public' | 'web';
@@ -21,14 +21,6 @@ const getScrapingMethod = (url: string): URLScrapingMethod => {
     return 'googledocs';
   }
   return 'other';
-};
-
-const getWaitTime = (url: string): number => {
-  if (url.includes('notion.site')) {
-    return 5000;
-  }
-
-  return 0;
 };
 
 const possiblyGetWebScrapingMethod = ($: cheerio.CheerioAPI): WebScrapingMethod => {
@@ -87,23 +79,15 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
     return await getGoogleDocsData(parsedUrl);
   }
 
-  const waitFor = getWaitTime(url);
-  const webscraperKey = Math.random() < 0.8 ? process.env.WEBSCRAPER_KEY_1 : process.env.WEBSCRAPER_KEY_2
-  const client = new webScrapingApiClient(webscraperKey);
-  const response = await client.get(url, {
-    render_js: 1,
-    proxy_type: 'datacenter',
-    timeout: 10000,
-    wait_until: 'domcontentloaded',
-    wait_for: waitFor,
+  const { data: response } = await axios.get('https://app.scrapingbee.com/api/v1', {
+    params: {
+      'api_key': process.env.SCRAPINGBEE_KEY,
+      url,
+      wait: '1000'
+    } 
   });
 
-  if (!response.success) {
-    console.log(url);
-    throw 'Error fetching results';
-  }
-
-  const rawContent = response.response.data;
+  const rawContent = response;
   const $ = cheerio.load(rawContent);
   // Only switch scraping method if other from url
   scrapingMethod = scrapingMethod === 'other' ? possiblyGetWebScrapingMethod($) : scrapingMethod;

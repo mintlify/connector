@@ -104,6 +104,7 @@ docsRouter.post('/', userMiddleware, async (req, res) => {
     } else console.log('Doc is null');
     res.send({ content });
   } catch (error) {
+    console.log({error});
     res.status(500).send({ error });
   }
 });
