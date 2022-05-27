@@ -28,7 +28,7 @@ type DocUpdateStatus = 'first-change' | 'continuous-change' | 'event-trigger';
 const DIFF_CONFIRMATION_THRESHOLD = 2;
 
 const getDiffAndContent = async (url: string, previousContent: string, orgId: string): Promise<DiffAndContent> => {
-  const { content } = await getDataFromWebpage(url, orgId);
+  const { content } = await getDataFromWebpage(url, orgId, 6000);
   return {
     diff: Diff.diffWords(previousContent, content),
     newContent: content

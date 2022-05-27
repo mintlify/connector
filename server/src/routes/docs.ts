@@ -125,4 +125,15 @@ docsRouter.delete('/:docId', userMiddleware, async (req, res) => {
   }
 });
 
+docsRouter.post('/content', async (req, res) => {
+  const { url, orgId } = req.body;
+
+  try {
+    const page = await getDataFromWebpage(url, orgId);
+    res.send({page});
+  } catch (error) {
+    res.status(500).send({ error });
+  }
+})
+
 export default docsRouter;

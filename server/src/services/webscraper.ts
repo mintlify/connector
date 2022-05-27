@@ -59,7 +59,7 @@ export type ContentData = {
   favicon?: string;
 };
 
-export const getDataFromWebpage = async (url: string, orgId: string): Promise<ContentData> => {
+export const getDataFromWebpage = async (url: string, orgId: string, wait = 1000): Promise<ContentData> => {
   if (!url) {
     throw 'URL not provided';
   }
@@ -83,7 +83,7 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
     params: {
       'api_key': process.env.SCRAPINGBEE_KEY,
       url,
-      wait: '1500',
+      wait: wait.toString(),
       'block_resources': 'false'
     } 
   });
