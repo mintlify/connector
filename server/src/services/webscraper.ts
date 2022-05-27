@@ -83,7 +83,7 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
     params: {
       'api_key': process.env.SCRAPINGBEE_KEY,
       url,
-      wait: '1000',
+      wait: '1500',
       'block_resources': 'false'
     } 
   });
