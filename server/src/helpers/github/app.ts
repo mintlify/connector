@@ -61,32 +61,18 @@ export const getAllFilesAndMap = async (context: Context): Promise<AllFilesAndMa
 type AlertsResponse = {
   incomingAlerts: Alert[],
   previousAlerts: Alert[],
-  newLinksMessage: string,
 }
 
 export const getAlerts = async (context: Context, files: FileInfo[]): Promise<AlertsResponse> => {
   const owner = context.payload.repository.owner.login;
   const repo = context.payload.pull_request.head.repo.name;
   const alertsRequest: AlertsRequest = { files, owner, repo }
-  const v01Promise = axios.post(`${ENDPOINT}/routes/alerts/original`, alertsRequest);
   const previousAlertsPromise = getReviewComments(context);
   const alertsPromise = axios.post(`${ENDPOINT}/routes/alerts/`, alertsRequest);
-  const [v01Response, alertsResponse, previousAlerts] = await Promise.all([v01Promise, alertsPromise, previousAlertsPromise]);
+  const [alertsResponse, previousAlerts] = await Promise.all([alertsPromise, previousAlertsPromise]);
   return {
-    incomingAlerts: v01Response.data.alerts.concat(alertsResponse.data.alerts),
+    incomingAlerts: alertsResponse.data.alerts,
     previousAlerts,
-    newLinksMessage: v01Response.data.newLinksMessage
-  }
-}
-
-export const potentiallyCreateNewLinksComment = async (context: Context, newLinksMessage: string) => {
-  if (newLinksMessage == null) {
-    return;
-  }
-  const commentResponse = await context.octokit.rest.issues.listComments(context.issue());
-  const comments = commentResponse.data.map((comment) => comment.body);
-  if (!comments.includes(newLinksMessage)) {
-    await context.octokit.issues.createComment(context.issue({body: newLinksMessage}))
   }
 }
 

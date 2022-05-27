@@ -2,15 +2,14 @@ import { ApplicationFunctionOptions, Context, Probot } from "probot";
 import './services/mongoose';
 import { getReviewComments, checkIfAllAlertsAreResolve, createSuccessCheck, createActionRequiredCheck, createInProgressCheck } from "./helpers/github/octokit";
 import headRouter from "./routes";
-import { createReviewCommentsFromAlerts, filterNewAlerts, getAlerts, getAllFilesAndMap, potentiallyCreateNewLinksComment } from "./helpers/github/app";
+import { createReviewCommentsFromAlerts, filterNewAlerts, getAlerts, getAllFilesAndMap } from "./helpers/github/app";
 
 export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
   app.on(["pull_request.opened", "pull_request.reopened", "pull_request.synchronize"], async (context) => {
     await createInProgressCheck(context);
 
     const { files, filesPatchLineRangesMap } = await getAllFilesAndMap(context);
-    const { incomingAlerts, previousAlerts, newLinksMessage } = await getAlerts(context, files);
-    potentiallyCreateNewLinksComment(context, newLinksMessage);
+    const { incomingAlerts, previousAlerts } = await getAlerts(context, files);
 
     if (incomingAlerts == null) {
       return;
