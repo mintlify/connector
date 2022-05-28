@@ -8,7 +8,7 @@ import { getNotionPageData } from './notion';
 import axios from 'axios';
 
 type URLScrapingMethod = 'notion-private' | 'googledocs' | 'other';
-type WebScrapingMethod = 'readme' | 'stoplight' | 'docusaurus' | 'github' | 'notion-public' | 'confluence-public' | 'web';
+type WebScrapingMethod = 'readme' | 'stoplight' | 'docusaurus' | 'github' | 'notion-public' | 'confluence-public' | 'gitbook' | 'web';
 
 type ScrapingMethod = URLScrapingMethod | WebScrapingMethod;
 
@@ -25,29 +25,34 @@ const getScrapingMethod = (url: string): URLScrapingMethod => {
 
 const possiblyGetWebScrapingMethod = ($: cheerio.CheerioAPI): WebScrapingMethod => {
   const readmeVersion = $('meta[name="readme-version"]');
-  if (readmeVersion.length !== 0) {
+  if (readmeVersion.length > 0) {
     return 'readme';
   }
   const stoplightConnect = $('link[href="https://js.stoplight.io"]');
-  if (stoplightConnect.length !== 0) {
+  if (stoplightConnect.length > 0) {
     return 'stoplight';
   }
   const githubContent = $('meta[content="GitHub"]');
   const hasReadmeId = $('#readme');
-  if (githubContent.length !== 0 && hasReadmeId.length !== 0) {
+  if (githubContent.length > 0 && hasReadmeId.length > 0) {
     return 'github';
   }
   const notionApp = $('#notion-app');
-  if (notionApp.length !== 0) {
+  if (notionApp.length > 0) {
     return 'notion-public';
   }
   const confluenceId = $('#com-atlassian-confluence');
-  if (confluenceId.length !== 0) {
+  if (confluenceId.length > 0) {
     return 'confluence-public';
   }
   const docusaurusVersion = $('meta[name="docusaurus_version"]');
-  if (docusaurusVersion.length !== 0) {
+  if (docusaurusVersion.length > 0) {
     return 'docusaurus';
+  }
+  const gitBookRoot = $('div[class="gitbook-root"]');
+  const contentEditor = $('div[data-testid="page.contentEditor"]');
+  if (gitBookRoot.length > 0 && contentEditor.length > 0) {
+    return 'gitbook';
   }
   return 'web';
 };
@@ -107,36 +112,48 @@ export const getDataFromWebpage = async (url: string, orgId: string, wait = 1000
   $('style').remove();
   $('title').remove();
 
-  let content;
+  let section;
 
-  if (scrapingMethod === 'readme') {
-    // Remove unneeded components
-    $('#updated-at').nextAll().remove();
-    $('#updated-at').remove();
-    $('nav').remove();
-    $('header.rm-Header').remove();
-    $('.PageThumbs').remove();
-    content = getContentFromHTML($('body'));
-  } else if (scrapingMethod === 'stoplight') {
-    content = getContentFromHTML($('.Editor'));
-  } else if (scrapingMethod === 'docusaurus') {
-    content = getContentFromHTML($('.markdown'));
-  } else if (scrapingMethod === 'github') {
-    content = getContentFromHTML($('#readme'));
-  } else if (scrapingMethod === 'notion-public') {
-    $('.notion-overlay-container').remove();
-    content = getContentFromHTML($('.notion-page-content'));
-  } else if (scrapingMethod === 'confluence-public') {
-    $('.recently-updated').remove();
-    content = getContentFromHTML($('#content-body'));
-  } else if (scrapingMethod === 'googledocs') {
-    content = getContentFromHTML($('#contents'));
-  } else {
-    content = getContentFromHTML($('body'));
-    if ($('body').find('main').length > 0) {
-      content = getContentFromHTML($('body main'));
-    }
+  switch (scrapingMethod) {
+    case 'readme':
+      $('#updated-at').nextAll().remove();
+      $('#updated-at').remove();
+      $('nav').remove();
+      $('header.rm-Header').remove();
+      $('.PageThumbs').remove();
+      section = $('body');
+      break;
+    case 'stoplight':
+      section = $('.Editor');
+      break;
+    case 'docusaurus':
+      section = $('.markdown');
+      break;
+    case 'github':
+      section = $('#readme');
+      break;
+    case 'notion-public':
+      $('.notion-overlay-container').remove();
+      section = $('.notion-page-content');
+      break;
+    case 'confluence-public':
+      $('.recently-updated').remove();
+      section = $('#content-body');
+      break;
+    case 'googledocs':
+      section = $('#contents');
+      break;
+    case 'gitbook':
+      section = $('div[data-testid="page.contentEditor"]');
+      break;
+    default:
+      section = $('body');
+      if ($('body').find('main').length > 0) {
+        section = $('body main');
+      } 
   }
+
+  const content = getContentFromHTML(section);
 
   return {
     method: scrapingMethod,
