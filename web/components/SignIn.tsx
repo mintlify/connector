@@ -50,7 +50,7 @@ export default function SignIn() {
         <div className="max-w-md bg-white border border-gray-300 drop-shadow-sm w-full rounded-lg py-12 px-8">
           <div>
             <img className="h-8" src="/assets/mintlify.svg" alt="Mintlify" />
-            <h2 className="mt-4 text-2xl font-bold text-gray-900">Welcome back to {orgForAuth.name}</h2>
+            <h2 className="mt-4 text-2xl font-bold text-gray-900">Welcome back</h2>
             <p className="mt-2 text-sm text-gray-600">
               Need a new organization?{' '}
               <Link href="https://1tc7vihvbit.typeform.com/to/ZUY3igg4">
