@@ -47,15 +47,18 @@ export default function SignIn() {
         <title>Sign in to {orgForAuth.name}</title>
       </Head>
       <div className="min-h-screen flex items-center bg-gray-50 justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-sm w-full">
+        <div className="max-w-md bg-white border border-gray-300 drop-shadow-sm w-full rounded-lg py-12 px-8">
           <div>
-            <img className="mx-auto h-12 w-auto" src="/assets/mintlify.svg" alt="Mintlify" />
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to {orgForAuth.name}</h2>
-            <p className="mt-2 text-center text-sm text-gray-600">
-              Or{" "}
-              <span className="font-medium text-primary">
-                create a new account
-              </span>
+            <img className="h-8" src="/assets/mintlify.svg" alt="Mintlify" />
+            <h2 className="mt-4 text-2xl font-bold text-gray-900">Welcome back to {orgForAuth.name}</h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Need a new organization?{' '}
+              <Link href="https://1tc7vihvbit.typeform.com/to/ZUY3igg4">
+                <a target="_blank" className="font-medium text-primary">
+                  Sign up
+                </a>
+              </Link>
+              {' '}here
             </p>
           </div>
           {isSubmitted && (
@@ -74,7 +77,7 @@ export default function SignIn() {
             <div className="mt-6">
               <div className="grid grid-cols-1">
                 <Link href="/api/login/github">
-                  <div className="w-full inline-flex space-x-2 justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-gray-700 text-sm font-medium text-white hover:bg-gray-800 cursor-pointer">
+                  <div className="w-full inline-flex space-x-2 justify-center py-2 px-4  rounded-md shadow-sm border border-gray-500 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
                     <span className="sr-only">Sign in with GitHub</span>
                     <svg className="w-5 h-5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
                       <path
@@ -89,10 +92,10 @@ export default function SignIn() {
               </div>
               <div className="mt-6 relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
+                  <div className="w-full border-t border-gray-200" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-gray-50 text-gray-500">Or continue with</span>
+                  <span className="px-2 bg-white text-gray-500">Or continue with</span>
                 </div>
               </div>
               <form className="mt-8 space-y-4" action="#" method="POST">
