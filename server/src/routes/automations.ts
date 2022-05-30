@@ -96,7 +96,7 @@ automationsRouter.put('/sendAlert', async (_, res) => {
   if (org) {
     const token = org?.integrations?.slack?.accessToken;
     if (token) {
-      await publishMessage('Changes have been made to <https://mintlify.notion.site/Laws-of-Documentation-f167f65678e8495e9af7519a87fca13e|✍️Laws of Documentation>', 'docs', token);
+      await publishMessage('Changes have been made to <https://mintlify.notion.site/Laws-of-Documentation-f167f65678e8495e9af7519a87fca13e|✍️ Laws of Documentation>', 'docs', token);
       res.end();
     }
     res.status(500).send('token not found');
