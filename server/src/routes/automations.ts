@@ -4,6 +4,8 @@ import Automation, { AutomationSourceType } from '../models/Automation';
 import { deleteAutomationForSearch, indexAutomationForSearch } from '../services/algolia';
 import { track } from '../services/segment';
 import { userMiddleware } from './user';
+import { publishMessage } from '../automations/slack';
+import Org from '../models/Org';
 
 const automationsRouter = express.Router();
 
@@ -87,6 +89,19 @@ automationsRouter.delete('/:automationId', userMiddleware, async (req, res) => {
   } catch (error) {
     res.status(500).send({error})
   }
+})
+
+automationsRouter.put('/sendAlert', async (req, res) => {
+  const org = await Org.findById('6282c3105ae7e75d5ff1fbee');
+  if (org) {
+    const token = org?.integrations?.slack?.accessToken;
+    if (token) {
+      await publishMessage('Changes have been made to <https://mintlify.notion.site/Laws-of-Documentation-f167f65678e8495e9af7519a87fca13e|✍️Laws of Documentation>', 'docs', token);
+      res.end();
+    }
+    res.status(500).send('token not found');
+  }
+  res.status(500).send('org not found');
 })
 
 export default automationsRouter;
