@@ -19,8 +19,10 @@ export const createDocFromUrl = async (url: string, orgId: string, userId: Types
     try {
       const faviconRes = await axios.get(`https://s2.googleusercontent.com/s2/favicons?sz=128&domain_url=${url}`);
       foundFavicon = faviconRes.request.res.responseUrl;
+      console.log('found a Favicon in createDocFromUrl');
     } catch {
       foundFavicon = undefined;
+      console.log('Error within createDocFromUrl: favicon not found');
     }
   }
   const doc = await Doc.findOneAndUpdate(
@@ -41,7 +43,8 @@ export const createDocFromUrl = async (url: string, orgId: string, userId: Types
       upsert: true,
       new: true,
     }
-  );
+  ).catch((error) => console.log(error));
+  console.log('Successfully create docs');
 
   return { content, doc, method };
 };
@@ -104,7 +107,7 @@ docsRouter.post('/', userMiddleware, async (req, res) => {
     } else console.log('Doc is null');
     res.send({ content });
   } catch (error) {
-    console.log({error});
+    console.log({ error });
     res.status(500).send({ error });
   }
 });
@@ -130,10 +133,10 @@ docsRouter.post('/content', async (req, res) => {
 
   try {
     const page = await getDataFromWebpage(url, orgId, 6000);
-    res.send({page});
+    res.send({ page });
   } catch (error) {
     res.status(500).send({ error });
   }
-})
+});
 
 export default docsRouter;
