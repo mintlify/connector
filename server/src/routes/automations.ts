@@ -91,7 +91,7 @@ automationsRouter.delete('/:automationId', userMiddleware, async (req, res) => {
   }
 })
 
-automationsRouter.put('/sendAlert', async (req, res) => {
+automationsRouter.put('/sendAlert', async (_, res) => {
   const org = await Org.findById('6282c3105ae7e75d5ff1fbee');
   if (org) {
     const token = org?.integrations?.slack?.accessToken;
