@@ -38,7 +38,10 @@ export const getGoogleDocsData = async (url: URL): Promise<ContentData> => {
 
   try {
     const auth = new google.auth.JWT(jwt.client_email, undefined, jwt.private_key, scopes, jwt.auth_email);
+    console.log('successfully initialized the google auth object');
     const docs = google.docs({ version: 'v1', auth });
+
+    console.log('successfully initiate google docs api connector');
 
     const documentId: string = url.pathname.split('/')[3];
     const res = await docs.documents.get({ documentId });
