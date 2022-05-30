@@ -6,14 +6,10 @@ import { createReviewCommentsFromAlerts, filterNewAlerts, getAlerts, getAllFiles
 
 export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
   app.on(["pull_request.opened", "pull_request.reopened", "pull_request.synchronize"], async (context) => {
-    console.log({context});
     await createInProgressCheck(context);
 
     const { files, filesPatchLineRangesMap } = await getAllFilesAndMap(context);
     const { incomingAlerts, previousAlerts } = await getAlerts(context, files);
-    console.log({files})
-    console.log({incomingAlerts})
-    console.log({previousAlerts})
 
     if (incomingAlerts == null) {
       return;
