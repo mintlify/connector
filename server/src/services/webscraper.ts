@@ -5,10 +5,10 @@ import validUrl from 'valid-url';
 import Org from '../models/Org';
 import { getContentFromHTML } from '../helpers/routes/domparsing';
 import { getNotionPageData } from './notion';
-const webScrapingApiClient = require('webscrapingapi');
+import axios from 'axios';
 
 type URLScrapingMethod = 'notion-private' | 'googledocs' | 'other';
-type WebScrapingMethod = 'readme' | 'stoplight' | 'docusaurus' | 'github' | 'notion-public' | 'confluence-public' | 'web';
+type WebScrapingMethod = 'readme' | 'stoplight' | 'docusaurus' | 'github' | 'notion-public' | 'confluence-public' | 'gitbook' | 'web';
 
 type ScrapingMethod = URLScrapingMethod | WebScrapingMethod;
 
@@ -23,39 +23,36 @@ const getScrapingMethod = (url: string): URLScrapingMethod => {
   return 'other';
 };
 
-const getWaitTime = (url: string): number => {
-  if (url.includes('notion.site')) {
-    return 5000;
-  }
-
-  return 0;
-};
-
 const possiblyGetWebScrapingMethod = ($: cheerio.CheerioAPI): WebScrapingMethod => {
   const readmeVersion = $('meta[name="readme-version"]');
-  if (readmeVersion.length !== 0) {
+  if (readmeVersion.length > 0) {
     return 'readme';
   }
   const stoplightConnect = $('link[href="https://js.stoplight.io"]');
-  if (stoplightConnect.length !== 0) {
+  if (stoplightConnect.length > 0) {
     return 'stoplight';
   }
   const githubContent = $('meta[content="GitHub"]');
   const hasReadmeId = $('#readme');
-  if (githubContent.length !== 0 && hasReadmeId.length !== 0) {
+  if (githubContent.length > 0 && hasReadmeId.length > 0) {
     return 'github';
   }
   const notionApp = $('#notion-app');
-  if (notionApp.length !== 0) {
+  if (notionApp.length > 0) {
     return 'notion-public';
   }
   const confluenceId = $('#com-atlassian-confluence');
-  if (confluenceId.length !== 0) {
+  if (confluenceId.length > 0) {
     return 'confluence-public';
   }
   const docusaurusVersion = $('meta[name="docusaurus_version"]');
-  if (docusaurusVersion.length !== 0) {
+  if (docusaurusVersion.length > 0) {
     return 'docusaurus';
+  }
+  const gitBookRoot = $('div[class="gitbook-root"]');
+  const contentEditor = $('div[data-testid="page.contentEditor"]');
+  if (gitBookRoot.length > 0 && contentEditor.length > 0) {
+    return 'gitbook';
   }
   return 'web';
 };
@@ -67,7 +64,7 @@ export type ContentData = {
   favicon?: string;
 };
 
-export const getDataFromWebpage = async (url: string, orgId: string): Promise<ContentData> => {
+export const getDataFromWebpage = async (url: string, orgId: string, wait = 1000): Promise<ContentData> => {
   if (!url) {
     throw 'URL not provided';
   }
@@ -87,23 +84,16 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
     return await getGoogleDocsData(parsedUrl);
   }
 
-  const waitFor = getWaitTime(url);
-  const webscraperKey = Math.random() < 0.8 ? process.env.WEBSCRAPER_KEY_1 : process.env.WEBSCRAPER_KEY_2
-  const client = new webScrapingApiClient(webscraperKey);
-  const response = await client.get(url, {
-    render_js: 1,
-    proxy_type: 'datacenter',
-    timeout: 10000,
-    wait_until: 'domcontentloaded',
-    wait_for: waitFor,
+  const { data: response } = await axios.get('https://app.scrapingbee.com/api/v1', {
+    params: {
+      'api_key': process.env.SCRAPINGBEE_KEY,
+      url,
+      wait: wait.toString(),
+      'block_resources': 'false'
+    } 
   });
 
-  if (!response.success) {
-    console.log(url);
-    throw 'Error fetching results';
-  }
-
-  const rawContent = response.response.data;
+  const rawContent = response;
   const $ = cheerio.load(rawContent);
   // Only switch scraping method if other from url
   scrapingMethod = scrapingMethod === 'other' ? possiblyGetWebScrapingMethod($) : scrapingMethod;
@@ -122,36 +112,48 @@ export const getDataFromWebpage = async (url: string, orgId: string): Promise<Co
   $('style').remove();
   $('title').remove();
 
-  let content;
+  let section;
 
-  if (scrapingMethod === 'readme') {
-    // Remove unneeded components
-    $('#updated-at').nextAll().remove();
-    $('#updated-at').remove();
-    $('nav').remove();
-    $('header.rm-Header').remove();
-    $('.PageThumbs').remove();
-    content = getContentFromHTML($('body'));
-  } else if (scrapingMethod === 'stoplight') {
-    content = getContentFromHTML($('.Editor'));
-  } else if (scrapingMethod === 'docusaurus') {
-    content = getContentFromHTML($('.markdown'));
-  } else if (scrapingMethod === 'github') {
-    content = getContentFromHTML($('#readme'));
-  } else if (scrapingMethod === 'notion-public') {
-    $('.notion-overlay-container').remove();
-    content = getContentFromHTML($('.notion-page-content'));
-  } else if (scrapingMethod === 'confluence-public') {
-    $('.recently-updated').remove();
-    content = getContentFromHTML($('#content-body'));
-  } else if (scrapingMethod === 'googledocs') {
-    content = getContentFromHTML($('#contents'));
-  } else {
-    content = getContentFromHTML($('body'));
-    if ($('body').find('main').length > 0) {
-      content = getContentFromHTML($('body main'));
-    }
+  switch (scrapingMethod) {
+    case 'readme':
+      $('#updated-at').nextAll().remove();
+      $('#updated-at').remove();
+      $('nav').remove();
+      $('header.rm-Header').remove();
+      $('.PageThumbs').remove();
+      section = $('body');
+      break;
+    case 'stoplight':
+      section = $('.Editor');
+      break;
+    case 'docusaurus':
+      section = $('.markdown');
+      break;
+    case 'github':
+      section = $('#readme');
+      break;
+    case 'notion-public':
+      $('.notion-overlay-container').remove();
+      section = $('.notion-page-content');
+      break;
+    case 'confluence-public':
+      $('.recently-updated').remove();
+      section = $('#content-body');
+      break;
+    case 'googledocs':
+      section = $('#contents');
+      break;
+    case 'gitbook':
+      section = $('div[data-testid="page.contentEditor"]');
+      break;
+    default:
+      section = $('body');
+      if ($('body').find('main').length > 0) {
+        section = $('body main');
+      } 
   }
+
+  const content = getContentFromHTML(section);
 
   return {
     method: scrapingMethod,

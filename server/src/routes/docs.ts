@@ -104,6 +104,7 @@ docsRouter.post('/', userMiddleware, async (req, res) => {
     } else console.log('Doc is null');
     res.send({ content });
   } catch (error) {
+    console.log({error});
     res.status(500).send({ error });
   }
 });
@@ -123,5 +124,16 @@ docsRouter.delete('/:docId', userMiddleware, async (req, res) => {
     res.status(500).send({ error });
   }
 });
+
+docsRouter.post('/content', async (req, res) => {
+  const { url, orgId } = req.body;
+
+  try {
+    const page = await getDataFromWebpage(url, orgId, 6000);
+    res.send({page});
+  } catch (error) {
+    res.status(500).send({ error });
+  }
+})
 
 export default docsRouter;
