@@ -55,7 +55,13 @@ alertsRouter.post('/', async (req, res) => {
 
     const alertResponses = await Promise.all(alertPromises);
     const alerts = alertResponses.filter((alert) => alert != null);
-    const org = await Org.findOne({ 'integrations.github.installations[0].account.login': owner });
+    const org = await Org.findOne({
+        'integrations.github.installations': {
+            $elemMatch: {
+                'account.login': owner
+            }
+        }
+    });
     if (org) {
         const events: EventType[] = codesWithAlerts.map((code) => {
             const event: EventType = {

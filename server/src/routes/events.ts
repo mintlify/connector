@@ -14,9 +14,6 @@ export const createEvent = (org: Types.ObjectId, doc: Types.ObjectId, type: Even
   };
 
   switch (type) {
-    case 'add':
-      event.add = data;
-      break;
     case 'change':
       event.change = data as Diff.Change[];
       break;
