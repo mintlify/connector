@@ -1,6 +1,7 @@
 import express from "express";
 import Org from "../models/Org";
 import User from "../models/User";
+import { client } from "../services/stytch";
 import { checkIfUserHasVSCodeInstalled, removeUnneededDataFromOrg, userMiddleware } from "./user";
 
 const orgRouter = express.Router();
@@ -141,5 +142,47 @@ orgRouter.get("/repos", userMiddleware, async (_, res) => {
     return res.status(500).send({ error });
   }
 });
+
+orgRouter.post('/', async (req, res) => {
+  const { userId, firstName, lastName, orgName, subdomain } = req.body;
+
+  if (!userId || !firstName || !lastName || !orgName || !subdomain) {
+    return res.status(400).send({error: 'Missing information from form'});
+  }
+
+  try {
+    const authUser = await client.users.get(userId);
+
+    if (authUser == null) {
+      return res.status(403).send({error: 'Invalid User ID'});
+    }
+
+    const { emails } = authUser;
+
+    const user = await User.findOneAndUpdate({
+      userId,
+    }, {
+      userId,
+      email: emails[0].email,
+      firstName,
+      lastName,
+    }, { upsert: true });
+
+    const org = await Org.create({
+      name: orgName,
+      subdomain,
+      users: [user.userId],
+      notifications: {
+        monthlyDigest: true,
+        newsletter: true,
+      }
+    })
+
+    return res.send({org});
+  } catch (error) {
+    console.log({error});
+    return res.status(500).send({error});
+  }
+})
 
 export default orgRouter;
