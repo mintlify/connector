@@ -21,7 +21,7 @@ export type Paragraph = {
 const scopes = ['https://www.googleapis.com/auth/documents.readonly'];
 
 const jwt = {
-  private_key: process.env.GOOGLE_PRIVATE_KEY,
+  private_key: process.env.GOOGLE_PRIVATE_KEY ? process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n') : '',
   client_email: process.env.GOOGLE_CLIENT_EMAIL,
   auth_email: process.env.GOOGLE_AUTH_EMAIL,
 };
