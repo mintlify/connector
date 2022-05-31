@@ -34,56 +34,36 @@ const GOOGLE_DOCS_ICON = 'https://res.cloudinary.com/mintlify/image/upload/v1653
 export const isGoogleDocsUrl = (url: URL): boolean => url.host === 'docs.google.com' || url.host === 'www.docs.google.com';
 
 export const getGoogleDocsData = async (url: URL): Promise<ContentData> => {
-  console.log("Google's jwt = ", jwt);
+  const auth = new google.auth.JWT(jwt.client_email, undefined, jwt.private_key, scopes, jwt.auth_email);
+  const docs = google.docs({ version: 'v1', auth });
 
-  try {
-    const auth = new google.auth.JWT(jwt.client_email, undefined, jwt.private_key, scopes, jwt.auth_email);
-    console.log('successfully initialized the google auth object');
-    const docs = google.docs({ version: 'v1', auth });
+  const documentId: string = url.pathname.split('/')[3];
+  const res = await docs.documents.get({ documentId });
+  const title = res.data.title ? res.data.title : 'No Title';
 
-    console.log('successfully initiate google docs api connector');
-
-    const documentId: string = url.pathname.split('/')[3];
-    console.log('getting the docs from the document id = ', documentId);
-    const res = await docs.documents.get({ documentId });
-    console.log('Successfully get the document');
-    const title = res.data.title ? res.data.title : 'No Title';
-
-    if (!res.data.body || !res.data.body.content)
-      return {
-        method: 'googledocs',
-        title,
-        content: 'Error getting content data',
-        favicon: GOOGLE_DOCS_ICON,
-      };
-
-    const content: any = res.data.body?.content;
-    let accumulatedContent = '';
-
-    content
-      .filter((block: any) => block.hasOwnProperty('paragraph'))
-      .map(({ paragraph }: { paragraph: Paragraph }) => {
-        paragraph.elements.map(
-          ({ textRun: { content } }: { textRun: { content: string } }) =>
-            (accumulatedContent = `${accumulatedContent}${content}`)
-        );
-      });
-
+  if (!res.data.body || !res.data.body.content)
     return {
       method: 'googledocs',
       title,
-      content: accumulatedContent,
-      favicon: GOOGLE_DOCS_ICON,
-    };
-  } catch (error) {
-    console.log('Unsuccessfully initialize the Google API connector');
-    console.log('error = ', error);
-
-    return {
-      method: 'googledocs',
-      title: 'Error getting content data',
       content: 'Error getting content data',
       favicon: GOOGLE_DOCS_ICON,
     };
-  }
+
+  const content: any = res.data.body?.content;
+  let accumulatedContent = '';
+
+  content
+    .filter((block: any) => block.hasOwnProperty('paragraph'))
+    .map(({ paragraph }: { paragraph: Paragraph }) => {
+      paragraph.elements.map(
+        ({ textRun: { content } }: { textRun: { content: string } }) => (accumulatedContent = `${accumulatedContent}${content}`)
+      );
+    });
+
+  return {
+    method: 'googledocs',
+    title,
+    content: accumulatedContent,
+    favicon: GOOGLE_DOCS_ICON,
+  };
 };

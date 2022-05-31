@@ -19,10 +19,8 @@ export const createDocFromUrl = async (url: string, orgId: string, userId: Types
     try {
       const faviconRes = await axios.get(`https://s2.googleusercontent.com/s2/favicons?sz=128&domain_url=${url}`);
       foundFavicon = faviconRes.request.res.responseUrl;
-      console.log('found a Favicon in createDocFromUrl');
     } catch {
       foundFavicon = undefined;
-      console.log('Error within createDocFromUrl: favicon not found');
     }
   }
   const doc = await Doc.findOneAndUpdate(
@@ -43,8 +41,7 @@ export const createDocFromUrl = async (url: string, orgId: string, userId: Types
       upsert: true,
       new: true,
     }
-  ).catch((error) => console.log(error));
-  console.log('Successfully create docs');
+  );
 
   return { content, doc, method };
 };
@@ -86,28 +83,18 @@ docsRouter.post('/', userMiddleware, async (req, res) => {
   const { url } = req.body;
   const org = res.locals.user.org;
   try {
-    console.log('Starting to create doc from url');
     const { content, doc, method } = await createDocFromUrl(url, org, res.locals.user._id);
-    console.log('Successfully created doc from url');
     if (doc != null) {
-      console.log('Start creating an event');
       await createEvent(org, doc._id, 'add', {});
-      console.log('Successfully creating an event');
-      console.log('Start indexing doc for search');
       indexDocForSearch(doc);
-      console.log('Succesfully indexing doc for search');
-
-      console.log('Start tracking doc');
       track(res.locals.user.userId, 'Add documentation', {
         doc: doc._id.toString(),
         method,
         org: org.toString(),
       });
-      console.log('Successfuly tracking doc');
     } else console.log('Doc is null');
     res.send({ content });
   } catch (error) {
-    console.log({ error });
     res.status(500).send({ error });
   }
 });
