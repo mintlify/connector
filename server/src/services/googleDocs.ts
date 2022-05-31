@@ -44,7 +44,9 @@ export const getGoogleDocsData = async (url: URL): Promise<ContentData> => {
     console.log('successfully initiate google docs api connector');
 
     const documentId: string = url.pathname.split('/')[3];
+    console.log('getting the docs from the document id = ', documentId);
     const res = await docs.documents.get({ documentId });
+    console.log('Successfully get the document');
     const title = res.data.title ? res.data.title : 'No Title';
 
     if (!res.data.body || !res.data.body.content)
