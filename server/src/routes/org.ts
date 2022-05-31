@@ -176,9 +176,11 @@ orgRouter.post('/', async (req, res) => {
         monthlyDigest: true,
         newsletter: true,
       }
-    })
+    });
 
-    return res.send({org});
+    const redirectUrl = `https://${org.subdomain}.mintlify.com`;
+
+    return res.send({redirectUrl});
   } catch (error) {
     console.log({error});
     return res.status(500).send({error});
