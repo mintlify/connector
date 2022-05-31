@@ -56,20 +56,21 @@ export const getGoogleDocsData = async (url: URL): Promise<ContentData> => {
       };
 
     const content: any = res.data.body?.content;
-    let accumulateContent = '';
+    let accumulatedContent = '';
 
     content
       .filter((block: any) => block.hasOwnProperty('paragraph'))
       .map(({ paragraph }: { paragraph: Paragraph }) => {
         paragraph.elements.map(
-          ({ textRun: { content } }: { textRun: { content: string } }) => (accumulateContent = `${accumulateContent}${content}`)
+          ({ textRun: { content } }: { textRun: { content: string } }) =>
+            (accumulatedContent = `${accumulatedContent}${content}`)
         );
       });
 
     return {
       method: 'googledocs',
       title,
-      content: accumulateContent,
+      content: accumulatedContent,
       favicon: GOOGLE_DOCS_ICON,
     };
   } catch (error) {
