@@ -1,11 +1,16 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { PROTOCOL } from "../../../helpers/api";
+import { API_ENDPOINT } from "../../../helpers/api";
 import { loadStytch } from "../../../lib/loadStytch";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { email } = req.body;
   const client = loadStytch();
-  const redirectUrl = `${PROTOCOL}://${req.headers.host}/api/auth?state=magiclink`;
+  const subdomain = req.headers.host;
+  const state = JSON.stringify({
+    method: 'magiclink',
+    subdomain,
+  })
+  const redirectUrl = `${API_ENDPOINT}/routes/user/login?state=${state}`;
 
   const response = await client.magicLinks.email.loginOrCreate({
     email,

@@ -1,4 +1,5 @@
 import express from "express";
+import { ISDEV } from "../helpers/environment";
 import Org from "../models/Org";
 import User from "../models/User";
 import { identify, track } from "../services/segment";
@@ -44,6 +45,20 @@ export const userMiddleware = async (
   next();
   return;
 };
+
+userRouter.get('/login', async (req, res) => {
+  const stateRaw = req.query.state as string;
+  const token = req.query.token;
+
+  if (!stateRaw || !token) {
+    return res.status(400).send({error: 'No state or token provided'});
+  }
+
+  const state = JSON.parse(stateRaw);
+  const host = ISDEV ? `http://${state.subdomain}` : `https://${state.subdomain}.mintlify.com`
+  const redirectUrl = `${host}/api/auth?state=${stateRaw}&token=${token}`;
+  return res.redirect(redirectUrl);
+})
 
 /**
  * Given emails as an array of strings & orgId as a string from the request body,
@@ -203,7 +218,7 @@ userRouter.get('/:userId/install-vscode', async (req, res) => {
   } catch (error) {
     return res.status(500).send({ error });
   }
-})
+});
 
 userRouter.put('/:userId/install-vscode', async (req, res) => {
   const { userId } = req.params;
@@ -214,6 +229,6 @@ userRouter.put('/:userId/install-vscode', async (req, res) => {
   } catch (error) {
     return res.status(500).send({ error });
   }
-})
+});
 
 export default userRouter;

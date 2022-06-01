@@ -1,21 +1,22 @@
 import {  NextApiResponse } from "next";
 import { User } from "../..";
-import { getOrgFromSubdomainAndPotentiallyJoin, getOrgFromSubdomain, getOrgFromSubdomainForAuth, getSubdomain, getUserFromUserId } from "../../../helpers/user";
+import { getOrgFromSubdomainAndPotentiallyJoin, getOrgFromSubdomainForAuth, getSubdomain, getUserFromUserId } from "../../../helpers/user";
 import { loadStytch } from "../../../lib/loadStytch";
 import { withSession } from "../../../lib/withSession";
 import { redirectToVSCode } from "../login/vscode";
 
 async function handler(req: any, res: NextApiResponse) {
   const token = req.query.token as string;
-  const state = req.query.state as string;
+  const stateRaw = req.query.state;
+  const state = JSON.parse(stateRaw);
 
   const client = loadStytch();
 
   try {
     let response;
-    if (state === "magiclink") {
+    if (state.method === "magiclink") {
       response = await client.magicLinks.authenticate(token);
-    } else if (state === "oauth") {
+    } else if (state.method === "oauth") {
       response = await client.oauth.authenticate(token);
     }
 
