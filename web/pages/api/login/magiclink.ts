@@ -5,10 +5,9 @@ import { loadStytch } from "../../../lib/loadStytch";
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { email } = req.body;
   const client = loadStytch();
-  const subdomain = req.headers.host;
   const state = JSON.stringify({
     method: 'magiclink',
-    subdomain,
+    host: req.headers.host,
   })
   const redirectUrl = `${API_ENDPOINT}/routes/user/login?state=${state}`;
 

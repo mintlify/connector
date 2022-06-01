@@ -46,6 +46,10 @@ export const userMiddleware = async (
   return;
 };
 
+export const getSubdomain = (host: string) => {
+  return host.split('.')[0];
+}
+
 userRouter.get('/login', async (req, res) => {
   const stateRaw = req.query.state as string;
   const token = req.query.token;
@@ -55,7 +59,9 @@ userRouter.get('/login', async (req, res) => {
   }
 
   const state = JSON.parse(stateRaw);
-  const host = ISDEV ? `http://${state.subdomain}` : `https://${state.subdomain}.mintlify.com`
+  const subdomain = getSubdomain(state.host);
+
+  const host = ISDEV ? `http://${subdomain}` : `https://${subdomain}.mintlify.com`
   const redirectUrl = `${host}/api/auth?state=${stateRaw}&token=${token}`;
   return res.redirect(redirectUrl);
 })
