@@ -204,7 +204,7 @@ orgRouter.post('/', async (req, res) => {
       }
     });
 
-    const redirectUrl = `https://${org.subdomain}.mintlify.com`;
+    const redirectUrl = `https://${org.subdomain}.mintlify.com/api/auth/create?userId=${user.userId}`;
 
     return res.send({redirectUrl});
   } catch (error) {

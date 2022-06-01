@@ -2,10 +2,10 @@ import axios from "axios";
 import { Org, User } from "../pages";
 import { API_ENDPOINT } from "./api";
 
-export const getUserFromUserId = async (userId: string) => {
+export const getUserFromUserId = async (userId: string): Promise<User> => {
   const {
     data: { user },
-  }: { data: { user: any } } = await axios.get(`${API_ENDPOINT}/routes/user/${userId}`);
+  }: { data: { user: User } } = await axios.get(`${API_ENDPOINT}/routes/user/${userId}`);
 
   return user;
 };
