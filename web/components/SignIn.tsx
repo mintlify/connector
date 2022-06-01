@@ -53,7 +53,7 @@ export default function SignIn() {
             <h2 className="mt-4 text-2xl font-bold text-gray-900">Welcome back</h2>
             <p className="mt-2 text-sm text-gray-600">
               Need a new organization?{' '}
-              <Link href="https://1tc7vihvbit.typeform.com/to/ZUY3igg4">
+              <Link href="https://mintlify.com/create">
                 <a target="_blank" className="font-medium text-primary">
                   Sign up
                 </a>
