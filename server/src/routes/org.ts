@@ -166,7 +166,6 @@ orgRouter.post('/', async (req, res) => {
     const { emails } = authUser;
 
     const existingOrg = await Org.findOne({ subdomain });
-
     if (existingOrg) {
       return res.send({ error: 'Organization subdomain is already taken' });
     }
