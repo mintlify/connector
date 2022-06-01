@@ -10,7 +10,7 @@ async function handler(req: any, res: NextApiResponse) {
   }
 
   const userPromise = getUserFromUserId(userId);
-  const subdomain = getSubdomain(window.location.host);
+  const subdomain = getSubdomain(req.headers.host);
   const orgPromise = getOrgFromSubdomain(subdomain, userId);
 
   const [user, org] = await Promise.all([userPromise, orgPromise]);
