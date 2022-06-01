@@ -143,6 +143,12 @@ orgRouter.get("/repos", userMiddleware, async (_, res) => {
   }
 });
 
+orgRouter.get('/availability/:subdomain', async (req, res) => {
+  const { subdomain } = req.params;
+  const orgExists = await Org.exists({subdomain});
+  return res.send({ available: orgExists == null });
+})
+
 orgRouter.post('/', async (req, res) => {
   const { userId, firstName, lastName, orgName, subdomain } = req.body;
 
@@ -158,6 +164,12 @@ orgRouter.post('/', async (req, res) => {
     }
 
     const { emails } = authUser;
+
+    const existingOrg = await Org.findOne({ subdomain });
+
+    if (existingOrg) {
+      return res.send({ error: 'Organization subdomain is already taken' });
+    }
 
     const user = await User.findOneAndUpdate({
       userId,
