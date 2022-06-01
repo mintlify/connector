@@ -143,10 +143,25 @@ orgRouter.get("/repos", userMiddleware, async (_, res) => {
   }
 });
 
+const isDomainAvailable = async (subdomain: string): Promise<boolean> => {
+  const overrideSubdomains: Record<string, boolean> = {
+    api: true,
+    connect: true,
+    www: true,
+    docs: true,
+  }
+  if (overrideSubdomains[subdomain]) {
+    return false;
+  }
+
+  const orgExists = await Org.exists({subdomain});
+  return orgExists == null;
+}
+
 orgRouter.get('/availability/:subdomain', async (req, res) => {
   const { subdomain } = req.params;
-  const orgExists = await Org.exists({subdomain});
-  return res.send({ available: orgExists == null });
+  const available = await isDomainAvailable(subdomain);
+  return res.send({ available });
 })
 
 orgRouter.post('/', async (req, res) => {
@@ -165,8 +180,8 @@ orgRouter.post('/', async (req, res) => {
 
     const { emails } = authUser;
 
-    const existingOrg = await Org.findOne({ subdomain });
-    if (existingOrg) {
+    const isOrgAvailable = await isDomainAvailable(subdomain);
+    if (!isOrgAvailable) {
       return res.send({ error: 'Organization subdomain is already taken' });
     }
 
