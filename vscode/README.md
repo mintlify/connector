@@ -1,11 +1,9 @@
-# Mintlify VSCode Extension
+# 🌿 Mintlify Extension
 
-Bring documentation closer to your code using the VSCode extension.
-
-* [Learn more about Mintlify](https://mintlify.com)
+Bring documentation closer to your code using [Mintlify](https://mintlify.com)
 
 ## Get Started
-1. 🔒 Join the waitlist by filling out [this form](https://1tc7vihvbit.typeform.com/to/ZUY3igg4?typeform)
+1. Create a Mintlify dashboard [here](https://www.mintlify.com/create)
 2. Add documents through the platform
 
 <img src="/vscode/assets/Add-doc.png" width="520px" />
@@ -23,8 +21,22 @@ Bring documentation closer to your code using the VSCode extension.
 
 <img src="/vscode/assets/submit.png" width="300px">
 
-## Features
+### Features
 After your connections are made, enjoy having full visibility into your documentation and codebase.
 * Integrate with GitHub to receive alerts to update documentation when code changes.
 * Receive alerts on documentation changes.
 * Stay up-to-date with changes by receiving notifications through email, webhooks, or Slack
+
+### 🚨 Disclaimer
+
+We never store your code, but your code does leave your machine. You can learn more about our [security policies](https://www.mintlify.com/security).
+
+---
+
+### More information
+
+[Website](https://mintlify.com/)
+[Twitter](https://twitter.com/mintlify)
+[Discord](https://discord.gg/6W7GuYuxra)
+
+_Built with 💚 by the Mintlify team_
