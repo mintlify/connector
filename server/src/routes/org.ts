@@ -192,7 +192,7 @@ orgRouter.post('/', async (req, res) => {
       email: emails[0].email,
       firstName,
       lastName,
-    }, { upsert: true });
+    }, { upsert: true, new: true });
 
     const org = await Org.create({
       name: orgName,
