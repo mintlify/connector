@@ -2,7 +2,7 @@ import Layout from "../components/layout"
 import { BellIcon, UserCircleIcon, UserGroupIcon } from "@heroicons/react/outline"
 import { GetServerSideProps } from "next"
 import { withSession } from "../lib/withSession"
-import { UserSession } from "."
+import { AccessMode, UserSession } from "."
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import axios from "axios"
@@ -19,19 +19,31 @@ export type EmailNotifications = {
   newsletter: boolean
 }
 
+type AccessOption = {
+  id: AccessMode,
+  name: string,
+  description: string
+}
+
 const navigation = [
   { name: "Account", href: "#setting-account", icon: UserCircleIcon },
   { name: "Organization", href: "#setting-organization", icon: UserGroupIcon },
   { name: "Notifications", href: "#setting-notifications", icon: BellIcon },
 ]
 
+const access: AccessOption[] = [
+  { id: 'public', name: 'Public', description: 'Anyone can join' },
+  { id: 'private', name: 'Private', description: 'Only invited members can join' },
+]
+
 export default function Settings({ userSession }: { userSession: UserSession }) {
-  const { user, org } = userSession
+  const { user, org } = userSession;
   
   const router = useRouter();
   const [firstName, setFirstName] = useState(user?.firstName)
   const [lastName, setLastName] = useState(user?.lastName)
   const [orgName, setOrgName] = useState(org?.name)
+  const [orgAccessMode, setOrgAccessMode] = useState(org?.access?.mode || 'public')
   const [invitedEmail, setInvitedEmail] = useState("")
   const [inviteErrorMessage, setInviteErrorMessage] = useState<string | undefined>(undefined)
   const [isSendingInvite, setIsSendingInvite] = useState(false)
@@ -127,6 +139,19 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
     })
   }
 
+  const updateAccessSetting = async (newAccessMode: AccessMode) => {
+    setOrgAccessMode(newAccessMode);
+    await axios.put(`${API_ENDPOINT}/routes/org/access`, {
+      mode: newAccessMode,
+    }, {
+      params: {
+        userId: user.userId,
+        subdomain: getSubdomain(window.location.host)
+      }
+    });
+    updateSession()
+  }
+
   return (
     <>
     <Head>
@@ -173,7 +198,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                         name="first-name"
                         id="first-name"
                         autoComplete="given-name"
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
                         onBlur={onBlurFirstNameInput}
@@ -189,7 +214,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                         name="last-name"
                         id="last-name"
                         autoComplete="family-name"
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
                         onBlur={onBlurLastNameInput}
@@ -240,7 +265,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                           name="organization"
                           id="organization"
                           autoComplete="organization"
-                          className="focus:ring-indigo-500 focus:border-indigo-500 flex-grow block w-full min-w-0 rounded-md sm:text-sm border-gray-300"
+                          className="focus:ring-primary focus:border-primary flex-grow block w-full min-w-0 rounded-md sm:text-sm border-gray-300"
                           value={orgName}
                           onChange={(e) => setOrgName(e.target.value)}
                           onBlur={onBlurOrgNameInput}
@@ -274,6 +299,38 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                     </div>
 
                     <div className="col-span-3">
+                        <h2 className="text-lg leading-6 font-medium text-gray-900">Access</h2>
+                        <p className="mt-1 text-sm text-gray-500">Settings for who can join the organization</p>
+                        <fieldset className="mt-2">
+                          <div className="divide-y divide-gray-200">
+                            {access.map((accessOption) => (
+                              <div key={accessOption.id} className="relative flex items-start py-4">
+                                <div className="min-w-0 flex-1 text-sm">
+                                  <label htmlFor={`account-${accessOption.id}`} className="font-medium text-gray-700">
+                                    {accessOption.name}
+                                  </label>
+                                  <p id={`account-${accessOption.id}-description`} className="text-gray-500">
+                                    {accessOption.description}
+                                  </p>
+                                </div>
+                                <div className="ml-3 flex items-center h-5">
+                                  <input
+                                    id={`account-${accessOption.id}`}
+                                    aria-describedby={`account-${accessOption.id}-description`}
+                                    name="account"
+                                    type="radio"
+                                    defaultChecked={accessOption.id === orgAccessMode}
+                                    className="focus:ring-0 cursor-pointer h-4 w-4 text-primary border-gray-300"
+                                    onClick={() => updateAccessSetting(accessOption.id)}
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </fieldset>
+                      </div>
+
+                    <div className="col-span-3">
                       <div className="space-y-5">
                         <div className="sm:flex sm:items-center">
                           <div className="sm:flex-auto">
@@ -287,7 +344,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                               type="email"
                               name="add-team-members"
                               id="add-team-members"
-                              className="block w-full shadow-sm focus:ring-sky-500 focus:border-sky-500 sm:text-sm border-gray-300 rounded-md"
+                              className="block w-full shadow-sm focus:ring-primary focus:border-primary sm:text-sm border-gray-300 rounded-md"
                               placeholder="Email address"
                               aria-describedby="add-team-members-helper"
                               value={invitedEmail}

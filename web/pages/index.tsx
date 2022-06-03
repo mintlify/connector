@@ -55,6 +55,8 @@ export type UserSession = {
   }
 }
 
+export type AccessMode = 'private' | 'public'
+
 export type Org = {
   _id: string,
   name: string,
@@ -64,6 +66,9 @@ export type Org = {
   notifications: {
     monthlyDigest: boolean,
     newsletter: boolean,
+  }
+  access?: {
+    mode: AccessMode
   }
 }
 

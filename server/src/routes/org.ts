@@ -198,19 +198,31 @@ orgRouter.post('/', async (req, res) => {
       name: orgName,
       subdomain,
       users: [user.userId],
-      notifications: {
-        monthlyDigest: true,
-        newsletter: true,
-      }
     });
 
     const redirectUrl = `https://${org.subdomain}.mintlify.com/api/auth/create?userId=${user.userId}`;
 
     return res.send({redirectUrl});
   } catch (error) {
-    console.log(error);
     return res.status(500).send({error});
   }
+});
+
+orgRouter.put('/access', userMiddleware, async (req, res) => {
+  const { mode } = req.body;
+  if (!mode) {
+    return res.status(400).send({ error: 'No mode selected' })
+  }
+
+  if (mode !== 'private' && mode !== 'public') {
+    return res.status(400).send({ error: 'Invalid mode' })
+  }
+
+  await Org.findByIdAndUpdate(res.locals.user.org, {
+    'access.mode': mode
+  })
+
+  return res.end();
 })
 
 export default orgRouter;

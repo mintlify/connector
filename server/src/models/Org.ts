@@ -34,6 +34,9 @@ export type OrgType = {
   notifications: {
     monthlyDigest: boolean,
     newsletter: boolean,
+  },
+  access: {
+    mode: string,
   }
 };
 
@@ -69,6 +72,9 @@ const OrgSchema = new Schema({
     monthlyDigest: { type: Boolean, default: true },
     newsletter: { type: Boolean, default: true },
   },
+  access: {
+    mode: { type: String, default: 'private' },
+  }
 });
 
 const Org = mongoose.model<OrgType>("Org", OrgSchema, "orgs");
