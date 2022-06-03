@@ -70,7 +70,14 @@ orgRouter.get("/users", userMiddleware, async (_: any, res: express.Response) =>
   if (org == null) return res.status(400).json({ error: 'Invalid organization ID' })
 
   const users = await User.find({ userId: org.users });
-  return res.status(200).json({ users });
+  const invitedEmails = org.invitedEmails || [];
+  const invitedUsers = invitedEmails.map((email) => {
+    return {
+      email,
+      pending: true,
+    }
+  })
+  return res.status(200).json({ users: users.concat(invitedUsers) });
 });
 
 orgRouter.put("/:orgId/name", userMiddleware, async (req, res) => {

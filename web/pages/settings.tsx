@@ -13,6 +13,7 @@ import { updateSession } from "../helpers/session"
 import { useRouter } from "next/router"
 import Head from "next/head"
 import { getSubdomain } from "../helpers/user"
+import ProfilePicture from "../components/ProfilePicture"
 
 export type EmailNotifications = {
   monthlyDigest: boolean
@@ -84,16 +85,23 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
     setIsSendingInvite(true)
     setInvitedEmail("")
     // create a pending account by calling the invitation API
+    const emails = [email];
     await axios
       .post(`${API_ENDPOINT}/routes/user/invite-to-org`, {
-        emails: [email],
+        emails,
       }, {
         params: {
           userId: user.userId,
         }
       })
-      .then((res) => {
-        setMembers(members.concat(res.data.users))
+      .then(() => {
+        const invitedMembers: any = emails.map((email) => {
+          return {
+            email,
+            pending: true
+          }
+        })
+        setMembers(members.concat(invitedMembers))
       })
     // send login invitation
     await axios.post("/api/login/magiclink", { email })
@@ -408,9 +416,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                                                 </svg>
                                               </span>
                                             ) : (
-                                              <div className="h-10 w-10 flex-shrink-0 border border-gray-3 bg-hover text-white flex items-center justify-center rounded-full">
-                                                <p className={"text-xs"}>{member.firstName[0] + member.lastName[0]}</p>
-                                              </div>
+                                              <ProfilePicture size={10} user={member} />
                                             )}
                                             <div className="ml-4">
                                               <div
