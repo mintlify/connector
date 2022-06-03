@@ -126,25 +126,37 @@ userRouter.post("/:userId/join/:orgId", async (req: express.Request, res: expres
   const { userId, orgId } = req.params;
   const { email, firstName, lastName } = req.body;
 
-  // add users not already existing
-  const org = await Org.findOneAndUpdate({ _id: orgId, users: { $ne: userId } }, {
-    $push: { users: userId }
-  }, { new: true })
-  const user = await User.create({
-    userId,
-    email,
-    firstName,
-    lastName,
-  });
+  try {
+    const foundOrg = await Org.findById(orgId);
 
-  identify(userId, {
-    email,
-    firstName,
-    lastName,
-    org: orgId
-  })
+    if (foundOrg == null) {
+      return res.status(400).send({error: 'Invalid Org ID'});
+    }
 
-  return res.send({ user, org: removeUnneededDataFromOrg(org) });
+    if (foundOrg.access.mode === 'private' && !foundOrg.invitedEmails?.includes(email)) {
+      return res.status(403).send({ error: 'You do not have access to this organization' });
+    }
+
+    const [org, user] = await Promise.all([
+      Org.findOneAndUpdate({ _id: orgId, users: { $ne: userId } }, { $push: { users: userId }, $pull: { invitedEmails: email } }, { new: true }),
+      User.create({
+        userId,
+        email,
+        firstName,
+        lastName,
+      })]); 
+
+    identify(userId, {
+      email,
+      firstName,
+      lastName,
+      org: orgId
+    })
+
+    return res.send({ user, org: removeUnneededDataFromOrg(org) });
+  } catch (error) {
+    return res.status(500).send({error})
+  }
 });
 
 userRouter.post("/:userId/join/existing/:subdomain", async (req: express.Request, res: express.Response) => {

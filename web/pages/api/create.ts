@@ -8,27 +8,31 @@ async function handler(req: any, res: NextApiResponse) {
   const { email, firstName, lastName, orgId } = req.query;
   const { userId } = req.session.get("user");
 
-  const {
-    data: { user, org },
-  } = await axios.post(`${API_ENDPOINT}/routes/user/${userId}/join/${orgId}`, {
-    email,
-    firstName,
-    lastName,
-  });
-
-  req.session.destroy();
-  req.session.set("user", {
-    userId,
-    user,
-    org,
-  });
-  await req.session.save();
-
-  if (req.session.get('authSource')?.source === 'vscode') {
-    return redirectToVSCode(res, user);
+  try {
+    const {
+      data: { user, org },
+    } = await axios.post(`${API_ENDPOINT}/routes/user/${userId}/join/${orgId}`, {
+      email,
+      firstName,
+      lastName,
+    });
+  
+    req.session.destroy();
+    req.session.set("user", {
+      userId,
+      user,
+      org,
+    });
+    await req.session.save();
+  
+    if (req.session.get('authSource')?.source === 'vscode') {
+      return redirectToVSCode(res, user);
+    }
+  
+    return res.redirect("/");
+  } catch (error) {
+    res.send('You do not have access to this organization');
   }
-
-  return res.redirect("/");
 }
 
 export default withSession(handler);
