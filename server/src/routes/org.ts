@@ -1,6 +1,7 @@
 import express from "express";
 import Org from "../models/Org";
 import User from "../models/User";
+import { track } from "../services/segment";
 import { client } from "../services/stytch";
 import { checkIfUserHasVSCodeInstalled, removeUnneededDataFromOrg, userMiddleware } from "./user";
 
@@ -201,6 +202,12 @@ orgRouter.post('/', async (req, res) => {
     });
 
     const redirectUrl = `https://${org.subdomain}.mintlify.com/api/auth/create?userId=${user.userId}`;
+
+    track(user.userId, 'Create Organization', {
+      name: orgName,
+      subdomain,
+      from: 'webflow'
+    })
 
     return res.send({redirectUrl});
   } catch (error) {
