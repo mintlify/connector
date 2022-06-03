@@ -133,7 +133,7 @@ userRouter.post("/:userId/join/:orgId", async (req: express.Request, res: expres
       return res.status(400).send({error: 'Invalid Org ID'});
     }
 
-    if (foundOrg.access.mode === 'private' && !foundOrg.invitedEmails?.includes(email)) {
+    if (foundOrg.access?.mode === 'private' && !foundOrg.invitedEmails?.includes(email)) {
       return res.status(403).send({ error: 'You do not have access to this organization' });
     }
 
@@ -168,7 +168,11 @@ userRouter.post("/:userId/join/existing/:subdomain", async (req: express.Request
     return res.send({ user, org: removeUnneededDataFromOrg(org) });
   }
 
-  const newOrg = await Org.findOneAndUpdate({ subdomain }, { $push: { users: userId } }, { new: true })
+  if (org?.access.mode === 'private' && !org.invitedEmails?.includes(user.email)) {
+    return res.status(403).send({ error: 'You do not have access to join this organization' });
+  }
+
+  const newOrg = await Org.findOneAndUpdate({ subdomain }, { $push: { users: userId }, $pull: { invitedEmails: user.email } }, { new: true })
   return res.send({ user, org: removeUnneededDataFromOrg(newOrg) });
 });
 

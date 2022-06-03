@@ -31,21 +31,26 @@ async function handler(req: any, res: NextApiResponse) {
     req.session.destroy();
 
     if (existingUser) {
-      // For existing users
-      const { org } = await getOrgFromSubdomainAndPotentiallyJoin(subdomain, existingUser.userId)
-      // TBD: Show that you do not have access
-      if (org == null) {
-        res.redirect('/');
-        return;
-      }
-      
-      req.session.set("user", {
-        userId: response.user_id,
-        user: existingUser,
-        org,
-      });
-      if (authSource?.source === 'vscode') {
-        redirectToVSCode(res, existingUser);
+      try {
+        // For existing users
+        const { org } = await getOrgFromSubdomainAndPotentiallyJoin(subdomain, existingUser.userId)
+        // TBD: Show that you do not have access
+        if (org == null) {
+          res.redirect('/');
+          return;
+        }
+        
+        req.session.set("user", {
+          userId: response.user_id,
+          user: existingUser,
+          org,
+        });
+        if (authSource?.source === 'vscode') {
+          redirectToVSCode(res, existingUser);
+          return;
+        }
+      } catch {
+        res.send('You do not have permission to join organization');
         return;
       }
     } else {
