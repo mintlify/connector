@@ -1,10 +1,11 @@
 import mongoose, { Schema } from 'mongoose';
 
 const UserSchema = new Schema({
-    userId: { type: String, required: true },
+    // userId, firstName, and lastName are not required for inviting members
+    userId: { type: String },
+    firstName: { type: String },
+    lastName: { type: String },
     authMethod: { type: String, default: 'stytch' },
-    firstName: { type: String, required: true, },
-    lastName: { type: String, required: true },
     email: { type: String, required: true },
     profilePicture: { type: String },
     createdAt: { type: Date, default: Date.now },

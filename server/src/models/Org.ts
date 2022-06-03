@@ -31,6 +31,7 @@ export type OrgType = {
     };
   };
   users: string[],
+  invitedEmails?: string[],
   notifications: {
     monthlyDigest: boolean,
     newsletter: boolean,
@@ -44,7 +45,8 @@ const OrgSchema = new Schema({
   name: { type: String, required: true },
   subdomain: { type: String, required: true, unique: true },
   createdAt: { type: Date, default: Date.now },
-  users: { type: [String], default: []},
+  users: { type: [String], default: [] },
+  invitedEmails: { type: [String], default: [] },
   logo: { type: String },
   favicon: { type: String },
   integrations: {

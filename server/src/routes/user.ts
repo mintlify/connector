@@ -66,40 +66,22 @@ userRouter.get('/login', async (req, res) => {
   return res.redirect(redirectUrl);
 })
 
-/**
- * Given emails as an array of strings & orgId as a string from the request body,
- * invite the users with the provided emails to the org through stytch.
- * Return the new array users through the response.
- */
 userRouter.post("/invite-to-org", userMiddleware, async (req: express.Request, res: express.Response) => {
     const { emails } = req.body;
     const orgId = res.locals.user.org;
 
-    let inviteUsers: any = [];
-
-    // Create users as `pending: true` under the database
-    emails.map((email: string) =>
-      inviteUsers.push(User.create({ email, org: orgId, pending: true }))
-    );
-
-    let users: any[] = [];
-
     try {
-      const results = await Promise.allSettled(inviteUsers);
-      results.forEach((result: any) => {
-        if (result.status !== "fulfilled") throw new Error(result.reason);
-        users.push(result.value);
-      });
+      await Org.findOneAndUpdate({ _id: orgId, invitedEmails: { $ne: emails } }, { $push: { invitedEmails: { $each: emails } } });
 
       track(res.locals.user.userId, 'Invite member', {
-        numberOfUsers: users.length,
+        emails,
         org: orgId.toString()
       })
+
+      return res.status(200).end();
     } catch (error) {
       return res.status(500).json({ error });
     }
-
-    return res.status(200).json({ users });
   }
 );
 
@@ -144,25 +126,37 @@ userRouter.post("/:userId/join/:orgId", async (req: express.Request, res: expres
   const { userId, orgId } = req.params;
   const { email, firstName, lastName } = req.body;
 
-  // add users not already existing
-  const org = await Org.findOneAndUpdate({ _id: orgId, users: { $ne: userId } }, {
-    $push: { users: userId }
-  }, { new: true })
-  const user = await User.create({
-    userId,
-    email,
-    firstName,
-    lastName,
-  });
+  try {
+    const foundOrg = await Org.findById(orgId);
 
-  identify(userId, {
-    email,
-    firstName,
-    lastName,
-    org: orgId
-  })
+    if (foundOrg == null) {
+      return res.status(400).send({error: 'Invalid Org ID'});
+    }
 
-  return res.send({ user, org: removeUnneededDataFromOrg(org) });
+    if (foundOrg.access?.mode === 'private' && !foundOrg.invitedEmails?.includes(email)) {
+      return res.status(403).send({ error: 'You do not have access to this organization' });
+    }
+
+    const [org, user] = await Promise.all([
+      Org.findOneAndUpdate({ _id: orgId, users: { $ne: userId } }, { $push: { users: userId }, $pull: { invitedEmails: email } }, { new: true }),
+      User.create({
+        userId,
+        email,
+        firstName,
+        lastName,
+      })]); 
+
+    identify(userId, {
+      email,
+      firstName,
+      lastName,
+      org: orgId
+    })
+
+    return res.send({ user, org: removeUnneededDataFromOrg(org) });
+  } catch (error) {
+    return res.status(500).send({error})
+  }
 });
 
 userRouter.post("/:userId/join/existing/:subdomain", async (req: express.Request, res: express.Response) => {
@@ -174,7 +168,11 @@ userRouter.post("/:userId/join/existing/:subdomain", async (req: express.Request
     return res.send({ user, org: removeUnneededDataFromOrg(org) });
   }
 
-  const newOrg = await Org.findOneAndUpdate({ subdomain }, { $push: { users: userId } }, { new: true })
+  if (org?.access.mode === 'private' && !org.invitedEmails?.includes(user.email)) {
+    return res.status(403).send({ error: 'You do not have access to join this organization' });
+  }
+
+  const newOrg = await Org.findOneAndUpdate({ subdomain }, { $push: { users: userId }, $pull: { invitedEmails: user.email } }, { new: true })
   return res.send({ user, org: removeUnneededDataFromOrg(newOrg) });
 });
 
