@@ -1,4 +1,5 @@
 import Layout from "../components/layout"
+import toast, { Toaster } from 'react-hot-toast';
 import { BellIcon, UserCircleIcon, UserGroupIcon } from "@heroicons/react/outline"
 import { GetServerSideProps } from "next"
 import { withSession } from "../lib/withSession"
@@ -14,6 +15,7 @@ import { useRouter } from "next/router"
 import Head from "next/head"
 import { getSubdomain } from "../helpers/user"
 import ProfilePicture from "../components/ProfilePicture"
+import { CheckCircleIcon, XIcon } from "@heroicons/react/solid";
 
 export type EmailNotifications = {
   monthlyDigest: boolean
@@ -36,6 +38,44 @@ const access: AccessOption[] = [
   { id: 'public', name: 'Public', description: 'Anyone can join' },
   { id: 'private', name: 'Private', description: 'Only invited members can join' },
 ]
+
+const notify = (title: string, description: string) => toast.custom((t) => {
+  return (
+    <div
+    className={`${
+      t.visible ? 'animate-enter' : 'animate-leave'
+    } max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+  >
+    <div className="w-full flex flex-col items-center space-y-4 sm:items-end">
+      <div className="max-w-sm w-full bg-white rounded-lg overflow-hidden">
+        <div className="p-4">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <CheckCircleIcon className="h-6 w-6 text-green-600" aria-hidden="true" />
+            </div>
+            <div className="ml-3 w-0 flex-1 pt-0.5">
+              <p className="text-sm font-medium text-gray-900">{title}</p>
+              <p className="mt-1 text-sm text-gray-500">{description}</p>
+            </div>
+            <div className="ml-4 flex-shrink-0 flex">
+              <button
+                type="button"
+                className="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none"
+                onClick={() => {
+                  toast.dismiss(t.id)
+                }}
+              >
+                <span className="sr-only">Close</span>
+                <XIcon className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  )
+});
 
 export default function Settings({ userSession }: { userSession: UserSession }) {
   const { user, org } = userSession;
@@ -104,25 +144,37 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
         setMembers(members.concat(invitedMembers))
       })
     // send login invitation
-    await axios.post("/api/login/magiclink", { email })
+    await axios.post("/api/login/magiclink", { email });
+    notify('Invited user', 'Sent invitation email to ' + email);
     setIsSendingInvite(false)
   }
 
   const onBlurFirstNameInput = async () => {
+    if (!firstName || firstName === user.firstName) {
+      return;
+    }
     await axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/firstname`, {
       firstName,
     })
-    updateSession()
+    updateSession();
+    notify('Profile name updated', 'Your first name has been updated.');
   }
 
   const onBlurLastNameInput = async () => {
+    if (!lastName || lastName === user.lastName) {
+      return;
+    }
     await axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/lastname`, {
       lastName,
     })
-    updateSession()
+    updateSession();
+    notify('Profile name updated', 'Your last name has been updated.');
   }
 
   const onBlurOrgNameInput = async () => {
+    if (!orgName || orgName === org.name) {
+      return;
+    }
     await axios.put(`${API_ENDPOINT}/routes/org/${org._id}/name`, {
       name: orgName,
     }, {
@@ -131,7 +183,8 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
         subdomain: getSubdomain(window.location.host)
       }
     })
-    updateSession()
+    updateSession();
+    notify('Organization name updated', 'Your organization name has been updated.');
   }
 
   const updateEmailNotifications = async (newNotifications: EmailNotifications) => {
@@ -145,6 +198,8 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
         subdomain: getSubdomain(window.location.host)
       }
     })
+
+    notify('Updated notification settings', 'Your notification preferences have been updated.');
   }
 
   const updateAccessSetting = async (newAccessMode: AccessMode) => {
@@ -157,7 +212,12 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
         subdomain: getSubdomain(window.location.host)
       }
     });
-    updateSession()
+    updateSession();
+    if (newAccessMode === 'private') {
+      notify('Updated access settings', 'Only invited members can join the organization');
+    } else {
+      notify('Updated access settings', 'Anyone can join the organization');
+    }
   }
 
   return (
@@ -167,6 +227,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
       <title>Settings</title>
     </Head>
     <Layout user={user} org={org}>
+      <Toaster position="bottom-right" reverseOrder={false} />
       <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
         <div className="my-6 lg:grid lg:grid-cols-12 lg:gap-x-5">
           <aside className="py-0 px-2 sm:px-6 lg:px-0 lg:col-span-4">
@@ -372,7 +433,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                                 e.preventDefault()
                                 inviteMember(invitedEmail)
                               }}
-                              className="inline-flex items-center justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-hover focus:outline-none focus:ring-0 focus:ring-offset-2 sm:w-auto"
+                              className="inline-flex items-center justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-hover focus:outline-none focus:ring-0 focus:ring-offset-2 sm:w-auto hover:cursor-pointer"
                             >
                               Add member
                             </button>
