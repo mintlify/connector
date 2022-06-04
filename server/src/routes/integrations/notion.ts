@@ -4,6 +4,7 @@ import { ISDEV } from '../../helpers/environment';
 
 import { ENDPOINT } from '../../helpers/github/octokit';
 import Org from '../../models/Org';
+import { track } from '../../services/segment';
 
 const clientId = 'ec770c41-07f8-44bd-a4d8-66d30e9786c8';
 const redirectUrl = `${ENDPOINT}/routes/integrations/notion/authorization`;
@@ -81,6 +82,10 @@ notionRouter.get('/install', (req, res) => {
     if (ISDEV) {
         return res.redirect(org.subdomain);
     }
+
+    track(org._id.toString(), 'Install Notion Integration', {
+        isOrg: true,
+    });
 
     return res.redirect(`https://${org.subdomain}.mintlify.com`);
 });

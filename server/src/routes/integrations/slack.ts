@@ -3,6 +3,7 @@ import qs from 'qs';
 import { Router } from 'express';
 
 import Org from '../../models/Org';
+import { track } from '../../services/segment';
 
 const clientId = '2329388587911.3498023797925';
 const redirectUri = 'https://connect.mintlify.com/routes/integrations/slack/authorization';
@@ -57,13 +58,13 @@ slackRouter.get('/install', async (req, res) => {
   
     const { response, error } = await getSlackAccessTokenFromCode(code as string);
     if (error) return res.status(403).send('Invalid grant code');
-    if ( state == null) return res.status(403).send('No state provided');
+    if (state == null) return res.status(403).send('No state provided');
     if (response.data.ok) {
-      const { org } = JSON.parse(decodeURIComponent(state as string));
+      const { org: orgId } = JSON.parse(decodeURIComponent(state as string));
   
       const { data } = response;
       const webhookData = data?.incoming_webhook;
-      await Org.findByIdAndUpdate(org, {
+      const org = await Org.findByIdAndUpdate(orgId, {
           "integrations.slack": {
             accessToken: data?.access_token,
             appId: data?.app_id,
@@ -72,6 +73,14 @@ slackRouter.get('/install', async (req, res) => {
             channelId: webhookData?.channel_id,
             configurationUrl: webhookData?.configuration_url
           }
+      });
+      
+      if (org == null) {
+        return res.status(403).send({ error: 'Invalid organization ID' });
+      }
+  
+      track(org._id.toString(), 'Install Notion Integration', {
+        isOrg: true,
       });
     }
 

@@ -4,6 +4,7 @@ import queryString from 'query-string';
 import { ISDEV } from "../../helpers/environment";
 import { ENDPOINT } from "../../helpers/github/octokit"
 import Org from '../../models/Org';
+import { track } from "../../services/segment";
 
 type GitHubAuthResponse = {
   access_token: string,
@@ -117,6 +118,10 @@ githubRouter.get('/authorization', async (req, res) => {
     if (ISDEV) {
       return res.redirect(org.subdomain);
     }
+
+    track(org._id.toString(), 'Install GitHub App', {
+      isOrg: true,
+    });
 
     return res.redirect(`https://${org.subdomain}.mintlify.com`);
 
