@@ -28,14 +28,16 @@ alertsRouter.post('/', async (req, res) => {
         return res.status(200).send({alerts: []});
     }
 
-    const orgId = org._id.toString()
+    const orgId = org._id.toString();
+
+    const filesWithContent = files.filter((file) => file != null);
 
     const alertPromises: Promise<Alert|null>[] = [];
     const codesWithAlerts: CodeType[] = codes.filter((code: CodeType) => {
         let hasAlert = false;
         switch (code.type) {
             case 'file':
-                files.map((file) => {
+                filesWithContent.map((file) => {
                     if (file.filename.endsWith(code.file) || code.file.endsWith(file.filename)) {
                         alertPromises.push(codeToAlert(code, file, orgId));
                         hasAlert = true;
@@ -43,7 +45,7 @@ alertsRouter.post('/', async (req, res) => {
                 });
                 break;
             case 'folder':
-                files.map((file) => {
+                filesWithContent.map((file) => {
                     if (file.filename.includes(code.file)) {
                         alertPromises.push(codeToAlert(code, file, orgId));
                         hasAlert = true;
@@ -51,7 +53,7 @@ alertsRouter.post('/', async (req, res) => {
                 });
                 break;
             case 'lines':
-                files.map((file: FileInfo) => {
+                filesWithContent.map((file: FileInfo) => {
                     if (didChange(code, file)) {
                         alertPromises.push(codeToAlert(code, file, orgId));
                         hasAlert = true;
