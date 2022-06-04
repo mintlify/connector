@@ -218,7 +218,7 @@ orgRouter.post('/', async (req, res) => {
     });
 
     // Send new organization welcome email
-    await sendEmail(emails[0].email, undefined, 'welcome-new-organization', [{ name: 'org_url', content: org.subdomain }]);
+    // await sendEmail(emails[0].email, undefined, 'welcome-new-organization', [{ name: 'org_url', content: org.subdomain }]);
 
     return res.send({ redirectUrl });
   } catch (error) {
