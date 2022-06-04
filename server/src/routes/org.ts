@@ -1,18 +1,19 @@
-import express from "express";
-import Org from "../models/Org";
-import User from "../models/User";
-import { track } from "../services/segment";
-import { client } from "../services/stytch";
-import { checkIfUserHasVSCodeInstalled, removeUnneededDataFromOrg, userMiddleware } from "./user";
+import express from 'express';
+import Org from '../models/Org';
+import User from '../models/User';
+import { track } from '../services/segment';
+import { client } from '../services/stytch';
+import { checkIfUserHasVSCodeInstalled, removeUnneededDataFromOrg, userMiddleware } from './user';
+import { sendEmail } from '../services/mandrill';
 
 const orgRouter = express.Router();
 
 orgRouter.get('/subdomain/:subdomain/auth', async (req, res) => {
   const { subdomain } = req.params;
 
-  const org = await Org.findOne({subdomain});
+  const org = await Org.findOne({ subdomain });
   if (org == null) {
-    res.send({org});
+    res.send({ org });
     return;
   }
 
@@ -22,35 +23,34 @@ orgRouter.get('/subdomain/:subdomain/auth', async (req, res) => {
       name: org.name,
       logo: org.logo,
       favicon: org.favicon,
-    }
-  })
-})
+    },
+  });
+});
 
 orgRouter.get('/subdomain/:subdomain/details', userMiddleware, async (req, res) => {
   const { subdomain } = req.params;
   const { userId } = res.locals.user;
 
   try {
-    const org = await Org.findOne({subdomain, users: userId});
+    const org = await Org.findOne({ subdomain, users: userId });
     const formattedOrg = removeUnneededDataFromOrg(org);
-    return res.json({org: formattedOrg});
+    return res.json({ org: formattedOrg });
+  } catch (error) {
+    return res.status(400).send({ error });
   }
-  catch (error) {
-    return res.status(400).send({error})
-  }
-})
+});
 
-orgRouter.put("/:orgId/notifications", userMiddleware, async (req: express.Request, res: express.Response) => {
+orgRouter.put('/:orgId/notifications', userMiddleware, async (req: express.Request, res: express.Response) => {
   const { orgId } = req.params;
   const userOrgId = res.locals.user.org.toString();
   const { monthlyDigest, newsletter } = req.body;
 
   if (userOrgId !== orgId) {
-    return res.status(403).send({ error: "User does not have permission" });
+    return res.status(403).send({ error: 'User does not have permission' });
   }
 
   if (monthlyDigest === null || newsletter === null)
-    return res.status(400).json({ error: "Both the monthlyDigest and newsletter values must be provided" });
+    return res.status(400).json({ error: 'Both the monthlyDigest and newsletter values must be provided' });
 
   try {
     await Org.findByIdAndUpdate(orgId, { notifications: { monthlyDigest, newsletter } });
@@ -61,13 +61,13 @@ orgRouter.put("/:orgId/notifications", userMiddleware, async (req: express.Reque
 });
 
 // Given an orgId from the request query, return all the user objects within that organization
-orgRouter.get("/users", userMiddleware, async (_: any, res: express.Response) => {
+orgRouter.get('/users', userMiddleware, async (_: any, res: express.Response) => {
   const orgId = res.locals.user.org;
 
-  if (!orgId) return res.status(400).json({ error: "orgId not provided" });
+  if (!orgId) return res.status(400).json({ error: 'orgId not provided' });
 
   const org = await Org.findById(orgId);
-  if (org == null) return res.status(400).json({ error: 'Invalid organization ID' })
+  if (org == null) return res.status(400).json({ error: 'Invalid organization ID' });
 
   const users = await User.find({ userId: org.users });
   const invitedEmails = org.invitedEmails || [];
@@ -75,22 +75,22 @@ orgRouter.get("/users", userMiddleware, async (_: any, res: express.Response) =>
     return {
       email,
       pending: true,
-    }
-  })
+    };
+  });
   return res.status(200).json({ users: users.concat(invitedUsers) });
 });
 
-orgRouter.put("/:orgId/name", userMiddleware, async (req, res) => {
+orgRouter.put('/:orgId/name', userMiddleware, async (req, res) => {
   const { orgId } = req.params;
   const userOrgId = res.locals.user.org.toString();
   const { name } = req.body;
 
   if (!name) {
-    return res.status(400).send({ error: "Name not provided" });
+    return res.status(400).send({ error: 'Name not provided' });
   }
 
   if (userOrgId !== orgId) {
-    return res.status(403).send({ error: "User does not have permission" });
+    return res.status(403).send({ error: 'User does not have permission' });
   }
 
   try {
@@ -106,14 +106,14 @@ orgRouter.get('/:orgId/integrations', userMiddleware, async (req, res) => {
   const userOrgId = res.locals.user.org.toString();
 
   if (userOrgId !== orgId) {
-    return res.status(403).send({ error: "User does not have permission" });
+    return res.status(403).send({ error: 'User does not have permission' });
   }
 
   try {
     const org = await Org.findById(orgId);
 
     if (org?.integrations == null) {
-      return res.send({integrations: { github: false, notion: false, vscode: false, slack: false }})
+      return res.send({ integrations: { github: false, notion: false, vscode: false, slack: false } });
     }
 
     const isVSCodeInstalled = await checkIfUserHasVSCodeInstalled(res.locals.user.userId);
@@ -122,14 +122,14 @@ orgRouter.get('/:orgId/integrations', userMiddleware, async (req, res) => {
       notion: org.integrations.notion?.access_token != null,
       slack: org.integrations.slack?.accessToken != null,
       vscode: isVSCodeInstalled, // dependent on the user
-    }
-    return res.send({integrations});
+    };
+    return res.send({ integrations });
   } catch (error) {
     return res.status(500).send({ error });
   }
-})
+});
 
-orgRouter.get("/repos", userMiddleware, async (_, res) => {
+orgRouter.get('/repos', userMiddleware, async (_, res) => {
   const orgId = res.locals.user.org.toString();
 
   try {
@@ -157,26 +157,26 @@ const isDomainAvailable = async (subdomain: string): Promise<boolean> => {
     connect: true,
     www: true,
     docs: true,
-  }
+  };
   if (overrideSubdomains[subdomain]) {
     return false;
   }
 
-  const orgExists = await Org.exists({subdomain});
+  const orgExists = await Org.exists({ subdomain });
   return orgExists == null;
-}
+};
 
 orgRouter.get('/availability/:subdomain', async (req, res) => {
   const { subdomain } = req.params;
   const available = await isDomainAvailable(subdomain);
   return res.send({ available });
-})
+});
 
 orgRouter.post('/', async (req, res) => {
   const { sessionToken, firstName, lastName, orgName, subdomain } = req.body;
 
   if (!sessionToken || !firstName || !lastName || !orgName || !subdomain) {
-    return res.status(400).send({error: 'Missing information from form'});
+    return res.status(400).send({ error: 'Missing information from form' });
   }
 
   try {
@@ -190,14 +190,18 @@ orgRouter.post('/', async (req, res) => {
       return res.send({ error: 'Organization subdomain is already taken' });
     }
 
-    const user = await User.findOneAndUpdate({
-      userId,
-    }, {
-      userId,
-      email: emails[0].email,
-      firstName,
-      lastName,
-    }, { upsert: true, new: true });
+    const user = await User.findOneAndUpdate(
+      {
+        userId,
+      },
+      {
+        userId,
+        email: emails[0].email,
+        firstName,
+        lastName,
+      },
+      { upsert: true, new: true }
+    );
 
     const org = await Org.create({
       name: orgName,
@@ -210,30 +214,33 @@ orgRouter.post('/', async (req, res) => {
     track(user.userId, 'Create Organization', {
       name: orgName,
       subdomain,
-      from: 'webflow'
-    })
+      from: 'webflow',
+    });
 
-    return res.send({redirectUrl});
+    // Send new organization welcome email
+    // await sendEmail(emails[0].email, undefined, 'welcome-new-organization', [{ name: 'org_url', content: org.subdomain }]);
+
+    return res.send({ redirectUrl });
   } catch (error) {
-    return res.status(500).send({error});
+    return res.status(500).send({ error });
   }
 });
 
 orgRouter.put('/access', userMiddleware, async (req, res) => {
   const { mode } = req.body;
   if (!mode) {
-    return res.status(400).send({ error: 'No mode selected' })
+    return res.status(400).send({ error: 'No mode selected' });
   }
 
   if (mode !== 'private' && mode !== 'public') {
-    return res.status(400).send({ error: 'Invalid mode' })
+    return res.status(400).send({ error: 'Invalid mode' });
   }
 
   await Org.findByIdAndUpdate(res.locals.user.org, {
-    'access.mode': mode
-  })
+    'access.mode': mode,
+  });
 
   return res.end();
-})
+});
 
 export default orgRouter;
