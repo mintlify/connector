@@ -4,7 +4,7 @@ import User from '../models/User';
 import { track } from '../services/segment';
 import { client } from '../services/stytch';
 import { checkIfUserHasVSCodeInstalled, removeUnneededDataFromOrg, userMiddleware } from './user';
-import { sendEmail } from '../services/mandrill';
+// import { sendEmail } from '../services/mandrill';
 
 const orgRouter = express.Router();
 
