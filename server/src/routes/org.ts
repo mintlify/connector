@@ -208,7 +208,7 @@ orgRouter.post('/', async (req, res) => {
       users: [user.userId],
     });
 
-    const redirectUrl = `https://${org.subdomain}.mintlify.com/api/auth/create?userId=${user.userId}`;
+    const redirectUrl = `https://${org.subdomain}.mintlify.com/api/auth/landing?userId=${user.userId}`;
 
     track(user.userId, 'Create Organization', {
       name: orgName,

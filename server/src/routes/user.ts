@@ -3,6 +3,7 @@ import { ISDEV } from "../helpers/environment";
 import Org from "../models/Org";
 import User from "../models/User";
 import { identify, track } from "../services/segment";
+import { client } from "../services/stytch";
 
 export const removeUnneededDataFromOrg = (org?: any) => {
   if (org) {
@@ -52,17 +53,45 @@ export const getSubdomain = (host: string) => {
 
 userRouter.get('/login', async (req, res) => {
   const stateRaw = req.query.state as string;
-  const token = req.query.token;
+  const token = req.query.token as string;
 
   if (!stateRaw || !token) {
     return res.status(400).send({error: 'No state or token provided'});
   }
 
   const state = JSON.parse(stateRaw);
-  const subdomain = getSubdomain(state.host);
+  // For authentication from app
+  if (state.host != null) {
+    const subdomain = getSubdomain(state.host);
 
+    const host = ISDEV ? `http://${subdomain}` : `https://${subdomain}.mintlify.com`
+    const redirectUrl = `${host}/api/auth?state=${stateRaw}&token=${token}`;
+    return res.redirect(redirectUrl);
+  }
+
+  // For authentication from landing page
+  const tokenType = req.query.stytch_token_type;
+  let authUser;
+  if (tokenType === 'magic_links') {
+    authUser = await client.magicLinks.authenticate(token);
+  }
+
+  else if (tokenType === 'oauth') {
+    authUser = await client.oauth.authenticate(token);
+  }
+
+  if (authUser == null) {
+    return res.status(400).send({error: 'Invalid token'})
+  }
+
+  const org = await Org.findOne({ users: authUser.user_id });
+  if (org == null) {
+    return res.redirect('https://mintlify.com/create');
+  }
+  
+  const subdomain = org.subdomain;
   const host = ISDEV ? `http://${subdomain}` : `https://${subdomain}.mintlify.com`
-  const redirectUrl = `${host}/api/auth?state=${stateRaw}&token=${token}`;
+  const redirectUrl = `${host}/api/auth/landing?userId=${authUser.user_id}`;
   return res.redirect(redirectUrl);
 })
 
