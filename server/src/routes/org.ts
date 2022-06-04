@@ -173,20 +173,17 @@ orgRouter.get('/availability/:subdomain', async (req, res) => {
 })
 
 orgRouter.post('/', async (req, res) => {
-  const { userId, firstName, lastName, orgName, subdomain } = req.body;
+  const { sessionToken, firstName, lastName, orgName, subdomain } = req.body;
 
-  if (!userId || !firstName || !lastName || !orgName || !subdomain) {
+  if (!sessionToken || !firstName || !lastName || !orgName || !subdomain) {
     return res.status(400).send({error: 'Missing information from form'});
   }
 
   try {
-    const authUser = await client.users.get(userId);
+    const authUser = await client.sessions.authenticate({ session_token: sessionToken, session_duration_minutes: 5 });
 
-    if (authUser == null) {
-      return res.status(403).send({error: 'Invalid User ID'});
-    }
-
-    const { emails } = authUser;
+    const { emails, user_id: userId } = authUser.user;
+    const newSessionToken = authUser.session_token;
 
     const isOrgAvailable = await isDomainAvailable(subdomain);
     if (!isOrgAvailable) {
@@ -208,7 +205,7 @@ orgRouter.post('/', async (req, res) => {
       users: [user.userId],
     });
 
-    const redirectUrl = `https://${org.subdomain}.mintlify.com/api/auth/landing?userId=${user.userId}`;
+    const redirectUrl = `https://${org.subdomain}.mintlify.com/api/auth/landing?sessionToken=${newSessionToken}`;
 
     track(user.userId, 'Create Organization', {
       name: orgName,

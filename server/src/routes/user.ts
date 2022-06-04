@@ -73,11 +73,15 @@ userRouter.get('/login', async (req, res) => {
   const tokenType = req.query.stytch_token_type;
   let authUser;
   if (tokenType === 'magic_links') {
-    authUser = await client.magicLinks.authenticate(token);
+    authUser = await client.magicLinks.authenticate(token, {
+      session_duration_minutes: 5,
+    });
   }
 
   else if (tokenType === 'oauth') {
-    authUser = await client.oauth.authenticate(token);
+    authUser = await client.oauth.authenticate(token, {
+      session_duration_minutes: 5,
+    });
   }
 
   if (authUser == null) {
@@ -91,7 +95,7 @@ userRouter.get('/login', async (req, res) => {
   
   const subdomain = org.subdomain;
   const host = ISDEV ? `http://${subdomain}` : `https://${subdomain}.mintlify.com`
-  const redirectUrl = `${host}/api/auth/landing?userId=${authUser.user_id}`;
+  const redirectUrl = `${host}/api/auth/landing?sessionToken=${authUser.session_token}`;
   return res.redirect(redirectUrl);
 })
 
