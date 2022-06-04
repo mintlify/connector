@@ -23,7 +23,7 @@ const getLineRangeFromCode = (code: CodeType, file: FileInfo): LineRange => {
     }
 }
 
-export const codeToAlert = async (code: CodeType, file: FileInfo): Promise<Alert|null> => {
+export const codeToAlert = async (code: CodeType, file: FileInfo, orgId: string): Promise<Alert|null> => {
     const doc: DocType | null = await Doc.findByIdAndUpdate(code.doc, { blocker: true });
     if (doc == null) return null;
     const lineRange = getLineRangeFromCode(code, file);
@@ -32,7 +32,7 @@ export const codeToAlert = async (code: CodeType, file: FileInfo): Promise<Alert
         type: code.type,
         lineRange,
     };
-    const message = await createMessage(link);
+    const message = await createMessage(link, orgId);
     return {
         url: doc.url,
         message,

@@ -15,11 +15,20 @@ alertsRouter.post('/', async (req, res) => {
 
     if (files == null || owner == null || repo == null) return res.status(400).end();
 
-    const codes = await Code.find({ gitOrg: owner, repo });
+    // FindOne might cause an issue with separate installations on the same org
+    const orgPromise = Org.findOne({'integrations.github.installations': {
+        $elemMatch: {
+            'account.login': owner
+        }
+    }});
+    const codesPromise = Code.find({ gitOrg: owner, repo });
+    const [org, codes] = await Promise.all([orgPromise, codesPromise]);
     
-    if (codes.length === 0) {
+    if (codes.length === 0 || org == null) {
         return res.status(200).send({alerts: []});
     }
+
+    const orgId = org._id.toString()
 
     const alertPromises: Promise<Alert|null>[] = [];
     const codesWithAlerts: CodeType[] = codes.filter((code: CodeType) => {
@@ -28,7 +37,7 @@ alertsRouter.post('/', async (req, res) => {
             case 'file':
                 files.map((file) => {
                     if (file.filename.endsWith(code.file) || code.file.endsWith(file.filename)) {
-                        alertPromises.push(codeToAlert(code, file));
+                        alertPromises.push(codeToAlert(code, file, orgId));
                         hasAlert = true;
                     }
                 });
@@ -36,7 +45,7 @@ alertsRouter.post('/', async (req, res) => {
             case 'folder':
                 files.map((file) => {
                     if (file.filename.includes(code.file)) {
-                        alertPromises.push(codeToAlert(code, file));
+                        alertPromises.push(codeToAlert(code, file, orgId));
                         hasAlert = true;
                     }
                 });
@@ -44,7 +53,7 @@ alertsRouter.post('/', async (req, res) => {
             case 'lines':
                 files.map((file: FileInfo) => {
                     if (didChange(code, file)) {
-                        alertPromises.push(codeToAlert(code, file));
+                        alertPromises.push(codeToAlert(code, file, orgId));
                         hasAlert = true;
                     }
                 });
@@ -55,30 +64,20 @@ alertsRouter.post('/', async (req, res) => {
 
     const alertResponses = await Promise.all(alertPromises);
     const alerts = alertResponses.filter((alert) => alert != null);
-    const org = await Org.findOne({
-        'integrations.github.installations': {
-            $elemMatch: {
-                'account.login': owner
-            }
-        }
+    const events: EventType[] = codesWithAlerts.map((code) => {
+        const event: EventType = {
+            org: org._id,
+            doc: code.doc,
+            type: 'code',
+            code: code._id
+        };
+        return event;
     });
-    if (org) {
-        const events: EventType[] = codesWithAlerts.map((code) => {
-            const event: EventType = {
-                org: org._id,
-                doc: code.doc,
-                type: 'code',
-                code: code._id
-            };
-            return event;
-        });
-        await Event.insertMany(events);
-
-        track(org._id.toString(), 'GitHub alert triggered', {
-            isOrg: true,
-            numberOfEvents: events.length,
-        })
-    }
+    await Event.insertMany(events);
+    track(orgId, 'GitHub alert triggered', {
+        isOrg: true,
+        numberOfEvents: events.length,
+    })
     
     return res.status(200).send({alerts});
 });

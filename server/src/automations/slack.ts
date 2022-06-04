@@ -3,9 +3,9 @@ import dotenv from 'dotenv';
 import { EventType } from '../models/Event';
 import { AutomationType } from '../models/Automation';
 import Doc, { DocType } from '../models/Doc';
-import { getDocumentNameFromUrl } from '../helpers/routes/messages';
 import { OrgType } from '../models/Org';
 import Code, { CodeType } from '../models/Code';
+import { getDataFromWebpage } from '../services/webscraper';
 
 dotenv.config();
 
@@ -39,11 +39,12 @@ export const publishMessage = async (text: string, channel: string, token: strin
   }
 }
 
-const getSlackMessage = async (event: EventType, automation: AutomationType): Promise<string|null> => {
+const getSlackMessage = async (event: EventType, automation: AutomationType, orgId: string): Promise<string|null> => {
       const doc: DocType | null = await Doc.findById(event.doc);
       let title = 'your document';
       if (doc != null) {
-        title = await getDocumentNameFromUrl(doc.url);
+        const { title: pageTitle } = await getDataFromWebpage(doc.url, orgId);
+        title = pageTitle;
       }
       if (automation.type === 'doc' && event.type === 'change') {
         return `Changes have been made to <${doc?.url}|${title}>`;
@@ -56,7 +57,7 @@ const getSlackMessage = async (event: EventType, automation: AutomationType): Pr
 }
 
 export const slackAutomationForEvent = async (event: EventType, automation: AutomationType, org: OrgType) => {
-    const message = await getSlackMessage(event, automation);
+    const message = await getSlackMessage(event, automation, org._id.toString());
     const channel = automation.destination.value;
     const token = org?.integrations?.slack?.accessToken;
     if (channel && message && token) {
