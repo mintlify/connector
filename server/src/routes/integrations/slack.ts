@@ -79,7 +79,7 @@ slackRouter.get('/install', async (req, res) => {
         return res.status(403).send({ error: 'Invalid organization ID' });
       }
   
-      track(org._id.toString(), 'Install Notion Integration', {
+      track(org._id.toString(), 'Install Slack Integration', {
         isOrg: true,
       });
     }
