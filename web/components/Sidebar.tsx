@@ -2,7 +2,7 @@ import { useIntercom } from 'react-use-intercom';
 import { ChatAlt2Icon, CogIcon, DocumentTextIcon, LightningBoltIcon } from '@heroicons/react/outline';
 import { PlusIcon } from '@heroicons/react/solid'
 import Link from 'next/link';
-import AddDocument from './commands/AddDocument'
+import AddDocumentation from './commands/AddDocumentation'
 import AddAutomation from './commands/AddAutomation'
 import { Org, User } from '../pages';
 import ProfilePicture from './ProfilePicture';
@@ -40,11 +40,11 @@ export default function Sidebar({
 
   return (
     <>
-    <AddDocument
+    <AddDocumentation
       user={user}
       isOpen={isAddDocumentOpen}
       setIsOpen={setIsAddDocumentOpen}
-      setIsAddingDoc={setIsAddingDoc}
+      setIsAddingDocumentation={setIsAddingDoc}
     />
     <AddAutomation
       user={user}
