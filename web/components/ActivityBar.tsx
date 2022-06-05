@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { API_ENDPOINT } from '../helpers/api';
-import { AutomationTypeIcon, getConnectionIcon } from '../helpers/Icons';
+import { AutomationTypeIcon, ConnectionIcon } from '../helpers/Icons';
 import { getSubdomain } from '../helpers/user';
 import { Doc, User } from '../pages';
 import timeAgo from '../services/timeago';
@@ -82,7 +82,10 @@ function DocProfile({ doc, user, setIsAddAutomationOpen }: DocProfileProps) {
                     <button key={code._id} onClick={() => { window.open(code.url, '_target') }}>
                       <a key={code._id} target="_blank" className="inline-flex items-center px-3 py-0.5 rounded-full text-xs bg-green-100 text-green-700">
                         <span className="mr-1">
-                          {getConnectionIcon(4, 4)}
+                          <ConnectionIcon
+                            outerSize={4}
+                            innerSize={4}
+                          />
                         </span>
                         <span className="truncate" style={{maxWidth: '11rem'}}>
                           {code.file}

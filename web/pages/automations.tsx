@@ -2,7 +2,7 @@ import { GetServerSideProps } from "next";
 import Sidebar from "../components/Sidebar";
 import { classNames } from "../helpers/functions";
 import Layout from "../components/layout";
-import { AutomationTypeIcon, getTypeIcon } from "../helpers/Icons";
+import { AutomationTypeIcon, TypeIcon } from "../helpers/Icons";
 import { Menu, Switch } from "@headlessui/react";
 import Head from "next/head";
 import { withSession } from "../lib/withSession";
@@ -267,12 +267,18 @@ export default function Automations({ userSession }: { userSession: UserSession 
                     <div className="mt-2 sm:flex sm:justify-between">
                       <div className="sm:flex">
                         <p className="flex items-center text-sm text-gray-500">
-                          { getTypeIcon(automation.type, 'flex-shrink-0 mr-1 h-4 w-4 text-gray-400') }
+                          <TypeIcon
+                            type={automation.type}
+                            className="flex-shrink-0 mr-1 h-4 w-4 text-gray-400"
+                          />
                           {automation.type === 'code' && automation.source.repo}
                           {automation.type === 'doc' && automation.source.doc}
                         </p>
                         <p className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
-                          { getTypeIcon(automation.destination.type, 'flex-shrink-0 mr-1 h-4 w-4 text-gray-400') }
+                          <TypeIcon
+                            type={automation.destination.type}
+                            className="flex-shrink-0 mr-1 h-4 w-4 text-gray-400"
+                          />
                           {automation.destination.value}
                         </p>
                       </div>

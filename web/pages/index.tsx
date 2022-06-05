@@ -9,7 +9,7 @@ import Sidebar from '../components/Sidebar'
 import { classNames } from '../helpers/functions'
 import Layout from '../components/layout'
 import Link from 'next/link'
-import { AutomationTypeIcon, getConnectionIcon } from '../helpers/Icons'
+import { AutomationTypeIcon, ConnectionIcon } from '../helpers/Icons'
 import { useEffect, useState } from 'react'
 import timeAgo from '../services/timeago'
 import { API_ENDPOINT } from '../helpers/api'
@@ -316,7 +316,10 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                         <div className="h-6 w-6"></div>
                         {doc.code.map((code) => (
                           <a key={code._id} >
-                            {getConnectionIcon(6, 4)}
+                            <ConnectionIcon
+                              outerSize={6}
+                              innerSize={4}
+                            />
                           </a>
                         ))}
                         {
