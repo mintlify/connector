@@ -1,18 +1,19 @@
 import { Fragment, useState } from 'react'
 import { Combobox, Dialog, Transition } from '@headlessui/react'
-import { classNames } from '../../helpers/functions'
-import { AutomationTypeIcon } from '../../helpers/Icons';
-import { AutomationType } from '../../pages/automations';
+import { classNames } from '../../../helpers/functions'
+import { AutomationTypeIcon } from '../../../helpers/Icons';
+import { AutomationType } from '../../../pages/automations';
 import { ChevronRightIcon } from '@heroicons/react/solid';
-import { User } from '../../pages';
+import AutomationConfig from './AutomationConfig';
+import { User } from '../../../pages';
 
-type AutomationData = {
+type AutomationSelection = {
   type: AutomationType;
   title: string;
   description: string;
 }
 
-export const addDocumentationMap: { doc: AutomationData, code: AutomationData } = {
+export const automationMap: Record<AutomationType, AutomationSelection> = {
   doc: {
     type: 'doc',
     title: 'Documentation change',
@@ -25,14 +26,14 @@ export const addDocumentationMap: { doc: AutomationData, code: AutomationData } 
   },
 };
 
-type AddDocumentationProps = {
+type AddAutomationProps = {
   user: User;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  setIsAddingDocumentation?: (isAddingAutomation: boolean) => void;
+  setIsAddingAutomation?: (isAddingAutomation: boolean) => void;
 }
 
-export default function AddDocumentation({ user, isOpen, setIsOpen, setIsAddingDocumentation }: AddDocumentationProps) {
+export default function AddAutomation({ user, isOpen, setIsOpen, setIsAddingAutomation }: AddAutomationProps) {
   const [selectedRuleType, setSelectedRuleType] = useState<AutomationType>();
 
   const onToPrimarySelection = () => {
@@ -70,7 +71,7 @@ export default function AddDocumentation({ user, isOpen, setIsOpen, setIsAddingD
             afterLeave={() => setSelectedRuleType(undefined)}
           >
             <Dialog.Panel className="mx-auto max-w-xl transform divide-y divide-gray-100 rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
-              {/* { selectedRuleType && (
+              { selectedRuleType && (
                 <AutomationConfig
                   user={user}
                   automationType={selectedRuleType}
@@ -78,11 +79,11 @@ export default function AddDocumentation({ user, isOpen, setIsOpen, setIsAddingD
                   setIsAddAutomationOpen={setIsOpen}
                   setIsAddingAutomation={setIsAddingAutomation}
                 />
-              ) } */}
+              ) }
               {
                 selectedRuleType == null && (<Combobox onChange={() => {}} value="">
                   <Combobox.Options static className="max-h-96 scroll-py-3 overflow-y-auto p-3">
-                    {Object.values(addDocumentationMap).map((item) => (
+                    {Object.values(automationMap).map((item) => (
                       <Combobox.Option
                         key={item.type}
                         value={item}
@@ -94,8 +95,8 @@ export default function AddDocumentation({ user, isOpen, setIsOpen, setIsAddingD
                         {({ active }) => (
                           <>
                             <AutomationTypeIcon
-                              type={item.type}
-                            />
+                                type={item.type}
+                              />
                             <div className="ml-4 flex-auto">
                               <p
                                 className={classNames(

@@ -1,40 +1,50 @@
 import { Fragment, useState } from 'react'
 import { Combobox, Dialog, Transition } from '@headlessui/react'
-import { classNames } from '../../helpers/functions'
-import { AutomationTypeIcon } from '../../helpers/Icons';
-import { AutomationType } from '../../pages/automations';
+import { classNames } from '../../../helpers/functions'
+import { DocumentationTypeIcon } from '../../../helpers/Icons';
 import { ChevronRightIcon } from '@heroicons/react/solid';
-import AutomationConfig from './AutomationConfig';
-import { User } from '../../pages';
+import { User } from '../../../pages';
 
-type AutomationData = {
-  type: AutomationType;
+export type AddDocumentationType = 'webpage' | 'notion' | 'confluence' | 'googledocs';
+
+type AddDocumentationSelection = {
+  type: AddDocumentationType;
   title: string;
   description: string;
 }
 
-export const automationMap: { doc: AutomationData, code: AutomationData } = {
-  doc: {
-    type: 'doc',
-    title: 'Documentation change',
-    description: 'Get notified when documentation changes',
+export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationSelection> = {
+  webpage: {
+    type: 'webpage',
+    title: 'Web page',
+    description: 'Add content from a website',
   },
-  code: {
-    type: 'code',
-    title: 'Code changes',
-    description: 'Get notified when connected code changes',
+  notion: {
+    type: 'notion',
+    title: 'Notion page',
+    description: 'Sync with your Notion workspace',
+  },
+  confluence: {
+    type: 'confluence',
+    title: 'Confluence document',
+    description: 'Add a Confluence document',
+  },
+  googledocs: {
+    type: 'googledocs',
+    title: 'Google Docs',
+    description: 'Add a Google Docs document',
   },
 };
 
-type AddAutomationProps = {
+type AddDocumentationProps = {
   user: User;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  setIsAddingAutomation?: (isAddingAutomation: boolean) => void;
+  setIsAddingDocumentation?: (isAddingAutomation: boolean) => void;
 }
 
-export default function AddAutomation({ user, isOpen, setIsOpen, setIsAddingAutomation }: AddAutomationProps) {
-  const [selectedRuleType, setSelectedRuleType] = useState<AutomationType>();
+export default function AddDocumentation({ user, isOpen, setIsOpen, setIsAddingDocumentation }: AddDocumentationProps) {
+  const [selectedRuleType, setSelectedRuleType] = useState<AddDocumentationType>();
 
   const onToPrimarySelection = () => {
     setSelectedRuleType(undefined);
@@ -71,7 +81,7 @@ export default function AddAutomation({ user, isOpen, setIsOpen, setIsAddingAuto
             afterLeave={() => setSelectedRuleType(undefined)}
           >
             <Dialog.Panel className="mx-auto max-w-xl transform divide-y divide-gray-100 rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
-              { selectedRuleType && (
+              {/* { selectedRuleType && (
                 <AutomationConfig
                   user={user}
                   automationType={selectedRuleType}
@@ -79,11 +89,11 @@ export default function AddAutomation({ user, isOpen, setIsOpen, setIsAddingAuto
                   setIsAddAutomationOpen={setIsOpen}
                   setIsAddingAutomation={setIsAddingAutomation}
                 />
-              ) }
+              ) } */}
               {
                 selectedRuleType == null && (<Combobox onChange={() => {}} value="">
                   <Combobox.Options static className="max-h-96 scroll-py-3 overflow-y-auto p-3">
-                    {Object.values(automationMap).map((item) => (
+                    {Object.values(addDocumentationMap).map((item) => (
                       <Combobox.Option
                         key={item.type}
                         value={item}
@@ -94,9 +104,9 @@ export default function AddAutomation({ user, isOpen, setIsOpen, setIsAddingAuto
                       >
                         {({ active }) => (
                           <>
-                            <AutomationTypeIcon
-                                type={item.type}
-                              />
+                            <DocumentationTypeIcon
+                              type={item.type}
+                            />
                             <div className="ml-4 flex-auto">
                               <p
                                 className={classNames(

@@ -1,15 +1,15 @@
 import { Fragment, ReactElement, useEffect, useState } from 'react'
 import { Listbox, Transition } from '@headlessui/react'
-import { classNames } from '../../helpers/functions'
-import { AutomationTypeIcon } from '../../helpers/Icons';
-import { AutomationType } from '../../pages/automations';
+import { classNames } from '../../../helpers/functions'
+import { AutomationTypeIcon } from '../../../helpers/Icons';
+import { AutomationType } from '../../../pages/automations';
 import { BellIcon, CheckIcon, HashtagIcon, LinkIcon, MailIcon, SelectorIcon } from '@heroicons/react/solid';
 import { DocumentTextIcon } from '@heroicons/react/outline';
 import { automationMap } from './AddAutomation';
 import axios from 'axios';
-import { API_ENDPOINT } from '../../helpers/api';
-import { Doc, User } from '../../pages';
-import { getSubdomain } from '../../helpers/user';
+import { API_ENDPOINT } from '../../../helpers/api';
+import { Doc, User } from '../../../pages';
+import { getSubdomain } from '../../../helpers/user';
 
 type Source = {
   _id: string;
