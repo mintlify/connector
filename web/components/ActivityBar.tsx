@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { API_ENDPOINT } from '../helpers/api';
-import { getAutomationTypeIcon, getConnectionIcon } from '../helpers/Icons';
+import { AutomationTypeIcon, getConnectionIcon } from '../helpers/Icons';
 import { getSubdomain } from '../helpers/user';
 import { Doc, User } from '../pages';
 import timeAgo from '../services/timeago';
@@ -106,7 +106,11 @@ function DocProfile({ doc, user, setIsAddAutomationOpen }: DocProfileProps) {
                       <button key={automation._id} onClick={() => { router.push('/automations') }}>
                         <a key={automation._id} className="inline-flex items-center px-3 py-0.5 rounded-full text-xs bg-amber-100 text-amber-700">
                           <span className="mr-1">
-                            {getAutomationTypeIcon(automation.type, 4, 4)}
+                            <AutomationTypeIcon
+                              type={automation.type}
+                              outerSize={4}
+                              innerSize={4}
+                            />
                           </span>
                           <span className="truncate" style={{maxWidth: '11rem'}}>
                             {automation.name}

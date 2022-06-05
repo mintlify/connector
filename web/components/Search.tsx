@@ -6,7 +6,7 @@ import { classNames } from '../helpers/functions'
 import axios from 'axios'
 import { API_ENDPOINT } from '../helpers/api'
 import { Org, User } from '../pages'
-import { getAutomationTypeIcon } from '../helpers/Icons'
+import { AutomationTypeIcon } from '../helpers/Icons'
 import { AutomationType } from '../pages/automations'
 import { useRouter } from 'next/router'
 
@@ -181,7 +181,11 @@ export default function Search({ user, org, isOpen, setIsOpen }: SearchProps) {
                                 )
                               }
                             >
-                              {getAutomationTypeIcon(automationResult.type, 6, 4)}
+                              <AutomationTypeIcon
+                                type={automationResult.type}
+                                outerSize={6}
+                                innerSize={4}
+                              />
                               <span className="ml-2 flex-auto truncate">{automationResult.name}</span>
                             </Combobox.Option>
                           ))}

@@ -1,7 +1,7 @@
 import { Fragment, ReactElement, useEffect, useState } from 'react'
 import { Listbox, Transition } from '@headlessui/react'
 import { classNames } from '../../helpers/functions'
-import { getAutomationTypeIcon } from '../../helpers/Icons';
+import { AutomationTypeIcon } from '../../helpers/Icons';
 import { AutomationType } from '../../pages/automations';
 import { BellIcon, CheckIcon, HashtagIcon, LinkIcon, MailIcon, SelectorIcon } from '@heroicons/react/solid';
 import { DocumentTextIcon } from '@heroicons/react/outline';
@@ -182,7 +182,9 @@ export default function AutomationConfig({ user, automationType, onCancel, setIs
   return <div className="px-6 py-6 z-10">
     <div>
       <div className="flex space-x-4">
-        {getAutomationTypeIcon(automationType)}
+        <AutomationTypeIcon
+          type={automationType}
+        />
         <div>
           <h1 className="text-sm font-medium text-gray-900">{ruleData.title}</h1>
           <p className="text-sm text-gray-500">

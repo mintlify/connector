@@ -1,7 +1,7 @@
 import { Fragment, useState } from 'react'
 import { Combobox, Dialog, Transition } from '@headlessui/react'
 import { classNames } from '../../helpers/functions'
-import { getAutomationTypeIcon } from '../../helpers/Icons';
+import { AutomationTypeIcon } from '../../helpers/Icons';
 import { AutomationType } from '../../pages/automations';
 import { ChevronRightIcon } from '@heroicons/react/solid';
 import AutomationConfig from './AutomationConfig';
@@ -94,7 +94,9 @@ export default function AddAutomation({ user, isOpen, setIsOpen, setIsAddingAuto
                       >
                         {({ active }) => (
                           <>
-                            {getAutomationTypeIcon(item.type)}
+                            <AutomationTypeIcon
+                                type={item.type}
+                              />
                             <div className="ml-4 flex-auto">
                               <p
                                 className={classNames(

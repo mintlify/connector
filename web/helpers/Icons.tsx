@@ -54,7 +54,7 @@ export const ConfluenceIcon = ({className, isActive}: SVGIconProps) => (
 </svg>
 )
 
-export const getAutomationTypeIcon = (type: AutomationType, outerSize = 10, innerSize = 6) => {
+export const AutomationTypeIcon = ({ type, outerSize = 10, innerSize = 6 } : { type: AutomationType, outerSize?: number, innerSize?: number } ) => {
   if (type === 'code') {
     return <div className={`h-${outerSize} w-${outerSize} rounded-lg bg-sky-100 flex items-center justify-center`}>
       <svg className={`h-${innerSize} w-${innerSize} text-sky-600`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
