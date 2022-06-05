@@ -8,7 +8,6 @@ export type EventType = {
     doc: Types.ObjectId;
     type: EventTypeMeta;
     change?: Array<Diff.Change>;
-    add?: Object;
     code?: Types.ObjectId;
 };
 
@@ -18,7 +17,6 @@ const EventSchema = new Schema({
     type: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
     change: Array, // only for change events
-    add: Object, // only for add events
     code: { type: Schema.Types.ObjectId }
 });
 
