@@ -32,7 +32,6 @@ eventsRouter.get('/', userMiddleware, async (req, res) => {
     const org = res.locals.user.org;
 
     const query: { org: string, doc?: mongoose.Types.ObjectId } = { org } as { org: string };
-    
     if (doc) {
       query.doc = new mongoose.Types.ObjectId(doc as string)
     }
