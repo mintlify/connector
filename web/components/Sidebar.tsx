@@ -28,11 +28,8 @@ export default function Sidebar({
   setIsAddAutomationOpen,
   setIsAddDocumentOpen
 }: SidebarProps) {
-
   const { boot, show } = useIntercom();
-
   const fullName = user.firstName + ' ' + user.lastName;
-
   const onClickHelp = () => {
     boot({ userId: user.userId, email: user.email, company: { companyId: org._id, name: org.name } })
     show();

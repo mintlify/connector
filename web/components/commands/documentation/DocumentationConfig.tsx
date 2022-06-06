@@ -32,44 +32,46 @@ export default function DocumentationConfig(
     onCancel();
   }
 
-  const configOptions: Record<AddDocumentationType, { validation: boolean, inputComponent: JSX.Element | null }> = {
+  const configOptions: Record<AddDocumentationType, { validation: boolean, inputComponent: JSX.Element | null, onSubmit: () => void }> = {
     webpage: {
       validation: Boolean(webpageValue),
       inputComponent: <AddWebpage value={webpageValue} setValue={setWebpageValue} />,
+      onSubmit: () => {
+        setIsAddDocLoading(true);
+        axios
+          .post(
+            `${API_ENDPOINT}/routes/docs`,
+            {
+              url: webpageValue,
+            },
+            {
+              params: {
+                userId: user.userId,
+                subdomain: getSubdomain(window.location.host),
+              },
+            }
+        ).then(() => setIsAddDocLoading(false))
+      }
     },
     notion: {
       validation: false,
       inputComponent: null,
+      onSubmit: () => {}
     },
     confluence: {
       validation: false,
       inputComponent: null,
+      onSubmit: () => {}
     },
     googledocs: {
       validation: false,
       inputComponent: null,
+      onSubmit: () => {}
     }
   }
 
   const onCreateButton = async () => {
-    if (documentationType === 'webpage') {
-      axios
-      .post(
-        `${API_ENDPOINT}/routes/docs`,
-        {
-          url: webpageValue,
-        },
-        {
-          params: {
-            userId: user.userId,
-            subdomain: getSubdomain(window.location.host),
-          },
-        }
-      )
-      .then(() => {
-        setIsAddDocLoading(false)
-      })
-    }
+    configOptions[documentationType].onSubmit();
     setIsAddDocumentationOpen(false);
   }
 
