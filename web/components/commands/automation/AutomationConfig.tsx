@@ -34,7 +34,7 @@ const defaultRepo: Source = {
 
 type AutomationConfig = {
   user: User,
-  automationType: AutomationType,
+  automationType: AutomationType | undefined,
   onCancel: () => void,
   setIsAddAutomationOpen: (isOpen: boolean) => void,
   setIsAddingAutomation?: (isAddingAutomation: boolean) => void;
@@ -92,8 +92,6 @@ export default function AutomationConfig({ user, automationType, onCancel, setIs
   const [selectedDestinationType, setSelectedDestinationType] = useState(destinations[0]);
   const [destinationValue, setDestinationValue] = useState('');
   const [name, setName] = useState('');
-
-  const ruleData = automationMap[automationType];
   
   useEffect(() => {
     if (automationType === 'doc') {
@@ -140,6 +138,10 @@ export default function AutomationConfig({ user, automationType, onCancel, setIs
     }
   }, [user, automationType])
 
+  if (automationType == null) {
+    return null;
+  }
+
   const onBackButton = () => {
     onCancel();
   }
@@ -177,6 +179,7 @@ export default function AutomationConfig({ user, automationType, onCancel, setIs
     }
   }
 
+  const ruleData = automationMap[automationType];
   const isCompletedForm = (automationType === 'doc' && selectedDoc.isDefault !== true && selectedDestinationType.isDefault !== true && destinationValue !== '') || (automationType === 'code' && selectedRepo.isDefault !== true && selectedDestinationType.isDefault !== true && destinationValue !== '');
   
   return <div className="px-6 py-6 z-10">

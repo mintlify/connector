@@ -71,15 +71,13 @@ export default function AddAutomation({ user, isOpen, setIsOpen, setIsAddingAuto
             afterLeave={() => setSelectedRuleType(undefined)}
           >
             <Dialog.Panel className="mx-auto max-w-xl transform divide-y divide-gray-100 rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
-              { selectedRuleType && (
-                <AutomationConfig
-                  user={user}
-                  automationType={selectedRuleType}
-                  onCancel={onToPrimarySelection}
-                  setIsAddAutomationOpen={setIsOpen}
-                  setIsAddingAutomation={setIsAddingAutomation}
-                />
-              ) }
+              <AutomationConfig
+                user={user}
+                automationType={selectedRuleType}
+                onCancel={onToPrimarySelection}
+                setIsAddAutomationOpen={setIsOpen}
+                setIsAddingAutomation={setIsAddingAutomation}
+              />
               {
                 selectedRuleType == null && (<Combobox onChange={() => {}} value="">
                   <Combobox.Options static className="max-h-96 scroll-py-3 overflow-y-auto p-3">

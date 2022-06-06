@@ -4,6 +4,7 @@ import { classNames } from '../../../helpers/functions'
 import { DocumentationTypeIcon } from '../../../helpers/Icons';
 import { ChevronRightIcon } from '@heroicons/react/solid';
 import { User } from '../../../pages';
+import DocumentationConfig from './DocumentationConfig';
 
 export type AddDocumentationType = 'webpage' | 'notion' | 'confluence' | 'googledocs';
 
@@ -81,15 +82,13 @@ export default function AddDocumentation({ user, isOpen, setIsOpen, setIsAddingD
             afterLeave={() => setSelectedRuleType(undefined)}
           >
             <Dialog.Panel className="mx-auto max-w-xl transform divide-y divide-gray-100 rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
-              {/* { selectedRuleType && (
-                <AutomationConfig
-                  user={user}
-                  automationType={selectedRuleType}
-                  onCancel={onToPrimarySelection}
-                  setIsAddAutomationOpen={setIsOpen}
-                  setIsAddingAutomation={setIsAddingAutomation}
-                />
-              ) } */}
+              <DocumentationConfig
+                user={user}
+                documentationType={selectedRuleType}
+                onCancel={onToPrimarySelection}
+                setIsAddDocumentationOpen={setIsOpen}
+                setIsAddingDocumentation={setIsAddingDocumentation}
+              />
               {
                 selectedRuleType == null && (<Combobox onChange={() => {}} value="">
                   <Combobox.Options static className="max-h-96 scroll-py-3 overflow-y-auto p-3">
