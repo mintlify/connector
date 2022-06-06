@@ -164,6 +164,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
           isAddDocumentOpen={isAddDocumentOpen}
           setIsAddDocumentOpen={setIsAddDocumentOpen}
           setIsAddingAutomation={setIsAddingAutomation}
+          setIsAddDocLoading={() => {}}
         />
         {/* Projects List */}
         <div className="bg-white lg:min-w-0 lg:flex-1">

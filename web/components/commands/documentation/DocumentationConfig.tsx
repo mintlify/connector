@@ -1,21 +1,26 @@
-import { ReactElement, useEffect } from 'react'
+import axios from 'axios';
+import { ReactComponentElement, useEffect, useState } from 'react'
+import { API_ENDPOINT } from '../../../helpers/api';
 import { classNames } from '../../../helpers/functions'
 import { DocumentationTypeIcon } from '../../../helpers/Icons';
+import { getSubdomain } from '../../../helpers/user';
 import { User } from '../../../pages';
 import { addDocumentationMap, AddDocumentationType } from './AddDocumentation';
+import AddWebpage from './AddWebpage';
 
-type DocumentationConfig = {
+type DocumentationConfigProps = {
   user: User,
   documentationType?: AddDocumentationType,
   onCancel: () => void,
   setIsAddDocumentationOpen: (isOpen: boolean) => void,
-  setIsAddingDocumentation?: (isAddingAutomation: boolean) => void;
+  setIsAddDocLoading: (isAddingAutomation: boolean) => void;
 }
 
 export default function DocumentationConfig(
-    { user, documentationType, onCancel, setIsAddDocumentationOpen, setIsAddingDocumentation }: DocumentationConfig
+    { user, documentationType, onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }: DocumentationConfigProps
   ) {
-  
+  const [webpageValue, setWebpageValue] = useState('');
+
   useEffect(() => {
   }, [user, documentationType]);
 
@@ -27,12 +32,53 @@ export default function DocumentationConfig(
     onCancel();
   }
 
+  const configOptions: Record<AddDocumentationType, { validation: boolean, inputComponent: JSX.Element | null }> = {
+    webpage: {
+      validation: Boolean(webpageValue),
+      inputComponent: <AddWebpage value={webpageValue} setValue={setWebpageValue} />,
+    },
+    notion: {
+      validation: false,
+      inputComponent: null,
+    },
+    confluence: {
+      validation: false,
+      inputComponent: null,
+    },
+    googledocs: {
+      validation: false,
+      inputComponent: null,
+    }
+  }
+
   const onCreateButton = async () => {
+    if (documentationType === 'webpage') {
+      axios
+      .post(
+        `${API_ENDPOINT}/routes/docs`,
+        {
+          url: webpageValue,
+        },
+        {
+          params: {
+            userId: user.userId,
+            subdomain: getSubdomain(window.location.host),
+          },
+        }
+      )
+      .then(() => {
+        setIsAddDocLoading(false)
+      })
+    }
     setIsAddDocumentationOpen(false);
   }
 
   const ruleData = addDocumentationMap[documentationType];
-  const isCompletedForm = false;
+  const ConfigureInput = () => {
+    return configOptions[documentationType].inputComponent;
+  }
+
+  const isCompletedForm = configOptions[documentationType].validation;
   
   return <div className="px-6 py-6 z-10">
     <div>
@@ -47,7 +93,9 @@ export default function DocumentationConfig(
           </p>
         </div>
       </div>
-          <div className="mt-4"></div>
+      <div className="mt-4">
+        <ConfigureInput />
+      </div>
 
       <div className="mt-4 flex justify-end">
         <button

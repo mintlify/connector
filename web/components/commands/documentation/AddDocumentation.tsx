@@ -41,10 +41,10 @@ type AddDocumentationProps = {
   user: User;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  setIsAddingDocumentation?: (isAddingAutomation: boolean) => void;
+  setIsAddDocLoading: (isAddingAutomation: boolean) => void;
 }
 
-export default function AddDocumentation({ user, isOpen, setIsOpen, setIsAddingDocumentation }: AddDocumentationProps) {
+export default function AddDocumentation({ user, isOpen, setIsOpen, setIsAddDocLoading }: AddDocumentationProps) {
   const [selectedRuleType, setSelectedRuleType] = useState<AddDocumentationType>();
 
   const onToPrimarySelection = () => {
@@ -87,7 +87,7 @@ export default function AddDocumentation({ user, isOpen, setIsOpen, setIsAddingD
                 documentationType={selectedRuleType}
                 onCancel={onToPrimarySelection}
                 setIsAddDocumentationOpen={setIsOpen}
-                setIsAddingDocumentation={setIsAddingDocumentation}
+                setIsAddDocLoading={setIsAddDocLoading}
               />
               {
                 selectedRuleType == null && (<Combobox onChange={() => {}} value="">
