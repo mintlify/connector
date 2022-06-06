@@ -11,6 +11,7 @@ export type DocType = {
     lastUpdatedAt: Date;
     createdAt: Date;
     changeConfirmationCount?: number;
+    isJustAdded: boolean;
 };
 
 const DocSchema = new Schema({
@@ -23,7 +24,8 @@ const DocSchema = new Schema({
     lastUpdatedAt: { type: Date, default: Date.now },
     createdAt: { type: Date, default: Date.now },
     createdBy: { type: Schema.Types.ObjectId },
-    changeConfirmationCount: { type: Number }
+    changeConfirmationCount: { type: Number },
+    isJustAdded: { type: Boolean, default: true },
 });
 
 const Doc = mongoose.model<DocType>('Doc', DocSchema, 'docs');

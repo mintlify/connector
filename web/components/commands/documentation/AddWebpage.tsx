@@ -34,7 +34,7 @@ export default function AddWebpage({value, setValue}: { value: string, setValue:
       }
     }).then(({ data }) => {
       setIsLoading(false);
-      const { title, favicon } = data;
+      const { favicon } = data;
       setFavicon(favicon);
     })
   }, [value])
@@ -56,7 +56,7 @@ export default function AddWebpage({value, setValue}: { value: string, setValue:
     </svg>
     }
     {
-      !isLoading && favicon && <Link href={value}><a target="_blank"><img className="h-4 w-4 cursor-pointer" src={favicon} alt="Favicon of result" /></a></Link>
+      !isLoading && favicon && <Link href={value}><a target="_blank"><img className="h-4 w-4 cursor-pointer rounded-sm" src={favicon} alt="Favicon of result" /></a></Link>
     }
   </div>
 </div>

@@ -12,15 +12,9 @@ import { track } from '../services/segment';
 const docsRouter = express.Router();
 
 // userId is the _id of the user not `userId`
-export const createDocFromUrl = async (url: string, orgId: string, userId: Types.ObjectId, isLightMode = false) => {
-  let pageData;
-  if (isLightMode) {
-    const response = await axios.get(url);
-    pageData = await extractDataFromHTML(url, response.data);
-  } else {
-    pageData = await getDataFromWebpage(url, orgId);
-  }
-  const { content, method, title, favicon } = pageData;
+export const createDocFromUrl = async (url: string, orgId: string, userId: Types.ObjectId) => {
+  const response = await axios.get(url);
+  const { content, method, title, favicon } = await extractDataFromHTML(url, response.data);
   const doc = await Doc.findOneAndUpdate(
     {
       org: orgId,
@@ -34,6 +28,7 @@ export const createDocFromUrl = async (url: string, orgId: string, userId: Types
       title,
       favicon,
       createdBy: userId,
+      isJustAdded: true,
     },
     {
       upsert: true,
@@ -92,33 +87,11 @@ docsRouter.get('/preview', async (req, res) => {
   }
 });
 
-// Light scan of content
-docsRouter.post('/initial', userMiddleware, async (req, res) => {
-  const { url } = req.body;
-  const org = res.locals.user.org;
-  try {
-    const { content, doc, method } = await createDocFromUrl(url, org, res.locals.user._id, true);
-    if (doc == null) {
-      return res.status(400).send({error: 'No doc available'});
-    }
-    await createEvent(org, doc._id, 'add', {});
-    indexDocForSearch(doc);
-    track(res.locals.user.userId, 'Add documentation', {
-      doc: doc._id.toString(),
-      method,
-      org: org.toString(),
-    });
-    return res.send({ content });
-  } catch (error) {
-    return res.status(500).send({ error });
-  }
-})
-
-// Deep scan of content
 docsRouter.post('/', userMiddleware, async (req, res) => {
   const { url } = req.body;
   const org = res.locals.user.org;
   try {
+    // Initial add is using light mode scan
     const { content, doc, method } = await createDocFromUrl(url, org, res.locals.user._id);
     if (doc == null) {
       return res.status(400).send({error: 'No doc available'});

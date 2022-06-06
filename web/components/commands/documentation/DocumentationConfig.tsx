@@ -41,7 +41,7 @@ export default function DocumentationConfig(
         setIsAddDocLoading(true);
         axios
           .post(
-            `${API_ENDPOINT}/routes/docs/initial`,
+            `${API_ENDPOINT}/routes/docs`,
             {
               url: webpageValue,
             },

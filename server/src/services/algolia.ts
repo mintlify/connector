@@ -40,27 +40,39 @@ const docsIndex = client.initIndex('docs');
 const automationsIndex = client.initIndex('automations');
 
 export const indexDocForSearch = async (doc: DocType) => {
-    const record = {
-        objectID: doc._id,
-        name: doc.title,
-        content: doc.content,
-        url: doc.url,
-        org: doc.org,
-        favicon: doc.favicon
-    };
-    await docsIndex.saveObject(record);
+    try {
+        const record = {
+            objectID: doc._id,
+            name: doc.title,
+            content: doc.content,
+            url: doc.url,
+            org: doc.org,
+            favicon: doc.favicon
+        };
+        await docsIndex.saveObject(record);
+    }
+    catch (error) {
+        // Todo: manage oversize
+        console.log(error);
+    }
 }
 
 export const updateDocContentForSearch = async (doc: DocType, newContent: string) => {
-    const record = {
-        objectID: doc._id,
-        name: doc.title,
-        content: newContent,
-        url: doc.url,
-        org: doc.org,
-        favicon: doc.favicon
-    };
-    await docsIndex.saveObject(record);
+    try {
+        const record = {
+            objectID: doc._id,
+            name: doc.title,
+            content: newContent,
+            url: doc.url,
+            org: doc.org,
+            favicon: doc.favicon
+        };
+        await docsIndex.saveObject(record);
+    }
+    catch (error) {
+        // Todo: manage oversize
+        console.log(error);
+    }
 }
 
 export const deleteDocForSearch = async (objectID: string): Promise<any> => {

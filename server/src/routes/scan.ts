@@ -15,28 +15,34 @@ const scanRouter = express.Router();
 type DiffAndContent = {
   diff: Diff.Change[],
   newContent: string,
+  newTitle: string,
+  newMethod: string,
+  newFavicon?: string,
 }
 
-type DiffAlert = {
-  diff: Diff.Change[],
-  newContent: string,
+interface DiffAlert extends DiffAndContent {
   doc: DocType
 }
 
-type DocUpdateStatus = 'first-change' | 'continuous-change' | 'event-trigger';
+type DocUpdateStatus = 'just-added' | 'first-change' | 'continuous-change' | 'event-trigger';
 
 const DIFF_CONFIRMATION_THRESHOLD = 2;
 
 const getDiffAndContent = async (url: string, previousContent: string, orgId: string): Promise<DiffAndContent> => {
-  const { content } = await getDataFromWebpage(url, orgId, 6000);
+  const { content, title, favicon, method } = await getDataFromWebpage(url, orgId, 6000);
   return {
     diff: Diff.diffWords(previousContent, content),
-    newContent: content
+    newContent: content,
+    newTitle: title,
+    newFavicon: favicon,
+    newMethod: method,
   }
 }
 
 const getDocUpdateStatus = (doc: DocType): DocUpdateStatus => {
-  if (doc.changeConfirmationCount == null) {
+  if (doc.isJustAdded) {
+    return 'just-added';
+  } else if (doc.changeConfirmationCount == null) {
     return 'first-change'
   } else if (doc.changeConfirmationCount < DIFF_CONFIRMATION_THRESHOLD) {
     return 'continuous-change'
@@ -50,27 +56,34 @@ export const scanDocsInOrg = async (orgId: string) => {
     return getDiffAndContent(doc.url, doc.content ?? '', orgId);
   });
 
-  const diffsAndContent = await Promise.all(getDifferencePromises);
+  const diffsAndContentResults = await Promise.all(getDifferencePromises);
 
   const diffAlerts: DiffAlert[] = [];
   const sameContentDocs: DocType[] = [];
-  diffsAndContent.forEach(({ diff, newContent }, i) => {
+  diffsAndContentResults.forEach((diffsAndContent, i) => {
+    const { diff } = diffsAndContent;
     const hasChanges = diff.some((diff) => (diff.added || diff.removed) && diff.value.trim());
     const doc = docsFromOrg[i];
-    if (hasChanges) {
+    if (hasChanges || doc.isJustAdded) {
       diffAlerts.push({
+        ...diffsAndContent,
         doc,
-        newContent,
-        diff
       });
     } else {
       sameContentDocs.push(doc);
     }
   });
 
-  const newContentUpdateQueries = diffAlerts.map(({ doc, newContent }) => {
+  const newContentUpdateQueries = diffAlerts.map(({ doc, newContent, newTitle, newFavicon }) => {
     const updateStatus = getDocUpdateStatus(doc);
     switch (updateStatus) {
+      case 'just-added':
+        return {
+          updateOne: {
+            filter: { _id: doc._id },
+            update: { isJustAdded: false, content: newContent, title: newTitle, favicon: newFavicon }
+          }
+        }
       case 'first-change':
         return {
           updateOne: {

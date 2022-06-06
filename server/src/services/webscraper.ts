@@ -71,17 +71,25 @@ export const getDataFromWebpage = async (url: string, orgId: string, wait = 1000
     return await getGoogleDocsData(parsedUrl);
   }
 
-  const { data: response } = await axios.get('https://app.scrapingbee.com/api/v1', {
-    params: {
-      'api_key': process.env.SCRAPINGBEE_KEY,
-      url,
-      wait: wait.toString(),
-      'block_resources': 'false'
-    } 
-  });
+  try {
+    const { data: response } = await axios.get('https://app.scrapingbee.com/api/v1', {
+      params: {
+        'api_key': process.env.SCRAPINGBEE_KEY,
+        url,
+        wait: wait.toString(),
+        'block_resources': 'false'
+      } 
+    });
 
-  const rawContent = response;
-  return extractDataFromHTML(url, rawContent);
+    const rawContent = response;
+    return extractDataFromHTML(url, rawContent);
+  } catch (error: any) {
+    // Catch 404 errors because they could be valid
+    if (error.response.status !== 404) {
+      throw 'Unable to fetch results';
+    }
+    return extractDataFromHTML(url, error.response.data);
+  }
 };
 
 // Extract information

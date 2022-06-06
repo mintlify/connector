@@ -28,6 +28,7 @@ export const createEvent = (org: Types.ObjectId, doc: Types.ObjectId, type: Even
 }
 
 eventsRouter.get('/', userMiddleware, async (req, res) => {
+  try {
     const { doc } = req.query;
     const org = res.locals.user.org;
 
@@ -65,6 +66,9 @@ eventsRouter.get('/', userMiddleware, async (req, res) => {
     })
 
     return res.send({ events: eventsWithNoDocsFilteredOut });
+  } catch {
+    return res.send({events: []});
+  }
 });
 
 export default eventsRouter;
