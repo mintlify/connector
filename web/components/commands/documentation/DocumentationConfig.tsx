@@ -6,7 +6,7 @@ import { DocumentationTypeIcon } from '../../../helpers/Icons';
 import { getSubdomain } from '../../../helpers/user';
 import { User } from '../../../pages';
 import { addDocumentationMap, AddDocumentationType } from './AddDocumentation';
-import AddWebpage from './AddWebpage';
+import AddWebpage, { isUrlValid } from './AddWebpage';
 
 type DocumentationConfigProps = {
   user: User,
@@ -34,7 +34,7 @@ export default function DocumentationConfig(
 
   const configOptions: Record<AddDocumentationType, { validation: boolean, inputComponent: JSX.Element | null, onSubmit: () => void }> = {
     webpage: {
-      validation: Boolean(webpageValue),
+      validation: isUrlValid(webpageValue),
       inputComponent: <AddWebpage value={webpageValue} setValue={setWebpageValue} />,
       onSubmit: () => {
         setIsAddDocLoading(true);
