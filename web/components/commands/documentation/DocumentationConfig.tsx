@@ -29,6 +29,7 @@ export default function DocumentationConfig(
   }
 
   const onBackButton = () => {
+    setWebpageValue('');
     onCancel();
   }
 
@@ -40,7 +41,7 @@ export default function DocumentationConfig(
         setIsAddDocLoading(true);
         axios
           .post(
-            `${API_ENDPOINT}/routes/docs`,
+            `${API_ENDPOINT}/routes/docs/initial`,
             {
               url: webpageValue,
             },
