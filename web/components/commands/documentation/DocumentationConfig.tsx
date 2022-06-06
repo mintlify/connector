@@ -54,21 +54,21 @@ export default function DocumentationConfig(
         ).then(() => setIsAddDocLoading(false))
       }
     },
-    notion: {
-      validation: false,
-      inputComponent: null,
-      onSubmit: () => {}
-    },
-    confluence: {
-      validation: false,
-      inputComponent: null,
-      onSubmit: () => {}
-    },
-    googledocs: {
-      validation: false,
-      inputComponent: null,
-      onSubmit: () => {}
-    }
+    // notion: {
+    //   validation: false,
+    //   inputComponent: null,
+    //   onSubmit: () => {}
+    // },
+    // confluence: {
+    //   validation: false,
+    //   inputComponent: null,
+    //   onSubmit: () => {}
+    // },
+    // googledocs: {
+    //   validation: false,
+    //   inputComponent: null,
+    //   onSubmit: () => {}
+    // }
   }
 
   const onCreateButton = async () => {
@@ -101,13 +101,13 @@ export default function DocumentationConfig(
       </div>
 
       <div className="mt-4 flex justify-end">
-        <button
+        {/* <button
           type="button"
           className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
           onClick={onBackButton}
         >
           Back
-        </button>
+        </button> */}
         <button
           type="submit"
           disabled={!isCompletedForm}
