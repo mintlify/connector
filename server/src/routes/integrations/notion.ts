@@ -1,10 +1,12 @@
 import axios from 'axios';
 import { Router } from 'express';
+import { Client } from '@notionhq/client';
 import { ISDEV } from '../../helpers/environment';
-
 import { ENDPOINT } from '../../helpers/github/octokit';
 import Org from '../../models/Org';
 import { track } from '../../services/segment';
+import { userMiddleware } from '../user';
+import { getNotionPageDataWithId } from '../../services/notion';
 
 const clientId = 'ec770c41-07f8-44bd-a4d8-66d30e9786c8';
 const redirectUrl = `${ENDPOINT}/routes/integrations/notion/authorization`;
@@ -51,20 +53,19 @@ const getNotionAccessTokenFromCode = async (code: string): Promise<NotionAuthDat
 
 const notionRouter = Router();
 
-notionRouter.get('/install', (req, res) => {
+notionRouter.get('/install', (req, res) => {    
     const { org } = req.query;
     if (!org) {
-      return res.send('Organization ID is required');
+        return res.send('Organization ID is required');
     }
-  
-    const state = { org }
-  
+
+    const state = { org };
     const encodedState = encodeURIComponent(JSON.stringify(state));
     const url = getNotionInstallURL(encodedState);
     return res.redirect(url);
-  });
+});
   
-  notionRouter.get('/authorization', async (req, res) => {
+notionRouter.get('/authorization', async (req, res) => {
     const { code, state } = req.query;
     if (code == null) return res.status(403).send('Invalid or missing grant code');
   
@@ -89,5 +90,36 @@ notionRouter.get('/install', (req, res) => {
 
     return res.redirect(`https://${org.subdomain}.mintlify.com`);
 });
+
+notionRouter.post('/sync', userMiddleware, async (_, res) => {
+    const { org: orgId } = res.locals.user;
+
+    const org = await Org.findById(orgId);
+
+    const notionAccessToken = org?.integrations?.notion?.access_token;
+
+    if (notionAccessToken == null) {
+        return res.send({error: 'No access to Notion'});
+    }
+    
+    const notion = new Client({ auth: notionAccessToken });
+    const searchResults = await notion.search({
+        page_size: 100,
+        filter: {
+            property: "object",
+            value: "page"
+        },
+    });
+
+    const getPagesPromise = searchResults.results.map((notionResult) => {
+        return getNotionPageDataWithId(notionResult.id, notionAccessToken);
+    });
+
+    const firstPagesContent = await Promise.all(getPagesPromise);
+
+    console.log(firstPagesContent);
+    
+    return res.send({results: firstPagesContent});
+})
 
 export default notionRouter;

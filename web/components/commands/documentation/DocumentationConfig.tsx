@@ -8,6 +8,12 @@ import { User } from '../../../pages';
 import { addDocumentationMap, AddDocumentationType } from './AddDocumentation';
 import AddWebpage from './AddWebpage';
 
+type DocConfigSettings = {
+  validation: boolean,
+  inputComponent: JSX.Element | null,
+  onSubmit: () => void
+}
+
 type DocumentationConfigProps = {
   user: User,
   documentationType?: AddDocumentationType,
@@ -32,7 +38,7 @@ export default function DocumentationConfig(
     onCancel();
   }
 
-  const configOptions: Record<AddDocumentationType, { validation: boolean, inputComponent: JSX.Element | null, onSubmit: () => void }> = {
+  const configOptions: Record<AddDocumentationType, DocConfigSettings> = {
     webpage: {
       validation: Boolean(webpageValue),
       inputComponent: <AddWebpage value={webpageValue} setValue={setWebpageValue} />,
@@ -58,16 +64,16 @@ export default function DocumentationConfig(
       inputComponent: null,
       onSubmit: () => {}
     },
-    // confluence: {
-    //   validation: false,
-    //   inputComponent: null,
-    //   onSubmit: () => {}
-    // },
-    // googledocs: {
-    //   validation: false,
-    //   inputComponent: null,
-    //   onSubmit: () => {}
-    // }
+    confluence: {
+      validation: false,
+      inputComponent: null,
+      onSubmit: () => {}
+    },
+    googledocs: {
+      validation: false,
+      inputComponent: null,
+      onSubmit: () => {}
+    }
   }
 
   const onCreateButton = async () => {
