@@ -1,15 +1,15 @@
 import { Fragment, ReactElement, useEffect, useState } from 'react'
 import { Listbox, Transition } from '@headlessui/react'
-import { classNames } from '../../helpers/functions'
-import { getAutomationTypeIcon } from '../../helpers/Icons';
-import { AutomationType } from '../../pages/automations';
+import { classNames } from '../../../helpers/functions'
+import { AutomationTypeIcon } from '../../../helpers/Icons';
+import { AutomationType } from '../../../pages/automations';
 import { BellIcon, CheckIcon, HashtagIcon, LinkIcon, MailIcon, SelectorIcon } from '@heroicons/react/solid';
 import { DocumentTextIcon } from '@heroicons/react/outline';
 import { automationMap } from './AddAutomation';
 import axios from 'axios';
-import { API_ENDPOINT } from '../../helpers/api';
-import { Doc, User } from '../../pages';
-import { getSubdomain } from '../../helpers/user';
+import { API_ENDPOINT } from '../../../helpers/api';
+import { Doc, User } from '../../../pages';
+import { getSubdomain } from '../../../helpers/user';
 
 type Source = {
   _id: string;
@@ -34,7 +34,7 @@ const defaultRepo: Source = {
 
 type AutomationConfig = {
   user: User,
-  automationType: AutomationType,
+  automationType: AutomationType | undefined,
   onCancel: () => void,
   setIsAddAutomationOpen: (isOpen: boolean) => void,
   setIsAddingAutomation?: (isAddingAutomation: boolean) => void;
@@ -92,8 +92,6 @@ export default function AutomationConfig({ user, automationType, onCancel, setIs
   const [selectedDestinationType, setSelectedDestinationType] = useState(destinations[0]);
   const [destinationValue, setDestinationValue] = useState('');
   const [name, setName] = useState('');
-
-  const ruleData = automationMap[automationType];
   
   useEffect(() => {
     if (automationType === 'doc') {
@@ -140,6 +138,10 @@ export default function AutomationConfig({ user, automationType, onCancel, setIs
     }
   }, [user, automationType])
 
+  if (automationType == null) {
+    return null;
+  }
+
   const onBackButton = () => {
     onCancel();
   }
@@ -177,12 +179,15 @@ export default function AutomationConfig({ user, automationType, onCancel, setIs
     }
   }
 
+  const ruleData = automationMap[automationType];
   const isCompletedForm = (automationType === 'doc' && selectedDoc.isDefault !== true && selectedDestinationType.isDefault !== true && destinationValue !== '') || (automationType === 'code' && selectedRepo.isDefault !== true && selectedDestinationType.isDefault !== true && destinationValue !== '');
   
   return <div className="px-6 py-6 z-10">
     <div>
       <div className="flex space-x-4">
-        {getAutomationTypeIcon(automationType)}
+        <AutomationTypeIcon
+          type={automationType}
+        />
         <div>
           <h1 className="text-sm font-medium text-gray-900">{ruleData.title}</h1>
           <p className="text-sm text-gray-500">

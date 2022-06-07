@@ -9,7 +9,7 @@ import Sidebar from '../components/Sidebar'
 import { classNames } from '../helpers/functions'
 import Layout from '../components/layout'
 import Link from 'next/link'
-import { getAutomationTypeIcon, getConnectionIcon } from '../helpers/Icons'
+import { AutomationTypeIcon, ConnectionIcon } from '../helpers/Icons'
 import { useEffect, useState } from 'react'
 import timeAgo from '../services/timeago'
 import { API_ENDPOINT } from '../helpers/api'
@@ -85,7 +85,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
   const [docs, setDocs] = useState<Doc[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedDoc, setSelectedDoc] = useState<Doc>();
-  const [isAddingDoc, setIsAddingDoc] = useState<boolean>(false);
+  const [isAddDocLoading, setIsAddDocLoading] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
   const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
@@ -122,7 +122,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
         const { events } = eventsResponse.data;
         setEvents(events);
       });
-  }, [userSession, selectedDoc, isAddingDoc]);
+  }, [userSession, selectedDoc, isAddDocLoading]);
 
   if (!userSession) {
     return <SignIn />
@@ -176,7 +176,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     return <div className="absolute inset-0" onClick={() => setSelectedDoc(undefined)}></div>
   }
 
-  const hasDocs = (docs && docs.length > 0) || isAddingDoc;
+  const hasDocs = (docs && docs.length > 0) || isAddDocLoading;
 
   return (
     <>
@@ -192,7 +192,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
         <Sidebar
           org={org}
           user={user}
-          setIsAddingDoc={setIsAddingDoc}
+          setIsAddDocLoading={setIsAddDocLoading}
           isAddAutomationOpen={isAddAutomationOpen}
           setIsAddAutomationOpen={setIsAddAutomationOpen}
           isAddDocumentOpen={isAddDocumentOpen}
@@ -229,7 +229,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
             </div>
           }
           <ul role="list" className="relative z-0">
-            { isAddingDoc && <LoadingItem /> }
+            { isAddDocLoading && <LoadingItem /> }
             {docs?.map((doc) => (
               <div key={doc._id}>
               <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div>
@@ -316,13 +316,20 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                         <div className="h-6 w-6"></div>
                         {doc.code.map((code) => (
                           <a key={code._id} >
-                            {getConnectionIcon(6, 4)}
+                            <ConnectionIcon
+                              outerSize={6}
+                              innerSize={4}
+                            />
                           </a>
                         ))}
                         {
                           doc.automations.map((automation) => (
                           <a key={automation._id}>
-                            {getAutomationTypeIcon(automation.type, 6, 4)}
+                            <AutomationTypeIcon
+                              type={automation.type}
+                              outerSize={6}
+                              innerSize={4}
+                            />
                           </a>
                           ))
                         }

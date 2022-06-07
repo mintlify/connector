@@ -5,7 +5,7 @@ import { userMiddleware } from './user';
 import { createEvent } from './events';
 import Doc from '../models/Doc';
 import Event from '../models/Event';
-import { getDataFromWebpage } from '../services/webscraper';
+import { extractDataFromHTML, getDataFromWebpage } from '../services/webscraper';
 import { deleteDocForSearch, indexDocForSearch } from '../services/algolia';
 import { track } from '../services/segment';
 
@@ -13,16 +13,8 @@ const docsRouter = express.Router();
 
 // userId is the _id of the user not `userId`
 export const createDocFromUrl = async (url: string, orgId: string, userId: Types.ObjectId) => {
-  const { content, method, title, favicon } = await getDataFromWebpage(url, orgId);
-  let foundFavicon = favicon;
-  if (!foundFavicon) {
-    try {
-      const faviconRes = await axios.get(`https://s2.googleusercontent.com/s2/favicons?sz=128&domain_url=${url}`);
-      foundFavicon = faviconRes.request.res.responseUrl;
-    } catch {
-      foundFavicon = undefined;
-    }
-  }
+  const response = await axios.get(url);
+  const { content, method, title, favicon } = await extractDataFromHTML(url, response.data);
   const doc = await Doc.findOneAndUpdate(
     {
       org: orgId,
@@ -36,6 +28,7 @@ export const createDocFromUrl = async (url: string, orgId: string, userId: Types
       title,
       favicon,
       createdBy: userId,
+      isJustAdded: true,
     },
     {
       upsert: true,
@@ -79,23 +72,40 @@ docsRouter.get('/', userMiddleware, async (_, res) => {
   }
 });
 
+docsRouter.get('/preview', async (req, res) => {
+  const url = req.query.url as string;
+  if (!url) {
+    return res.end();
+  }
+
+  try {
+    const response = await axios.get(url);
+    const { title, favicon } = await extractDataFromHTML(url, response.data);
+    return res.send({title, favicon});
+  } catch {
+    return res.status(400).send({error: 'Unable to fetch content from URL'});
+  }
+});
+
 docsRouter.post('/', userMiddleware, async (req, res) => {
   const { url } = req.body;
   const org = res.locals.user.org;
   try {
+    // Initial add is using light mode scan
     const { content, doc, method } = await createDocFromUrl(url, org, res.locals.user._id);
-    if (doc != null) {
-      await createEvent(org, doc._id, 'add', {});
-      indexDocForSearch(doc);
-      track(res.locals.user.userId, 'Add documentation', {
-        doc: doc._id.toString(),
-        method,
-        org: org.toString(),
-      });
-    } else console.log('Doc is null');
-    res.send({ content });
+    if (doc == null) {
+      return res.status(400).send({error: 'No doc available'});
+    }
+    await createEvent(org, doc._id, 'add', {});
+    indexDocForSearch(doc);
+    track(res.locals.user.userId, 'Add documentation', {
+      doc: doc._id.toString(),
+      method,
+      org: org.toString(),
+    });
+    return res.send({ content });
   } catch (error) {
-    res.status(500).send({ error });
+    return res.status(500).send({ error });
   }
 });
 

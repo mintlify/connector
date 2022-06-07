@@ -2,15 +2,15 @@ import { useIntercom } from 'react-use-intercom';
 import { ChatAlt2Icon, CogIcon, DocumentTextIcon, LightningBoltIcon } from '@heroicons/react/outline';
 import { PlusIcon } from '@heroicons/react/solid'
 import Link from 'next/link';
-import AddDocument from './commands/AddDocument'
-import AddAutomation from './commands/AddAutomation'
+import AddDocumentation from './commands/documentation/AddDocumentation'
+import AddAutomation from './commands/automation/AddAutomation'
 import { Org, User } from '../pages';
 import ProfilePicture from './ProfilePicture';
 
 type SidebarProps = {
   user: User;
   org: Org;
-  setIsAddingDoc?: (isAddingDoc: boolean) => void;
+  setIsAddDocLoading: (isAddingDoc: boolean) => void;
   setIsAddingAutomation?: (isAddingAutomation: boolean) => void;
   isAddDocumentOpen: boolean;
   setIsAddDocumentOpen: (isAddingAutomation: boolean) => void;
@@ -21,18 +21,15 @@ type SidebarProps = {
 export default function Sidebar({
   user,
   org,
-  setIsAddingDoc,
+  setIsAddDocLoading,
   setIsAddingAutomation,
   isAddAutomationOpen,
   isAddDocumentOpen,
   setIsAddAutomationOpen,
   setIsAddDocumentOpen
 }: SidebarProps) {
-
   const { boot, show } = useIntercom();
-
   const fullName = user.firstName + ' ' + user.lastName;
-
   const onClickHelp = () => {
     boot({ userId: user.userId, email: user.email, company: { companyId: org._id, name: org.name } })
     show();
@@ -40,11 +37,11 @@ export default function Sidebar({
 
   return (
     <>
-    <AddDocument
+    <AddDocumentation
       user={user}
       isOpen={isAddDocumentOpen}
       setIsOpen={setIsAddDocumentOpen}
-      setIsAddingDoc={setIsAddingDoc}
+      setIsAddDocLoading={setIsAddDocLoading}
     />
     <AddAutomation
       user={user}

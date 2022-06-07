@@ -2,7 +2,7 @@ import { GetServerSideProps } from "next";
 import Sidebar from "../components/Sidebar";
 import { classNames } from "../helpers/functions";
 import Layout from "../components/layout";
-import { getAutomationTypeIcon, getTypeIcon } from "../helpers/Icons";
+import { AutomationTypeIcon, TypeIcon } from "../helpers/Icons";
 import { Menu, Switch } from "@headlessui/react";
 import Head from "next/head";
 import { withSession } from "../lib/withSession";
@@ -164,6 +164,7 @@ export default function Automations({ userSession }: { userSession: UserSession 
           isAddDocumentOpen={isAddDocumentOpen}
           setIsAddDocumentOpen={setIsAddDocumentOpen}
           setIsAddingAutomation={setIsAddingAutomation}
+          setIsAddDocLoading={() => {}}
         />
         {/* Projects List */}
         <div className="bg-white lg:min-w-0 lg:flex-1">
@@ -202,7 +203,11 @@ export default function Automations({ userSession }: { userSession: UserSession 
                   <div className="px-4 py-5 sm:px-6">
                     <div className="flex items-center justify-between">
                       <div className="flex space-x-2 items-center">
-                        { getAutomationTypeIcon(automation.type, 8, 5) }
+                        <AutomationTypeIcon
+                          type={automation.type}
+                          outerSize={8}
+                          innerSize={5}
+                        />
                         <p className="text-sm font-medium text-gray-700">{automation.name}</p>
                       </div>
                       <div className="ml-2 flex-shrink-0 flex items-center space-x-2">
@@ -263,12 +268,18 @@ export default function Automations({ userSession }: { userSession: UserSession 
                     <div className="mt-2 sm:flex sm:justify-between">
                       <div className="sm:flex">
                         <p className="flex items-center text-sm text-gray-500">
-                          { getTypeIcon(automation.type, 'flex-shrink-0 mr-1 h-4 w-4 text-gray-400') }
+                          <TypeIcon
+                            type={automation.type}
+                            className="flex-shrink-0 mr-1 h-4 w-4 text-gray-400"
+                          />
                           {automation.type === 'code' && automation.source.repo}
                           {automation.type === 'doc' && automation.source.doc}
                         </p>
                         <p className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
-                          { getTypeIcon(automation.destination.type, 'flex-shrink-0 mr-1 h-4 w-4 text-gray-400') }
+                          <TypeIcon
+                            type={automation.destination.type}
+                            className="flex-shrink-0 mr-1 h-4 w-4 text-gray-400"
+                          />
                           {automation.destination.value}
                         </p>
                       </div>

@@ -7,21 +7,9 @@ import { getContentFromHTML } from '../helpers/routes/domparsing';
 import { getNotionPageData } from './notion';
 import axios from 'axios';
 
-type URLScrapingMethod = 'notion-private' | 'googledocs' | 'other';
-type WebScrapingMethod = 'readme' | 'stoplight' | 'docusaurus' | 'github' | 'notion-public' | 'confluence-public' | 'gitbook' | 'web';
+type WebScrapingMethod = 'readme' | 'stoplight' | 'docusaurus' | 'github' | 'notion-public' | 'notion-private' | 'googledocs' | 'confluence-public' | 'gitbook' | 'web';
 
-type ScrapingMethod = URLScrapingMethod | WebScrapingMethod;
-
-const getScrapingMethod = (url: string): URLScrapingMethod => {
-  const urlParsed = new URL(url);
-  if (isNotionUrl(urlParsed)) {
-    return 'notion-private';
-  }
-  if (isGoogleDocsUrl(urlParsed)) {
-    return 'googledocs';
-  }
-  return 'other';
-};
+type ScrapingMethod = WebScrapingMethod;
 
 const possiblyGetWebScrapingMethod = ($: cheerio.CheerioAPI): WebScrapingMethod => {
   const readmeVersion = $('meta[name="readme-version"]');
@@ -71,32 +59,43 @@ export const getDataFromWebpage = async (url: string, orgId: string, wait = 1000
   if (!validUrl.isUri(url)) {
     throw 'Is not valid URL';
   }
-
-  let scrapingMethod: ScrapingMethod = getScrapingMethod(url);
+  const urlParsed = new URL(url);
   const org = await Org.findById(orgId);
-  if (scrapingMethod === 'notion-private' && org?.integrations?.notion) {
+  if (isNotionUrl(urlParsed) && org?.integrations?.notion) {
     const notionAccessToken = org.integrations.notion.access_token;
     return await getNotionPageData(url, notionAccessToken);
   }
   // Only use the Google API to handle unpublished Google Docs for now since it doesn't work with published document yet.
-  else if (scrapingMethod === 'googledocs' && !url.includes('/pub')) {
+  else if (isGoogleDocsUrl(urlParsed) && !url.includes('/pub')) {
     const parsedUrl = new URL(url);
     return await getGoogleDocsData(parsedUrl);
   }
 
-  const { data: response } = await axios.get('https://app.scrapingbee.com/api/v1', {
-    params: {
-      'api_key': process.env.SCRAPINGBEE_KEY,
-      url,
-      wait: wait.toString(),
-      'block_resources': 'false'
-    } 
-  });
+  try {
+    const { data: response } = await axios.get('https://app.scrapingbee.com/api/v1', {
+      params: {
+        'api_key': process.env.SCRAPINGBEE_KEY,
+        url,
+        wait: wait.toString(),
+        'block_resources': 'false'
+      } 
+    });
 
-  const rawContent = response;
-  const $ = cheerio.load(rawContent);
-  // Only switch scraping method if other from url
-  scrapingMethod = scrapingMethod === 'other' ? possiblyGetWebScrapingMethod($) : scrapingMethod;
+    const rawContent = response;
+    return extractDataFromHTML(url, rawContent);
+  } catch (error: any) {
+    // Catch 404 errors because they could be valid
+    if (error.response.status !== 404) {
+      throw 'Unable to fetch results';
+    }
+    return extractDataFromHTML(url, error.response.data);
+  }
+};
+
+// Extract information
+export const extractDataFromHTML = async (url: string, html: string): Promise<ContentData> => {
+  const $ = cheerio.load(html);
+  const scrapingMethod = possiblyGetWebScrapingMethod($);
 
   const title = $('title').first().text().trim();
   let favicon = $('link[rel="shortcut icon"]').attr('href') || $('link[rel="icon"]').attr('href');
@@ -105,6 +104,14 @@ export const getDataFromWebpage = async (url: string, orgId: string, wait = 1000
   } else if (favicon?.startsWith('/')) {
     const urlParsed = new URL(url);
     favicon = `${urlParsed.origin}${favicon}`;
+  }
+  if (!favicon) {
+    try {
+      const faviconRes = await axios.get(`https://s2.googleusercontent.com/s2/favicons?sz=128&domain_url=${url}`);
+      favicon = faviconRes.request.res.responseUrl;
+    } catch {
+      favicon = undefined;
+    }
   }
   // Remove unneeded for content
   $('iframe').remove();
@@ -140,9 +147,6 @@ export const getDataFromWebpage = async (url: string, orgId: string, wait = 1000
       $('.recently-updated').remove();
       section = $('#content-body');
       break;
-    case 'googledocs':
-      section = $('#contents');
-      break;
     case 'gitbook':
       section = $('div[data-testid="page.contentEditor"]');
       break;
@@ -161,4 +165,4 @@ export const getDataFromWebpage = async (url: string, orgId: string, wait = 1000
     content,
     favicon,
   };
-};
+}
