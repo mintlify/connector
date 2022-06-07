@@ -6,8 +6,7 @@ import { ChevronRightIcon } from '@heroicons/react/solid';
 import { User } from '../../../pages';
 import DocumentationConfig from './DocumentationConfig';
 
-export type AddDocumentationType = 'webpage';
-// export type AddDocumentationType = 'webpage' | 'notion' | 'confluence' | 'googledocs';
+export type AddDocumentationType = 'webpage' | 'notion';
 
 type AddDocumentationSelection = {
   type: AddDocumentationType;
@@ -21,12 +20,11 @@ export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationS
     title: 'Web page',
     description: 'Add content from a website',
   },
-  // Do not remove
-  // notion: {
-  //   type: 'notion',
-  //   title: 'Notion page',
-  //   description: 'Sync with your Notion workspace',
-  // },
+  notion: {
+    type: 'notion',
+    title: 'Notion page',
+    description: 'Sync with your Notion workspace',
+  },
   // confluence: {
   //   type: 'confluence',
   //   title: 'Confluence document',
@@ -47,10 +45,10 @@ type AddDocumentationProps = {
 }
 
 export default function AddDocumentation({ user, isOpen, setIsOpen, setIsAddDocLoading }: AddDocumentationProps) {
-  const [selectedRuleType, setSelectedRuleType] = useState<AddDocumentationType>('webpage');
+  const [selectedRuleType, setSelectedRuleType] = useState<AddDocumentationType>();
 
   const onToPrimarySelection = () => {
-    setSelectedRuleType('webpage');
+    setSelectedRuleType(undefined);
   }
 
   const onClose = () => {
@@ -81,7 +79,7 @@ export default function AddDocumentation({ user, isOpen, setIsOpen, setIsAddDocL
             leave="ease-in duration-200"
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
-            afterLeave={() => setSelectedRuleType('webpage')}
+            afterLeave={() => setSelectedRuleType(undefined)}
           >
             <Dialog.Panel className="mx-auto max-w-xl transform divide-y divide-gray-100 rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
               <DocumentationConfig
