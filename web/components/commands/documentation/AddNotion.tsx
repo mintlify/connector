@@ -35,7 +35,7 @@ type AddNotionProps = {
 
 export default function AddNotion({ user, org, onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }: AddNotionProps) {
   const [pages, setPages] = useState<Page[]>();
-  const [selectedPageIds, setSelectedPageIds] = useState<string[]>([]);
+  const [selectedPages, setSelectedPages] = useState<Page[]>([]);
   const [search, setSearch] = useState('');
   const router = useRouter();
 
@@ -50,18 +50,18 @@ export default function AddNotion({ user, org, onCancel, setIsAddDocumentationOp
         return {...page, lastEditedAgo: timeAgo.format(Date.parse(page.lastEditedTime))};
       });
       setPages(pages);
-      setSelectedPageIds(results.map((result: Page) => result.id));
+      setSelectedPages(pages);
     }).catch(async () => {
       router.push(`${API_ENDPOINT}/routes/integrations/notion/install?org=${org._id}`);
     })
   }, [user.userId, router, org]);
 
-  const onClickPage = (pageId: string) => {
-    if (selectedPageIds.includes(pageId)) {
-      setSelectedPageIds(selectedPageIds.filter((id) => id !== pageId));
+  const onClickPage = (selectingPage: Page) => {
+    if (selectedPages.some((page) => page.id === selectingPage.id)) {
+      setSelectedPages(selectedPages.filter((page) => page.id !== selectingPage.id));
     }
     else {
-      setSelectedPageIds([...selectedPageIds, pageId]);
+      setSelectedPages([...selectedPages, selectingPage]);
     }
   }
 
@@ -69,12 +69,12 @@ export default function AddNotion({ user, org, onCancel, setIsAddDocumentationOp
     return page.title.toLowerCase().includes(search.toLowerCase());
   }) || [];
 
-  const isValidToSubmit = selectedPageIds.length > 0;
+  const isValidToSubmit = selectedPages.length > 0;
 
   const onSubmit = async () => {
     setIsAddDocLoading(true);
     axios.post(`${API_ENDPOINT}/routes/docs/notion`, {
-      pages: filteredPages,
+      pages: selectedPages,
     }, {
       params: {
         userId: user.userId,
@@ -87,7 +87,7 @@ export default function AddNotion({ user, org, onCancel, setIsAddDocumentationOp
   }
 
   return <div>
-  { pages != null && selectedPageIds != null ? <>
+  { pages != null && selectedPages != null ? <>
     <div className="relative rounded-md shadow-sm">
     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
       <SearchIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -107,11 +107,11 @@ export default function AddNotion({ user, org, onCancel, setIsAddDocumentationOp
           <div
             key={page.id}
             className={classNames(
-                selectedPageIds.includes(page.id) ? 'border-primary ring-1 ring-primary' : '',
+                selectedPages.some((selectedPage) => selectedPage.id === page.id) ? 'border-primary ring-1 ring-primary' : '',
                 'relative bg-white hover:bg-gray-50 border rounded-lg shadow-sm py-3 px-4 flex cursor-pointer focus:outline-none'
               )
             }
-            onClick={() => onClickPage(page.id)}
+            onClick={() => onClickPage(page)}
           >
           <span className="flex-1 flex">
             <span className="flex flex-col">
@@ -125,12 +125,12 @@ export default function AddNotion({ user, org, onCancel, setIsAddDocumentationOp
             </span>
           </span>
           <CheckCircleIcon
-            className={classNames(selectedPageIds.includes(page.id) ? '' : 'invisible', 'h-5 w-5 text-primary')}
+            className={classNames(selectedPages.some((selectedPage) => selectedPage.id === page.id) ? '' : 'invisible', 'h-5 w-5 text-primary')}
             aria-hidden="true"
           />
           <span
             className={classNames(
-              selectedPageIds.includes(page.id) ? 'border-indigo-500' : 'border-transparent',
+              selectedPages.some((selectedPage) => selectedPage.id === page.id) ? 'border-indigo-500' : 'border-transparent',
               'absolute -inset-px rounded-lg pointer-events-none'
             )}
             aria-hidden="true"
@@ -146,11 +146,11 @@ export default function AddNotion({ user, org, onCancel, setIsAddDocumentationOp
     </div>}
     <div className="flex">
       {
-        pages && selectedPageIds.length > 0 ? <>
-          <button className="text-sm text-primary font-medium" onClick={() => setSelectedPageIds([])}>
+        pages && selectedPages.length > 0 ? <>
+          <button className="text-sm text-primary font-medium" onClick={() => setSelectedPages([])}>
             Deselect all
           </button>
-        </> : pages ? <button className="text-sm text-primary font-medium" onClick={() => setSelectedPageIds(filteredPages.map((page) => page.id))}>
+        </> : pages ? <button className="text-sm text-primary font-medium" onClick={() => setSelectedPages(filteredPages)}>
             Select all
           </button> : null
       }
@@ -169,7 +169,7 @@ export default function AddNotion({ user, org, onCancel, setIsAddDocumentationOp
           isValidToSubmit ? "bg-primary hover:bg-hover" : "bg-gray-300 cursor-default")}
           onClick={onSubmit}
         >
-          Import ({selectedPageIds.length}) Notion Pages
+          Import ({selectedPages.length}) Notion Pages
         </button>
       </div>
     </div>
