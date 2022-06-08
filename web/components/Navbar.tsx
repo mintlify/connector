@@ -17,10 +17,6 @@ const navigation = [
   {
     name: 'Documentation',
     href: '/',
-  },
-  {
-    name: 'Automations',
-    href: '/automations',
   }
 ]
 
