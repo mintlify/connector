@@ -53,6 +53,9 @@ export const createDocsFromNotionPageId = async (pages: NotionPage[], orgId: Typ
           org: orgId,
           url: page.url,
           method: 'notion-private',
+          notion: {
+            pageId: page.id,
+          },
           content: '', // to be scraped
           title: `${page.icon?.emoji ? `${page.icon?.emoji} ` : ''}${page.title}`,
           favicon: page.icon?.file,

@@ -9,7 +9,7 @@ import axios from 'axios';
 
 type WebScrapingMethod = 'readme' | 'stoplight' | 'docusaurus' | 'github' | 'notion-public' | 'notion-private' | 'googledocs' | 'confluence-public' | 'gitbook' | 'web';
 
-type ScrapingMethod = WebScrapingMethod;
+export type ScrapingMethod = WebScrapingMethod;
 
 const possiblyGetWebScrapingMethod = ($: cheerio.CheerioAPI): WebScrapingMethod => {
   const readmeVersion = $('meta[name="readme-version"]');
