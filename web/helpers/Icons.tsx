@@ -1,7 +1,8 @@
 import { MailIcon, PencilAltIcon, BellIcon as BellIconSolid } from "@heroicons/react/solid";
-import { DocumentSearchIcon } from "@heroicons/react/outline";
+import { DocumentSearchIcon, DocumentTextIcon } from "@heroicons/react/outline";
 import { DestinationType, AutomationType } from "../pages/automations";
 import { AddDocumentationType } from "../components/commands/documentation/AddDocumentation";
+import { Doc } from "../pages";
 
 export type AddDocumentTypeIconProps = {
   type: AddDocumentationType,
@@ -116,4 +117,8 @@ export const TypeIcon = ({ type, className } : {type: AutomationType | Destinati
     default:
       return null;
   }
+}
+
+export const DocTitleIcon = ({doc}: {doc: Doc}) => {
+  return doc.favicon ? <img src={doc.favicon} alt="favicon" className="h-5 w-5 rounded-sm" /> : doc.method === 'notion-private' ? <img src="/assets/integrations/notion.svg" alt="favicon" className="h-5 w-5 rounded-sm" /> : <DocumentTextIcon className="h-5 w-5 text-gray-600" />
 }
