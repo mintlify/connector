@@ -1,5 +1,5 @@
 import { DocumentationTypeIcon } from '../../../helpers/Icons';
-import { User } from '../../../pages';
+import { Org, User } from '../../../pages';
 import { addDocumentationMap, AddDocumentationType } from './AddDocumentation';
 import AddNotion from './AddNotion';
 import AddWebpage from './AddWebpage';
@@ -10,13 +10,14 @@ type DocConfigSettings = {
 
 type DocumentationConfigProps = {
   user: User,
+  org: Org,
   documentationType?: AddDocumentationType,
   onCancel: () => void,
   setIsAddDocumentationOpen: (isOpen: boolean) => void,
   setIsAddDocLoading: (isAddingAutomation: boolean) => void;
 }
 
-export default function DocumentationConfig({ user, documentationType, onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }: DocumentationConfigProps) {
+export default function DocumentationConfig({ user, org, documentationType, onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }: DocumentationConfigProps) {
   if (documentationType == null) {
     return null;
   }
@@ -33,6 +34,7 @@ export default function DocumentationConfig({ user, documentationType, onCancel,
     notion: {
       inputComponent: <AddNotion
         user={user}
+        org={org}
         onCancel={onCancel}
         setIsAddDocumentationOpen={setIsAddDocumentationOpen}
         setIsAddDocLoading={setIsAddDocLoading}

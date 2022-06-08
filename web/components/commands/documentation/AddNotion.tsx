@@ -1,11 +1,12 @@
 import { SearchIcon } from "@heroicons/react/outline";
 import { CheckCircleIcon } from "@heroicons/react/solid";
 import axios from "axios";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { API_ENDPOINT } from "../../../helpers/api";
 import { classNames } from "../../../helpers/functions";
 import { getSubdomain } from "../../../helpers/user";
-import { User } from "../../../pages";
+import { Org, User } from "../../../pages";
 import timeAgo from "../../../services/timeago";
 
 type Icon = {
@@ -26,15 +27,17 @@ type Page = {
 
 type AddNotionProps = {
   user: User;
+  org: Org;
   onCancel: () => void;
   setIsAddDocumentationOpen: (isOpen: boolean) => void;
   setIsAddDocLoading: (isAddingAutomation: boolean) => void;
 }
 
-export default function AddNotion({ user, onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }: AddNotionProps) {
+export default function AddNotion({ user, org, onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }: AddNotionProps) {
   const [pages, setPages] = useState<Page[]>();
   const [selectedPageIds, setSelectedPageIds] = useState<string[]>([]);
   const [search, setSearch] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
     axios.post(`${API_ENDPOINT}/routes/integrations/notion/sync`, {}, {
@@ -48,8 +51,10 @@ export default function AddNotion({ user, onCancel, setIsAddDocumentationOpen, s
       });
       setPages(pages);
       setSelectedPageIds(results.map((result: Page) => result.id));
+    }).catch(async () => {
+      router.push(`${API_ENDPOINT}/routes/integrations/notion/install?org=${org._id}`);
     })
-  }, [user.userId]);
+  }, [user.userId, router, org]);
 
   const onClickPage = (pageId: string) => {
     if (selectedPageIds.includes(pageId)) {

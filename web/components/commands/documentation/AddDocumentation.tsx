@@ -5,10 +5,6 @@ import { DocumentationTypeIcon } from '../../../helpers/Icons';
 import { ChevronRightIcon } from '@heroicons/react/solid';
 import { Org, User } from '../../../pages';
 import DocumentationConfig from './DocumentationConfig';
-import axios from 'axios';
-import { API_ENDPOINT } from '../../../helpers/api';
-import { getSubdomain } from '../../../helpers/user';
-import { useRouter } from 'next/router';
 
 export type AddDocumentationType = 'webpage' | 'notion' | 'confluence' | 'googledocs';
 
@@ -51,20 +47,9 @@ type AddDocumentationProps = {
 
 export default function AddDocumentation({ user, org, isOpen, setIsOpen, setIsAddDocLoading }: AddDocumentationProps) {
   const [selectedRuleType, setSelectedRuleType] = useState<AddDocumentationType>();
-  const router = useRouter();
+
 
   const onClickOption = async (item: AddDocumentationSelection) => {
-    if (item.type === 'notion') {
-      const { data: { integrations } } = await axios.get(`${API_ENDPOINT}/routes/org/${org._id}/integrations`, {
-        params: {
-          userId: user.userId,
-          subdomain: getSubdomain(window.location.host)
-        }
-      });
-      if (!integrations.notion) {
-        router.push(`${API_ENDPOINT}/routes/integrations/notion/install?org=${org._id}`);
-      }
-    }
     setSelectedRuleType(item.type);
   }
 
@@ -105,6 +90,7 @@ export default function AddDocumentation({ user, org, isOpen, setIsOpen, setIsAd
             <Dialog.Panel className="mx-auto max-w-xl transform divide-y divide-gray-100 rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
               <DocumentationConfig
                 user={user}
+                org={org}
                 documentationType={selectedRuleType}
                 onCancel={onToPrimarySelection}
                 setIsAddDocumentationOpen={setIsOpen}
