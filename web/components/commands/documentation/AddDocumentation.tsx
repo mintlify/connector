@@ -3,11 +3,10 @@ import { Combobox, Dialog, Transition } from '@headlessui/react'
 import { classNames } from '../../../helpers/functions'
 import { DocumentationTypeIcon } from '../../../helpers/Icons';
 import { ChevronRightIcon } from '@heroicons/react/solid';
-import { User } from '../../../pages';
+import { Org, User } from '../../../pages';
 import DocumentationConfig from './DocumentationConfig';
 
-export type AddDocumentationType = 'webpage';
-// export type AddDocumentationType = 'webpage' | 'notion' | 'confluence' | 'googledocs';
+export type AddDocumentationType = 'webpage' | 'notion' | 'confluence' | 'googledocs';
 
 type AddDocumentationSelection = {
   type: AddDocumentationType;
@@ -21,36 +20,41 @@ export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationS
     title: 'Web page',
     description: 'Add content from a website',
   },
-  // Do not remove
-  // notion: {
-  //   type: 'notion',
-  //   title: 'Notion page',
-  //   description: 'Sync with your Notion workspace',
-  // },
-  // confluence: {
-  //   type: 'confluence',
-  //   title: 'Confluence document',
-  //   description: 'Add a Confluence document',
-  // },
-  // googledocs: {
-  //   type: 'googledocs',
-  //   title: 'Google Docs',
-  //   description: 'Add a Google Docs document',
-  // },
+  notion: {
+    type: 'notion',
+    title: 'Notion',
+    description: 'Add Notion pages',
+  },
+  confluence: {
+    type: 'confluence',
+    title: 'Confluence',
+    description: 'Add Confluence documents',
+  },
+  googledocs: {
+    type: 'googledocs',
+    title: 'Google Docs',
+    description: 'Add Google Docs documents',
+  },
 };
 
 type AddDocumentationProps = {
   user: User;
+  org: Org;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   setIsAddDocLoading: (isAddingAutomation: boolean) => void;
 }
 
-export default function AddDocumentation({ user, isOpen, setIsOpen, setIsAddDocLoading }: AddDocumentationProps) {
-  const [selectedRuleType, setSelectedRuleType] = useState<AddDocumentationType>('webpage');
+export default function AddDocumentation({ user, org, isOpen, setIsOpen, setIsAddDocLoading }: AddDocumentationProps) {
+  const [selectedRuleType, setSelectedRuleType] = useState<AddDocumentationType>();
+
+
+  const onClickOption = async (item: AddDocumentationSelection) => {
+    setSelectedRuleType(item.type);
+  }
 
   const onToPrimarySelection = () => {
-    setSelectedRuleType('webpage');
+    setSelectedRuleType(undefined);
   }
 
   const onClose = () => {
@@ -81,11 +85,12 @@ export default function AddDocumentation({ user, isOpen, setIsOpen, setIsAddDocL
             leave="ease-in duration-200"
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
-            afterLeave={() => setSelectedRuleType('webpage')}
+            afterLeave={() => setSelectedRuleType(undefined)}
           >
             <Dialog.Panel className="mx-auto max-w-xl transform divide-y divide-gray-100 rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
               <DocumentationConfig
                 user={user}
+                org={org}
                 documentationType={selectedRuleType}
                 onCancel={onToPrimarySelection}
                 setIsAddDocumentationOpen={setIsOpen}
@@ -101,7 +106,7 @@ export default function AddDocumentation({ user, isOpen, setIsOpen, setIsAddDocL
                         className={({ active }) =>
                           classNames('flex items-center cursor-default select-none rounded-xl p-3 hover:cursor-pointer', active ? 'bg-gray-50' : '')
                         }
-                        onClick={() => setSelectedRuleType(item.type)}
+                        onClick={() => onClickOption(item)}
                       >
                         {({ active }) => (
                           <>

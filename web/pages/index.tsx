@@ -40,6 +40,7 @@ export type Doc = {
   code: Code[],
   automations: Automation[],
   favicon?: string,
+  method: string,
 }
 
 export type UserSession = {
@@ -245,10 +246,10 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                         <h2 className="text-sm font-medium text-gray-700">
                           <div className="flex items-center space-x-2">
                             <div>
-                              { doc.favicon ? <img src={doc.favicon} alt="favicon" className="h-5 w-5 rounded-sm" /> : <DocumentTextIcon className="h-5 w-5 text-gray-600" /> }
+                              { doc.favicon ? <img src={doc.favicon} alt="favicon" className="h-5 w-5 rounded-sm" /> : doc.method === 'notion-private' ? <img src="/assets/integrations/notion.svg" alt="favicon" className="h-5 w-5 rounded-sm" /> : <DocumentTextIcon className="h-5 w-5 text-gray-600" /> }
                             </div>
                             <Link
-                              href={doc.url || ''}
+                              href={doc.url}
                             >
                               <a target="_blank" className="decoration-gray-300 hover:underline">
                                 {doc.title}

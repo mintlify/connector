@@ -39,6 +39,7 @@ export default function Sidebar({
     <>
     <AddDocumentation
       user={user}
+      org={org}
       isOpen={isAddDocumentOpen}
       setIsOpen={setIsAddDocumentOpen}
       setIsAddDocLoading={setIsAddDocLoading}
