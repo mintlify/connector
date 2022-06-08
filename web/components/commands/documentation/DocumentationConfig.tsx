@@ -40,12 +40,12 @@ export default function DocumentationConfig({ user, org, documentationType, onCa
         setIsAddDocLoading={setIsAddDocLoading}
       />,
     },
-    confluence: {
-      inputComponent: null,
-    },
-    googledocs: {
-      inputComponent: null,
-    }
+    // confluence: {
+    //   inputComponent: null,
+    // },
+    // googledocs: {
+    //   inputComponent: null,
+    // }
   }
 
   const ruleData = addDocumentationMap[documentationType];

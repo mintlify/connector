@@ -6,7 +6,8 @@ import { ChevronRightIcon } from '@heroicons/react/solid';
 import { Org, User } from '../../../pages';
 import DocumentationConfig from './DocumentationConfig';
 
-export type AddDocumentationType = 'webpage' | 'notion' | 'confluence' | 'googledocs';
+// export type AddDocumentationType = 'webpage' | 'notion' | 'confluence' | 'googledocs';
+export type AddDocumentationType = 'webpage' | 'notion';
 
 type AddDocumentationSelection = {
   type: AddDocumentationType;
@@ -25,16 +26,16 @@ export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationS
     title: 'Notion',
     description: 'Add Notion pages',
   },
-  confluence: {
-    type: 'confluence',
-    title: 'Confluence',
-    description: 'Add Confluence documents',
-  },
-  googledocs: {
-    type: 'googledocs',
-    title: 'Google Docs',
-    description: 'Add Google Docs documents',
-  },
+  // confluence: {
+  //   type: 'confluence',
+  //   title: 'Confluence',
+  //   description: 'Add Confluence documents',
+  // },
+  // googledocs: {
+  //   type: 'googledocs',
+  //   title: 'Google Docs',
+  //   description: 'Add Google Docs documents',
+  // },
 };
 
 type AddDocumentationProps = {
