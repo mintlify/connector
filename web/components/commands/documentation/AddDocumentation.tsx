@@ -22,12 +22,12 @@ export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationS
   },
   notion: {
     type: 'notion',
-    title: 'Notion page',
-    description: 'Sync with your Notion workspace',
+    title: 'Notion',
+    description: 'Add a Notion page',
   },
   confluence: {
     type: 'confluence',
-    title: 'Confluence document',
+    title: 'Confluence',
     description: 'Add a Confluence document',
   },
   googledocs: {
