@@ -146,13 +146,13 @@ export default function AddNotion({ user, org, onCancel, setIsAddDocumentationOp
     </div>}
     <div className="flex">
       {
-        selectedPageIds.length > 0 ? <>
+        pages && selectedPageIds.length > 0 ? <>
           <button className="text-sm text-primary font-medium" onClick={() => setSelectedPageIds([])}>
             Deselect all
           </button>
-        </> : <button className="text-sm text-primary font-medium" onClick={() => setSelectedPageIds(filteredPages.map((page) => page.id))}>
+        </> : pages ? <button className="text-sm text-primary font-medium" onClick={() => setSelectedPageIds(filteredPages.map((page) => page.id))}>
             Select all
-          </button>
+          </button> : null
       }
       <div className="flex-1 mt-4 flex justify-end">
         <button
