@@ -6,6 +6,7 @@ import { DocumentationTypeIcon } from '../../../helpers/Icons';
 import { getSubdomain } from '../../../helpers/user';
 import { User } from '../../../pages';
 import { addDocumentationMap, AddDocumentationType } from './AddDocumentation';
+import AddNotion from './AddNotion';
 import AddWebpage from './AddWebpage';
 
 type DocConfigSettings = {
@@ -61,7 +62,7 @@ export default function DocumentationConfig(
     },
     notion: {
       validation: false,
-      inputComponent: null,
+      inputComponent: <AddNotion user={user} />,
       onSubmit: () => {}
     },
     confluence: {

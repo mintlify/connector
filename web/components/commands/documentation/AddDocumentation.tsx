@@ -5,9 +5,6 @@ import { DocumentationTypeIcon } from '../../../helpers/Icons';
 import { ChevronRightIcon } from '@heroicons/react/solid';
 import { User } from '../../../pages';
 import DocumentationConfig from './DocumentationConfig';
-import axios from 'axios';
-import { API_ENDPOINT } from '../../../helpers/api';
-import { getSubdomain } from '../../../helpers/user';
 
 export type AddDocumentationType = 'webpage' | 'notion' | 'confluence' | 'googledocs';
 
@@ -15,7 +12,6 @@ type AddDocumentationSelection = {
   type: AddDocumentationType;
   title: string;
   description: string;
-  onClick?: (user: User) => void;
 }
 
 export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationSelection> = {
@@ -28,14 +24,6 @@ export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationS
     type: 'notion',
     title: 'Notion page',
     description: 'Sync with your Notion workspace',
-    onClick: (user: User) => {
-      axios.post(`${API_ENDPOINT}/routes/integrations/notion/sync`, {}, {
-        params: {
-          userId: user.userId,
-          subdomain: getSubdomain(window.location.host),
-        }
-      })
-    }
   },
   confluence: {
     type: 'confluence',
@@ -60,9 +48,6 @@ export default function AddDocumentation({ user, isOpen, setIsOpen, setIsAddDocL
   const [selectedRuleType, setSelectedRuleType] = useState<AddDocumentationType>();
 
   const onClickOption = (item: AddDocumentationSelection) => {
-    if (item.onClick) {
-      return item.onClick(user);
-    }
     setSelectedRuleType(item.type);
   }
 

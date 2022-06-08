@@ -6,7 +6,7 @@ import { ENDPOINT } from '../../helpers/github/octokit';
 import Org from '../../models/Org';
 import { track } from '../../services/segment';
 import { userMiddleware } from '../user';
-import { getNotionPageDataWithId } from '../../services/notion';
+import { getNotionTitle } from '../../services/notion';
 
 const clientId = 'ec770c41-07f8-44bd-a4d8-66d30e9786c8';
 const redirectUrl = `${ENDPOINT}/routes/integrations/notion/authorization`;
@@ -109,17 +109,22 @@ notionRouter.post('/sync', userMiddleware, async (_, res) => {
             property: "object",
             value: "page"
         },
+        sort: {
+            direction: 'descending',
+            timestamp: 'last_edited_time'
+        }
     });
 
-    const getPagesPromise = searchResults.results.map((notionResult) => {
-        return getNotionPageDataWithId(notionResult.id, notionAccessToken);
-    });
-
-    const firstPagesContent = await Promise.all(getPagesPromise);
-
-    console.log(firstPagesContent);
+    const results = searchResults.results.map((page: any) => {
+        return {
+            id: page.id,
+            title: getNotionTitle(page),
+            icon: page.icon,
+            url: page.url,
+        }
+    })
     
-    return res.send({results: firstPagesContent});
+    return res.send({results});
 })
 
 export default notionRouter;
