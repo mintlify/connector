@@ -6,6 +6,7 @@ import { API_ENDPOINT } from "../../../helpers/api";
 import { classNames } from "../../../helpers/functions";
 import { getSubdomain } from "../../../helpers/user";
 import { User } from "../../../pages";
+import timeAgo from "../../../services/timeago";
 
 type Icon = {
   type: 'emoji' | 'file',
@@ -19,6 +20,8 @@ type Page = {
   id: string,
   title: string,
   icon?: Icon,
+  lastEditedTime: string,
+  lastEditedAgo: string,
 }
 
 type AddNotionProps = {
@@ -28,7 +31,7 @@ type AddNotionProps = {
   setIsAddDocLoading: (isAddingAutomation: boolean) => void;
 }
 
-export default function AddNotion({ user, onCancel }: AddNotionProps) {
+export default function AddNotion({ user, onCancel, setIsAddDocumentationOpen }: AddNotionProps) {
   const [pages, setPages] = useState<Page[]>();
   const [selectedPageIds, setSelectedPageIds] = useState<string[]>([]);
   const [search, setSearch] = useState('');
@@ -40,7 +43,10 @@ export default function AddNotion({ user, onCancel }: AddNotionProps) {
         subdomain: getSubdomain(window.location.host),
       }
     }).then(({ data: { results } }) => {
-      setPages(results);
+      const pages = results.map((page: Page) => {
+        return {...page, lastEditedAgo: timeAgo.format(Date.parse(page.lastEditedTime))};
+      });
+      setPages(pages);
       setSelectedPageIds(results.map((result: Page) => result.id));
     })
   }, [user.userId]);
@@ -59,7 +65,7 @@ export default function AddNotion({ user, onCancel }: AddNotionProps) {
   });
 
   const onSubmit = async () => {
-
+    setIsAddDocumentationOpen(false);
   }
 
   const isValidToSubmit = filteredPages && filteredPages.length > 0;
@@ -98,7 +104,7 @@ export default function AddNotion({ user, onCancel }: AddNotionProps) {
                 {page.title}
               </span>
               <span className="mt-1 flex items-center text-sm text-gray-500">
-                Last updated
+                Last updated {page.lastEditedAgo}
               </span>
             </span>
           </span>

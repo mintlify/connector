@@ -119,6 +119,7 @@ notionRouter.post('/sync', userMiddleware, async (_, res) => {
         return {
             id: page.id,
             title: getNotionTitle(page),
+            lastEditedTime: page.last_edited_time,
             icon: page.icon,
             url: page.url,
         }
