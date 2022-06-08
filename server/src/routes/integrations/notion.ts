@@ -4,6 +4,7 @@ import { Client } from '@notionhq/client';
 import { ISDEV } from '../../helpers/environment';
 import { ENDPOINT } from '../../helpers/github/octokit';
 import Org from '../../models/Org';
+import Doc from '../../models/Doc';
 import { track } from '../../services/segment';
 import { userMiddleware } from '../user';
 import { getNotionTitle } from '../../services/notion';
@@ -127,6 +128,7 @@ notionRouter.post('/sync', userMiddleware, async (_, res) => {
         }
     });
 
+    const existingDocs = await Doc.find({ org: orgId });
     const results: NotionPage[] = searchResults.results.map((page: any) => {
         return {
             id: page.id,
@@ -135,6 +137,8 @@ notionRouter.post('/sync', userMiddleware, async (_, res) => {
             icon: page.icon,
             url: page.url,
         }
+    }).filter((page) => {
+        return !existingDocs.some((doc) => doc.notion?.pageId === page.id)
     })
     
     return res.send({results});
