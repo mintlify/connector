@@ -3,8 +3,12 @@ import { Combobox, Dialog, Transition } from '@headlessui/react'
 import { classNames } from '../../../helpers/functions'
 import { DocumentationTypeIcon } from '../../../helpers/Icons';
 import { ChevronRightIcon } from '@heroicons/react/solid';
-import { User } from '../../../pages';
+import { Org, User } from '../../../pages';
 import DocumentationConfig from './DocumentationConfig';
+import axios from 'axios';
+import { API_ENDPOINT } from '../../../helpers/api';
+import { getSubdomain } from '../../../helpers/user';
+import { useRouter } from 'next/router';
 
 export type AddDocumentationType = 'webpage' | 'notion' | 'confluence' | 'googledocs';
 
@@ -39,15 +43,28 @@ export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationS
 
 type AddDocumentationProps = {
   user: User;
+  org: Org;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   setIsAddDocLoading: (isAddingAutomation: boolean) => void;
 }
 
-export default function AddDocumentation({ user, isOpen, setIsOpen, setIsAddDocLoading }: AddDocumentationProps) {
+export default function AddDocumentation({ user, org, isOpen, setIsOpen, setIsAddDocLoading }: AddDocumentationProps) {
   const [selectedRuleType, setSelectedRuleType] = useState<AddDocumentationType>();
+  const router = useRouter();
 
-  const onClickOption = (item: AddDocumentationSelection) => {
+  const onClickOption = async (item: AddDocumentationSelection) => {
+    if (item.type === 'notion') {
+      const { data: { integrations } } = await axios.get(`${API_ENDPOINT}/routes/org/${org._id}/integrations`, {
+        params: {
+          userId: user.userId,
+          subdomain: getSubdomain(window.location.host)
+        }
+      });
+      if (!integrations.notion) {
+        router.push(`${API_ENDPOINT}/routes/integrations/notion/install?org=${org._id}`);
+      }
+    }
     setSelectedRuleType(item.type);
   }
 
