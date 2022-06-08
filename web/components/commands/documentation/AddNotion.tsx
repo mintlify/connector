@@ -31,7 +31,7 @@ type AddNotionProps = {
   setIsAddDocLoading: (isAddingAutomation: boolean) => void;
 }
 
-export default function AddNotion({ user, onCancel, setIsAddDocumentationOpen }: AddNotionProps) {
+export default function AddNotion({ user, onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }: AddNotionProps) {
   const [pages, setPages] = useState<Page[]>();
   const [selectedPageIds, setSelectedPageIds] = useState<string[]>([]);
   const [search, setSearch] = useState('');
@@ -62,13 +62,24 @@ export default function AddNotion({ user, onCancel, setIsAddDocumentationOpen }:
 
   const filteredPages = pages?.filter((page) => {
     return page.title.toLowerCase().includes(search.toLowerCase());
-  });
-
-  const onSubmit = async () => {
-    setIsAddDocumentationOpen(false);
-  }
+  }) || [];
 
   const isValidToSubmit = filteredPages && filteredPages.length > 0;
+
+  const onSubmit = async () => {
+    setIsAddDocLoading(true);
+    axios.post(`${API_ENDPOINT}/routes/docs/notion`, {
+      pages: filteredPages,
+    }, {
+      params: {
+        userId: user.userId,
+        subdomain: getSubdomain(window.location.host),
+      }
+    }).then(() => {
+      setIsAddDocLoading(false);
+    })
+    setIsAddDocumentationOpen(false);
+  }
 
   return <div>
   { pages != null && selectedPageIds != null ? <>

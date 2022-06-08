@@ -91,6 +91,18 @@ notionRouter.get('/authorization', async (req, res) => {
     return res.redirect(`https://${org.subdomain}.mintlify.com`);
 });
 
+export type NotionPage = {
+    id: string,
+    title: string,
+    lastEditedTime: string,
+    icon?: {
+        type: string,
+        emoji?: string,
+        file?: string,
+    },
+    url: string,
+}
+
 notionRouter.post('/sync', userMiddleware, async (_, res) => {
     const { org: orgId } = res.locals.user;
 
@@ -115,7 +127,7 @@ notionRouter.post('/sync', userMiddleware, async (_, res) => {
         }
     });
 
-    const results = searchResults.results.map((page: any) => {
+    const results: NotionPage[] = searchResults.results.map((page: any) => {
         return {
             id: page.id,
             title: getNotionTitle(page),
