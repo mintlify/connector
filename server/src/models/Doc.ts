@@ -12,6 +12,10 @@ export type DocType = {
     createdAt: Date;
     changeConfirmationCount?: number;
     isJustAdded: boolean;
+    // used for method = notion-private
+    notion?: {
+        pageId: string;
+    },
 };
 
 const DocSchema = new Schema({
@@ -26,6 +30,9 @@ const DocSchema = new Schema({
     createdBy: { type: Schema.Types.ObjectId },
     changeConfirmationCount: { type: Number },
     isJustAdded: { type: Boolean, default: true },
+    notion: {
+        pageId: { type: String, }
+    }
 });
 
 const Doc = mongoose.model<DocType>('Doc', DocSchema, 'docs');

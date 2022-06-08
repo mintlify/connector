@@ -152,7 +152,7 @@ export default function Search({ user, org, isOpen, setIsOpen }: SearchProps) {
                                 <>
                                 {
                                   docResult.favicon
-                                    ? <img className={classNames('h-6 w-6 flex-none', active ? 'grayscale brightness-200' : '')} src={docResult.favicon} alt="Logo" />
+                                    ? <img className="h-6 w-6 flex-none" src={docResult.favicon} alt="Logo" />
                                     : <DocumentTextIcon
                                         className={classNames('h-6 w-6 flex-none', active ? 'text-white' : 'text-gray-400')}
                                         aria-hidden="true"
