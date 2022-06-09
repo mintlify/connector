@@ -64,7 +64,7 @@ export default function Navbar({ user, org }: NavbarProps) {
               </div>
               <div className="flex lg:justify-end focus:outline-none">
                 <button
-                  className="w-96 lg:max-w-xs"
+                  className="md:w-96 lg:max-w-xs w-full"
                   onClick={() => setIsSearchOpen(true)}
                 >
                   <label htmlFor="search" className="sr-only">
