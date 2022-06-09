@@ -64,7 +64,7 @@ const getIntegrations = (orgId: string) => {
       href: `${API_ENDPOINT}/routes/integrations/notion/install?org=${orgId}`,
     },
     {
-      id: 'googledocs',
+      id: 'google',
       name: 'Google',
       imageUrl: '/assets/integrations/google.svg',
       href: `${API_ENDPOINT}/routes/integrations/google/install?org=${orgId}`,

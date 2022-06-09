@@ -1,4 +1,4 @@
-import mongoose, { Schema, Types } from "mongoose";
+import mongoose, { Schema, Types } from 'mongoose';
 
 export type OrgType = {
   _id: Types.ObjectId;
@@ -29,16 +29,21 @@ export type OrgType = {
     github?: {
       installations: Object[];
     };
+    google?: {
+      accessToken: string;
+      expiryDate: number;
+      refreshToken: string;
+    };
   };
-  users: string[],
-  invitedEmails?: string[],
+  users: string[];
+  invitedEmails?: string[];
   notifications: {
-    monthlyDigest: boolean,
-    newsletter: boolean,
-  },
+    monthlyDigest: boolean;
+    newsletter: boolean;
+  };
   access: {
-    mode: string,
-  }
+    mode: string;
+  };
 };
 
 const OrgSchema = new Schema({
@@ -69,6 +74,11 @@ const OrgSchema = new Schema({
       workspace_name: { type: String },
       workspace_icon: { type: String },
     },
+    google: {
+      accessToken: { type: String, required: true },
+      expiryDate: { type: Number, required: true },
+      refreshToken: { type: String, required: true },
+    },
   },
   notifications: {
     monthlyDigest: { type: Boolean, default: true },
@@ -76,9 +86,9 @@ const OrgSchema = new Schema({
   },
   access: {
     mode: { type: String, default: 'private' },
-  }
+  },
 });
 
-const Org = mongoose.model<OrgType>("Org", OrgSchema, "orgs");
+const Org = mongoose.model<OrgType>('Org', OrgSchema, 'orgs');
 
 export default Org;
