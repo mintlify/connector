@@ -2,7 +2,7 @@ import { LockClosedIcon, MailIcon } from "@heroicons/react/solid"
 import Link from "next/link"
 import axios from "axios"
 import { useEffect, useState } from "react"
-import { getOrgFromSubdomainForAuth, getSubdomain, OrgForAuth } from "../helpers/user"
+import { getOrgFromSubdomainForAuth, getSubdomain, OrgForAuth } from "../../helpers/user"
 import Head from "next/head"
 
 export default function SignIn() {

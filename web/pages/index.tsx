@@ -17,13 +17,14 @@ import Head from 'next/head'
 import 'react-loading-skeleton/dist/skeleton.css'
 import LoadingItem from '../components/LoadingItem'
 import { withSession } from '../lib/withSession'
-import SignIn from '../components/SignIn'
-import Setup from '../components/Setup'
+import SignIn from '../components/screens/SignIn'
+import Setup from '../components/screens/Setup'
 import { Automation } from './automations'
 import { DocumentTextIcon } from '@heroicons/react/outline'
 import { Event } from '../components/Event'
 import ActivityBar from '../components/ActivityBar'
 import { getSubdomain } from '../helpers/user'
+import Onboarding from '../components/screens/Onboarding'
 
 type Code = {
   _id: string,
@@ -128,6 +129,9 @@ export default function Home({ userSession }: { userSession: UserSession }) {
   if (!userSession) {
     return <SignIn />
   }
+
+  // Temporarily return onboarding
+  return <Onboarding />
 
   const { user, org } = userSession;
 
