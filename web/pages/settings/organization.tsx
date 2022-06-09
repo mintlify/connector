@@ -33,6 +33,57 @@ const access: AccessOption[] = [
   { id: 'private', name: 'Private', description: 'Only invited members can join' },
 ]
 
+const integrations = [
+  {
+    title: 'Alerts',
+    subtitle: 'Receive alerts about your documentation',
+    apps: [
+      {
+        id: 'slack',
+        name: 'Slack',
+        icon: '/assets/integrations/slack.svg',
+        installHref: '',
+      }
+    ]
+  },
+  {
+    title: 'Documentation',
+    subtitle: 'Integration with documentation platforms',
+    apps: [
+      {
+        id: 'google-drive',
+        name: 'Google Drive',
+        icon: '/assets/integrations/google-docs.svg',
+        installHref: '',
+      },
+      {
+        id: 'notion',
+        name: 'Notion',
+        icon: '/assets/integrations/notion.svg',
+        installHref: '',
+      }
+    ]
+  },
+  {
+    title: 'Code',
+    subtitle: 'Connect documentation with your code',
+    apps: [
+      {
+        id: 'github',
+        name: 'GitHub',
+        icon: '/assets/integrations/github.svg',
+        installHref: '',
+      },
+      {
+        id: 'vscode',
+        name: 'VS Code',
+        icon: '/assets/integrations/vscode.svg',
+        installHref: '',
+      }
+    ]
+  }
+]
+
 const notify = (title: string, description: string) => toast.custom((t) => {
   return (
     <div
@@ -80,7 +131,8 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
   const [invitedEmail, setInvitedEmail] = useState("")
   const [inviteErrorMessage, setInviteErrorMessage] = useState<string | undefined>(undefined)
   const [isSendingInvite, setIsSendingInvite] = useState(false)
-  const [members, setMembers] = useState<User[]>([])
+  const [members, setMembers] = useState<User[]>([]);
+  const [integrationsStatus, setIntegrationsStatus] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (user == null || org == null) return;
@@ -94,7 +146,17 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
       setMembers(res.data.users)
     });
 
-  }, [user, org])
+    axios.get(`${API_ENDPOINT}/routes/org/${org._id}/integrations`, {
+      params: {
+        userId: user.userId,
+        subdomain: getSubdomain(window.location.host)
+      }
+    }).then(({ data }) => {
+        const { integrations } = data;
+        setIntegrationsStatus(integrations);
+      })
+
+  }, [user, org]);
 
   if (user == null || org == null) {
     router.push('/');
@@ -395,6 +457,43 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+            </form>
+            <form method="POST" id="integrations">
+              <div className="shadow sm:rounded-md">
+                <div className="bg-white pt-6 pb-8 px-4 space-y-4 sm:px-6">
+                  <div>
+                    <h3 className="text-lg leading-6 font-medium text-gray-900">Integrations</h3>
+                    <p className="mt-1 text-sm text-gray-500">Connections for your documentation stack</p>
+                  </div>
+
+                  <ul role="list" className="divide-y divide-gray-200">
+                    {
+                      integrations.map((integration) => (
+                      <li key={integration.title} className="px-4 py-4 sm:px-0">
+                        <h1 className="text-gray-800 font-medium">{integration.title}</h1>
+                        <p className="text-gray-500 text-sm">{integration.subtitle}</p>
+                        {
+                          integration.apps.map((app) => (
+                            <div key={app.id} className="mt-2 flex">
+                              <div className="flex-1 flex items-center text-gray-700">
+                                <img className="h-4 w-4 mr-2" src={app.icon} alt={app.name} />
+                                {app.name}
+                              </div>
+                              <div className="text-sm">
+                                { integrationsStatus[app.id]
+                                ? <span className="flex items-center text-gray-700 font-medium">Installed <CheckCircleIcon className="h-4 w-4 text-green-600" /></span>
+                                : <button className="text-primary font-medium">Install</button>
+                                }
+                              </div>
+                            </div>
+                          ))
+                        }
+                      </li>
+                      ))
+                    }
+                  </ul>
                 </div>
               </div>
             </form>

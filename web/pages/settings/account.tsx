@@ -1,6 +1,6 @@
 import Layout from "../../components/layout"
 import toast, { Toaster } from 'react-hot-toast';
-import { UserCircleIcon, UserGroupIcon } from "@heroicons/react/outline"
+import { UserCircleIcon, UserGroupIcon, ViewGridAddIcon } from "@heroicons/react/outline"
 import { GetServerSideProps } from "next"
 import { withSession } from "../../lib/withSession"
 import { UserSession } from ".."
@@ -22,6 +22,7 @@ export type EmailNotifications = {
 export const navigation = [
   { name: "Account", href: "/settings/account", icon: UserCircleIcon },
   { name: "Organization", href: "/settings/organization", icon: UserGroupIcon },
+  { name: "Integrations", href: "/settings/organization#integrations", icon: ViewGridAddIcon },
 ]
 
 const notify = (title: string, description: string) => toast.custom((t) => {
