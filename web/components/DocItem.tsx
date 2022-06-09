@@ -6,7 +6,7 @@ import {
   ChevronRightIcon,
   DotsVerticalIcon,
 } from '@heroicons/react/solid'
-import { AutomationTypeIcon, ConnectionIcon, DocTitleIcon } from '../helpers/Icons'
+import { ConnectionIcon, DocTitleIcon } from '../helpers/Icons'
 import timeAgo from '../services/timeago'
 import { getSubdomain } from "../helpers/user";
 import axios from "axios";
@@ -20,25 +20,61 @@ type DocItemProps = {
   setDocs: (docs: Doc[]) => void,
   selectedDoc?: Doc,
   setSelectedDoc: (doc: Doc | undefined) => void,
+  integrationsStatus: { [key: string]: boolean } | undefined
 }
 
-export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs, setSelectedDoc }: DocItemProps) {
-  const listMenu = [
-    {
-      name: 'Delete',
-      isRed: true,
-      onClick: (docId: string) => {
-        setDocs(docs.filter(doc => doc._id !== docId));
-        setSelectedDoc(undefined);
-        axios.delete(`${API_ENDPOINT}/routes/docs/${docId}`, {
+export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs, setSelectedDoc, integrationsStatus }: DocItemProps) {
+  const listMenu = () => {
+    const menu = [];
+
+    if (integrationsStatus != null && integrationsStatus['slack']) {
+      const slack = doc?.slack ?? true;
+      menu.push({
+        name: slack ? 'Disable Slack alerts' : 'Enable Slack alerts',
+        isGreen: !slack,
+        onClick: () => {
+          axios.put(`${API_ENDPOINT}/routes/docs/${doc._id}/slack`, {
+            params: {
+              userId: user.userId,
+              subdomain: getSubdomain(window.location.host)
+            }
+          });
+        }
+      })
+    }
+
+    const email = doc?.email ?? true;
+
+    menu.push({
+      name: email ? 'Disable email alerts' : 'Enable email alerts',
+      isGreen: !email,
+      onClick: () => {
+        axios.put(`${API_ENDPOINT}/routes/docs/${doc._id}/email`, {
           params: {
             userId: user.userId,
             subdomain: getSubdomain(window.location.host)
           }
         });
       }
-    }
-  ]
+    })
+
+    menu.push({
+      name: 'Delete',
+      isRed: true,
+      onClick: () => {
+        setDocs(docs.filter(oneOfTheDocs => oneOfTheDocs._id !== doc._id));
+        setSelectedDoc(undefined);
+        axios.delete(`${API_ENDPOINT}/routes/docs/${doc._id}`, {
+          params: {
+            userId: user.userId,
+            subdomain: getSubdomain(window.location.host)
+          }
+        });
+      }
+    });
+
+    return menu;
+  };
 
   return <div key={doc._id}>
   <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div>
@@ -94,9 +130,9 @@ export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs
               </Menu.Button>
             </div>
             <Menu.Items className="origin-top-right absolute right-0 mt-2 z-10 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
-                <div className="py-1 w-32">
+                <div className="py-1 w-40">
                   {
-                    listMenu.map((menu) => (
+                    listMenu().map((menu) => (
                       <Menu.Item key={menu.name}>
                         {({ active }) => (
                           <button
@@ -104,10 +140,11 @@ export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs
                             className={classNames(
                               active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                               menu.isRed ? 'text-red-700' : '',
-                              'w-full flex items-center space-x-2 px-3 py-1.5 text-sm')}
+                              'w-full flex items-center space-x-2 px-3 py-1.5 text-sm',
+                              menu.isGreen ? 'text-green-800' : '')}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                menu.onClick(doc._id);
+                                menu.onClick();
                               }}
                           >
                             <span>{menu.name}</span>
@@ -131,17 +168,6 @@ export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs
                 />
               </a>
             ))}
-            {
-              doc.automations.map((automation) => (
-              <a key={automation._id}>
-                <AutomationTypeIcon
-                  type={automation.type}
-                  outerSize={6}
-                  innerSize={4}
-                />
-              </a>
-              ))
-            }
           </div>
         </div>
       </div>

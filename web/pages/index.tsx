@@ -33,6 +33,8 @@ export type Doc = {
   code: Code[],
   favicon?: string,
   method: string,
+  slack?: boolean,
+  email?: boolean 
 }
 
 export type UserSession = {
@@ -81,6 +83,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
   const [isAddDocLoading, setIsAddDocLoading] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
+  const [integrationsStatus, setIntegrationsStatus] = useState<{ [key: string]: boolean }>();
 
   useEffect(() => {
     if (userSession == null || userSession.user == null || userSession.org == null) {
@@ -116,14 +119,31 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       });
   }, [userSession, selectedDoc, isAddDocLoading]);
 
+  const { user, org } = userSession;
+
+  useEffect(() => {
+    if (user == null || org == null) {
+      return;
+    }
+
+    axios.get(`${API_ENDPOINT}/routes/org/${org._id}/integrations`, {
+      params: {
+        userId: user.userId,
+        subdomain: getSubdomain(window.location.host)
+      }
+    })
+    .then(({ data }) => {
+      const { integrations } = data;
+      setIntegrationsStatus(integrations);
+    })
+  }, [user, org]);
+
   if (!userSession) {
     return <SignIn />
   }
 
   // Temporarily return onboarding
   // return <Onboarding />
-
-  const { user, org } = userSession;
 
   if (user == null) {
     return <>
@@ -216,6 +236,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                 setSelectedDoc={setSelectedDoc}
                 docs={docs}
                 setDocs={setDocs}
+                integrationsStatus={integrationsStatus}
               />
             ))}
           </ul>
