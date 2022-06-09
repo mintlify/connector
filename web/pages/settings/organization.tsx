@@ -344,7 +344,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                         </fieldset>
                       </div>
 
-                    <div className="col-span-3">
+                    <div className="col-span-3" id="invite">
                       <div className="space-y-5">
                         <div className="sm:flex sm:items-center">
                           <div className="sm:flex-auto">
