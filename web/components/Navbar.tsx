@@ -13,13 +13,6 @@ import ProfilePicture from './ProfilePicture'
 import { Org, User } from '../pages'
 import Search from './Search'
 
-const navigation = [
-  {
-    name: 'Documentation',
-    href: '/',
-  }
-]
-
 const userNavigation = [
   { name: 'Account', href: '/settings/account' },
   { name: 'Organization', href: '/settings/organization' },
@@ -68,22 +61,6 @@ export default function Navbar({ user, org }: NavbarProps) {
                     />
                   </button>
                 </Link>
-                <div className="hidden lg:block lg:ml-6">
-                  <div className="flex space-x-4">
-                    {
-                      navigation.map((nav) => (
-                        <Link
-                          key={nav.name}
-                          href={nav.href}
-                        >
-                          <span className={navButtonClass(router.pathname === nav.href)}>
-                            {nav.name}
-                          </span>
-                        </Link>
-                      ))
-                    }
-                  </div>
-                </div>
               </div>
               <button
                 className="flex-1 flex justify-center px-2 lg:ml-6 lg:justify-end focus:outline-none"
@@ -207,21 +184,6 @@ export default function Navbar({ user, org }: NavbarProps) {
           </div>
 
           <Disclosure.Panel className="lg:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1">
-              {
-                navigation.map((nav) => (
-                  <Disclosure.Button
-                    key={nav.name}
-                    as="a"
-                    href={nav.href}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-800"
-                  >
-                    {nav.name}
-                  </Disclosure.Button>
-                  )
-                )
-              }
-            </div>
             <div className="pt-4 pb-3 border-t border-gray-700">
               <div className="flex items-center px-5">
                 <div className="flex-shrink-0">

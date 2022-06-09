@@ -9,7 +9,7 @@ import Sidebar from '../components/Sidebar'
 import { classNames } from '../helpers/functions'
 import Layout from '../components/layout'
 import Link from 'next/link'
-import { AutomationTypeIcon, ConnectionIcon, DocTitleIcon } from '../helpers/Icons'
+import { ConnectionIcon, DocTitleIcon } from '../helpers/Icons'
 import { useEffect, useState } from 'react'
 import timeAgo from '../services/timeago'
 import { API_ENDPOINT } from '../helpers/api'
@@ -318,17 +318,6 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                             />
                           </a>
                         ))}
-                        {
-                          doc.automations.map((automation) => (
-                          <a key={automation._id}>
-                            <AutomationTypeIcon
-                              type={automation.type}
-                              outerSize={6}
-                              innerSize={4}
-                            />
-                          </a>
-                          ))
-                        }
                       </div>
                     </div>
                   </div>
