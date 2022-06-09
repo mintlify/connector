@@ -50,7 +50,7 @@ export default function Navbar({ user, org }: NavbarProps) {
       {({ open }) => (
         <>
           <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-            <div className="relative flex items-center justify-between h-16">
+            <div className="relative flex items-center justify-between h-16 flex-row">
               <div className="flex items-center px-2 lg:px-0">
                 <Link href="/">
                   <button className="flex-shrink-0">
@@ -62,11 +62,11 @@ export default function Navbar({ user, org }: NavbarProps) {
                   </button>
                 </Link>
               </div>
-              <button
-                className="flex-1 flex justify-center px-2 lg:ml-6 lg:justify-end focus:outline-none"
-                onClick={() => setIsSearchOpen(true)}
-              >
-                <div className="max-w-lg w-full lg:max-w-xs">
+              <div className="flex lg:justify-end focus:outline-none">
+                <button
+                  className="w-96 lg:max-w-xs"
+                  onClick={() => setIsSearchOpen(true)}
+                >
                   <label htmlFor="search" className="sr-only">
                     Search
                   </label>
@@ -87,8 +87,8 @@ export default function Navbar({ user, org }: NavbarProps) {
                       </kbd>
                     </div>
                   </div>
-                </div>
-              </button>
+                </button>
+              </div>
               <div className="flex lg:hidden">
                 {/* Mobile menu button */}
                 <Disclosure.Button className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
@@ -100,7 +100,7 @@ export default function Navbar({ user, org }: NavbarProps) {
                   )}
                 </Disclosure.Button>
               </div>
-              <div className="hidden flex-1 lg:block lg:ml-4">
+              <div className="hidden lg:block lg:ml-4">
                 <div className="flex flex-row-reverse">
 
                   {/* Profile dropdown */}
