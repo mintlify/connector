@@ -16,7 +16,7 @@ import { DocumentTextIcon } from '@heroicons/react/outline'
 import { Event } from '../components/Event'
 import ActivityBar from '../components/ActivityBar'
 import { getSubdomain } from '../helpers/user'
-// import Onboarding from '../components/screens/Onboarding'
+import Onboarding from '../components/screens/Onboarding'
 import DocItem from '../components/DocItem'
 
 type Code = {
@@ -123,9 +123,6 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     return <SignIn />
   }
 
-  // Temporarily return onboarding
-  // return <Onboarding />
-
   const { user, org } = userSession;
 
   if (user == null) {
@@ -143,6 +140,9 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       <Link href="/api/logout">Logout</Link>
     </div>
   }
+
+  // Temporarily return onboarding
+  return <Onboarding user={user} org={org} />
 
   const onClickDoc = (doc: Doc) => {
     if (doc._id === selectedDoc?._id) {

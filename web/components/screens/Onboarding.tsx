@@ -1,10 +1,14 @@
 import { Combobox } from "@headlessui/react";
 import { ChevronRightIcon } from "@heroicons/react/solid";
-import Link from "next/link";
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { API_ENDPOINT } from "../../helpers/api";
 import { classNames } from "../../helpers/functions";
 import { DocumentationTypeIcon } from "../../helpers/Icons";
-import { addDocumentationMap } from "../commands/documentation/AddDocumentation";
+import { getSubdomain } from "../../helpers/user";
+import { Doc, Org, User } from "../../pages";
+import AddDocumentation, { addDocumentationMap, AddDocumentationType } from "../commands/documentation/AddDocumentation";
+import DocItem from "../DocItem";
 
 const rolesOptions = [
   { id: 'founder', title: 'Founder' },
@@ -47,7 +51,12 @@ const ProgressBar = ({ currentStep }: { currentStep: number }) => {
   </div>
 }
 
-export default function Onboarding() {
+type OnboardingProps = {
+  user: User,
+  org: Org,
+}
+
+export default function Onboarding({ user, org }: OnboardingProps) {
   const [step, setStep] = useState(0);
 
   const CurrentStep = () => {
@@ -55,7 +64,7 @@ export default function Onboarding() {
       case 0:
         return <Step0 />;
       case 1:
-        return <Step1 />;
+        return <Step1 user={user} org={org} />;
       case 2:
         return <Step2 />;
       case 3:
@@ -77,7 +86,7 @@ export default function Onboarding() {
   return (
     <div className="bg-slate-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-8">
-        <div className="max-w-3xl mx-auto py-12">
+        <div className="w-96 max-w-full mx-auto py-12">
           <CurrentStep />
           <div className="flex mt-8 space-x-2">
             {
@@ -132,7 +141,7 @@ function Step0() {
       <div>
         <label className="text-base font-medium text-gray-900">How big is your team?</label>
         <fieldset className="mt-4">
-          <div className="w-96 max-w-full grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {sizeOptions.map((sizeOption) => (
               <div key={sizeOption.id} className="flex items-center">
                 <input
@@ -154,7 +163,7 @@ function Step0() {
         <label className="text-base font-medium text-gray-900">Which of the following do you or your team use?</label>
         <p className="text-sm leading-5 text-gray-500">Check all that apply</p>
         <fieldset className="mt-4">
-          <div className="w-96 max-w-full grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {appsOptions.map((appOption) => (
               <div key={appOption.id} className="flex items-center">
                 <input
@@ -176,9 +185,34 @@ function Step0() {
   </>;
 }
 
-function Step1() {
+function Step1({ user, org }: OnboardingProps) {
+  const [docs, setDocs] = useState<Doc[]>([]);
+  const [isAddingDocOpen, setIsAddingDocOpen] = useState(false);
+  const [addDocumentationType, setAddDocumentationType] = useState<AddDocumentationType>();
   const currentStep = 1;
+
+  useEffect(() => {
+    axios.get(`${API_ENDPOINT}/routes/docs`, {
+      params: {
+        userId: user.userId,
+        subdomain: getSubdomain(window.location.host)
+      }
+    })
+      .then((docsResponse) => {
+        const { docs } = docsResponse.data;
+        setDocs(docs);
+      });
+  }, [user.userId]);
+
   return <>
+    <AddDocumentation
+      user={user}
+      org={org}
+      isOpen={isAddingDocOpen}
+      setIsOpen={setIsAddingDocOpen}
+      setIsAddDocLoading={() => {}}
+      overrideSelectedRuleType={addDocumentationType}
+    />
     <h1 className="text-3xl font-semibold">
       Let&apos;s add some <span className="text-primary">documentation</span> 🗃
     </h1>
@@ -186,7 +220,7 @@ function Step1() {
       You can import or link your existing pages
     </p>
     <ProgressBar currentStep={currentStep} />
-    <div className="mt-6 space-y-8 w-96 max-w-full">
+    <div className="mt-6 space-y-8">
       <div className="bg-white rounded-md shadow-md">
         <Combobox onChange={() => {}} value="">
           <Combobox.Options static className="max-h-96 scroll-py-3 overflow-y-auto p-3">
@@ -197,7 +231,7 @@ function Step1() {
                 className={({ active }) =>
                   classNames('flex items-center cursor-default select-none rounded-xl p-3 hover:cursor-pointer', active ? 'bg-gray-50' : '')
                 }
-                onClick={() => {}}
+                onClick={() => { setIsAddingDocOpen(true); setAddDocumentationType(item.type) }}
               >
                 {({ active }) => (
                   <>
@@ -230,49 +264,20 @@ function Step1() {
       </div>
       <div>
         <h1 className="text-lg">Documents added</h1>
-        <div className="mt-2 bg-white rounded-md p-3 shadow-md">
-          <div
-                  className={classNames("relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:pl-6 lg:pl-8 xl:pl-6 cursor-pointer", false ? 'bg-gray-50' : '')}
-                  onClick={() => {}}
-                >
-                  <div className="flex items-center justify-between space-x-4">
-                    {/* Repo name and link */}
-                    <div className="min-w-0 space-y-2">
-                      <div className="flex items-center space-x-3">
-                        <span className="block">
-                          <h2 className="text-sm font-medium text-gray-700">
-                            <div className="flex items-center space-x-2">
-                              <div>
-                                {/* <DocTitleIcon doc={doc} /> */}
-                              </div>
-                              <Link
-                                href={"https://google.com"}
-                              >
-                                <a target="_blank" className="decoration-gray-300 hover:underline">
-                                  {/* {doc.title} */}
-                                  Hey there
-                                </a>
-                              </Link>
-                            </div>
-                          </h2>
-                        </span>
-                      </div>
-                      <a className="relative group flex items-center space-x-2.5">
-                        <span className="flex items-center space-x-2.5 text-sm text-gray-500 truncate">
-                          <div>
-                            <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" className="w-3 h-3 text-gray-500">
-                              <path fill="currentColor" fillRule="evenodd" d="M1.643 3.143L.427 1.927A.25.25 0 000 2.104V5.75c0 .138.112.25.25.25h3.646a.25.25 0 00.177-.427L2.715 4.215a6.5 6.5 0 11-1.18 4.458.75.75 0 10-1.493.154 8.001 8.001 0 101.6-5.684zM7.75 4a.75.75 0 01.75.75v2.992l2.028.812a.75.75 0 01-.557 1.392l-2.5-1A.75.75 0 017 8.25v-3.5A.75.75 0 017.75 4z"></path>
-                            </svg>
-                          </div>
-                          <div>
-                            Last updated f
-                          </div>
-                        </span>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-          </div>
+        <ul className="mt-2 bg-white rounded-md p-3 shadow-md">
+          {docs.map((doc) => (
+            <DocItem
+              user={user}
+              key={doc._id}
+              doc={doc}
+              docs={docs}
+              setDocs={setDocs}
+              onClick={() => {}}
+              setSelectedDoc={() => {}}
+              removeSeparators
+            />
+          ))}
+          </ul>
         </div>
     </div>
   </>;
@@ -292,7 +297,7 @@ function Step2() {
       <div>
         <label className="text-base font-medium text-gray-900">What best describes what you do?</label>
         <fieldset className="mt-4">
-          <div className="w-96 max-w-full grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {rolesOptions.map((roleOption) => (
               <div key={roleOption.id} className="flex items-center">
                 <input
@@ -313,7 +318,7 @@ function Step2() {
       <div>
         <label className="text-base font-medium text-gray-900">How big is your team?</label>
         <fieldset className="mt-4">
-          <div className="w-96 max-w-full grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {sizeOptions.map((sizeOption) => (
               <div key={sizeOption.id} className="flex items-center">
                 <input
@@ -335,7 +340,7 @@ function Step2() {
         <label className="text-base font-medium text-gray-900">Which of the following do you or your team use?</label>
         <p className="text-sm leading-5 text-gray-500">Check all that apply</p>
         <fieldset className="mt-4">
-          <div className="w-96 max-w-full grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {appsOptions.map((appOption) => (
               <div key={appOption.id} className="flex items-center">
                 <input
@@ -371,7 +376,7 @@ function Step3() {
       <div>
         <label className="text-base font-medium text-gray-900">What best describes what you do?</label>
         <fieldset className="mt-4">
-          <div className="w-96 max-w-full grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {rolesOptions.map((roleOption) => (
               <div key={roleOption.id} className="flex items-center">
                 <input
@@ -392,7 +397,7 @@ function Step3() {
       <div>
         <label className="text-base font-medium text-gray-900">How big is your team?</label>
         <fieldset className="mt-4">
-          <div className="w-96 max-w-full grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {sizeOptions.map((sizeOption) => (
               <div key={sizeOption.id} className="flex items-center">
                 <input
@@ -414,7 +419,7 @@ function Step3() {
         <label className="text-base font-medium text-gray-900">Which of the following do you or your team use?</label>
         <p className="text-sm leading-5 text-gray-500">Check all that apply</p>
         <fieldset className="mt-4">
-          <div className="w-96 max-w-full grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {appsOptions.map((appOption) => (
               <div key={appOption.id} className="flex items-center">
                 <input

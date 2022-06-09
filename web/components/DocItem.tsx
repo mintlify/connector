@@ -20,9 +20,10 @@ type DocItemProps = {
   setDocs: (docs: Doc[]) => void,
   selectedDoc?: Doc,
   setSelectedDoc: (doc: Doc | undefined) => void,
+  removeSeparators?: boolean,
 }
 
-export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs, setSelectedDoc }: DocItemProps) {
+export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs, setSelectedDoc, removeSeparators }: DocItemProps) {
   const listMenu = [
     {
       name: 'Delete',
@@ -41,7 +42,7 @@ export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs
   ]
 
   return <div key={doc._id}>
-  <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div>
+  {!removeSeparators && <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div> }
   <li
     className={classNames("relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:pl-6 lg:pl-8 xl:pl-6 cursor-pointer", doc._id === selectedDoc?._id ? 'bg-gray-50' : '')}
     onClick={() => onClick(doc)}
