@@ -2,7 +2,7 @@ import { UserAddIcon } from "@heroicons/react/solid";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { UserSession } from "../pages";
+import { UserSession } from "../../pages";
 
 type SetupProps = {
   userSession: UserSession
