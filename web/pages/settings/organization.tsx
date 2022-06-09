@@ -483,7 +483,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                               </div>
                               <div className="text-sm">
                                 { integrationsStatus[app.id]
-                                ? <span className="flex items-center text-gray-700 font-medium">Installed <CheckCircleIcon className="h-4 w-4 text-green-600" /></span>
+                                ? <CheckCircleIcon className="h-4 w-4 text-green-600" />
                                 : <button className="text-primary font-medium">Install</button>
                                 }
                               </div>
