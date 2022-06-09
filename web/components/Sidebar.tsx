@@ -109,12 +109,6 @@ export default function Sidebar({
                   <span className="text-sm font-medium">Invite team member</span>
                 </div>
               </Link>
-              <Link href="/settings">
-                <div className="flex items-center space-x-2 cursor-pointer text-gray-500 hover:text-gray-700">
-                  <CogIcon className="h-5 w-5" aria-hidden="true" />
-                  <span className="text-sm font-medium">Settings</span>
-                </div>
-              </Link>
               <button onClick={onClickHelp}>
                 <div className="flex items-center space-x-2 cursor-pointer text-gray-500 hover:text-gray-700">
                   <ChatAlt2Icon className="h-5 w-5" aria-hidden="true" />
