@@ -189,4 +189,31 @@ docsRouter.post('/content', async (req, res) => {
   }
 });
 
+docsRouter.put('/:docId/slack', userMiddleware, async (req, res) => {
+  try {
+    const { docId } = req.params;
+    const doc = await Doc.findById(docId);
+    if (doc == null) return res.status(400).json({ error: 'Invalid doc ID' });
+    const slack = !doc?.slack ?? false;
+    await Doc.findByIdAndUpdate(docId, { slack });
+    return res.end();
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
+});
+
+docsRouter.put('/:docId/email', userMiddleware, async (req, res) => {
+  try {
+    const { docId } = req.params;
+    const doc = await Doc.findById(docId);
+    if (doc == null) return res.status(400).json({ error: 'Invalid doc ID' });
+    const email = !doc?.email ?? false;
+    await Doc.findByIdAndUpdate(docId, { email });
+    return res.end();
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
+
+});
+
 export default docsRouter;
