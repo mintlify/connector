@@ -1,11 +1,11 @@
-import { DocumentTextIcon, LightningBoltIcon } from '@heroicons/react/outline';
+import { LightningBoltIcon } from '@heroicons/react/outline';
 import { XCircleIcon } from '@heroicons/react/solid';
 import axios from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { API_ENDPOINT } from '../helpers/api';
-import { AutomationTypeIcon, ConnectionIcon } from '../helpers/Icons';
+import { AutomationTypeIcon, ConnectionIcon, DocTitleIcon } from '../helpers/Icons';
 import { getSubdomain } from '../helpers/user';
 import { Doc, User } from '../pages';
 import timeAgo from '../services/timeago';
@@ -62,13 +62,7 @@ function DocProfile({ doc, user, setIsAddAutomationOpen }: DocProfileProps) {
 
   return <div className="pt-6">
     <div className="flex space-x-3">
-      {
-        doc.favicon ? <img
-        className="h-5 w-5 rounded-sm"
-        src={doc.favicon}
-        alt={doc.title}
-      /> : <DocumentTextIcon className="h-5 w-5 text-gray-600" />
-      }
+      <DocTitleIcon doc={doc} />
       <div className="flex-1">
         <h1 className="text-sm font-medium">{doc.title}</h1>
         <h2 className="mt-px text-sm text-gray-500">Added {timeAgo.format(Date.parse(doc.createdAt))}</h2>

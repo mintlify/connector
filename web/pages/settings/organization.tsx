@@ -1,21 +1,21 @@
-import Layout from "../components/layout"
+import Layout from "../../components/layout"
 import toast, { Toaster } from 'react-hot-toast';
-import { BellIcon, UserCircleIcon, UserGroupIcon } from "@heroicons/react/outline"
 import { GetServerSideProps } from "next"
-import { withSession } from "../lib/withSession"
-import { AccessMode, UserSession } from "."
+import { withSession } from "../../lib/withSession"
+import { AccessMode, UserSession } from ".."
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import axios from "axios"
-import { API_ENDPOINT } from "../helpers/api"
-import { classNames } from "../helpers/functions"
-import { User } from "."
-import { updateSession } from "../helpers/session"
+import { API_ENDPOINT } from "../../helpers/api"
+import { classNames } from "../../helpers/functions"
+import { User } from ".."
+import { updateSession } from "../../helpers/session"
 import { useRouter } from "next/router"
 import Head from "next/head"
-import { getSubdomain } from "../helpers/user"
-import ProfilePicture from "../components/ProfilePicture"
+import { getSubdomain } from "../../helpers/user"
+import ProfilePicture from "../../components/ProfilePicture"
 import { CheckCircleIcon, XIcon } from "@heroicons/react/solid";
+import { navigation } from "./account";
 
 export type EmailNotifications = {
   monthlyDigest: boolean
@@ -28,15 +28,60 @@ type AccessOption = {
   description: string
 }
 
-const navigation = [
-  { name: "Account", href: "#setting-account", icon: UserCircleIcon },
-  { name: "Organization", href: "#setting-organization", icon: UserGroupIcon },
-  { name: "Notifications", href: "#setting-notifications", icon: BellIcon },
-]
-
 const access: AccessOption[] = [
   { id: 'public', name: 'Public', description: 'Anyone can join' },
   { id: 'private', name: 'Private', description: 'Only invited members can join' },
+]
+
+const integrations = [
+  {
+    title: 'Alerts',
+    subtitle: 'Receive alerts about your documentation',
+    apps: [
+      {
+        id: 'slack',
+        name: 'Slack',
+        icon: '/assets/integrations/slack.svg',
+        installHref: '',
+      }
+    ]
+  },
+  {
+    title: 'Documentation',
+    subtitle: 'Integration with documentation platforms',
+    apps: [
+      {
+        id: 'google-drive',
+        name: 'Google Drive',
+        icon: '/assets/integrations/google-docs.svg',
+        installHref: '',
+      },
+      {
+        id: 'notion',
+        name: 'Notion',
+        icon: '/assets/integrations/notion.svg',
+        installHref: '',
+      }
+    ]
+  },
+  {
+    title: 'Code',
+    subtitle: 'Connect documentation with your code',
+    apps: [
+      {
+        id: 'github',
+        name: 'GitHub',
+        icon: '/assets/integrations/github.svg',
+        installHref: '',
+      },
+      {
+        id: 'vscode',
+        name: 'VS Code',
+        icon: '/assets/integrations/vscode.svg',
+        installHref: '',
+      }
+    ]
+  }
 ]
 
 const notify = (title: string, description: string) => toast.custom((t) => {
@@ -81,18 +126,13 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
   const { user, org } = userSession;
   
   const router = useRouter();
-  const [firstName, setFirstName] = useState(user?.firstName)
-  const [lastName, setLastName] = useState(user?.lastName)
   const [orgName, setOrgName] = useState(org?.name)
   const [orgAccessMode, setOrgAccessMode] = useState(org?.access?.mode || 'public')
   const [invitedEmail, setInvitedEmail] = useState("")
   const [inviteErrorMessage, setInviteErrorMessage] = useState<string | undefined>(undefined)
   const [isSendingInvite, setIsSendingInvite] = useState(false)
-  const [members, setMembers] = useState<User[]>([])
-  const [emailNotifications, setNotifications] = useState<EmailNotifications>({
-    monthlyDigest: false,
-    newsletter: false,
-  })
+  const [members, setMembers] = useState<User[]>([]);
+  const [integrationsStatus, setIntegrationsStatus] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (user == null || org == null) return;
@@ -106,9 +146,17 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
       setMembers(res.data.users)
     });
 
-    setNotifications(org.notifications)
+    axios.get(`${API_ENDPOINT}/routes/org/${org._id}/integrations`, {
+      params: {
+        userId: user.userId,
+        subdomain: getSubdomain(window.location.host)
+      }
+    }).then(({ data }) => {
+        const { integrations } = data;
+        setIntegrationsStatus(integrations);
+      })
 
-  }, [user, org])
+  }, [user, org]);
 
   if (user == null || org == null) {
     router.push('/');
@@ -149,28 +197,6 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
     setIsSendingInvite(false)
   }
 
-  const onBlurFirstNameInput = async () => {
-    if (!firstName || firstName === user.firstName) {
-      return;
-    }
-    await axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/firstname`, {
-      firstName,
-    })
-    updateSession();
-    notify('Profile name updated', 'Your first name has been updated.');
-  }
-
-  const onBlurLastNameInput = async () => {
-    if (!lastName || lastName === user.lastName) {
-      return;
-    }
-    await axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/lastname`, {
-      lastName,
-    })
-    updateSession();
-    notify('Profile name updated', 'Your last name has been updated.');
-  }
-
   const onBlurOrgNameInput = async () => {
     if (!orgName || orgName === org.name) {
       return;
@@ -185,21 +211,6 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
     })
     updateSession();
     notify('Organization name updated', 'Your organization name has been updated.');
-  }
-
-  const updateEmailNotifications = async (newNotifications: EmailNotifications) => {
-    setNotifications(newNotifications)
-    // update the organization's new notifications in the database
-    await axios.put(`${API_ENDPOINT}/routes/org/${org._id}/notifications`, {
-      ...newNotifications,
-    }, {
-      params: {
-        userId: user.userId,
-        subdomain: getSubdomain(window.location.host)
-      }
-    })
-
-    notify('Updated notification settings', 'Your notification preferences have been updated.');
   }
 
   const updateAccessSetting = async (newAccessMode: AccessMode) => {
@@ -228,10 +239,10 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
     </Head>
     <Layout user={user} org={org}>
       <Toaster position="bottom-right" reverseOrder={false} />
-      <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
+      <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8">
         <div className="my-6 lg:grid lg:grid-cols-12 lg:gap-x-5">
           <aside className="py-0 px-2 sm:px-6 lg:px-0 lg:col-span-4">
-            <nav className="space-y-1 lg:ml-40">
+            <nav className="space-y-1 lg:ml-52">
               {navigation.map((item) => (
                 <a
                   key={item.name}
@@ -249,72 +260,6 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
           </aside>
 
           <div className="space-y-8 sm:px-6 lg:px-0 lg:col-span-5">
-            <form action="#" method="POST" id="setting-account">
-              <div className="shadow sm:rounded-md sm:overflow-hidden">
-                <div className="bg-white pt-6 pb-8 px-4 space-y-5 sm:px-6">
-                  <div>
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">Account</h3>
-                    <p className="mt-1 text-sm text-gray-500">Your personal account information</p>
-                  </div>
-
-                  <div className="grid grid-cols-6 gap-6">
-                    <div className="col-span-6 sm:col-span-3">
-                      <label htmlFor="first-name" className="block text-sm font-medium text-gray-700">
-                        First name
-                      </label>
-                      <input
-                        type="text"
-                        name="first-name"
-                        id="first-name"
-                        autoComplete="given-name"
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        onBlur={onBlurFirstNameInput}
-                      />
-                    </div>
-
-                    <div className="col-span-6 sm:col-span-3">
-                      <label htmlFor="last-name" className="block text-sm font-medium text-gray-700">
-                        Last name
-                      </label>
-                      <input
-                        type="text"
-                        name="last-name"
-                        id="last-name"
-                        autoComplete="family-name"
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        onBlur={onBlurLastNameInput}
-                      />
-                    </div>
-
-                    <div className="col-span-6">
-                      <label htmlFor="email-address" className="block text-sm font-medium text-gray-700">
-                        Email address
-                      </label>
-                      <input
-                        type="text"
-                        name="email-address"
-                        id="email-address"
-                        autoComplete="email"
-                        disabled
-                        value={user.email}
-                        className="mt-1 block w-full border border-gray-300 bg-gray-100 text-gray-400 rounded-md shadow-sm py-2 px-3 focus:outline-none sm:text-sm"
-                      />
-                      <p className="text-sm mt-2 text-gray-500">
-                        <Link href="mailto:hi@mintlify.com">
-                          <span className="text-primary font-medium cursor-pointer">Contact support</span>
-                        </Link>{" "}
-                        to change your primary email
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </form>
-
             <form action="#" method="POST" id="setting-organization">
               <div className="shadow sm:rounded-md sm:overflow-hidden">
                 <div className="bg-white pt-6 pb-8 px-4 space-y-5 sm:px-6">
@@ -399,7 +344,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                         </fieldset>
                       </div>
 
-                    <div className="col-span-3">
+                    <div className="col-span-3" id="invite">
                       <div className="space-y-5">
                         <div className="sm:flex sm:items-center">
                           <div className="sm:flex-auto">
@@ -467,7 +412,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
                                           <div className="flex items-center">
                                             {member.pending ? (
-                                              <span className="inline-block h-10 w-10 rounded-full overflow-hidden bg-gray-100">
+                                              <span className="inline-block h-10 w-10 rounded-full bg-gray-100 overflow-hidden">
                                                 <svg
                                                   className="h-full w-full text-gray-300"
                                                   fill="currentColor"
@@ -515,68 +460,40 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                 </div>
               </div>
             </form>
-
-            <form action="#" method="POST" id="setting-notifications">
-              <div className="shadow sm:rounded-md sm:overflow-hidden">
-                <div className="bg-white pt-6 pb-8 px-4 space-y-5 sm:px-6">
+            <form method="POST" id="integrations">
+              <div className="shadow sm:rounded-md">
+                <div className="bg-white pt-6 pb-8 px-4 space-y-4 sm:px-6">
                   <div>
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">Notifications</h3>
-                    <p className="mt-1 text-sm text-gray-500">Manage notification preferences</p>
+                    <h3 className="text-lg leading-6 font-medium text-gray-900">Integrations</h3>
+                    <p className="mt-1 text-sm text-gray-500">Connections for your documentation stack</p>
                   </div>
 
-                  <fieldset>
-                    <legend className="text-base font-medium text-gray-900">Email notifications</legend>
-                    <div className="mt-4 space-y-4">
-                      <div className="flex items-start">
-                        <div className="h-5 flex items-center">
-                          <input
-                            id="comments"
-                            name="comments"
-                            type="checkbox"
-                            className="focus:ring-primary h-4 w-4 text-primary border-gray-300 rounded"
-                            checked={emailNotifications.monthlyDigest}
-                            onChange={(_) =>
-                              updateEmailNotifications({
-                                ...emailNotifications,
-                                monthlyDigest: !emailNotifications.monthlyDigest,
-                              })
-                            }
-                          />
-                        </div>
-                        <div className="ml-3 text-sm">
-                          <label htmlFor="comments" className="font-medium text-gray-700">
-                            Monthly documentation digest
-                          </label>
-                          <p className="text-gray-500">Get a detailed report on the monthly documentation changes</p>
-                        </div>
-                      </div>
-                      <div>
-                        <div className="flex items-start">
-                          <div className="h-5 flex items-center">
-                            <input
-                              id="candidates"
-                              name="candidates"
-                              type="checkbox"
-                              className="focus:ring-primary h-4 w-4 text-primary border-gray-300 rounded"
-                              checked={emailNotifications.newsletter}
-                              onChange={(_) =>
-                                updateEmailNotifications({
-                                  ...emailNotifications,
-                                  newsletter: !emailNotifications.newsletter,
-                                })
-                              }
-                            />
-                          </div>
-                          <div className="ml-3 text-sm">
-                            <label htmlFor="candidates" className="font-medium text-gray-700">
-                              Newsletter
-                            </label>
-                            <p className="text-gray-500">Be notified on product updates and special offers</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </fieldset>
+                  <ul role="list" className="divide-y divide-gray-200">
+                    {
+                      integrations.map((integration) => (
+                      <li key={integration.title} className="px-4 py-4 sm:px-0">
+                        <h1 className="text-gray-800 font-medium">{integration.title}</h1>
+                        <p className="text-gray-500 text-sm">{integration.subtitle}</p>
+                        {
+                          integration.apps.map((app) => (
+                            <div key={app.id} className="mt-2 flex">
+                              <div className="flex-1 flex items-center text-gray-700">
+                                <img className="h-4 w-4 mr-2" src={app.icon} alt={app.name} />
+                                {app.name}
+                              </div>
+                              <div className="text-sm">
+                                { integrationsStatus[app.id]
+                                ? <span className="flex items-center text-gray-700 font-medium">Installed <CheckCircleIcon className="h-4 w-4 text-green-600" /></span>
+                                : <button className="text-primary font-medium">Install</button>
+                                }
+                              </div>
+                            </div>
+                          ))
+                        }
+                      </li>
+                      ))
+                    }
+                  </ul>
                 </div>
               </div>
             </form>

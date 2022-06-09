@@ -47,7 +47,8 @@ export const indexDocForSearch = async (doc: DocType) => {
             content: doc.content,
             url: doc.url,
             org: doc.org,
-            favicon: doc.favicon
+            favicon: doc.favicon,
+            method: doc.method,
         };
         await docsIndex.saveObject(record);
     }
@@ -65,7 +66,8 @@ export const updateDocContentForSearch = async (doc: DocType, newContent: string
             content: newContent,
             url: doc.url,
             org: doc.org,
-            favicon: doc.favicon
+            favicon: doc.favicon,
+            method: doc.method,
         };
         await docsIndex.saveObject(record);
     }
