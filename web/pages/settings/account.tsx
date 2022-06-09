@@ -115,7 +115,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
         subdomain: getSubdomain(window.location.host)
       }
     })
-
+    updateSession();
     notify('Updated notification settings', 'Your notification preferences have been updated.');
   }
 
@@ -211,13 +211,6 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                       </p>
                     </div>
                   </div>
-                </div>
-              </div>
-            </form>
-
-            <form action="#" method="POST" id="setting-notifications">
-              <div className="shadow sm:rounded-md sm:overflow-hidden">
-                <div className="bg-white pt-6 pb-8 px-4 space-y-5 sm:px-6">
                   <div>
                     <h3 className="text-lg leading-6 font-medium text-gray-900">Notifications</h3>
                     <p className="mt-1 text-sm text-gray-500">Manage notification preferences</p>
