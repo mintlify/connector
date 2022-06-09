@@ -38,6 +38,7 @@ googleRouter.get('/authorization', async (req, res) => {
   const { code, state } = req.query;
   if (code == null) return res.status(403).send('Invalid or missing grant code');
 
+  // Need an error handler here for Google tokens retrieval, but will implement later.
   const { tokens } = await oAuth2Client.getToken(code as string);
   oAuth2Client.setCredentials(tokens);
 
