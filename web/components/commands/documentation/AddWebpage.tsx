@@ -2,6 +2,9 @@ import axios from "axios"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { API_ENDPOINT } from "../../../helpers/api"
+import { classNames } from "../../../helpers/functions"
+import { getSubdomain } from "../../../helpers/user"
+import { User } from "../../../pages"
 
 export const isUrlValid = (str: string): boolean => {
   const pattern = new RegExp(
@@ -16,12 +19,20 @@ export const isUrlValid = (str: string): boolean => {
   return pattern.test(str);
 }
 
-export default function AddWebpage({value, setValue}: { value: string, setValue: (url: string) => void }) {
+type AddWebpageProps = {
+  user: User,
+  onCancel: () => void,
+  setIsAddDocumentationOpen: (isOpen: boolean) => void,
+  setIsAddDocLoading: (isAddingAutomation: boolean) => void;
+}
+
+export default function AddWebpage({user, onCancel, setIsAddDocumentationOpen, setIsAddDocLoading}: AddWebpageProps) {
+  const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [favicon, setFavicon] = useState();
 
   useEffect(() => {
-    if (!isUrlValid(value)) {
+    if (!isUrlValid(url)) {
       setIsLoading(false);
       setFavicon(undefined);
       return;
@@ -30,19 +41,42 @@ export default function AddWebpage({value, setValue}: { value: string, setValue:
     setIsLoading(true);
     axios.get(`${API_ENDPOINT}/routes/docs/preview`, {
       params: {
-        url: value
+        url
       }
     }).then(({ data }) => {
       setIsLoading(false);
       const { favicon } = data;
       setFavicon(favicon);
     })
-  }, [value])
-  return <div className="relative rounded-md shadow-sm">
+  }, [url]);
+
+  const onSubmit = async () => {
+    setIsAddDocLoading(true);
+    await axios
+      .post(
+        `${API_ENDPOINT}/routes/docs`,
+        {
+          url,
+        },
+        {
+          params: {
+            userId: user.userId,
+            subdomain: getSubdomain(window.location.host),
+          },
+        }
+    )
+
+    setIsAddDocLoading(false);
+    setIsAddDocumentationOpen(false);
+  }
+
+  const isValidToSubmit = Boolean(url);
+
+  return <div><div className="relative rounded-md shadow-sm">
   <input
     type="url"
-    value={value}
-    onChange={(e) => setValue(e.target.value)}
+    value={url}
+    onChange={(e) => setUrl(e.target.value)}
     name="company-website"
     id="company-website"
     className="focus:ring-primary focus:border-primary block w-full pl-3 pr-8 sm:text-sm border-gray-300 rounded-md"
@@ -56,8 +90,31 @@ export default function AddWebpage({value, setValue}: { value: string, setValue:
     </svg>
     }
     {
-      !isLoading && favicon && <Link href={value}><a target="_blank"><img className="h-4 w-4 cursor-pointer rounded-sm" src={favicon} alt="Favicon of result" /></a></Link>
+      !isLoading && favicon && <Link href={url}>
+        <a target="_blank">
+          <img className="h-4 w-4 cursor-pointer rounded-sm" src={favicon} alt="Favicon of result" />
+        </a>
+      </Link>
     }
   </div>
+</div>
+<div className="mt-4 flex justify-end">
+  <button
+    type="button"
+    className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
+    onClick={onCancel}
+  >
+    Back
+  </button>
+  <button
+    type="submit"
+    disabled={!isValidToSubmit}
+    className={classNames("ml-3 inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white",
+    isValidToSubmit ? "bg-primary hover:bg-hover" : "bg-gray-300 cursor-default")}
+    onClick={onSubmit}
+  >
+    Add Documentation
+  </button>
+</div>
 </div>
 }

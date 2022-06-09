@@ -8,6 +8,7 @@ import Event from '../models/Event';
 import { extractDataFromHTML, getDataFromWebpage } from '../services/webscraper';
 import { deleteDocForSearch, indexDocForSearch } from '../services/algolia';
 import { track } from '../services/segment';
+import { NotionPage } from './integrations/notion';
 
 const docsRouter = express.Router();
 
@@ -38,6 +39,53 @@ export const createDocFromUrl = async (url: string, orgId: string, userId: Types
 
   return { content, doc, method };
 };
+
+export const createDocsFromNotionPageId = async (pages: NotionPage[], orgId: Types.ObjectId, userId: string) => {
+  const addDocPromises = pages.map((page) => new Promise<void>(async (resolve) => {
+    try {
+      // Add doc without content
+      const doc = await Doc.findOneAndUpdate(
+        {
+          org: orgId,
+          url: page.url,
+        },
+        {
+          org: orgId,
+          url: page.url,
+          method: 'notion-private',
+          notion: {
+            pageId: page.id,
+          },
+          content: '', // to be scraped
+          title: `${page.icon?.emoji ? `${page.icon?.emoji} ` : ''}${page.title}`,
+          favicon: page.icon?.file,
+          createdBy: userId,
+          isJustAdded: true,
+          lastUpdatedAt: Date.parse(page.lastEditedTime)
+        },
+        {
+          upsert: true,
+          new: true,
+        }
+      );
+
+      await createEvent(orgId, doc._id, 'add', {});
+      indexDocForSearch(doc);
+      track(userId, 'Add documentation', {
+        doc: doc._id.toString(),
+        method: 'notion-private',
+        org: orgId.toString(),
+      });
+
+      resolve();
+    }
+    catch {
+      resolve();
+    }
+  }));
+
+  await Promise.all(addDocPromises);
+}
 
 docsRouter.get('/', userMiddleware, async (_, res) => {
   const org = res.locals.user.org;
@@ -108,6 +156,19 @@ docsRouter.post('/', userMiddleware, async (req, res) => {
     return res.status(500).send({ error });
   }
 });
+
+docsRouter.post('/notion', userMiddleware, async (req, res) => {
+  const { pages } = req.body;
+  const org = res.locals.user.org;
+
+  try {
+    // Initial add is using light mode scan
+    await createDocsFromNotionPageId(pages, org, res.locals.user._id);
+    return res.end();
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
+})
 
 docsRouter.delete('/:docId', userMiddleware, async (req, res) => {
   const { docId } = req.params;

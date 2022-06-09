@@ -2,13 +2,14 @@ import express from 'express';
 import * as Diff from 'diff';
 import Doc, { DocType } from '../models/Doc';
 import Event, { EventType } from '../models/Event';
-import { getDataFromWebpage } from '../services/webscraper';
+import { ContentData, getDataFromWebpage } from '../services/webscraper';
 import { triggerAutomationsForEvents } from '../automations';
 import { updateDocContentForSearch } from '../services/algolia';
 import { workQueue } from '../workers';
 import mongoose from 'mongoose';
 import Org from '../models/Org';
 import { track } from '../services/segment';
+import { getNotionPageDataWithId } from '../services/notion';
 
 const scanRouter = express.Router();
 
@@ -27,9 +28,25 @@ interface DiffAlert extends DiffAndContent {
 type DocUpdateStatus = 'just-added' | 'first-change' | 'continuous-change' | 'event-trigger';
 
 const DIFF_CONFIRMATION_THRESHOLD = 2;
+const WAIT_FOR_WEB_SCRAPE = 6000; // in ms
 
-const getDiffAndContent = async (url: string, previousContent: string, orgId: string): Promise<DiffAndContent> => {
-  const { content, title, favicon, method } = await getDataFromWebpage(url, orgId, 6000);
+// Currently supports webpage and notion page
+const extractFromDoc = async (doc: DocType, orgId: string): Promise<ContentData> => {
+  if (doc.method === 'notion-private' && doc.notion?.pageId) {
+    const org = await Org.findById(orgId);
+    const notionAccessToken = org?.integrations?.notion?.access_token;
+    if (notionAccessToken == null) {
+      throw 'Unable to get organization by ID'
+    }
+    return getNotionPageDataWithId(doc.notion.pageId, notionAccessToken);
+  }
+
+  return getDataFromWebpage(doc.url, orgId, WAIT_FOR_WEB_SCRAPE);
+}
+
+const getDiffAndContent = async (doc: DocType, orgId: string): Promise<DiffAndContent> => {
+  const previousContent = doc.content || '';
+  const { content, title, favicon, method } = await extractFromDoc(doc, orgId);
   return {
     diff: Diff.diffWords(previousContent, content),
     newContent: content,
@@ -53,7 +70,7 @@ const getDocUpdateStatus = (doc: DocType): DocUpdateStatus => {
 export const scanDocsInOrg = async (orgId: string) => {
   const docsFromOrg = await Doc.find({ org: orgId });
   const getDifferencePromises = docsFromOrg.map((doc) => {
-    return getDiffAndContent(doc.url, doc.content ?? '', orgId);
+    return getDiffAndContent(doc, orgId);
   });
 
   const diffsAndContentResults = await Promise.all(getDifferencePromises);

@@ -9,7 +9,7 @@ import Sidebar from '../components/Sidebar'
 import { classNames } from '../helpers/functions'
 import Layout from '../components/layout'
 import Link from 'next/link'
-import { AutomationTypeIcon, ConnectionIcon } from '../helpers/Icons'
+import { AutomationTypeIcon, ConnectionIcon, DocTitleIcon } from '../helpers/Icons'
 import { useEffect, useState } from 'react'
 import timeAgo from '../services/timeago'
 import { API_ENDPOINT } from '../helpers/api'
@@ -38,6 +38,7 @@ export type Doc = {
   url: string,
   code: Code[],
   favicon?: string,
+  method: string,
 }
 
 export type UserSession = {
@@ -240,10 +241,10 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                         <h2 className="text-sm font-medium text-gray-700">
                           <div className="flex items-center space-x-2">
                             <div>
-                              { doc.favicon ? <img src={doc.favicon} alt="favicon" className="h-5 w-5 rounded-sm" /> : <DocumentTextIcon className="h-5 w-5 text-gray-600" /> }
+                              <DocTitleIcon doc={doc} />
                             </div>
                             <Link
-                              href={doc.url || ''}
+                              href={doc.url}
                             >
                               <a target="_blank" className="decoration-gray-300 hover:underline">
                                 {doc.title}

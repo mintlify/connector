@@ -21,7 +21,8 @@ const navigation = [
 ]
 
 const userNavigation = [
-  { name: 'Settings', href: '/settings' },
+  { name: 'Account', href: '/settings/account' },
+  { name: 'Organization', href: '/settings/organization' },
   { name: 'Sign out', href: '/api/logout' },
 ]
 
@@ -145,23 +146,58 @@ export default function Navbar({ user, org }: NavbarProps) {
                       leaveFrom="transform opacity-100 scale-100"
                       leaveTo="transform opacity-0 scale-95"
                     >
-                      <Menu.Items className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5">
-                        {
-                          userNavigation.map((nav) => (
-                          <Menu.Item key={nav.href}>
+                     <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none">
+                        <div className="px-4 py-3">
+                          <p className="text-sm">Signed in as</p>
+                          <p className="text-sm font-medium text-gray-900 truncate">{user.email}</p>
+                        </div>
+                        <div className="py-1">
+                        <Link href="/settings/account">
+                            <Menu.Item>
+                              {({ active }) => (
+                                  <a
+                                    className={classNames(
+                                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                      'block px-4 py-2 text-sm cursor-pointer'
+                                    )}
+                                  >
+                                    Account settings
+                                  </a>
+                              )}
+                            </Menu.Item>
+                          </Link>
+                          <Link href="/settings/organization">
+                          <Menu.Item>
                             {({ active }) => (
                               <a
-                                href={nav.href}
                                 className={classNames(
-                                  active ? 'bg-gray-100' : '',
-                                  'block px-4 py-2 text-sm text-gray-700'
+                                  active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                  'block px-4 py-2 text-sm cursor-pointer'
                                 )}
                               >
-                                {nav.name}
+                                Organization
                               </a>
                             )}
-                          </Menu.Item>))
-                        }
+                          </Menu.Item>
+                          </Link>
+                        </div>
+                        <div className="py-1">
+                        <Link href="/api/logout">
+                          <Menu.Item>
+                            {({ active }) => (
+                                <button
+                                  type="submit"
+                                  className={classNames(
+                                    active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                    'block w-full text-left px-4 py-2 text-sm'
+                                  )}
+                                >
+                                  Sign out
+                                </button>
+                            )}
+                          </Menu.Item>
+                          </Link>
+                        </div>
                       </Menu.Items>
                     </Transition>
                   </Menu>
