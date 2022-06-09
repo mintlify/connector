@@ -104,15 +104,7 @@ docsRouter.get('/', userMiddleware, async (_, res) => {
           localField: '_id',
           as: 'code',
         },
-      },
-      {
-        $lookup: {
-          from: 'automations',
-          foreignField: 'source.doc',
-          localField: '_id',
-          as: 'automations',
-        },
-      },
+      }
     ]);
     return res.status(200).send({ docs });
   } catch (error) {
