@@ -19,7 +19,6 @@ import LoadingItem from '../components/LoadingItem'
 import { withSession } from '../lib/withSession'
 import SignIn from '../components/SignIn'
 import Setup from '../components/Setup'
-import { Automation } from './automations'
 import { DocumentTextIcon } from '@heroicons/react/outline'
 import { Event } from '../components/Event'
 import ActivityBar from '../components/ActivityBar'
@@ -38,7 +37,6 @@ export type Doc = {
   createdAt: string,
   url: string,
   code: Code[],
-  automations: Automation[],
   favicon?: string,
 }
 
@@ -88,7 +86,6 @@ export default function Home({ userSession }: { userSession: UserSession }) {
   const [isAddDocLoading, setIsAddDocLoading] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
-  const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
 
   useEffect(() => {
     if (userSession == null || userSession.user == null || userSession.org == null) {
@@ -193,8 +190,6 @@ export default function Home({ userSession }: { userSession: UserSession }) {
           org={org}
           user={user}
           setIsAddDocLoading={setIsAddDocLoading}
-          isAddAutomationOpen={isAddAutomationOpen}
-          setIsAddAutomationOpen={setIsAddAutomationOpen}
           isAddDocumentOpen={isAddDocumentOpen}
           setIsAddDocumentOpen={setIsAddDocumentOpen}
         />
@@ -349,7 +344,6 @@ export default function Home({ userSession }: { userSession: UserSession }) {
           events={events}
           selectedDoc={selectedDoc}
           user={user}
-          setIsAddAutomationOpen={setIsAddAutomationOpen}
         />
       </div>
     </div>

@@ -10,9 +10,8 @@ type SidebarProps = {
   user: User;
   org: Org;
   setIsAddDocLoading: (isAddingDoc: boolean) => void;
-  setIsAddingAutomation?: (isAddingAutomation: boolean) => void;
   isAddDocumentOpen: boolean;
-  setIsAddDocumentOpen: (isAddingAutomation: boolean) => void;
+  setIsAddDocumentOpen: (isAddingDoc: boolean) => void;
 }
 
 export default function Sidebar({
