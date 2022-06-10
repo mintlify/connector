@@ -11,7 +11,6 @@ import LoadingItem from '../components/LoadingItem'
 import { withSession } from '../lib/withSession'
 import SignIn from '../components/screens/SignIn'
 import Setup from '../components/screens/Setup'
-import { Automation } from './automations'
 import { DocumentTextIcon } from '@heroicons/react/outline'
 import { Event } from '../components/Event'
 import ActivityBar from '../components/ActivityBar'
@@ -26,15 +25,16 @@ type Code = {
 }
 
 export type Doc = {
-  _id: string
-  title: string
-  lastUpdatedAt: string
-  createdAt: string
-  url: string
-  code: Code[]
-  automations: Automation[]
-  favicon?: string
-  method: string
+  _id: string,
+  title: string,
+  lastUpdatedAt: string,
+  createdAt: string,
+  url: string,
+  code: Code[],
+  favicon?: string,
+  method: string,
+  slack?: boolean,
+  email?: boolean 
 }
 
 export type UserSession = {
@@ -77,13 +77,13 @@ export type User = {
 }
 
 export default function Home({ userSession }: { userSession: UserSession }) {
-  const [docs, setDocs] = useState<Doc[]>([])
-  const [events, setEvents] = useState<Event[]>([])
-  const [selectedDoc, setSelectedDoc] = useState<Doc>()
-  const [isAddDocLoading, setIsAddDocLoading] = useState<boolean>(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false)
-  const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false)
+  const [docs, setDocs] = useState<Doc[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [selectedDoc, setSelectedDoc] = useState<Doc>();
+  const [isAddDocLoading, setIsAddDocLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
+  const [integrationsStatus, setIntegrationsStatus] = useState<{ [key: string]: boolean }>();
 
   useEffect(() => {
     if (userSession == null || userSession.user == null || userSession.org == null) {
@@ -121,14 +121,31 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       })
   }, [userSession, selectedDoc, isAddDocLoading])
 
+  const { user, org } = userSession;
+
+  useEffect(() => {
+    if (user == null || org == null) {
+      return;
+    }
+
+    axios.get(`${API_ENDPOINT}/routes/org/${org._id}/integrations`, {
+      params: {
+        userId: user.userId,
+        subdomain: getSubdomain(window.location.host)
+      }
+    })
+    .then(({ data }) => {
+      const { integrations } = data;
+      setIntegrationsStatus(integrations);
+    })
+  }, [user, org]);
+
   if (!userSession) {
     return <SignIn />
   }
 
   // Temporarily return onboarding
   // return <Onboarding />
-
-  const { user, org } = userSession
 
   if (user == null) {
     return (
@@ -180,8 +197,6 @@ export default function Home({ userSession }: { userSession: UserSession }) {
               org={org}
               user={user}
               setIsAddDocLoading={setIsAddDocLoading}
-              isAddAutomationOpen={isAddAutomationOpen}
-              setIsAddAutomationOpen={setIsAddAutomationOpen}
               isAddDocumentOpen={isAddDocumentOpen}
               setIsAddDocumentOpen={setIsAddDocumentOpen}
             />
@@ -223,6 +238,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                     setSelectedDoc={setSelectedDoc}
                     docs={docs}
                     setDocs={setDocs}
+                    integrationsStatus={integrationsStatus}
                   />
                 ))}
               </ul>
@@ -234,7 +250,6 @@ export default function Home({ userSession }: { userSession: UserSession }) {
               events={events}
               selectedDoc={selectedDoc}
               user={user}
-              setIsAddAutomationOpen={setIsAddAutomationOpen}
             />
           </div>
         </div>

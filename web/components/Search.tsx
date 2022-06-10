@@ -6,9 +6,6 @@ import { classNames } from '../helpers/functions'
 import axios from 'axios'
 import { API_ENDPOINT } from '../helpers/api'
 import { Org, User } from '../pages'
-import { AutomationTypeIcon } from '../helpers/Icons'
-import { AutomationType } from '../pages/automations'
-import { useRouter } from 'next/router'
 
 type DocResult = {
   objectID: string,
@@ -19,16 +16,8 @@ type DocResult = {
   favicon?: string,
 }
 
-type AutomationResult = {
-  objectID: string,
-  name: string,
-  org: string,
-  type: AutomationType,
-}
-
 type SearchResults = {
   docs: DocResult[],
-  automations: AutomationResult[],
 }
 
 type SearchProps = {
@@ -40,11 +29,11 @@ type SearchProps = {
 
 export default function Search({ user, org, isOpen, setIsOpen }: SearchProps) {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<SearchResults>({ docs: [], automations: [] });
+  const [results, setResults] = useState<SearchResults>({ docs: [] });
 
   useEffect(() => {
     if (!query) {
-      setResults({ docs: [], automations: [] });
+      setResults({ docs: [] });
       return;
     }
 
@@ -59,18 +48,14 @@ export default function Search({ user, org, isOpen, setIsOpen }: SearchProps) {
       })
   }, [query, user, org._id]);
 
-  const router = useRouter();
-
   if (!isOpen) {
     return null;
   }
 
   const docsResults = results.docs;
-  const automationsResults = results.automations;
 
   const onSelectionChange = (result: any) => {
     if (result.type != null) {
-      router.push('/automations');
       setIsOpen(false);
       return
     }
@@ -128,7 +113,7 @@ export default function Search({ user, org, isOpen, setIsOpen }: SearchProps) {
                   />
                 </div>
 
-                {(docsResults.length > 0 || automationsResults.length > 0) && (
+                {docsResults.length > 0 && (
                   <Combobox.Options
                     static
                     className="max-h-80 scroll-py-10 scroll-py-10 scroll-pb-2 scroll-pb-2 space-y-4 overflow-y-auto p-4 pb-2"
@@ -166,36 +151,10 @@ export default function Search({ user, org, isOpen, setIsOpen }: SearchProps) {
                         </ul>
                       </li>
                     )}
-                    {automationsResults.length > 0 && (
-                      <li>
-                        <h2 className="text-xs font-semibold text-gray-900">Automations</h2>
-                        <ul className="-mx-4 mt-2 text-sm text-gray-700">
-                          {automationsResults.map((automationResult) => (
-                            <Combobox.Option
-                              key={automationResult.objectID}
-                              value={automationResult}
-                              className={({ active }) =>
-                                classNames(
-                                  'flex cursor-pointer select-none items-center px-4 py-2',
-                                  active ? 'bg-primary text-white' : ''
-                                )
-                              }
-                            >
-                              <AutomationTypeIcon
-                                type={automationResult.type}
-                                outerSize={6}
-                                innerSize={4}
-                              />
-                              <span className="ml-2 flex-auto truncate">{automationResult.name}</span>
-                            </Combobox.Option>
-                          ))}
-                        </ul>
-                      </li>
-                    )}
                   </Combobox.Options>
                 )}
 
-                {query !== '' && query !== '?' && docsResults.length === 0 && automationsResults.length === 0 && (
+                {query !== '' && query !== '?' && docsResults.length === 0 && (
                   <div className="py-14 px-6 text-center text-sm sm:px-14">
                     <ExclamationIcon className="mx-auto h-6 w-6 text-gray-400" aria-hidden="true" />
                     <p className="mt-4 font-semibold text-gray-900">No results found</p>

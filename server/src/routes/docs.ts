@@ -104,15 +104,7 @@ docsRouter.get('/', userMiddleware, async (_, res) => {
           localField: '_id',
           as: 'code',
         },
-      },
-      {
-        $lookup: {
-          from: 'automations',
-          foreignField: 'source.doc',
-          localField: '_id',
-          as: 'automations',
-        },
-      },
+      }
     ]);
     return res.status(200).send({ docs });
   } catch (error) {
@@ -194,6 +186,32 @@ docsRouter.post('/content', async (req, res) => {
     res.send({ page });
   } catch (error) {
     res.status(500).send({ error });
+  }
+});
+
+docsRouter.put('/:docId/slack', async (req, res) => {
+  try {
+    const { docId } = req.params;
+    const { slack } = req.body;
+    const doc = await Doc.findById(docId);
+    if (doc == null) return res.status(400).json({ error: 'Invalid doc ID' });
+    await Doc.findByIdAndUpdate(docId, { slack });
+    return res.end();
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
+});
+
+docsRouter.put('/:docId/email', async (req, res) => {
+  try {
+    const { docId } = req.params;
+    const { email } = req.body;
+    const doc = await Doc.findById(docId);
+    if (doc == null) return res.status(400).json({ error: 'Invalid doc ID' });
+    await Doc.findByIdAndUpdate(doc._id, { email }, {new: true, strict: false});
+    return res.end();
+  } catch (error) {
+    return res.status(500).send({ error });
   }
 });
 
