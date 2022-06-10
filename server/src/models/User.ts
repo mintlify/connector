@@ -12,6 +12,7 @@ export type UserType = {
     pending: boolean,
     isVSCodeInstalled: boolean,
     onboarding?: {
+        isCompleted: boolean,
         role: string,
         usingVSCode: boolean,
     },
@@ -31,6 +32,7 @@ const UserSchema = new Schema({
     pending: { type: Boolean, default: false, required: true },
     isVSCodeInstalled: { type: Boolean, default: false },
     onboarding: {
+        isCompleted: Boolean,
         role: String,
         usingVSCode: Boolean,
     }

@@ -285,6 +285,15 @@ userRouter.post('/onboarding', userMiddleware, async (req, res) => {
   } catch (error) {
     return res.status(500).send({ error: 'System error' });
   }
+});
+
+userRouter.put('/onboarding/complete', userMiddleware, async (_, res) => {
+  try {
+    await User.findByIdAndUpdate(res.locals.user._id, { 'onboarding.isCompleted': true });
+    return res.end();
+  } catch (error) {
+    return res.status(500).send({ error: 'System error' });
+  }
 })
 
 export default userRouter;

@@ -81,6 +81,7 @@ export type User = {
   profilePicture?: string,
   pending?: boolean;
   onboarding?: {
+    isCompleted: boolean;
     role: string;
     usingVSCode: boolean;
   }
@@ -151,8 +152,9 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     </div>
   }
 
-  // Temporarily return onboarding
-  return <Onboarding user={user} org={org} />
+  if (!user.onboarding?.isCompleted) {
+    return <Onboarding user={user} org={org} />
+  }
 
   const onClickDoc = (doc: Doc) => {
     if (doc._id === selectedDoc?._id) {
