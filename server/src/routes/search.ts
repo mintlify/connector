@@ -1,5 +1,5 @@
 import express from 'express';
-import { searchDocsAndAutomations } from '../services/algolia';
+import { searchDocs } from '../services/algolia';
 import { track } from '../services/segment';
 import { userMiddleware } from './user';
 
@@ -10,11 +10,11 @@ searchRouter.get('/', async (req, res) => {
   const orgId = req.query.orgId as string;
 
   if (!orgId || !query) {
-    return res.send({results: { docs: [], automations: [] }});
+    return res.send({results: { docs: [] }});
   }
 
   try {
-    const results = await searchDocsAndAutomations(query, orgId);
+    const results = await searchDocs(query, orgId);
     return res.send({results});
   }
   catch (error) {

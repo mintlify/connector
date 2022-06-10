@@ -1,6 +1,5 @@
 import algoliasearch from 'algoliasearch';
 import dotenv from 'dotenv';
-import { AutomationType } from '../models/Automation';
 import { DocType } from '../models/Doc';
 
 dotenv.config();
@@ -10,19 +9,12 @@ const algoliaClientId = process.env.ALGOLIA_APP_ID as string;
 const client = algoliasearch(algoliaClientId, algoliaSecret);
 
 type SearchResults = {
-    docs: any[],
-    automations: any[]
+    docs: any[]
 }
 
-export const searchDocsAndAutomations = async (query: string, orgId: string): Promise<SearchResults> => {
+export const searchDocs = async (query: string, orgId: string): Promise<SearchResults> => {
     const queries = [{
         indexName: 'docs',
-        query,
-        params: {
-            filters: `org:${orgId}`
-        }
-      }, {
-        indexName: 'automations',
         query,
         params: {
             filters: `org:${orgId}`
@@ -31,13 +23,11 @@ export const searchDocsAndAutomations = async (query: string, orgId: string): Pr
     
     const { results } = await client.multipleQueries(queries);
     return {
-        docs: results[0].hits,
-        automations: results[1].hits
+        docs: results[0].hits
     }
 }
 
 const docsIndex = client.initIndex('docs');
-const automationsIndex = client.initIndex('automations');
 
 export const indexDocForSearch = async (doc: DocType) => {
     try {
@@ -79,18 +69,4 @@ export const updateDocContentForSearch = async (doc: DocType, newContent: string
 
 export const deleteDocForSearch = async (objectID: string): Promise<any> => {
     return docsIndex.deleteObject(objectID);
-}
-
-export const indexAutomationForSearch = async (automation: AutomationType) => {
-    const record = {
-        objectID: automation._id,
-        name: automation.name,
-        org: automation.org,
-        type: automation.type
-    }
-    await automationsIndex.saveObject(record);
-}
-
-export const deleteAutomationForSearch = async (objectID: string) => {
-    await automationsIndex.deleteObject(objectID);
 }

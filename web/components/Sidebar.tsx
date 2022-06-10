@@ -3,7 +3,6 @@ import { ChatAlt2Icon, CogIcon, DocumentTextIcon, LightningBoltIcon, ViewGridAdd
 import { PlusIcon } from '@heroicons/react/solid'
 import Link from 'next/link';
 import AddDocumentation from './commands/documentation/AddDocumentation'
-import AddAutomation from './commands/automation/AddAutomation'
 import { Org, User } from '../pages';
 import ProfilePicture from './ProfilePicture';
 
@@ -11,21 +10,15 @@ type SidebarProps = {
   user: User;
   org: Org;
   setIsAddDocLoading: (isAddingDoc: boolean) => void;
-  setIsAddingAutomation?: (isAddingAutomation: boolean) => void;
   isAddDocumentOpen: boolean;
-  setIsAddDocumentOpen: (isAddingAutomation: boolean) => void;
-  isAddAutomationOpen: boolean;
-  setIsAddAutomationOpen: (isAddingAutomation: boolean) => void;
+  setIsAddDocumentOpen: (isAddingDoc: boolean) => void;
 }
 
 export default function Sidebar({
   user,
   org,
   setIsAddDocLoading,
-  setIsAddingAutomation,
-  isAddAutomationOpen,
   isAddDocumentOpen,
-  setIsAddAutomationOpen,
   setIsAddDocumentOpen
 }: SidebarProps) {
   const { boot, show } = useIntercom();
@@ -43,12 +36,6 @@ export default function Sidebar({
       isOpen={isAddDocumentOpen}
       setIsOpen={setIsAddDocumentOpen}
       setIsAddDocLoading={setIsAddDocLoading}
-    />
-    <AddAutomation
-      user={user}
-      isOpen={isAddAutomationOpen}
-      setIsOpen={setIsAddAutomationOpen}
-      setIsAddingAutomation={setIsAddingAutomation}
     />
     <div className="xl:flex-shrink-0 xl:w-64 xl:border-r xl:border-gray-200">
       <div className="pl-4 pr-6 py-6 sm:pl-6 lg:pl-8 xl:pl-0">
@@ -91,14 +78,6 @@ export default function Sidebar({
                     Add Review Check
                   </button>
                 </Link>
-                <button
-                  type="button"
-                  className="mt-3 inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full"
-                  onClick={() => setIsAddAutomationOpen(true)}
-                >
-                  <LightningBoltIcon className="h-4 w-4 mr-1" />
-                  Add Automation
-                </button>
               </div>
             </div>
             {/* Meta info */}
