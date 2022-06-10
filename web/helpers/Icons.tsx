@@ -1,6 +1,5 @@
 import { MailIcon, PencilAltIcon, BellIcon as BellIconSolid } from '@heroicons/react/solid'
 import { DocumentSearchIcon, DocumentTextIcon } from '@heroicons/react/outline'
-import { DestinationType, AutomationType } from '../pages/automations'
 import { AddDocumentationType } from '../components/commands/documentation/AddDocumentation'
 import { Doc } from '../pages'
 
@@ -147,7 +146,7 @@ export const ConnectionIcon = ({ outerSize = 10, innerSize = 6 }: { outerSize?: 
   )
 }
 
-export const TypeIcon = ({ type, className }: { type: AutomationType | DestinationType; className: string }) => {
+export const TypeIcon = ({ type, className }: { type: string; className: string }) => {
   switch (type) {
     case 'code':
       return (
