@@ -44,31 +44,32 @@ const appsOptions: Option[] = [
   { id: 'none', title: 'None of the above' },
 ]
 
-const ProgressBar = ({ currentStep }: { currentStep: number }) => {
-  return <div className="mt-4 flex space-x-2">
-  {[0, 1, 2, 3].map((i) => (
-      <>
-        {
-          i > currentStep && <span key={i} className="h-1 w-14 bg-slate-200 rounded-sm"></span>
-        }
-        {
-          i <= currentStep && <span key={i} className="h-1 w-14 bg-primary rounded-sm"></span>
-        }
-      </>
-    ))
-  }
-  </div>
-}
-
 type NavButtonsProps = {
   onBack: () => void,
   onNext: () => void,
   isCompleted: boolean,
   isFirst?: boolean,
   isLast?: boolean,
+  onSkip?: () => void,
 }
 
-const NavButtons = ({ onBack, onNext, isFirst, isLast, isCompleted }: NavButtonsProps) => {
+const ProgressBar = ({ step, totalSteps }: { step: number, totalSteps: number }) => {
+  return <div className="mt-4 flex space-x-2">
+  {Array.from(Array(totalSteps).keys()).map((i) => (
+    <>
+      {
+        i > step && <span key={i} className="h-1 w-14 bg-slate-200 rounded-sm"></span>
+      }
+      {
+        i <= step && <span key={i} className="h-1 w-14 bg-primary rounded-sm"></span>
+      }
+    </>
+    ))
+  }
+</div>
+}
+
+const NavButtons = ({ onBack, onNext, isFirst, isLast, isCompleted, onSkip }: NavButtonsProps) => {
   return <div className="flex mt-8 space-x-2">
     {
       !isFirst && <button
@@ -81,6 +82,12 @@ const NavButtons = ({ onBack, onNext, isFirst, isLast, isCompleted }: NavButtons
       onClick={onNext}
       disabled={!isCompleted}
     >{isLast ? 'Complete' : 'Next'}</button>
+    {
+      onSkip && <button
+      className="py-1 px-3 rounded-sm text-sm text-gray-400 hover:text-gray-500"
+      onClick={onSkip}
+    >Skip</button>
+    }
   </div>
 }
 
@@ -126,10 +133,13 @@ export default function Onboarding({ user, org }: OnboardingProps) {
     setStep(step + 1);
   }
 
+  const hasApps = appsUsing.filter((app) => app !== 'none').length > 0;
+  const totalSteps = hasApps ? 4 : 3;
+
   const CurrentStep = () => {
     switch (step) {
       case 0:
-        return <Step0
+        return <IntroStep
           user={user}
           onBack={onBack}
           onNext={onNext}
@@ -139,13 +149,42 @@ export default function Onboarding({ user, org }: OnboardingProps) {
           setTeamSize={setTeamSize}
           appsUsing={appsUsing}
           setAppsUsing={setAppsUsing}
+          step={step}
+          totalSteps={totalSteps}
         />;
       case 1:
-        return <Step1 user={user} org={org} onBack={onBack} onNext={onNext} />;
+        return <AddDocStep
+          user={user}
+          org={org}
+          onBack={onBack}
+          onNext={onNext}
+          step={step}
+          totalSteps={totalSteps}
+        />;
       case 2:
-        return <Step2 user={user} org={org} onBack={onBack} onNext={onNext} />;
+        if (!hasApps) {
+          return <InviteStep
+            user={user}
+            onBack={onBack}
+            step={step}
+            totalSteps={totalSteps}
+            />;
+        }
+        return <IntegrateStep
+          user={user}
+          org={org}
+          onBack={onBack}
+          onNext={onNext}
+          appsUsing={appsUsing}
+          step={step}
+          totalSteps={totalSteps}
+        />;
       case 3:
-        return <Step3 onBack={onBack} />;
+        return <InviteStep
+          user={user}
+          onBack={onBack}
+          step={step}
+          totalSteps={totalSteps} />;
       default:
         return null;
     }
@@ -162,8 +201,8 @@ export default function Onboarding({ user, org }: OnboardingProps) {
   )
 }
 
-function Step0({ user, onBack, onNext, role, setRole, teamSize, setTeamSize, appsUsing, setAppsUsing }:
-  { user: User, onBack: () => void, onNext: () => void, role: string | undefined, setRole: (role: string) => void, teamSize: string | undefined, setTeamSize: (teamSize: string) => void, appsUsing: string[], setAppsUsing: (appsUsing: string[]) => void }) {
+function IntroStep({ user, onBack, onNext, role, setRole, teamSize, setTeamSize, appsUsing, setAppsUsing, step, totalSteps }:
+  { user: User, onBack: () => void, onNext: () => void, role: string | undefined, setRole: (role: string) => void, teamSize: string | undefined, setTeamSize: (teamSize: string) => void, appsUsing: string[], setAppsUsing: (appsUsing: string[]) => void, step: number, totalSteps: number }) {
   const onClickAppOptions = (appOptionId: string) => {
     if (appsUsing.includes(appOptionId)) {
       setAppsUsing(appsUsing.filter((app) => app !== appOptionId));
@@ -190,16 +229,12 @@ function Step0({ user, onBack, onNext, role, setRole, teamSize, setTeamSize, app
   }
 
   const isCompleted = role != null && teamSize != null && appsUsing.length > 0;
-  
-  const currentStep = 0;
   return <>
-    <h1 className="text-3xl font-semibold">
-      Welcome <span className="text-primary">{user.firstName}</span> 👋
-    </h1>
+    <h1 className="text-3xl font-semibold">Welcome <span className="text-primary">{user.firstName}</span> 👋</h1>
     <p className="mt-1 text-gray-600">
       First things first, tell us about yourself
     </p>
-    <ProgressBar currentStep={currentStep} />
+    <ProgressBar step={step} totalSteps={totalSteps} /> 
     <div className="mt-6 space-y-8">
       <div>
         <label className="text-base font-medium text-gray-900">What best describes what you do?</label>
@@ -268,17 +303,16 @@ function Step0({ user, onBack, onNext, role, setRole, teamSize, setTeamSize, app
           </div>
         </fieldset>
       </div>
-    </div>
+      </div>
     <NavButtons onBack={onBack} onNext={onNextFirstPage} isFirst isCompleted={isCompleted} />
   </>;
 }
 
-function Step1({ user, org, onBack, onNext }: { user: User, org: Org, onBack: () => void, onNext: () => void }) {
+function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: User, org: Org, onBack: () => void, onNext: () => void, step: number, totalSteps: number }) {
   const [docs, setDocs] = useState<Doc[]>([]);
   const [isAddingDocOpen, setIsAddingDocOpen] = useState(false);
   const [addDocumentationType, setAddDocumentationType] = useState<AddDocumentationType>();
   const [isAddDocLoading, setIsAddDocLoading] = useState(false);
-  const currentStep = 1;
 
   useEffect(() => {
     axios.get(`${API_ENDPOINT}/routes/docs`, {
@@ -311,7 +345,7 @@ function Step1({ user, org, onBack, onNext }: { user: User, org: Org, onBack: ()
     <p className="mt-1 text-gray-600">
       You can import or link your existing pages
     </p>
-    <ProgressBar currentStep={currentStep} />
+    <ProgressBar step={step} totalSteps={totalSteps} /> 
     <div className="mt-6 space-y-8">
       <div className="bg-white rounded-md shadow-md">
         <Combobox onChange={() => {}} value="">
@@ -374,19 +408,18 @@ function Step1({ user, org, onBack, onNext }: { user: User, org: Org, onBack: ()
           </ul>
         </div>
       }
-    </div>
+      </div>
     <NavButtons onBack={onBack} onNext={onNext} isCompleted={isCompleted} />
   </>;
 }
 
-function Step2({ user, org, onBack, onNext }: { user: User, org: Org, onBack: () => void, onNext: () => void }) {
+function IntegrateStep({ user, org, onBack, onNext, appsUsing, step, totalSteps }: { user: User, org: Org, onBack: () => void, onNext: () => void, appsUsing: string[], step: number, totalSteps: number }) {
   const integrations = [
     {
       type: 'slack',
       title: 'Slack',
       description: 'Connect with your workspace',
       iconSrc: '/assets/integrations/slack.svg',
-      isRequired: org.onboarding?.usingSlack,
       installUrl: `${API_ENDPOINT}/routes/integrations/slack/install?org=${org._id}`,
     },
     {
@@ -394,7 +427,6 @@ function Step2({ user, org, onBack, onNext }: { user: User, org: Org, onBack: ()
       title: 'GitHub',
       description: 'Enable documentation review',
       iconSrc: '/assets/integrations/github.svg',
-      isRequired: org.onboarding?.usingGitHub,
       installUrl: `${API_ENDPOINT}/routes/integrations/github/install?org=${org._id}`,
     },
     {
@@ -402,14 +434,11 @@ function Step2({ user, org, onBack, onNext }: { user: User, org: Org, onBack: ()
       title: 'VS Code',
       description: 'Connect code to documentation',
       iconSrc: '/assets/integrations/vscode.svg',
-      isRequired: user.onboarding?.usingVSCode,
       installUrl: 'vscode:extension/mintlify.connector',
     }
   ];
 
-  const remainingIntegrations = integrations.filter(({ isRequired }) => isRequired);
-
-  const currentStep = 2;
+  const remainingIntegrations = integrations.filter(({ type }) => appsUsing.includes(type));
   const isCompleted = remainingIntegrations.length === 0;
 
   return <>
@@ -419,7 +448,7 @@ function Step2({ user, org, onBack, onNext }: { user: User, org: Org, onBack: ()
     <p className="mt-1 text-gray-600">
       Connect with the apps that you use
     </p>
-    <ProgressBar currentStep={currentStep} />
+    <ProgressBar step={step} totalSteps={totalSteps} /> 
     <div className="mt-6 space-y-8">
       <div>
         <div className="mt-2 bg-white rounded-md p-3 shadow-md">
@@ -463,14 +492,13 @@ function Step2({ user, org, onBack, onNext }: { user: User, org: Org, onBack: ()
       </Combobox>
         </div>
       </div>
-    </div>
-    <NavButtons onBack={onBack} onNext={onNext} isCompleted={isCompleted} />
+      </div>
+    <NavButtons onBack={onBack} onNext={onNext} isCompleted={isCompleted} onSkip={onNext} />
   </>;
 }
 
-function Step3({ onBack }: { onBack: () => void }) {
+function InviteStep({ user, onBack, step, totalSteps }: { user: User, onBack: () => void, step: number, totalSteps: number }) {
   const [invitedEmail, setInvitedEmail] = useState('');
-  const currentStep = 3;
   const members: User[] = [];
 
   const onSubmit = () => {
@@ -486,7 +514,7 @@ function Step3({ onBack }: { onBack: () => void }) {
     <p className="mt-1 text-gray-600">
       You can also do this later in the app
     </p>
-    <ProgressBar currentStep={currentStep} />
+    <ProgressBar step={step} totalSteps={totalSteps} /> 
     <div className="mt-6 space-y-8">
       <div>
       <div className="space-y-5 bg-white rounded-md p-3 shadow-md">
