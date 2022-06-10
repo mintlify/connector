@@ -10,6 +10,7 @@ import { getSubdomain } from "../../helpers/user";
 import { Doc, Org, User } from "../../pages";
 import AddDocumentation, { addDocumentationMap, AddDocumentationType } from "../commands/documentation/AddDocumentation";
 import DocItem from "../DocItem";
+import ProfilePicture from "../ProfilePicture";
 
 const rolesOptions = [
   { id: 'founder', title: 'Founder' },
@@ -52,6 +53,28 @@ const ProgressBar = ({ currentStep }: { currentStep: number }) => {
   </div>
 }
 
+type NavButtonsProps = {
+  onBack: () => void,
+  onNext: () => void,
+  isFirst?: boolean,
+  isLast?: boolean,
+}
+
+const NavButtons = ({ onBack, onNext, isFirst, isLast }: NavButtonsProps) => {
+  return <div className="flex mt-8 space-x-2">
+    {
+      !isFirst && <button
+      className="bg-white border border-gray-500 hover:bg-gray-100 py-1 px-6 rounded-sm text-gray-600"
+      onClick={onBack}
+    >Back</button>
+    }
+    <button
+      className="bg-primary hover:bg-hover py-1 px-6 rounded-sm text-white"
+      onClick={onNext}
+    >{isLast ? 'Complete' : 'Next'}</button>
+  </div>
+}
+
 type OnboardingProps = {
   user: User,
   org: Org,
@@ -60,16 +83,32 @@ type OnboardingProps = {
 export default function Onboarding({ user, org }: OnboardingProps) {
   const [step, setStep] = useState(0);
 
+  const onBack = () => {
+    if (step === 0) {
+      return;
+    }
+
+    setStep(step - 1);
+  }
+
+  const onNext = () => {
+    if (step === 3) {
+      return;
+    }
+
+    setStep(step + 1);
+  }
+
   const CurrentStep = () => {
     switch (step) {
       case 0:
-        return <Step0 />;
+        return <Step0 onBack={onBack} onNext={onNext} />;
       case 1:
-        return <Step1 user={user} org={org} />;
+        return <Step1 user={user} org={org} onBack={onBack} onNext={onNext} />;
       case 2:
-        return <Step2 org={org} />;
+        return <Step2 org={org} onBack={onBack} onNext={onNext} />;
       case 3:
-        return <Step3 />;
+        return <Step3 onBack={onBack} />;
       default:
         return null;
     }
@@ -89,25 +128,13 @@ export default function Onboarding({ user, org }: OnboardingProps) {
       <div className="max-w-7xl mx-auto px-8">
         <div className="w-96 max-w-full mx-auto py-12">
           <CurrentStep />
-          <div className="flex mt-8 space-x-2">
-            {
-              step > 0 && <button
-              className="bg-white border border-gray-500 hover:bg-gray-100 py-1 px-6 rounded-sm text-gray-600"
-              onClick={() => setStep(step - 1)}
-            >Back</button>
-            }
-            <button
-              className="bg-primary hover:bg-hover py-1 px-6 rounded-sm text-white"
-              onClick={nextPage}
-            >{isLastPage ? 'Complete' : 'Next'}</button>
-          </div>
         </div>
       </div>
     </div>
   )
 }
 
-function Step0() {
+function Step0({ onBack, onNext }: { onBack: () => void, onNext: () => void }) {
   const currentStep = 0;
   return <>
     <h1 className="text-3xl font-semibold">
@@ -183,10 +210,11 @@ function Step0() {
         </fieldset>
       </div>
     </div>
+    <NavButtons onBack={onBack} onNext={onNext} isFirst />
   </>;
 }
 
-function Step1({ user, org }: OnboardingProps) {
+function Step1({ user, org, onBack, onNext }: { user: User, org: Org, onBack: () => void, onNext: () => void }) {
   const [docs, setDocs] = useState<Doc[]>([]);
   const [isAddingDocOpen, setIsAddingDocOpen] = useState(false);
   const [addDocumentationType, setAddDocumentationType] = useState<AddDocumentationType>();
@@ -281,10 +309,11 @@ function Step1({ user, org }: OnboardingProps) {
           </ul>
         </div>
     </div>
+    <NavButtons onBack={onBack} onNext={onNext} />
   </>;
 }
 
-function Step2({ org }: { org: Org }) {
+function Step2({ org, onBack, onNext }: { org: Org, onBack: () => void, onNext: () => void }) {
   const integrations = [
     {
       type: 'slack',
@@ -361,14 +390,22 @@ function Step2({ org }: { org: Org }) {
         </div>
       </div>
     </div>
+    <NavButtons onBack={onBack} onNext={onNext} />
   </>;
 }
 
-function Step3() {
+function Step3({ onBack }: { onBack: () => void }) {
+  const [invitedEmail, setInvitedEmail] = useState('');
   const currentStep = 3;
+  const members: User[] = [];
+
+  const onSubmit = () => {
+
+  }
+
   return <>
     <h1 className="text-3xl font-semibold">
-      Invite your{' '}<span className="text-primary">team</span> ✉️
+      Invite other{' '}<span className="text-primary">members</span> ✉️
     </h1>
     <p className="mt-1 text-gray-600">
       You can also do this later in the app
@@ -376,69 +413,107 @@ function Step3() {
     <ProgressBar currentStep={currentStep} />
     <div className="mt-6 space-y-8">
       <div>
-        <label className="text-base font-medium text-gray-900">What best describes what you do?</label>
-        <fieldset className="mt-4">
-          <div className="grid grid-cols-2 gap-4">
-            {rolesOptions.map((roleOption) => (
-              <div key={roleOption.id} className="flex items-center">
-                <input
-                  id={roleOption.id}
-                  name="role"
-                  type="radio"
-                  defaultChecked={roleOption.id === 'email'}
-                  className="focus:ring-0 h-4 w-4 text-primary border-gray-300"
-                />
-                <label htmlFor={roleOption.id} className="ml-3 block text-sm text-gray-700">
-                  {roleOption.title}
-                </label>
-              </div>
-            ))}
+      <div className="space-y-5 bg-white rounded-md p-3 shadow-md">
+        <div className="flex">
+          <div className="flex-grow">
+            <input
+              type="email"
+              name="add-team-members"
+              id="add-team-members"
+              className="block w-full shadow-sm focus:ring-primary focus:border-primary sm:text-sm border-gray-300 rounded-md"
+              placeholder="Email address"
+              aria-describedby="add-team-members-helper"
+              value={invitedEmail}
+              onChange={(e) => {
+                // setInviteErrorMessage(undefined)
+                setInvitedEmail(e.target.value)
+              }}
+              required
+            />
+            {/* {inviteErrorMessage && <div className="text-red-500 pt-2 pl-2">{inviteErrorMessage}</div>} */}
           </div>
-        </fieldset>
+          <span className="ml-3">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                // inviteMember(invitedEmail)
+              }}
+              className="inline-flex items-center justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-hover focus:outline-none focus:ring-0 focus:ring-offset-2 sm:w-auto hover:cursor-pointer"
+            >
+              Add member
+            </button>
+          </span>
+        </div>
+        {
+          members.length > 0 && <div className="mt-8 flex flex-col">
+          <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+              <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                <table className="min-w-full divide-y divide-gray-300">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th
+                        scope="col"
+                        className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                      >
+                        Name
+                      </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Role
+                      </th>
+                      {/* the column for the Edit button- this should be implement later. */}
+                      {/* <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                        <span className="sr-only">Edit</span>
+                      </th> */}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 bg-white">
+                    {members.map((member) => (
+                      <tr key={member.email}>
+                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
+                          <div className="flex items-center">
+                            {member.pending ? (
+                              <span className="inline-block h-10 w-10 rounded-full bg-gray-100 overflow-hidden">
+                                <svg
+                                  className="h-full w-full text-gray-300"
+                                  fill="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                              </span>
+                            ) : (
+                              <ProfilePicture size={10} user={member} />
+                            )}
+                            <div className="ml-4">
+                              <div
+                                className={classNames(
+                                  "font-medium text-gray-900",
+                                  member.pending ? "italic" : ""
+                                )}
+                              >
+                                {member.pending ? "Pending User" : `${member.firstName} ${member.lastName}`}
+                              </div>
+                              <div className="text-gray-500">{member.email}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {member.pending ? "Pending" : "Member"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        }
       </div>
-      <div>
-        <label className="text-base font-medium text-gray-900">How big is your team?</label>
-        <fieldset className="mt-4">
-          <div className="grid grid-cols-2 gap-4">
-            {sizeOptions.map((sizeOption) => (
-              <div key={sizeOption.id} className="flex items-center">
-                <input
-                  id={sizeOption.id}
-                  name="size"
-                  type="radio"
-                  defaultChecked={sizeOption.id === 'email'}
-                  className="focus:ring-0 h-4 w-4 text-primary border-gray-300"
-                />
-                <label htmlFor={sizeOption.id} className="ml-3 block text-sm text-gray-700">
-                  {sizeOption.title}
-                </label>
-              </div>
-            ))}
-          </div>
-        </fieldset>
-      </div>
-      <div>
-        <label className="text-base font-medium text-gray-900">Which of the following do you or your team use?</label>
-        <p className="text-sm leading-5 text-gray-500">Check all that apply</p>
-        <fieldset className="mt-4">
-          <div className="grid grid-cols-2 gap-4">
-            {appsOptions.map((appOption) => (
-              <div key={appOption.id} className="flex items-center">
-                <input
-                  id={appOption.id}
-                  name="role-option"
-                  type="checkbox"
-                  defaultChecked={appOption.id === 'email'}
-                  className="focus:ring-0 h-4 w-4 text-primary border-gray-300"
-                />
-                <label htmlFor={appOption.id} className="ml-3 block text-sm text-gray-700">
-                  {appOption.title}
-                </label>
-              </div>
-            ))}
-          </div>
-        </fieldset>
       </div>
     </div>
+    <NavButtons onBack={onBack} onNext={onSubmit} isLast />
   </>;
 }
