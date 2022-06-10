@@ -22,7 +22,7 @@ type DocItemProps = {
   selectedDoc?: Doc,
   removeSeparators?: boolean,
   setSelectedDoc: (doc: Doc | undefined) => void,
-  integrationsStatus: { [key: string]: boolean } | undefined
+  integrationsStatus?: { [key: string]: boolean }
 }
 
 export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs, removeSeparators, setSelectedDoc, integrationsStatus }: DocItemProps) {
