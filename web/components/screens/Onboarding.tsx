@@ -1,6 +1,7 @@
 import { Combobox } from "@headlessui/react";
 import { ChevronRightIcon } from "@heroicons/react/solid";
 import axios from "axios";
+import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -195,6 +196,10 @@ export default function Onboarding({ user, org }: OnboardingProps) {
   }
 
   return (
+    <>
+    <Head>
+      <title>Getting started</title>
+    </Head>
     <div className="bg-slate-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-8">
         <div className="w-96 max-w-full mx-auto py-12">
@@ -202,6 +207,7 @@ export default function Onboarding({ user, org }: OnboardingProps) {
         </div>
       </div>
     </div>
+    </>
   )
 }
 
