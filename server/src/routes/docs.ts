@@ -87,12 +87,19 @@ export const createDocsFromNotionPageId = async (pages: NotionPage[], orgId: Typ
   await Promise.all(addDocPromises);
 }
 
-docsRouter.get('/', userMiddleware, async (_, res) => {
+docsRouter.get('/', userMiddleware, async (req, res) => {
   const org = res.locals.user.org;
+  const { shouldShowCreatedBySelf } = req.query;
+
+  const matchQuery: { org: Types.ObjectId, createdBy?: Types.ObjectId } = { org };
+  if (shouldShowCreatedBySelf) {
+    matchQuery.createdBy = res.locals.user._id;
+  }
+
   try {
     const docs = await Doc.aggregate([
       {
-        $match: { org },
+        $match: matchQuery,
       },
       {
         $sort: { lastUpdatedAt: -1 },

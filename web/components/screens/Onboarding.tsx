@@ -10,6 +10,7 @@ import { getSubdomain } from "../../helpers/user";
 import { Doc, Org, User } from "../../pages";
 import AddDocumentation, { addDocumentationMap, AddDocumentationType } from "../commands/documentation/AddDocumentation";
 import DocItem from "../DocItem";
+import LoadingItem from "../LoadingItem";
 import ProfilePicture from "../ProfilePicture";
 
 type Option = {
@@ -232,22 +233,24 @@ function Step1({ user, org, onBack, onNext }: { user: User, org: Org, onBack: ()
   const [docs, setDocs] = useState<Doc[]>([]);
   const [isAddingDocOpen, setIsAddingDocOpen] = useState(false);
   const [addDocumentationType, setAddDocumentationType] = useState<AddDocumentationType>();
+  const [isAddDocLoading, setIsAddDocLoading] = useState(false);
   const currentStep = 1;
 
   useEffect(() => {
     axios.get(`${API_ENDPOINT}/routes/docs`, {
       params: {
         userId: user.userId,
-        subdomain: getSubdomain(window.location.host)
+        subdomain: getSubdomain(window.location.host),
+        shouldShowCreatedBySelf: true,
       }
     })
       .then((docsResponse) => {
         const { docs } = docsResponse.data;
         setDocs(docs);
       });
-  }, [user.userId]);
+  }, [user.userId, isAddDocLoading]);
 
-  const isCompleted = true;
+  const isCompleted = docs.length > 0;
 
   return <>
     <AddDocumentation
@@ -255,7 +258,7 @@ function Step1({ user, org, onBack, onNext }: { user: User, org: Org, onBack: ()
       org={org}
       isOpen={isAddingDocOpen}
       setIsOpen={setIsAddingDocOpen}
-      setIsAddDocLoading={() => {}}
+      setIsAddDocLoading={setIsAddDocLoading}
       overrideSelectedRuleType={addDocumentationType}
     />
     <h1 className="text-3xl font-semibold">
@@ -307,9 +310,11 @@ function Step1({ user, org, onBack, onNext }: { user: User, org: Org, onBack: ()
           </Combobox.Options>
       </Combobox>
       </div>
-      <div>
+      {
+        docs.length > 0 && <div>
         <h1 className="text-lg">Documents added</h1>
         <ul className="mt-2 bg-white rounded-md p-3 shadow-md">
+          { isAddDocLoading && <LoadingItem /> }
           {docs.map((doc) => (
             <DocItem
               user={user}
@@ -324,6 +329,7 @@ function Step1({ user, org, onBack, onNext }: { user: User, org: Org, onBack: ()
           ))}
           </ul>
         </div>
+      }
     </div>
     <NavButtons onBack={onBack} onNext={onNext} isCompleted={isCompleted} />
   </>;
