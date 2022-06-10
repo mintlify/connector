@@ -58,10 +58,7 @@ export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs
         isRed: false,
         onClick: () => {
           axios.put(`${API_ENDPOINT}/routes/docs/${doc._id}/slack`, {
-            params: {
-              userId: user.userId,
-              subdomain: getSubdomain(window.location.host)
-            }
+            slack: !slack
           });
         }
       })
