@@ -15,7 +15,7 @@ import { DocumentTextIcon } from '@heroicons/react/outline'
 import { Event } from '../components/Event'
 import ActivityBar from '../components/ActivityBar'
 import { getSubdomain } from '../helpers/user'
-// import Onboarding from '../components/screens/Onboarding'
+import Onboarding from '../components/screens/Onboarding'
 import DocItem from '../components/DocItem'
 
 type Code = {
@@ -64,16 +64,27 @@ export type Org = {
   }
   access?: {
     mode: AccessMode
+  },
+  onboarding?: {
+    teamSize: string;
+    usingGitHub: boolean;
+    usingSlack: boolean;
+    usingNone: boolean;
   }
 }
 
 export type User = {
-  userId: string
-  email: string
-  firstName: string
-  lastName: string
-  profilePicture?: string
-  pending?: boolean
+  userId: string,
+  email: string,
+  firstName: string,
+  lastName: string,
+  profilePicture?: string,
+  pending?: boolean;
+  onboarding?: {
+    isCompleted: boolean;
+    role: string;
+    usingVSCode: boolean;
+  }
 }
 
 export default function Home({ userSession }: { userSession: UserSession }) {
@@ -144,9 +155,6 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     return <SignIn />
   }
 
-  // Temporarily return onboarding
-  // return <Onboarding />
-
   if (user == null) {
     return (
       <>
@@ -165,6 +173,10 @@ export default function Home({ userSession }: { userSession: UserSession }) {
         <Link href="/api/logout">Logout</Link>
       </div>
     )
+  }
+
+  if (!user.onboarding?.isCompleted) {
+    return <Onboarding user={user} org={org} />
   }
 
   const onClickDoc = (doc: Doc) => {

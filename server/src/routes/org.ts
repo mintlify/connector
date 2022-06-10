@@ -76,7 +76,7 @@ orgRouter.get('/users', userMiddleware, async (_: any, res: express.Response) =>
       email,
       pending: true,
     };
-  });
+  }) as any;
   return res.status(200).json({ users: users.concat(invitedUsers) });
 });
 

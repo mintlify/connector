@@ -268,4 +268,32 @@ userRouter.put('/:userId/install-vscode', async (req, res) => {
   }
 });
 
+userRouter.post('/onboarding', userMiddleware, async (req, res) => {
+  const { role, teamSize, appsUsing } = req.body;
+
+  if (!role || !teamSize || appsUsing == null) {
+    return res.status(400).send({ error: 'No data provided' });
+  }
+
+  try {
+    const userUpdateQuery = { onboarding: { role, usingVSCode: appsUsing.includes('vscode') } };
+    const orgUpdateQuery = { onboarding: { teamSize, usingGitHub: appsUsing.includes('github'), usingSlack: appsUsing.includes('slack'), usingNone: appsUsing.includes('none') } }
+    const updateUserPromise = User.findByIdAndUpdate(res.locals.user._id, userUpdateQuery);
+    const updateOrgPromise = Org.findByIdAndUpdate(res.locals.user.org, orgUpdateQuery);
+    await Promise.all([updateUserPromise, updateOrgPromise]);
+    return res.end();
+  } catch (error) {
+    return res.status(500).send({ error: 'System error' });
+  }
+});
+
+userRouter.put('/onboarding/complete', userMiddleware, async (_, res) => {
+  try {
+    await User.findByIdAndUpdate(res.locals.user._id, { 'onboarding.isCompleted': true });
+    return res.end();
+  } catch (error) {
+    return res.status(500).send({ error: 'System error' });
+  }
+})
+
 export default userRouter;
