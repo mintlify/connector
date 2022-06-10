@@ -514,6 +514,7 @@ function IntegrateStep({ user, org, onBack, onNext, appsUsing, step, totalSteps 
                 </a>
               </Link>
             ))}
+            {remainingIntegrations.length === 0 && <div className="text-gray-600 text-center">All required integrations have been installed 🎉</div>}
           </Combobox.Options>
       </Combobox>
         }
@@ -526,7 +527,38 @@ function IntegrateStep({ user, org, onBack, onNext, appsUsing, step, totalSteps 
 
 function InviteStep({ user, onBack, step, totalSteps }: { user: User, onBack: () => void, step: number, totalSteps: number }) {
   const [invitedEmail, setInvitedEmail] = useState('');
-  const members: User[] = [];
+  const [inviteErrorMessage, setInviteErrorMessage] = useState<string>();
+  const [members, setMembers] = useState<User[]>([]);
+
+  const inviteMember = async (email: string) => {
+    if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email.trim()) || email.trim() === "") {
+      setInviteErrorMessage("Please enter a valid email address.")
+      return
+    }
+
+    setInvitedEmail("")
+    // create a pending account by calling the invitation API
+    const emails = [email];
+    await axios
+      .post(`${API_ENDPOINT}/routes/user/invite-to-org`, {
+        emails,
+      }, {
+        params: {
+          userId: user.userId,
+        }
+      })
+      .then(() => {
+        const invitedMembers: any = emails.map((email) => {
+          return {
+            email,
+            pending: true
+          }
+        })
+        setMembers(members.concat(invitedMembers))
+      })
+    // send login invitation
+    await axios.post("/api/login/magiclink", { email });
+  }
 
   const onSubmit = () => {
 
@@ -556,19 +588,19 @@ function InviteStep({ user, onBack, step, totalSteps }: { user: User, onBack: ()
               aria-describedby="add-team-members-helper"
               value={invitedEmail}
               onChange={(e) => {
-                // setInviteErrorMessage(undefined)
+                setInviteErrorMessage(undefined)
                 setInvitedEmail(e.target.value)
               }}
               required
             />
-            {/* {inviteErrorMessage && <div className="text-red-500 pt-2 pl-2">{inviteErrorMessage}</div>} */}
+            {inviteErrorMessage && <div className="text-red-500 pt-2 pl-2">{inviteErrorMessage}</div>}
           </div>
           <span className="ml-3">
             <button
               type="button"
               onClick={(e) => {
                 e.preventDefault()
-                // inviteMember(invitedEmail)
+                inviteMember(invitedEmail)
               }}
               className="inline-flex items-center justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-hover focus:outline-none focus:ring-0 focus:ring-offset-2 sm:w-auto hover:cursor-pointer"
             >
