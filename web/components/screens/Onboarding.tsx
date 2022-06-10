@@ -84,6 +84,23 @@ const NavButtons = ({ onBack, onNext, isFirst, isLast, isCompleted }: NavButtons
   </div>
 }
 
+const buildAppsUsing = (user: User, org: Org) => {
+  const apps = [];
+  if (user.onboarding?.usingVSCode) {
+    apps.push('vscode');
+  }
+  if (org.onboarding?.usingGitHub) {
+    apps.push('github');
+  }
+  if (org.onboarding?.usingSlack) {
+    apps.push('slack');
+  }
+  if (org.onboarding?.usingNone) {
+    apps.push('none');
+  }
+  return apps;
+}
+
 type OnboardingProps = {
   user: User,
   org: Org,
@@ -91,6 +108,9 @@ type OnboardingProps = {
 
 export default function Onboarding({ user, org }: OnboardingProps) {
   const [step, setStep] = useState(0);
+  const [role, setRole] = useState<string | undefined>(user.onboarding?.role);
+  const [teamSize, setTeamSize] = useState<string | undefined>(org.onboarding?.teamSize);
+  const [appsUsing, setAppsUsing] = useState<string[]>(buildAppsUsing(user, org));
 
   const onBack = () => {
     if (step === 0) {
@@ -109,7 +129,17 @@ export default function Onboarding({ user, org }: OnboardingProps) {
   const CurrentStep = () => {
     switch (step) {
       case 0:
-        return <Step0 user={user} org={org} onBack={onBack} onNext={onNext} />;
+        return <Step0
+          user={user}
+          onBack={onBack}
+          onNext={onNext}
+          role={role}
+          setRole={setRole}
+          teamSize={teamSize}
+          setTeamSize={setTeamSize}
+          appsUsing={appsUsing}
+          setAppsUsing={setAppsUsing}
+        />;
       case 1:
         return <Step1 user={user} org={org} onBack={onBack} onNext={onNext} />;
       case 2:
@@ -132,27 +162,8 @@ export default function Onboarding({ user, org }: OnboardingProps) {
   )
 }
 
-function Step0({ user, org, onBack, onNext }: { user: User, org: Org, onBack: () => void, onNext: () => void }) {
-  const buildAppsUsing = () => {
-    const apps = [];
-    if (user.onboarding?.usingVSCode) {
-      apps.push('vscode');
-    }
-    if (org.onboarding?.usingGitHub) {
-      apps.push('github');
-    }
-    if (org.onboarding?.usingSlack) {
-      apps.push('slack');
-    }
-    if (org.onboarding?.usingNone) {
-      apps.push('none');
-    }
-    return apps;
-  }
-  const [role, setRole] = useState<string | undefined>(user.onboarding?.role);
-  const [teamSize, setTeamSize] = useState<string | undefined>(org.onboarding?.teamSize);
-  const [appsUsing, setAppsUsing] = useState<string[]>(buildAppsUsing());
-
+function Step0({ user, onBack, onNext, role, setRole, teamSize, setTeamSize, appsUsing, setAppsUsing }:
+  { user: User, onBack: () => void, onNext: () => void, role: string | undefined, setRole: (role: string) => void, teamSize: string | undefined, setTeamSize: (teamSize: string) => void, appsUsing: string[], setAppsUsing: (appsUsing: string[]) => void }) {
   const onClickAppOptions = (appOptionId: string) => {
     if (appsUsing.includes(appOptionId)) {
       setAppsUsing(appsUsing.filter((app) => app !== appOptionId));
@@ -579,6 +590,6 @@ function Step3({ onBack }: { onBack: () => void }) {
       </div>
       </div>
     </div>
-    <NavButtons onBack={onBack} onNext={onSubmit} isLast isCompleted={true} />
+    <NavButtons onBack={onBack} onNext={onSubmit} isLast isCompleted={isCompleted} />
   </>;
 }
