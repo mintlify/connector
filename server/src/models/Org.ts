@@ -75,9 +75,9 @@ const OrgSchema = new Schema({
       workspace_icon: { type: String },
     },
     google: {
-      accessToken: { type: String, required: true },
-      expiryDate: { type: Number, required: true },
-      refreshToken: { type: String, required: true },
+      accessToken: { type: String },
+      expiryDate: { type: Number },
+      refreshToken: { type: String },
     },
   },
   notifications: {
