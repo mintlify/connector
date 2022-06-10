@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { API_ENDPOINT } from "../../helpers/api";
 import { classNames } from "../../helpers/functions";
 import { DocumentationTypeIcon } from "../../helpers/Icons";
+import { updateSession } from "../../helpers/session";
 import { getSubdomain } from "../../helpers/user";
 import { Doc, Org, User } from "../../pages";
 import AddDocumentation, { addDocumentationMap, AddDocumentationType } from "../commands/documentation/AddDocumentation";
@@ -108,7 +109,7 @@ export default function Onboarding({ user, org }: OnboardingProps) {
   const CurrentStep = () => {
     switch (step) {
       case 0:
-        return <Step0 user={user} onBack={onBack} onNext={onNext} />;
+        return <Step0 user={user} org={org} onBack={onBack} onNext={onNext} />;
       case 1:
         return <Step1 user={user} org={org} onBack={onBack} onNext={onNext} />;
       case 2:
@@ -131,10 +132,26 @@ export default function Onboarding({ user, org }: OnboardingProps) {
   )
 }
 
-function Step0({ user, onBack, onNext }: { user: User, onBack: () => void, onNext: () => void }) {
-  const [role, setRole] = useState<string>();
-  const [teamSize, setTeamSize] = useState<string>();
-  const [appsUsing, setAppsUsing] = useState<string[]>([]);
+function Step0({ user, org, onBack, onNext }: { user: User, org: Org, onBack: () => void, onNext: () => void }) {
+  const buildAppsUsing = () => {
+    const apps = [];
+    if (user.onboarding?.usingVSCode) {
+      apps.push('vscode');
+    }
+    if (org.onboarding?.usingGitHub) {
+      apps.push('github');
+    }
+    if (org.onboarding?.usingSlack) {
+      apps.push('slack');
+    }
+    if (org.onboarding?.usingNone) {
+      apps.push('none');
+    }
+    return apps;
+  }
+  const [role, setRole] = useState<string | undefined>(user.onboarding?.role);
+  const [teamSize, setTeamSize] = useState<string | undefined>(org.onboarding?.teamSize);
+  const [appsUsing, setAppsUsing] = useState<string[]>(buildAppsUsing());
 
   const onClickAppOptions = (appOptionId: string) => {
     if (appsUsing.includes(appOptionId)) {
@@ -143,6 +160,22 @@ function Step0({ user, onBack, onNext }: { user: User, onBack: () => void, onNex
     }
 
     setAppsUsing([...appsUsing, appOptionId]);
+  }
+
+  const onNextFirstPage = async () => {
+    axios.post(`${API_ENDPOINT}/routes/user/onboarding`, {
+      role,
+      teamSize,
+      appsUsing
+    }, {
+      params: {
+        userId: user.userId,
+        subdomain: getSubdomain(window.location.host)
+      }
+    }).then(() => {
+      updateSession();
+    })
+    onNext();
   }
 
   const isCompleted = role != null && teamSize != null && appsUsing.length > 0;
@@ -167,7 +200,7 @@ function Step0({ user, onBack, onNext }: { user: User, onBack: () => void, onNex
                   id={roleOption.id}
                   name="role"
                   type="radio"
-                  defaultChecked={roleOption.id === 'email'}
+                  defaultChecked={role === roleOption.id}
                   className="focus:ring-0 h-4 w-4 text-primary border-gray-300"
                   onClick={() => setRole(roleOption.id)}
                 />
@@ -189,7 +222,7 @@ function Step0({ user, onBack, onNext }: { user: User, onBack: () => void, onNex
                   id={sizeOption.id}
                   name="size"
                   type="radio"
-                  defaultChecked={sizeOption.id === 'email'}
+                  defaultChecked={teamSize === sizeOption.id}
                   className="focus:ring-0 h-4 w-4 text-primary border-gray-300"
                   onClick={() => setTeamSize(sizeOption.id)}
                 />
@@ -212,7 +245,7 @@ function Step0({ user, onBack, onNext }: { user: User, onBack: () => void, onNex
                   id={appOption.id}
                   name="role-option"
                   type="checkbox"
-                  defaultChecked={appOption.id === 'email'}
+                  defaultChecked={appsUsing.includes(appOption.id)}
                   className="focus:ring-0 h-4 w-4 text-primary border-gray-300"
                   onClick={() => onClickAppOptions(appOption.id)}
                 />
@@ -225,7 +258,7 @@ function Step0({ user, onBack, onNext }: { user: User, onBack: () => void, onNex
         </fieldset>
       </div>
     </div>
-    <NavButtons onBack={onBack} onNext={onNext} isFirst isCompleted={isCompleted} />
+    <NavButtons onBack={onBack} onNext={onNextFirstPage} isFirst isCompleted={isCompleted} />
   </>;
 }
 

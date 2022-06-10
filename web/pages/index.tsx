@@ -64,6 +64,12 @@ export type Org = {
   }
   access?: {
     mode: AccessMode
+  },
+  onboarding?: {
+    teamSize: string;
+    usingGitHub: boolean;
+    usingSlack: boolean;
+    usingNone: boolean;
   }
 }
 
@@ -74,6 +80,10 @@ export type User = {
   lastName: string,
   profilePicture?: string,
   pending?: boolean;
+  onboarding?: {
+    role: string;
+    usingVSCode: boolean;
+  }
 }
 
 export default function Home({ userSession }: { userSession: UserSession }) {
