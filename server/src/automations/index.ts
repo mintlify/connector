@@ -1,7 +1,8 @@
+// TODO - Re-add email after the template is ready
 import { EventType } from '../models/Event';
 import Org, { OrgType } from '../models/Org';
 import { slackAutomationForEvent } from './slack';
-import { sendEmailToAllMembersOfOrg } from '../services/mandrill';
+// import { sendEmailToAllMembersOfOrg } from '../services/mandrill';
 import Doc, { DocType } from '../models/Doc';
 
 export const triggerAutomationsForEvents = async (orgId: string, events: EventType[]) => {
@@ -19,8 +20,8 @@ export const triggerAutomations = async (event: EventType, org: OrgType) => {
         return;
     }
     const isSlackOn = doc?.slack ?? true;
-    const isEmailOn = doc?.email ?? true;
+    // const isEmailOn = doc?.email ?? true;
 
     if (isSlackOn) { slackAutomationForEvent(event, org, doc); }
-    if (isEmailOn) { sendEmailToAllMembersOfOrg(org); }
+    // if (isEmailOn) { sendEmailToAllMembersOfOrg(org); }
 }
