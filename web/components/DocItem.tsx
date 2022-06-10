@@ -64,16 +64,16 @@ export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs
       })
     }
 
-    menu.push({
-      name: email ? 'Disable email alerts' : 'Enable email alerts',
-      isGreen: !email,
-      isRed: false,
-      onClick: () => {
-        axios.put(`${API_ENDPOINT}/routes/docs/${doc._id}/email`, {
-          email: !email
-        });
-      }
-    })
+    // menu.push({
+    //   name: email ? 'Disable email alerts' : 'Enable email alerts',
+    //   isGreen: !email,
+    //   isRed: false,
+    //   onClick: () => {
+    //     axios.put(`${API_ENDPOINT}/routes/docs/${doc._id}/email`, {
+    //       email: !email
+    //     });
+    //   }
+    // })
 
     menu.push({
       name: 'Delete',
