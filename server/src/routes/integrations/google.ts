@@ -57,8 +57,7 @@ googleRouter.get('/authorization', async (req, res) => {
   }
 
   const FRONTEND_URL =
-    (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : `https://${org.subdomain}.mintlify.com`) +
-    '/settings/organization#integrations';
+    process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : `https://${org.subdomain}.mintlify.com`;
 
   return res.redirect(302, FRONTEND_URL);
 });
