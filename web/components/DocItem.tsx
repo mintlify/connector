@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import Link from "next/link";
 import { classNames } from "../helpers/functions";
 import { Doc, User } from "../pages";
@@ -6,7 +7,7 @@ import {
   ChevronRightIcon,
   DotsVerticalIcon,
 } from '@heroicons/react/solid'
-import { ConnectionIcon, DocTitleIcon } from '../helpers/Icons'
+import { ConnectionIcon, DocTitleIcon, SilencedDocIcon } from '../helpers/Icons'
 import timeAgo from '../services/timeago'
 import { getSubdomain } from "../helpers/user";
 import axios from "axios";
@@ -24,7 +25,29 @@ type DocItemProps = {
 }
 
 export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs, setSelectedDoc, integrationsStatus }: DocItemProps) {
-  const listMenu = () => {
+  const [silenced, setSilenced] = useState(false);
+  const [listMenu, setListMenu] = useState([{
+    name: 'Delete',
+    isRed: true,
+    isGreen: false,
+    onClick: () => {
+      setDocs(docs.filter(oneOfTheDocs => oneOfTheDocs._id !== doc._id));
+      setSelectedDoc(undefined);
+      axios.delete(`${API_ENDPOINT}/routes/docs/${doc._id}`, {
+        params: {
+          userId: user.userId,
+          subdomain: getSubdomain(window.location.host)
+        }
+      });
+    }
+  }]);
+
+  useEffect(() => {
+    let slack = doc?.slack ?? true;
+    if (integrationsStatus == null || !integrationsStatus['slack']) { slack = false }
+    const email = doc?.email ?? true;
+    setSilenced(!slack && !email);
+    
     const menu = [];
 
     if (integrationsStatus != null && integrationsStatus['slack']) {
@@ -32,6 +55,7 @@ export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs
       menu.push({
         name: slack ? 'Disable Slack alerts' : 'Enable Slack alerts',
         isGreen: !slack,
+        isRed: false,
         onClick: () => {
           axios.put(`${API_ENDPOINT}/routes/docs/${doc._id}/slack`, {
             params: {
@@ -43,17 +67,13 @@ export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs
       })
     }
 
-    const email = doc?.email ?? true;
-
     menu.push({
       name: email ? 'Disable email alerts' : 'Enable email alerts',
       isGreen: !email,
+      isRed: false,
       onClick: () => {
         axios.put(`${API_ENDPOINT}/routes/docs/${doc._id}/email`, {
-          params: {
-            userId: user.userId,
-            subdomain: getSubdomain(window.location.host)
-          }
+          email: !email
         });
       }
     })
@@ -61,6 +81,7 @@ export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs
     menu.push({
       name: 'Delete',
       isRed: true,
+      isGreen: false,
       onClick: () => {
         setDocs(docs.filter(oneOfTheDocs => oneOfTheDocs._id !== doc._id));
         setSelectedDoc(undefined);
@@ -72,9 +93,10 @@ export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs
         });
       }
     });
+    setListMenu(menu);
+  }, [doc, integrationsStatus, docs, setDocs, setSelectedDoc, user.userId]);
 
-    return menu;
-  };
+
 
   return <div key={doc._id}>
   <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div>
@@ -132,7 +154,7 @@ export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs
             <Menu.Items className="origin-top-right absolute right-0 mt-2 z-10 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
                 <div className="py-1 w-40">
                   {
-                    listMenu().map((menu) => (
+                    listMenu.map((menu) => (
                       <Menu.Item key={menu.name}>
                         {({ active }) => (
                           <button
@@ -168,6 +190,12 @@ export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs
                 />
               </a>
             ))}
+            {silenced && (
+              <SilencedDocIcon
+                outerSize={6}
+                innerSize={4} 
+              />
+            )}  
           </div>
         </div>
       </div>
