@@ -1,6 +1,7 @@
 import { Combobox } from "@headlessui/react";
 import { ChevronRightIcon } from "@heroicons/react/solid";
 import axios from "axios";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { API_ENDPOINT } from "../../helpers/api";
 import { classNames } from "../../helpers/functions";
@@ -66,7 +67,7 @@ export default function Onboarding({ user, org }: OnboardingProps) {
       case 1:
         return <Step1 user={user} org={org} />;
       case 2:
-        return <Step2 />;
+        return <Step2 org={org} />;
       case 3:
         return <Step3 />;
       default:
@@ -283,7 +284,30 @@ function Step1({ user, org }: OnboardingProps) {
   </>;
 }
 
-function Step2() {
+function Step2({ org }: { org: Org }) {
+  const integrations = [
+    {
+      type: 'slack',
+      title: 'Slack',
+      description: 'Connect with your workspace',
+      iconSrc: '/assets/integrations/slack.svg',
+      installUrl: `${API_ENDPOINT}/routes/integrations/slack/install?org=${org._id}`,
+    },
+    {
+      type: 'github',
+      title: 'GitHub',
+      description: 'Enable documentation review',
+      iconSrc: '/assets/integrations/github.svg',
+      installUrl: `${API_ENDPOINT}/routes/integrations/github/install?org=${org._id}`,
+    },
+    {
+      type: 'vscode',
+      title: 'VS Code',
+      description: 'Connect code to documentation',
+      iconSrc: '/assets/integrations/vscode.svg',
+      installUrl: 'vscode:extension/mintlify.connector',
+    }
+  ]
   const currentStep = 2;
   return <>
     <h1 className="text-3xl font-semibold">
@@ -295,68 +319,46 @@ function Step2() {
     <ProgressBar currentStep={currentStep} />
     <div className="mt-6 space-y-8">
       <div>
-        <label className="text-base font-medium text-gray-900">What best describes what you do?</label>
-        <fieldset className="mt-4">
-          <div className="grid grid-cols-2 gap-4">
-            {rolesOptions.map((roleOption) => (
-              <div key={roleOption.id} className="flex items-center">
-                <input
-                  id={roleOption.id}
-                  name="role"
-                  type="radio"
-                  defaultChecked={roleOption.id === 'email'}
-                  className="focus:ring-0 h-4 w-4 text-primary border-gray-300"
-                />
-                <label htmlFor={roleOption.id} className="ml-3 block text-sm text-gray-700">
-                  {roleOption.title}
-                </label>
-              </div>
+        <div className="mt-2 bg-white rounded-md p-3 shadow-md">
+        <Combobox onChange={() => {}} value="">
+          <Combobox.Options static className="scroll-py-3 overflow-y-auto">
+            {integrations.map((integration) => (
+              <Link key={integration.type} href={integration.installUrl}>
+                <Combobox.Option
+                  value={integration}
+                  className={({ active }) =>
+                    classNames('flex items-center cursor-default select-none rounded-xl p-3 hover:cursor-pointer', active ? 'bg-gray-50' : '')
+                  }
+                  onClick={() => {}}
+                >
+                  {({ active }) => (
+                    <>
+                      <img className="h-5 w-5" src={integration.iconSrc} alt={integration.title} />
+                      <div className="ml-4 flex-auto">
+                        <p
+                          className={classNames(
+                            'text-sm font-medium',
+                            active ? 'text-gray-900' : 'text-gray-700'
+                          )}
+                        >
+                          {integration.title}
+                        </p>
+                        <p className={classNames('text-sm', active ? 'text-gray-700' : 'text-gray-500')}>
+                          {integration.description}
+                        </p>
+                      </div>
+                      <ChevronRightIcon
+                        className="h-5 w-5 text-gray-400 group-hover:text-gray-700"
+                        aria-hidden="true"
+                      />
+                    </>
+                  )}
+                </Combobox.Option>
+              </Link>
             ))}
-          </div>
-        </fieldset>
-      </div>
-      <div>
-        <label className="text-base font-medium text-gray-900">How big is your team?</label>
-        <fieldset className="mt-4">
-          <div className="grid grid-cols-2 gap-4">
-            {sizeOptions.map((sizeOption) => (
-              <div key={sizeOption.id} className="flex items-center">
-                <input
-                  id={sizeOption.id}
-                  name="size"
-                  type="radio"
-                  defaultChecked={sizeOption.id === 'email'}
-                  className="focus:ring-0 h-4 w-4 text-primary border-gray-300"
-                />
-                <label htmlFor={sizeOption.id} className="ml-3 block text-sm text-gray-700">
-                  {sizeOption.title}
-                </label>
-              </div>
-            ))}
-          </div>
-        </fieldset>
-      </div>
-      <div>
-        <label className="text-base font-medium text-gray-900">Which of the following do you or your team use?</label>
-        <p className="text-sm leading-5 text-gray-500">Check all that apply</p>
-        <fieldset className="mt-4">
-          <div className="grid grid-cols-2 gap-4">
-            {appsOptions.map((appOption) => (
-              <div key={appOption.id} className="flex items-center">
-                <input
-                  id={appOption.id}
-                  name="role-option"
-                  type="checkbox"
-                  defaultChecked={appOption.id === 'email'}
-                  className="focus:ring-0 h-4 w-4 text-primary border-gray-300"
-                />
-                <label htmlFor={appOption.id} className="ml-3 block text-sm text-gray-700">
-                  {appOption.title}
-                </label>
-              </div>
-            ))}
-          </div>
-        </fieldset>
+          </Combobox.Options>
+      </Combobox>
+        </div>
       </div>
     </div>
   </>;
