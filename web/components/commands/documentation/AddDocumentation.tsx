@@ -1,18 +1,18 @@
 import { Fragment, useState } from 'react'
 import { Combobox, Dialog, Transition } from '@headlessui/react'
 import { classNames } from '../../../helpers/functions'
-import { DocumentationTypeIcon } from '../../../helpers/Icons';
-import { ChevronRightIcon } from '@heroicons/react/solid';
-import { Org, User } from '../../../pages';
-import DocumentationConfig from './DocumentationConfig';
+import { DocumentationTypeIcon } from '../../../helpers/Icons'
+import { ChevronRightIcon } from '@heroicons/react/solid'
+import { Org, User } from '../../../pages'
+import DocumentationConfig from './DocumentationConfig'
 
 // export type AddDocumentationType = 'webpage' | 'notion' | 'confluence' | 'googledocs';
-export type AddDocumentationType = 'webpage' | 'notion';
+export type AddDocumentationType = 'webpage' | 'notion'
 
 type AddDocumentationSelection = {
-  type: AddDocumentationType;
-  title: string;
-  description: string;
+  type: AddDocumentationType
+  title: string
+  description: string
 }
 
 export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationSelection> = {
@@ -36,30 +36,29 @@ export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationS
   //   title: 'Google Docs',
   //   description: 'Add Google Docs documents',
   // },
-};
+}
 
 type AddDocumentationProps = {
-  user: User;
-  org: Org;
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
-  setIsAddDocLoading: (isAddingAutomation: boolean) => void;
+  user: User
+  org: Org
+  isOpen: boolean
+  setIsOpen: (isOpen: boolean) => void
+  setIsAddDocLoading: (isAddingAutomation: boolean) => void
 }
 
 export default function AddDocumentation({ user, org, isOpen, setIsOpen, setIsAddDocLoading }: AddDocumentationProps) {
-  const [selectedRuleType, setSelectedRuleType] = useState<AddDocumentationType>();
-
+  const [selectedRuleType, setSelectedRuleType] = useState<AddDocumentationType>()
 
   const onClickOption = async (item: AddDocumentationSelection) => {
-    setSelectedRuleType(item.type);
+    setSelectedRuleType(item.type)
   }
 
   const onToPrimarySelection = () => {
-    setSelectedRuleType(undefined);
+    setSelectedRuleType(undefined)
   }
 
   const onClose = () => {
-    setIsOpen(false);
+    setIsOpen(false)
   }
 
   return (
@@ -97,47 +96,40 @@ export default function AddDocumentation({ user, org, isOpen, setIsOpen, setIsAd
                 setIsAddDocumentationOpen={setIsOpen}
                 setIsAddDocLoading={setIsAddDocLoading}
               />
-              {
-                selectedRuleType == null && (<Combobox onChange={() => {}} value="">
+              {selectedRuleType == null && (
+                <Combobox onChange={() => {}} value="">
                   <Combobox.Options static className="max-h-96 scroll-py-3 overflow-y-auto p-3">
                     {Object.values(addDocumentationMap).map((item) => (
                       <Combobox.Option
                         key={item.type}
                         value={item}
                         className={({ active }) =>
-                          classNames('flex items-center cursor-default select-none rounded-xl p-3 hover:cursor-pointer', active ? 'bg-gray-50' : '')
+                          classNames(
+                            'flex items-center cursor-default select-none rounded-xl p-3 hover:cursor-pointer',
+                            active ? 'bg-gray-50' : ''
+                          )
                         }
                         onClick={() => onClickOption(item)}
                       >
                         {({ active }) => (
                           <>
-                            <DocumentationTypeIcon
-                              type={item.type}
-                            />
+                            <DocumentationTypeIcon type={item.type} />
                             <div className="ml-4 flex-auto">
-                              <p
-                                className={classNames(
-                                  'text-sm font-medium',
-                                  active ? 'text-gray-900' : 'text-gray-700'
-                                )}
-                              >
+                              <p className={classNames('text-sm font-medium', active ? 'text-gray-900' : 'text-gray-700')}>
                                 {item.title}
                               </p>
                               <p className={classNames('text-sm', active ? 'text-gray-700' : 'text-gray-500')}>
                                 {item.description}
                               </p>
                             </div>
-                            <ChevronRightIcon
-                              className="h-5 w-5 text-gray-400 group-hover:text-gray-700"
-                              aria-hidden="true"
-                            />
+                            <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-gray-700" aria-hidden="true" />
                           </>
                         )}
                       </Combobox.Option>
                     ))}
                   </Combobox.Options>
-              </Combobox>)
-              }
+                </Combobox>
+              )}
             </Dialog.Panel>
           </Transition.Child>
         </div>
