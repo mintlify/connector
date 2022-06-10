@@ -30,9 +30,12 @@ export type OrgType = {
       installations: Object[];
     };
     google?: {
-      accessToken: string;
-      expiryDate: number;
-      refreshToken: string;
+      access_token: string;
+      // expiry_date is the time in ms at which this token is thought to expire.
+      expiry_date: number;
+      refresh_token: string;
+      token_type: string;
+      scope: string;
     };
   };
   users: string[];
@@ -75,9 +78,12 @@ const OrgSchema = new Schema({
       workspace_icon: { type: String },
     },
     google: {
-      accessToken: { type: String, required: true },
-      expiryDate: { type: Number, required: true },
-      refreshToken: { type: String, required: true },
+      access_token: { type: String, required: true },
+      // expiry_date is the time in ms at which this token is thought to expire.
+      expiry_date: { type: Number, required: true },
+      refresh_token: { type: String, required: true },
+      scope: { type: String, required: true },
+      token_type: { type: String, required: true },
     },
   },
   notifications: {
