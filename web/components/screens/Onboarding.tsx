@@ -113,7 +113,7 @@ export default function Onboarding({ user, org }: OnboardingProps) {
       case 1:
         return <Step1 user={user} org={org} onBack={onBack} onNext={onNext} />;
       case 2:
-        return <Step2 org={org} onBack={onBack} onNext={onNext} />;
+        return <Step2 user={user} org={org} onBack={onBack} onNext={onNext} />;
       case 3:
         return <Step3 onBack={onBack} />;
       default:
@@ -368,13 +368,14 @@ function Step1({ user, org, onBack, onNext }: { user: User, org: Org, onBack: ()
   </>;
 }
 
-function Step2({ org, onBack, onNext }: { org: Org, onBack: () => void, onNext: () => void }) {
+function Step2({ user, org, onBack, onNext }: { user: User, org: Org, onBack: () => void, onNext: () => void }) {
   const integrations = [
     {
       type: 'slack',
       title: 'Slack',
       description: 'Connect with your workspace',
       iconSrc: '/assets/integrations/slack.svg',
+      isRequired: org.onboarding?.usingSlack,
       installUrl: `${API_ENDPOINT}/routes/integrations/slack/install?org=${org._id}`,
     },
     {
@@ -382,6 +383,7 @@ function Step2({ org, onBack, onNext }: { org: Org, onBack: () => void, onNext: 
       title: 'GitHub',
       description: 'Enable documentation review',
       iconSrc: '/assets/integrations/github.svg',
+      isRequired: org.onboarding?.usingGitHub,
       installUrl: `${API_ENDPOINT}/routes/integrations/github/install?org=${org._id}`,
     },
     {
@@ -389,12 +391,15 @@ function Step2({ org, onBack, onNext }: { org: Org, onBack: () => void, onNext: 
       title: 'VS Code',
       description: 'Connect code to documentation',
       iconSrc: '/assets/integrations/vscode.svg',
+      isRequired: user.onboarding?.usingVSCode,
       installUrl: 'vscode:extension/mintlify.connector',
     }
-  ]
-  const currentStep = 2;
+  ];
 
-  const isCompleted = true;
+  const remainingIntegrations = integrations.filter(({ isRequired }) => isRequired);
+
+  const currentStep = 2;
+  const isCompleted = remainingIntegrations.length === 0;
 
   return <>
     <h1 className="text-3xl font-semibold">
@@ -409,7 +414,7 @@ function Step2({ org, onBack, onNext }: { org: Org, onBack: () => void, onNext: 
         <div className="mt-2 bg-white rounded-md p-3 shadow-md">
         <Combobox onChange={() => {}} value="">
           <Combobox.Options static className="scroll-py-3 overflow-y-auto">
-            {integrations.map((integration) => (
+            {remainingIntegrations.map((integration) => (
               <Link key={integration.type} href={integration.installUrl}>
                 <Combobox.Option
                   value={integration}
