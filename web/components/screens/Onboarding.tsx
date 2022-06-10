@@ -12,7 +12,12 @@ import AddDocumentation, { addDocumentationMap, AddDocumentationType } from "../
 import DocItem from "../DocItem";
 import ProfilePicture from "../ProfilePicture";
 
-const rolesOptions = [
+type Option = {
+  id: string,
+  title: string,
+}
+
+const rolesOptions: Option[] = [
   { id: 'founder', title: 'Founder' },
   { id: 'executive', title: 'Executive' },
   { id: 'em', title: 'Engineering Manager' },
@@ -22,7 +27,7 @@ const rolesOptions = [
   { id: 'other', title: 'Other' },
 ]
 
-const sizeOptions = [
+const sizeOptions: Option[] = [
   { id: '1', title: 'Individual' },
   { id: '2-5', title: '2 - 10' },
   { id: '11-50', title: '11 - 50' },
@@ -30,7 +35,7 @@ const sizeOptions = [
   { id: '200+', title: '200+' },
 ]
 
-const appsOptions = [
+const appsOptions: Option[] = [
   { id: 'github', title: 'GitHub' },
   { id: 'vscode', title: 'VS Code' },
   { id: 'slack', title: 'Slack' },
@@ -56,11 +61,12 @@ const ProgressBar = ({ currentStep }: { currentStep: number }) => {
 type NavButtonsProps = {
   onBack: () => void,
   onNext: () => void,
+  isCompleted: boolean,
   isFirst?: boolean,
   isLast?: boolean,
 }
 
-const NavButtons = ({ onBack, onNext, isFirst, isLast }: NavButtonsProps) => {
+const NavButtons = ({ onBack, onNext, isFirst, isLast, isCompleted }: NavButtonsProps) => {
   return <div className="flex mt-8 space-x-2">
     {
       !isFirst && <button
@@ -69,8 +75,9 @@ const NavButtons = ({ onBack, onNext, isFirst, isLast }: NavButtonsProps) => {
     >Back</button>
     }
     <button
-      className="bg-primary hover:bg-hover py-1 px-6 rounded-sm text-white"
+      className={classNames("py-1 px-6 rounded-sm text-white", isCompleted ? 'bg-primary hover:bg-hover' : 'bg-gray-400')}
       onClick={onNext}
+      disabled={!isCompleted}
     >{isLast ? 'Complete' : 'Next'}</button>
   </div>
 }
@@ -87,7 +94,6 @@ export default function Onboarding({ user, org }: OnboardingProps) {
     if (step === 0) {
       return;
     }
-
     setStep(step - 1);
   }
 
@@ -95,14 +101,13 @@ export default function Onboarding({ user, org }: OnboardingProps) {
     if (step === 3) {
       return;
     }
-
     setStep(step + 1);
   }
 
   const CurrentStep = () => {
     switch (step) {
       case 0:
-        return <Step0 onBack={onBack} onNext={onNext} />;
+        return <Step0 user={user} onBack={onBack} onNext={onNext} />;
       case 1:
         return <Step1 user={user} org={org} onBack={onBack} onNext={onNext} />;
       case 2:
@@ -112,15 +117,6 @@ export default function Onboarding({ user, org }: OnboardingProps) {
       default:
         return null;
     }
-  }
-
-  const isLastPage = step === 3;
-
-  const nextPage = () => {
-    if (isLastPage) {
-      return;
-    }
-    setStep(step + 1);
   }
 
   return (
@@ -134,11 +130,26 @@ export default function Onboarding({ user, org }: OnboardingProps) {
   )
 }
 
-function Step0({ onBack, onNext }: { onBack: () => void, onNext: () => void }) {
+function Step0({ user, onBack, onNext }: { user: User, onBack: () => void, onNext: () => void }) {
+  const [role, setRole] = useState<string>();
+  const [teamSize, setTeamSize] = useState<string>();
+  const [appsUsing, setAppsUsing] = useState<string[]>([]);
+
+  const onClickAppOptions = (appOptionId: string) => {
+    if (appsUsing.includes(appOptionId)) {
+      setAppsUsing(appsUsing.filter((app) => app !== appOptionId));
+      return;
+    }
+
+    setAppsUsing([...appsUsing, appOptionId]);
+  }
+
+  const isCompleted = role != null && teamSize != null && appsUsing.length > 0;
+  
   const currentStep = 0;
   return <>
     <h1 className="text-3xl font-semibold">
-      Welcome <span className="text-primary">Han</span> 👋
+      Welcome <span className="text-primary">{user.firstName}</span> 👋
     </h1>
     <p className="mt-1 text-gray-600">
       First things first, tell us about yourself
@@ -157,6 +168,7 @@ function Step0({ onBack, onNext }: { onBack: () => void, onNext: () => void }) {
                   type="radio"
                   defaultChecked={roleOption.id === 'email'}
                   className="focus:ring-0 h-4 w-4 text-primary border-gray-300"
+                  onClick={() => setRole(roleOption.id)}
                 />
                 <label htmlFor={roleOption.id} className="ml-3 block text-sm text-gray-700">
                   {roleOption.title}
@@ -178,6 +190,7 @@ function Step0({ onBack, onNext }: { onBack: () => void, onNext: () => void }) {
                   type="radio"
                   defaultChecked={sizeOption.id === 'email'}
                   className="focus:ring-0 h-4 w-4 text-primary border-gray-300"
+                  onClick={() => setTeamSize(sizeOption.id)}
                 />
                 <label htmlFor={sizeOption.id} className="ml-3 block text-sm text-gray-700">
                   {sizeOption.title}
@@ -200,6 +213,7 @@ function Step0({ onBack, onNext }: { onBack: () => void, onNext: () => void }) {
                   type="checkbox"
                   defaultChecked={appOption.id === 'email'}
                   className="focus:ring-0 h-4 w-4 text-primary border-gray-300"
+                  onClick={() => onClickAppOptions(appOption.id)}
                 />
                 <label htmlFor={appOption.id} className="ml-3 block text-sm text-gray-700">
                   {appOption.title}
@@ -210,7 +224,7 @@ function Step0({ onBack, onNext }: { onBack: () => void, onNext: () => void }) {
         </fieldset>
       </div>
     </div>
-    <NavButtons onBack={onBack} onNext={onNext} isFirst />
+    <NavButtons onBack={onBack} onNext={onNext} isFirst isCompleted={isCompleted} />
   </>;
 }
 
@@ -232,6 +246,8 @@ function Step1({ user, org, onBack, onNext }: { user: User, org: Org, onBack: ()
         setDocs(docs);
       });
   }, [user.userId]);
+
+  const isCompleted = true;
 
   return <>
     <AddDocumentation
@@ -309,7 +325,7 @@ function Step1({ user, org, onBack, onNext }: { user: User, org: Org, onBack: ()
           </ul>
         </div>
     </div>
-    <NavButtons onBack={onBack} onNext={onNext} />
+    <NavButtons onBack={onBack} onNext={onNext} isCompleted={isCompleted} />
   </>;
 }
 
@@ -338,6 +354,9 @@ function Step2({ org, onBack, onNext }: { org: Org, onBack: () => void, onNext: 
     }
   ]
   const currentStep = 2;
+
+  const isCompleted = true;
+
   return <>
     <h1 className="text-3xl font-semibold">
       Let&apos;s get you{' '}<span className="text-primary">integrated</span> 🔌
@@ -390,7 +409,7 @@ function Step2({ org, onBack, onNext }: { org: Org, onBack: () => void, onNext: 
         </div>
       </div>
     </div>
-    <NavButtons onBack={onBack} onNext={onNext} />
+    <NavButtons onBack={onBack} onNext={onNext} isCompleted={isCompleted} />
   </>;
 }
 
@@ -402,6 +421,8 @@ function Step3({ onBack }: { onBack: () => void }) {
   const onSubmit = () => {
 
   }
+
+  const isCompleted = true;
 
   return <>
     <h1 className="text-3xl font-semibold">
@@ -514,6 +535,6 @@ function Step3({ onBack }: { onBack: () => void }) {
       </div>
       </div>
     </div>
-    <NavButtons onBack={onBack} onNext={onSubmit} isLast />
+    <NavButtons onBack={onBack} onNext={onSubmit} isLast isCompleted={true} />
   </>;
 }
