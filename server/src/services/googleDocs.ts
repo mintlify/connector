@@ -26,9 +26,6 @@ const jwt = {
   auth_email: process.env.GOOGLE_AUTH_EMAIL,
 };
 
-// const auth = new google.auth.JWT(jwt.client_email, undefined, jwt.private_key, scopes, jwt.auth_email);
-// const docs = google.docs({ version: 'v1', auth });
-
 const GOOGLE_DOCS_ICON = 'https://res.cloudinary.com/mintlify/image/upload/v1653175048/googledocs-icon_im6j4z.svg';
 
 export const isGoogleDocsUrl = (url: URL): boolean => url.host === 'docs.google.com' || url.host === 'www.docs.google.com';
