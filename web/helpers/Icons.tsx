@@ -45,7 +45,7 @@ export const DocumentationTypeIcon = ({ type, outerSize = 10, innerSize = 6, isA
           </svg>
         </div>
       )
-    case 'googledocs':
+    case 'google':
       return (
         <div className={`h-${outerSize} w-${outerSize} rounded-lg bg-gray-100 flex items-center justify-center`}>
           <svg

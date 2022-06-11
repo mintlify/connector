@@ -18,6 +18,7 @@
     "next-iron-session": "^4.2.0",
     "react": "18.1.0",
     "react-dom": "18.1.0",
+    "react-google-drive-picker": "^1.2.0",
     "react-hot-toast": "^2.2.0",
     "react-hotkeys-hook": "^3.4.6",
     "react-loading-skeleton": "^3.1.0",

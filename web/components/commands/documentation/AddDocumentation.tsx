@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react'
+import { Fragment, useState, useEffect } from 'react'
 import { Combobox, Dialog, Transition } from '@headlessui/react'
 import { classNames } from '../../../helpers/functions'
 import { DocumentationTypeIcon } from '../../../helpers/Icons'
@@ -6,8 +6,8 @@ import { ChevronRightIcon } from '@heroicons/react/solid'
 import { Org, User } from '../../../pages'
 import DocumentationConfig from './DocumentationConfig'
 
-// export type AddDocumentationType = 'webpage' | 'notion' | 'confluence' | 'googledocs';
-export type AddDocumentationType = 'webpage' | 'notion' | 'googledocs'
+// export type AddDocumentationType = 'webpage' | 'notion' | 'confluence' | 'google';
+export type AddDocumentationType = 'webpage' | 'notion' | 'google'
 
 type AddDocumentationSelection = {
   type: AddDocumentationType
@@ -26,8 +26,8 @@ export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationS
     title: 'Notion',
     description: 'Add Notion pages',
   },
-  googledocs: {
-    type: 'googledocs',
+  google: {
+    type: 'google',
     title: 'Google Docs',
     description: 'Add Google Docs documents',
   },

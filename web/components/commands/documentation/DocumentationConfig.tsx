@@ -3,6 +3,7 @@ import { Org, User } from '../../../pages'
 import { addDocumentationMap, AddDocumentationType } from './AddDocumentation'
 import AddNotion from './AddNotion'
 import AddWebpage from './AddWebpage'
+import AddGoogleDocs from './AddGoogleDocs'
 
 type DocConfigSettings = {
   inputComponent: JSX.Element | null
@@ -11,6 +12,7 @@ type DocConfigSettings = {
 type DocumentationConfigProps = {
   user: User
   org: Org
+  isInstalled: boolean
   documentationType?: AddDocumentationType
   onCancel: () => void
   setIsAddDocumentationOpen: (isOpen: boolean) => void
@@ -21,6 +23,7 @@ export default function DocumentationConfig({
   user,
   org,
   documentationType,
+  isInstalled,
   onCancel,
   setIsAddDocumentationOpen,
   setIsAddDocLoading,
@@ -31,32 +34,17 @@ export default function DocumentationConfig({
 
   const configOptions: Record<AddDocumentationType, DocConfigSettings> = {
     webpage: {
-      inputComponent: (
-        <AddWebpage
-          user={user}
-          onCancel={onCancel}
-          setIsAddDocumentationOpen={setIsAddDocumentationOpen}
-          setIsAddDocLoading={setIsAddDocLoading}
-        />
-      ),
+      inputComponent: AddWebpage({ user, onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }),
     },
     notion: {
-      inputComponent: (
-        <AddNotion
-          user={user}
-          org={org}
-          onCancel={onCancel}
-          setIsAddDocumentationOpen={setIsAddDocumentationOpen}
-          setIsAddDocLoading={setIsAddDocLoading}
-        />
-      ),
+      inputComponent: AddNotion({ user, org, isInstalled, onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }),
+    },
+    google: {
+      inputComponent: AddGoogleDocs({ user, org, isInstalled, onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }),
     },
     // confluence: {
     //   inputComponent: null,
     // },
-    // googledocs: {
-    //   inputComponent: null,
-    // }
   }
 
   const ruleData = addDocumentationMap[documentationType]

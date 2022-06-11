@@ -2,7 +2,6 @@ import { Router } from 'express'
 import { google as googleapis } from 'googleapis'
 import { userMiddleware } from '../user'
 import Org from '../../models/Org'
-import axios from 'axios'
 
 const googleRouter = Router()
 const client_id = process.env.GOOGLE_OAUTH_CLIENT_ID,
@@ -74,15 +73,7 @@ googleRouter.get('/sync', userMiddleware, async (_, res) => {
 
   // install the Google integrations if users haven't set it
   if (!google || !google.access_token) {
-    try {
-      const BACKEND_ENDPOINT = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'https://connect.mintlify.com'
-      await axios.get(`${BACKEND_ENDPOINT}/routes/integrations/google/install?org=${orgId}`)
-      const newOrg = await Org.findById(orgId)
-      // Get the new google tokens
-      google = newOrg?.integrations?.google as GoogleCredentials
-    } catch (error: any) {
-      return res.status(500).send(error)
-    }
+    return res.status(403).json({ error: 'No access token found for Google' })
   }
 
   oAuth2Client.setCredentials(google)

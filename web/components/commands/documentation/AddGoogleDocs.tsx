@@ -1,119 +1,79 @@
 import { SearchIcon } from '@heroicons/react/outline'
 import { CheckCircleIcon } from '@heroicons/react/solid'
-import axios from 'axios'
-import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
 import { API_ENDPOINT } from '../../../helpers/api'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
 import { classNames } from '../../../helpers/functions'
-import { getSubdomain } from '../../../helpers/user'
+import axios from 'axios'
 import { Org, User } from '../../../pages'
-import timeAgo from '../../../services/timeago'
+import { getSubdomain } from '../../../helpers/user'
 
-type Icon = {
-  type: 'emoji' | 'file'
-  emoji?: string
-  file?: {
-    url: string
-  }
-}
-
-type Page = {
-  id: string
-  title: string
-  icon?: Icon
-  lastEditedTime: string
-  lastEditedAgo: string
-}
-
-type AddNotionProps = {
+type AddGoogleDocsProps = {
   user: User
   org: Org
   isInstalled: boolean
   onCancel: () => void
-  setIsAddDocumentationOpen: (isOpen: boolean) => void
   setIsAddDocLoading: (isAddingAutomation: boolean) => void
+  setIsAddDocumentationOpen: (isOpen: boolean) => void
 }
 
-export default function AddNotion({
+type Doc = {
+  id: string
+  name: string
+}
+
+export default function AddGoogleDocs({
   user,
   org,
   isInstalled,
   onCancel,
-  setIsAddDocumentationOpen,
   setIsAddDocLoading,
-}: AddNotionProps) {
-  const [pages, setPages] = useState<Page[]>()
-  const [selectedPages, setSelectedPages] = useState<Page[]>([])
+  setIsAddDocumentationOpen,
+}: AddGoogleDocsProps) {
+  const [docs, setDocs] = useState<Doc[]>([])
+  const [selectedDocs, setSelectedDocs] = useState<Doc[]>([])
   const [search, setSearch] = useState('')
   const router = useRouter()
 
   useEffect(() => {
-    isInstalled || router.push(`${API_ENDPOINT}/routes/integrations/notion/install?org=${org._id}`)
+    isInstalled || router.push(`${API_ENDPOINT}/routes/integrations/google/install?org=${org._id}`)
   })
 
   useEffect(() => {
     axios
-      .post(
-        `${API_ENDPOINT}/routes/integrations/notion/sync`,
-        {},
-        {
-          params: {
-            userId: user.userId,
-            subdomain: getSubdomain(window.location.host),
-          },
-        }
-      )
-      .then(({ data: { results } }) => {
-        const pages = results.map((page: Page) => {
-          return { ...page, lastEditedAgo: timeAgo.format(Date.parse(page.lastEditedTime)) }
-        })
-        setPages(pages)
-        setSelectedPages(pages)
+      .get(`${API_ENDPOINT}/routes/integrations/google/sync`, {
+        params: { userId: user.userId, subdomain: getSubdomain(window.location.host) },
+      })
+      .then(({ data: { files } }) => {
+        setDocs(files)
+        setSelectedDocs(files)
       })
       .catch(async () => {
-        router.push(`${API_ENDPOINT}/routes/integrations/notion/install?org=${org._id}`)
+        router.push(`${API_ENDPOINT}/routes/integrations/google/install?org=${org._id}`)
       })
   }, [user.userId, router, org])
 
-  const onClickPage = (selectingPage: Page) => {
-    if (selectedPages.some((page) => page.id === selectingPage.id)) {
-      setSelectedPages(selectedPages.filter((page) => page.id !== selectingPage.id))
-    } else {
-      setSelectedPages([...selectedPages, selectingPage])
-    }
+  const onClickDocs = (selectingDocs: Doc): void => {
+    selectedDocs.some((_docs) => _docs.id === selectingDocs.id)
+      ? setSelectedDocs(selectedDocs.filter((_docs) => _docs.id !== selectingDocs.id))
+      : setSelectedDocs([...selectedDocs, selectingDocs])
   }
 
-  const filteredPages =
-    pages?.filter((page) => {
-      return page.title.toLowerCase().includes(search.toLowerCase())
+  const filteredDocs =
+    docs?.filter((docs) => {
+      return docs.name.toLowerCase().includes(search.toLowerCase())
     }) || []
 
-  const isValidToSubmit = selectedPages.length > 0
+  const isSubmitAllowed = selectedDocs.length > 0
 
   const onSubmit = async () => {
     setIsAddDocLoading(true)
-    axios
-      .post(
-        `${API_ENDPOINT}/routes/docs/notion`,
-        {
-          pages: selectedPages,
-        },
-        {
-          params: {
-            userId: user.userId,
-            subdomain: getSubdomain(window.location.host),
-          },
-        }
-      )
-      .then(() => {
-        setIsAddDocLoading(false)
-      })
     setIsAddDocumentationOpen(false)
   }
 
   return (
     <div>
-      {pages != null && selectedPages != null ? (
+      {docs != null && selectedDocs != null ? (
         <>
           <div className="relative rounded-md shadow-sm">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -130,34 +90,35 @@ export default function AddNotion({
             />
           </div>
           <div className="mt-4 grid grid-cols-1 gap-y-3 sm:grid-cols-2 sm:gap-x-4">
-            {filteredPages?.map((page) => (
+            {filteredDocs?.map((docs) => (
               <div
-                key={page.id}
+                key={docs.id}
                 className={classNames(
-                  selectedPages.some((selectedPage) => selectedPage.id === page.id) ? 'border-primary ring-1 ring-primary' : '',
+                  selectedDocs.some((selectedDocs) => selectedDocs.id === docs.id) ? 'border-primary ring-1 ring-primary' : '',
                   'relative bg-white hover:bg-gray-50 border rounded-lg shadow-sm py-3 px-4 flex cursor-pointer focus:outline-none'
                 )}
-                onClick={() => onClickPage(page)}
+                onClick={() => onClickDocs(docs)}
               >
                 <span className="flex-1 flex">
                   <span className="flex flex-col">
                     <span className="flex items-center text-sm font-medium text-gray-900">
-                      <TitleIcon icon={page.icon} />
-                      {page.title}
+                      <span className="mr-1">
+                        <img src="/assets/integrations/google-docs.svg" className="h-4 w-4 rounded-sm" alt="google-docs-logo" />
+                      </span>
+                      {docs.name}
                     </span>
-                    <span className="mt-1 flex items-center text-sm text-gray-500">Last updated {page.lastEditedAgo}</span>
                   </span>
                 </span>
                 <CheckCircleIcon
                   className={classNames(
-                    selectedPages.some((selectedPage) => selectedPage.id === page.id) ? '' : 'invisible',
+                    selectedDocs.some((selectedDocs) => selectedDocs.id === docs.id) ? '' : 'invisible',
                     'h-5 w-5 text-primary'
                   )}
                   aria-hidden="true"
                 />
                 <span
                   className={classNames(
-                    selectedPages.some((selectedPage) => selectedPage.id === page.id)
+                    selectedDocs.some((selectedDocs) => selectedDocs.id === docs.id)
                       ? 'border-indigo-500'
                       : 'border-transparent',
                     'absolute -inset-px rounded-lg pointer-events-none'
@@ -181,14 +142,14 @@ export default function AddNotion({
         </div>
       )}
       <div className="flex">
-        {pages && selectedPages.length > 0 ? (
+        {docs && selectedDocs.length > 0 ? (
           <>
-            <button className="text-sm text-primary font-medium" onClick={() => setSelectedPages([])}>
+            <button className="text-sm text-primary font-medium" onClick={() => setSelectedDocs([])}>
               Deselect all
             </button>
           </>
-        ) : pages ? (
-          <button className="text-sm text-primary font-medium" onClick={() => setSelectedPages(filteredPages)}>
+        ) : docs ? (
+          <button className="text-sm text-primary font-medium" onClick={() => setSelectedDocs(filteredDocs)}>
             Select all
           </button>
         ) : null}
@@ -202,37 +163,17 @@ export default function AddNotion({
           </button>
           <button
             type="submit"
-            disabled={!isValidToSubmit}
+            disabled={!isSubmitAllowed}
             className={classNames(
               'ml-3 inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white',
-              isValidToSubmit ? 'bg-primary hover:bg-hover' : 'bg-gray-300 cursor-default'
+              isSubmitAllowed ? 'bg-primary hover:bg-hover' : 'bg-gray-300 cursor-default'
             )}
             onClick={onSubmit}
           >
-            Import ({selectedPages.length}) Notion Pages
+            Import ({selectedDocs.length}) Google Documents
           </button>
         </div>
       </div>
     </div>
   )
-}
-
-const TitleIcon = ({ icon }: { icon?: Icon }) => {
-  if (icon == null) {
-    return null
-  }
-
-  if (icon.emoji) {
-    return <span className="mr-1">{icon?.emoji}</span>
-  }
-
-  if (icon.file) {
-    return (
-      <span className="mr-1">
-        <img src={icon.file.url} className="h-4 w-4 rounded-sm" />
-      </span>
-    )
-  }
-
-  return null
 }
