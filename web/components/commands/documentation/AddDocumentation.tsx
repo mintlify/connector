@@ -5,6 +5,9 @@ import { DocumentationTypeIcon } from '../../../helpers/Icons'
 import { ChevronRightIcon } from '@heroicons/react/solid'
 import { Org, User } from '../../../pages'
 import DocumentationConfig from './DocumentationConfig'
+import axios from 'axios'
+import { API_ENDPOINT } from '../../../helpers/api'
+import { getSubdomain } from '../../../helpers/user'
 
 // export type AddDocumentationType = 'webpage' | 'notion' | 'confluence' | 'google';
 export type AddDocumentationType = 'webpage' | 'notion' | 'google'
@@ -48,6 +51,7 @@ type AddDocumentationProps = {
 
 export default function AddDocumentation({ user, org, isOpen, setIsOpen, setIsAddDocLoading }: AddDocumentationProps) {
   const [selectedRuleType, setSelectedRuleType] = useState<AddDocumentationType>()
+  const [integrationsStatus, setIntegrationsStatus] = useState<Record<string, boolean>>({})
 
   const onClickOption = async (item: AddDocumentationSelection) => {
     setSelectedRuleType(item.type)
@@ -60,6 +64,23 @@ export default function AddDocumentation({ user, org, isOpen, setIsOpen, setIsAd
   const onClose = () => {
     setIsOpen(false)
   }
+
+  useEffect(() => {
+    async function getIntegrationsStatus() {
+      await axios
+        .get(`${API_ENDPOINT}/routes/org/${org._id}/integrations`, {
+          params: {
+            userId: user.userId,
+            subdomain: getSubdomain(window.location.host),
+          },
+        })
+        .then(({ data }) => {
+          const { integrations } = data
+          setIntegrationsStatus(integrations)
+        })
+    }
+    getIntegrationsStatus()
+  })
 
   return (
     <Transition.Root show={isOpen} as={Fragment} appear>
@@ -91,6 +112,7 @@ export default function AddDocumentation({ user, org, isOpen, setIsOpen, setIsAd
               <DocumentationConfig
                 user={user}
                 org={org}
+                isInstalled={integrationsStatus[selectedRuleType || '']}
                 documentationType={selectedRuleType}
                 onCancel={onToPrimarySelection}
                 setIsAddDocumentationOpen={setIsOpen}

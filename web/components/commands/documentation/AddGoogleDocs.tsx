@@ -30,7 +30,7 @@ export default function AddGoogleDocs({
   setIsAddDocLoading,
   setIsAddDocumentationOpen,
 }: AddGoogleDocsProps) {
-  const [docs, setDocs] = useState<Doc[]>([])
+  const [docs, setDocs] = useState<Doc[]>()
   const [selectedDocs, setSelectedDocs] = useState<Doc[]>([])
   const [search, setSearch] = useState('')
   const router = useRouter()
