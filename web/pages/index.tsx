@@ -134,7 +134,8 @@ export default function Home({ userSession }: { userSession: UserSession }) {
 
 
   useEffect(() => {
-  const { user, org } = userSession;
+    if (userSession == null) { return };
+    const { user, org } = userSession;
 
     if (user == null || org == null) {
       return;
