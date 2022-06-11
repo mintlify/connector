@@ -130,11 +130,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
         const { events } = eventsResponse.data
         setEvents(events)
       })
-  }, [userSession, selectedDoc, isAddDocLoading])
-
-
-  useEffect(() => {
-    if (userSession == null) { return };
+    
     const { user, org } = userSession;
 
     if (user == null || org == null) {
@@ -151,7 +147,8 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       const { integrations } = data;
       setIntegrationsStatus(integrations);
     })
-  }, [userSession]);
+
+  }, [userSession, selectedDoc, isAddDocLoading])
 
   if (!userSession) {
     return <SignIn />
