@@ -41,7 +41,7 @@ export const getGoogleDocsData = async (url: URL, credentials: GoogleCredentials
 
   if (!res.data.body || !res.data.body.content)
     return {
-      method: 'googledocs',
+      method: 'google',
       title,
       content: 'Error getting content data',
       favicon: GOOGLE_DOCS_ICON,
@@ -59,7 +59,7 @@ export const getGoogleDocsData = async (url: URL, credentials: GoogleCredentials
     })
 
   return {
-    method: 'googledocs',
+    method: 'google',
     title,
     content: accumulatedContent,
     favicon: GOOGLE_DOCS_ICON,

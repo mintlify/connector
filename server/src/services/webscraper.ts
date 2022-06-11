@@ -14,7 +14,7 @@ type WebScrapingMethod =
   | 'github'
   | 'notion-public'
   | 'notion-private'
-  | 'googledocs'
+  | 'google'
   | 'confluence-public'
   | 'gitbook'
   | 'web'
