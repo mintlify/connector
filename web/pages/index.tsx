@@ -132,9 +132,10 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       })
   }, [userSession, selectedDoc, isAddDocLoading])
 
-  const { user, org } = userSession;
 
   useEffect(() => {
+  const { user, org } = userSession;
+
     if (user == null || org == null) {
       return;
     }
@@ -149,11 +150,13 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       const { integrations } = data;
       setIntegrationsStatus(integrations);
     })
-  }, [user, org]);
+  }, [userSession]);
 
   if (!userSession) {
     return <SignIn />
   }
+
+  const { user, org } = userSession;
 
   if (user == null) {
     return (
