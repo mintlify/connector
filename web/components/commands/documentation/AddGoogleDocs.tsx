@@ -7,6 +7,7 @@ import { classNames } from '../../../helpers/functions'
 import axios from 'axios'
 import { Org, User } from '../../../pages'
 import { getSubdomain } from '../../../helpers/user'
+import timeAgo from '../../../services/timeago'
 
 type AddGoogleDocsProps = {
   user: User
@@ -20,6 +21,9 @@ type AddGoogleDocsProps = {
 type Doc = {
   id: string
   name: string
+  modifiedTime: string
+  lastEditedAgo: string
+  createdTime: string
 }
 
 export default function AddGoogleDocs({
@@ -45,11 +49,17 @@ export default function AddGoogleDocs({
         params: { userId: user.userId, subdomain: getSubdomain(window.location.host) },
       })
       .then(({ data: { files } }) => {
-        setDocs(files)
-        setSelectedDocs(files)
-      })
-      .catch(async () => {
-        router.push(`${API_ENDPOINT}/routes/integrations/google/install?org=${org._id}`)
+        const filesWithTimeAgo = files.map((file: Doc) => ({
+          ...file,
+          lastEditedAgo: file?.modifiedTime
+            ? file.modifiedTime
+            : file?.createdTime
+            ? file.createdTime
+            : new Date().toDateString(),
+          url: `https://docs.google.com/document/d/${file.id}`,
+        }))
+        setDocs(filesWithTimeAgo)
+        setSelectedDocs(filesWithTimeAgo)
       })
   }, [user.userId, router, org])
 
@@ -68,6 +78,27 @@ export default function AddGoogleDocs({
 
   const onSubmit = async () => {
     setIsAddDocLoading(true)
+    axios
+      .post(
+        `${API_ENDPOINT}/routes/docs/google`,
+        {
+          docs: selectedDocs,
+        },
+        {
+          params: {
+            userId: user.userId,
+            subdomain: getSubdomain(window.location.host),
+          },
+        }
+      )
+      .then(() => {
+        console.log('successfully add the google docs')
+        setIsAddDocLoading(false)
+      })
+      .catch((err) => {
+        console.log('Adding Google Docs failed')
+        console.log(err)
+      })
     setIsAddDocumentationOpen(false)
   }
 
@@ -106,6 +137,9 @@ export default function AddGoogleDocs({
                         <img src="/assets/integrations/google-docs.svg" className="h-4 w-4 rounded-sm" alt="google-docs-logo" />
                       </span>
                       {docs.name}
+                    </span>
+                    <span className="mt-1 flex items-center text-sm text-gray-500">
+                      Last updated {timeAgo.format(Date.parse(docs.lastEditedAgo))}
                     </span>
                   </span>
                 </span>

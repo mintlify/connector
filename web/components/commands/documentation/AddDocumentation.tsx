@@ -112,7 +112,7 @@ export default function AddDocumentation({ user, org, isOpen, setIsOpen, setIsAd
               <DocumentationConfig
                 user={user}
                 org={org}
-                isInstalled={integrationsStatus[selectedRuleType || '']}
+                isInstalled={selectedRuleType !== undefined ? integrationsStatus[selectedRuleType] : false}
                 documentationType={selectedRuleType}
                 onCancel={onToPrimarySelection}
                 setIsAddDocumentationOpen={setIsOpen}

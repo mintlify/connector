@@ -9,6 +9,7 @@ import { extractDataFromHTML, getDataFromWebpage } from '../services/webscraper'
 import { deleteDocForSearch, indexDocForSearch } from '../services/algolia'
 import { track } from '../services/segment'
 import { NotionPage } from './integrations/notion'
+import { GoogleDocs } from './integrations/google'
 
 const docsRouter = express.Router()
 
@@ -89,7 +90,69 @@ export const createDocsFromNotionPageId = async (pages: NotionPage[], orgId: Typ
   await Promise.all(addDocPromises)
 }
 
-export const createDocsFromGoogleDocsId = async () => {}
+export const createDocsFromGoogleDocsId = async ({
+  docs,
+  orgId,
+  userId,
+}: {
+  docs: GoogleDocs[]
+  orgId: Types.ObjectId
+  userId: string
+}) => {
+  const addDocPromises = docs.map(
+    (_doc) =>
+      new Promise<void>(async (resolve) => {
+        try {
+          // Add doc without content
+          console.log('_doc.lastEditedAgo = ', _doc.lastEditedAgo)
+          const doc = await Doc.findOneAndUpdate(
+            {
+              org: orgId,
+              url: _doc.url,
+            },
+            {
+              org: orgId,
+              url: _doc.url,
+              method: 'google-docs',
+              googleDocs: { docId: _doc.id },
+              content: '',
+              title: _doc.name,
+              createdBy: userId,
+              isJustAdded: true,
+              lastUpdatedAt: Date.parse(_doc.lastEditedAgo),
+            },
+            {
+              upsert: true,
+              new: true,
+            }
+          )
+
+          await createEvent(orgId, doc._id, 'add', {})
+          indexDocForSearch(doc)
+          track(userId, 'Add documentation', {
+            doc: doc._id.toString(),
+            method: 'google-docs',
+            org: orgId.toString(),
+          })
+        } catch (error) {
+          console.log('Error within createDocsFromGoogleDocsId: ', error)
+        }
+
+        resolve()
+      })
+  )
+
+  await Promise.allSettled(addDocPromises).then((results) =>
+    results.forEach((result) => {
+      if (result.status === 'rejected') {
+        console.error(result.reason)
+        throw new Error(result.reason)
+      }
+    })
+  )
+
+  console.log('Add google docs works')
+}
 
 docsRouter.get('/', userMiddleware, async (_, res) => {
   const org = res.locals.user.org
@@ -176,13 +239,15 @@ docsRouter.post('/notion', userMiddleware, async (req, res) => {
 
 docsRouter.post('/google', userMiddleware, async (req, res) => {
   const { docs } = req.body
-  const org = res.locals.user.org
+  const orgId = res.locals.user.org,
+    userId = res.locals.user._id
 
   try {
     // Initial add is using light mode scan
-    await createDocsFromGoogleDocsId()
+    await createDocsFromGoogleDocsId({ docs, orgId, userId })
     return res.status(200).end()
   } catch (error) {
+    console.log("Add google docs didn't work")
     return res.status(500).send({ error })
   }
 })

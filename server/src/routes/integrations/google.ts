@@ -64,6 +64,13 @@ export type GoogleCredentials = {
   scope: string
 }
 
+export type GoogleDocs = {
+  id: string
+  name: string
+  url: string
+  lastEditedAgo: string
+}
+
 googleRouter.get('/sync', userMiddleware, async (_, res) => {
   const { org: orgId } = res.locals.user
 
@@ -91,7 +98,7 @@ googleRouter.get('/sync', userMiddleware, async (_, res) => {
           })
         : googleDrive.files.list({
             q: 'mimeType="application/vnd.google-apps.document" and trashed=false',
-            fields: 'nextPageToken, files(id, name)',
+            fields: 'nextPageToken, files(id, name, modifiedTime, createdTime)',
           }))
       nextPageToken = data.nextPageToken
       allFiles = allFiles.concat(data.files)

@@ -224,6 +224,8 @@ export const DocTitleIcon = ({ doc }: { doc: Doc }) => {
     <img src={doc.favicon} alt="favicon" className="h-5 w-5 rounded-sm" />
   ) : doc.method === 'notion-private' ? (
     <img src="/assets/integrations/notion.svg" alt="favicon" className="h-5 w-5 rounded-sm" />
+  ) : doc.method === 'google-docs' ? (
+    <img src="/assets/integrations/google-docs.svg" alt="favicon" className="h-5 w-5 rounded-sm" />
   ) : (
     <DocumentTextIcon className="h-5 w-5 text-gray-600" />
   )
