@@ -55,7 +55,7 @@ googleRouter.get('/authorization', async (req, res) => {
   return res.redirect(302, FRONTEND_URL)
 })
 
-type GoogleCredentials = {
+export type GoogleCredentials = {
   access_token: string
   // expiry_date is the time in ms at which this token is thought to expire.
   expiry_date: number
@@ -71,7 +71,6 @@ googleRouter.get('/sync', userMiddleware, async (_, res) => {
 
   let google = org?.integrations?.google as GoogleCredentials
 
-  // install the Google integrations if users haven't set it
   if (!google || !google.access_token) {
     return res.status(403).json({ error: 'No access token found for Google' })
   }

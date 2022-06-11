@@ -1,168 +1,179 @@
-import * as cheerio from 'cheerio';
-import { isNotionUrl } from './notion';
-import { isGoogleDocsUrl, getGoogleDocsData } from './googleDocs';
-import validUrl from 'valid-url';
-import Org from '../models/Org';
-import { getContentFromHTML } from '../helpers/routes/domparsing';
-import { getNotionPageData } from './notion';
-import axios from 'axios';
+import * as cheerio from 'cheerio'
+import { isNotionUrl } from './notion'
+import { isGoogleDocsUrl, getGoogleDocsData } from './googleDocs'
+import validUrl from 'valid-url'
+import Org from '../models/Org'
+import { getContentFromHTML } from '../helpers/routes/domparsing'
+import { getNotionPageData } from './notion'
+import axios from 'axios'
 
-type WebScrapingMethod = 'readme' | 'stoplight' | 'docusaurus' | 'github' | 'notion-public' | 'notion-private' | 'googledocs' | 'confluence-public' | 'gitbook' | 'web';
+type WebScrapingMethod =
+  | 'readme'
+  | 'stoplight'
+  | 'docusaurus'
+  | 'github'
+  | 'notion-public'
+  | 'notion-private'
+  | 'googledocs'
+  | 'confluence-public'
+  | 'gitbook'
+  | 'web'
 
-export type ScrapingMethod = WebScrapingMethod;
+export type ScrapingMethod = WebScrapingMethod
 
 const possiblyGetWebScrapingMethod = ($: cheerio.CheerioAPI): WebScrapingMethod => {
-  const readmeVersion = $('meta[name="readme-version"]');
+  const readmeVersion = $('meta[name="readme-version"]')
   if (readmeVersion.length > 0) {
-    return 'readme';
+    return 'readme'
   }
-  const stoplightConnect = $('link[href="https://js.stoplight.io"]');
+  const stoplightConnect = $('link[href="https://js.stoplight.io"]')
   if (stoplightConnect.length > 0) {
-    return 'stoplight';
+    return 'stoplight'
   }
-  const githubContent = $('meta[content="GitHub"]');
-  const hasReadmeId = $('#readme');
+  const githubContent = $('meta[content="GitHub"]')
+  const hasReadmeId = $('#readme')
   if (githubContent.length > 0 && hasReadmeId.length > 0) {
-    return 'github';
+    return 'github'
   }
-  const notionApp = $('#notion-app');
+  const notionApp = $('#notion-app')
   if (notionApp.length > 0) {
-    return 'notion-public';
+    return 'notion-public'
   }
-  const confluenceId = $('#com-atlassian-confluence');
+  const confluenceId = $('#com-atlassian-confluence')
   if (confluenceId.length > 0) {
-    return 'confluence-public';
+    return 'confluence-public'
   }
-  const docusaurusVersion = $('meta[name="docusaurus_version"]');
+  const docusaurusVersion = $('meta[name="docusaurus_version"]')
   if (docusaurusVersion.length > 0) {
-    return 'docusaurus';
+    return 'docusaurus'
   }
-  const gitBookRoot = $('div[class="gitbook-root"]');
-  const contentEditor = $('div[data-testid="page.contentEditor"]');
+  const gitBookRoot = $('div[class="gitbook-root"]')
+  const contentEditor = $('div[data-testid="page.contentEditor"]')
   if (gitBookRoot.length > 0 && contentEditor.length > 0) {
-    return 'gitbook';
+    return 'gitbook'
   }
-  return 'web';
-};
+  return 'web'
+}
 
 export type ContentData = {
-  method: ScrapingMethod;
-  title: string;
-  content: string;
-  favicon?: string;
-};
+  method: ScrapingMethod
+  title: string
+  content: string
+  favicon?: string
+}
 
 export const getDataFromWebpage = async (url: string, orgId: string, wait = 1000): Promise<ContentData> => {
   if (!url) {
-    throw 'URL not provided';
+    throw 'URL not provided'
   }
   if (!validUrl.isUri(url)) {
-    throw 'Is not valid URL';
+    throw 'Is not valid URL'
   }
-  const urlParsed = new URL(url);
-  const org = await Org.findById(orgId);
+  const urlParsed = new URL(url)
+  const org = await Org.findById(orgId)
   if (isNotionUrl(urlParsed) && org?.integrations?.notion) {
-    const notionAccessToken = org.integrations.notion.access_token;
-    return await getNotionPageData(url, notionAccessToken);
+    const notionAccessToken = org.integrations.notion.access_token
+    return await getNotionPageData(url, notionAccessToken)
   }
   // Only use the Google API to handle unpublished Google Docs for now since it doesn't work with published document yet.
-  else if (isGoogleDocsUrl(urlParsed) && !url.includes('/pub')) {
-    const parsedUrl = new URL(url);
-    return await getGoogleDocsData(parsedUrl);
+  else if (isGoogleDocsUrl(urlParsed) && !url.includes('/pub') && org?.integrations?.google) {
+    const parsedUrl = new URL(url)
+    const googleCredentials = org.integrations.google
+    return await getGoogleDocsData(parsedUrl, googleCredentials)
   }
 
   try {
     const { data: response } = await axios.get('https://app.scrapingbee.com/api/v1', {
       params: {
-        'api_key': process.env.SCRAPINGBEE_KEY,
+        api_key: process.env.SCRAPINGBEE_KEY,
         url,
         wait: wait.toString(),
-        'block_resources': 'false'
-      } 
-    });
+        block_resources: 'false',
+      },
+    })
 
-    const rawContent = response;
-    return extractDataFromHTML(url, rawContent);
+    const rawContent = response
+    return extractDataFromHTML(url, rawContent)
   } catch (error: any) {
     // Catch 404 errors because they could be valid
     if (error.response.status !== 404) {
-      throw 'Unable to fetch results';
+      throw 'Unable to fetch results'
     }
-    return extractDataFromHTML(url, error.response.data);
+    return extractDataFromHTML(url, error.response.data)
   }
-};
+}
 
 // Extract information
 export const extractDataFromHTML = async (url: string, html: string): Promise<ContentData> => {
-  const $ = cheerio.load(html);
-  const scrapingMethod = possiblyGetWebScrapingMethod($);
+  const $ = cheerio.load(html)
+  const scrapingMethod = possiblyGetWebScrapingMethod($)
 
-  const title = $('title').first().text().trim();
-  let favicon = $('link[rel="shortcut icon"]').attr('href') || $('link[rel="icon"]').attr('href');
+  const title = $('title').first().text().trim()
+  let favicon = $('link[rel="shortcut icon"]').attr('href') || $('link[rel="icon"]').attr('href')
   if (favicon?.startsWith('//')) {
-    favicon = `https:${favicon}`;
+    favicon = `https:${favicon}`
   } else if (favicon?.startsWith('/')) {
-    const urlParsed = new URL(url);
-    favicon = `${urlParsed.origin}${favicon}`;
+    const urlParsed = new URL(url)
+    favicon = `${urlParsed.origin}${favicon}`
   }
   if (!favicon) {
     try {
-      const faviconRes = await axios.get(`https://s2.googleusercontent.com/s2/favicons?sz=128&domain_url=${url}`);
-      favicon = faviconRes.request.res.responseUrl;
+      const faviconRes = await axios.get(`https://s2.googleusercontent.com/s2/favicons?sz=128&domain_url=${url}`)
+      favicon = faviconRes.request.res.responseUrl
     } catch {
-      favicon = undefined;
+      favicon = undefined
     }
   }
   // Remove unneeded for content
-  $('iframe').remove();
-  $('script').remove();
-  $('style').remove();
-  $('title').remove();
+  $('iframe').remove()
+  $('script').remove()
+  $('style').remove()
+  $('title').remove()
 
-  let section;
+  let section
 
   switch (scrapingMethod) {
     case 'readme':
-      $('#updated-at').nextAll().remove();
-      $('#updated-at').remove();
-      $('nav').remove();
-      $('header.rm-Header').remove();
-      $('.PageThumbs').remove();
-      section = $('body');
-      break;
+      $('#updated-at').nextAll().remove()
+      $('#updated-at').remove()
+      $('nav').remove()
+      $('header.rm-Header').remove()
+      $('.PageThumbs').remove()
+      section = $('body')
+      break
     case 'stoplight':
-      section = $('.Editor');
-      break;
+      section = $('.Editor')
+      break
     case 'docusaurus':
-      section = $('.markdown');
-      break;
+      section = $('.markdown')
+      break
     case 'github':
-      section = $('#readme');
-      break;
+      section = $('#readme')
+      break
     case 'notion-public':
-      $('.notion-overlay-container').remove();
-      section = $('.notion-page-content');
-      break;
+      $('.notion-overlay-container').remove()
+      section = $('.notion-page-content')
+      break
     case 'confluence-public':
-      $('.recently-updated').remove();
-      section = $('#content-body');
-      break;
+      $('.recently-updated').remove()
+      section = $('#content-body')
+      break
     case 'gitbook':
-      section = $('div[data-testid="page.contentEditor"]');
-      break;
+      section = $('div[data-testid="page.contentEditor"]')
+      break
     default:
-      section = $('body');
+      section = $('body')
       if ($('body').find('main').length > 0) {
-        section = $('body main');
-      } 
+        section = $('body main')
+      }
   }
 
-  const content = getContentFromHTML(section);
+  const content = getContentFromHTML(section)
 
   return {
     method: scrapingMethod,
     title,
     content,
     favicon,
-  };
+  }
 }
