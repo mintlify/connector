@@ -116,12 +116,11 @@ export default function Search({ user, org, isOpen, setIsOpen }: SearchProps) {
                 {docsResults.length > 0 && (
                   <Combobox.Options
                     static
-                    className="max-h-80 scroll-py-10 scroll-py-10 scroll-pb-2 scroll-pb-2 space-y-4 overflow-y-auto p-4 pb-2"
+                    className="max-h-80 scroll-py-10 scroll-pb-2 space-y-4 overflow-y-auto px-4 pb-2"
                   >
                     {docsResults.length > 0 && (
                       <li>
-                        <h2 className="text-xs font-semibold text-gray-900">Documentation</h2>
-                        <ul className="-mx-4 mt-2 text-sm text-gray-700">
+                        <ul className="-mx-4 text-sm text-gray-700">
                           {docsResults.map((docResult) => (
                             <Combobox.Option
                               key={docResult.objectID}
