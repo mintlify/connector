@@ -32,7 +32,6 @@ type NavbarProps = {
 
 export default function Navbar({ user, org }: NavbarProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const router = useRouter();
 
   const fullName = `${user.firstName} ${user.lastName}`;
 
