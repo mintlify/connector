@@ -7,27 +7,20 @@ dotenv.config();
 const algoliaSecret = process.env.ALGOLIA_SECRET as string;
 const algoliaClientId = process.env.ALGOLIA_APP_ID as string;
 const client = algoliasearch(algoliaClientId, algoliaSecret);
+const docsIndex = client.initIndex('docs');
 
 type SearchResults = {
     docs: any[]
 }
 
-export const searchDocs = async (query: string, orgId: string): Promise<SearchResults> => {
-    const queries = [{
-        indexName: 'docs',
-        query,
-        params: {
-            filters: `org:${orgId}`
-        }
-      }];
-    
-    const { results } = await client.multipleQueries(queries);
+export const searchDocs = async (query: string, orgId: string): Promise<SearchResults> => {    
+    const results = await docsIndex.search(query, {
+        filters: `org:${orgId}`
+    })
     return {
-        docs: results[0].hits
+        docs: results.hits
     }
 }
-
-const docsIndex = client.initIndex('docs');
 
 export const indexDocForSearch = async (doc: DocType) => {
     try {

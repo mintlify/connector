@@ -14,6 +14,14 @@ type DocResult = {
   url: string,
   org: string,
   favicon?: string,
+  _highlightResult: {
+    name: { value: string },
+    content: { value: string },
+  },
+  _snippetResult: {
+    name: { value: string },
+    content: { value: string },
+  }
 }
 
 type SearchResults = {
@@ -125,15 +133,13 @@ export default function Search({ user, org, isOpen, setIsOpen }: SearchProps) {
                             <Combobox.Option
                               key={docResult.objectID}
                               value={docResult}
-                              className={({ active }) =>
-                                classNames(
-                                  'flex cursor-pointer select-none items-center px-4 py-2',
-                                  active ? 'bg-primary text-white' : ''
-                                )
-                              }
                             >
                               {({ active }) => (
-                                <>
+                                <div className={classNames(
+                                  'cursor-pointer select-none px-4 py-2',
+                                  active ? 'bg-primary text-white' : ''
+                                )}>
+                                  <div className="flex items-center">
                                 {
                                   docResult.favicon
                                     ? <img className="h-6 w-6 flex-none" src={docResult.favicon} alt="Logo" />
@@ -141,9 +147,15 @@ export default function Search({ user, org, isOpen, setIsOpen }: SearchProps) {
                                         className={classNames('h-6 w-6 flex-none', active ? 'text-white' : 'text-gray-400')}
                                         aria-hidden="true"
                                       />
-                                }
-                                  <span className="ml-2 flex-auto truncate">{docResult.name}</span>
-                                </>
+                                  }
+                                  <span className="ml-2 flex-auto truncate" dangerouslySetInnerHTML={{ __html: docResult._highlightResult.name.value }}></span>
+                                  </div>
+                                  {
+                                    docResult._snippetResult.content.value && <div>
+                                    <span className={classNames("text-sm truncate pl-8", active ? 'text-white' : 'text-gray-500')} dangerouslySetInnerHTML={{ __html: docResult._snippetResult.content.value }}></span>
+                                  </div>
+                                  }
+                                </div>
                               )}
                             </Combobox.Option>
                           ))}
