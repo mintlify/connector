@@ -196,6 +196,8 @@ export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs
         </div>
       </div>
     </div>
+    <iframe className="mt-2 w-full h-96 rounded-sm" src={`${API_ENDPOINT}/routes/docs/screen?url=${doc.url}`}>
+    </iframe>
   </li>
   </div>
 }

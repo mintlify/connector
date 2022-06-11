@@ -222,4 +222,14 @@ docsRouter.put('/:docId/email', async (req, res) => {
   }
 });
 
+docsRouter.get('/screen', async (req, res) => {
+  try {
+    const url = req.query.url as string;
+    const { data } = await axios.get(url);
+    res.send(data);
+  } catch {
+    res.status(400).end();
+  }
+})
+
 export default docsRouter;
