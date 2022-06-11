@@ -92,12 +92,7 @@ export default function AddGoogleDocs({
         }
       )
       .then(() => {
-        console.log('successfully add the google docs')
         setIsAddDocLoading(false)
-      })
-      .catch((err) => {
-        console.log('Adding Google Docs failed')
-        console.log(err)
       })
     setIsAddDocumentationOpen(false)
   }

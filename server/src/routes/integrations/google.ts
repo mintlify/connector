@@ -103,7 +103,6 @@ googleRouter.get('/sync', userMiddleware, async (_, res) => {
       nextPageToken = data.nextPageToken
       allFiles = allFiles.concat(data.files)
     } catch (error: any) {
-      console.log(error)
       return res.status(500).send(error)
     }
   }

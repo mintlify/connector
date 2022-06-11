@@ -104,7 +104,6 @@ export const createDocsFromGoogleDocsId = async ({
       new Promise<void>(async (resolve) => {
         try {
           // Add doc without content
-          console.log('_doc.lastEditedAgo = ', _doc.lastEditedAgo)
           const doc = await Doc.findOneAndUpdate(
             {
               org: orgId,
@@ -134,9 +133,7 @@ export const createDocsFromGoogleDocsId = async ({
             method: 'google-docs',
             org: orgId.toString(),
           })
-        } catch (error) {
-          console.log('Error within createDocsFromGoogleDocsId: ', error)
-        }
+        } catch (error) {}
 
         resolve()
       })
@@ -150,8 +147,6 @@ export const createDocsFromGoogleDocsId = async ({
       }
     })
   )
-
-  console.log('Add google docs works')
 }
 
 docsRouter.get('/', userMiddleware, async (_, res) => {
@@ -247,7 +242,6 @@ docsRouter.post('/google', userMiddleware, async (req, res) => {
     await createDocsFromGoogleDocsId({ docs, orgId, userId })
     return res.status(200).end()
   } catch (error) {
-    console.log("Add google docs didn't work")
     return res.status(500).send({ error })
   }
 })
