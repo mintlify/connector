@@ -149,12 +149,19 @@ export const createDocsFromGoogleDocsId = async ({
   )
 }
 
-docsRouter.get('/', userMiddleware, async (_, res) => {
+docsRouter.get('/', userMiddleware, async (req, res) => {
   const org = res.locals.user.org
+  const { shouldShowCreatedBySelf } = req.query
+
+  const matchQuery: { org: Types.ObjectId; createdBy?: Types.ObjectId } = { org }
+  if (shouldShowCreatedBySelf) {
+    matchQuery.createdBy = res.locals.user._id
+  }
+
   try {
     const docs = await Doc.aggregate([
       {
-        $match: { org },
+        $match: matchQuery,
       },
       {
         $sort: { lastUpdatedAt: -1 },
@@ -165,14 +172,6 @@ docsRouter.get('/', userMiddleware, async (_, res) => {
           foreignField: 'doc',
           localField: '_id',
           as: 'code',
-        },
-      },
-      {
-        $lookup: {
-          from: 'automations',
-          foreignField: 'source.doc',
-          localField: '_id',
-          as: 'automations',
         },
       },
     ])
@@ -270,6 +269,32 @@ docsRouter.post('/content', async (req, res) => {
     res.send({ page })
   } catch (error) {
     res.status(500).send({ error })
+  }
+})
+
+docsRouter.put('/:docId/slack', async (req, res) => {
+  try {
+    const { docId } = req.params
+    const { slack } = req.body
+    const doc = await Doc.findById(docId)
+    if (doc == null) return res.status(400).json({ error: 'Invalid doc ID' })
+    await Doc.findByIdAndUpdate(docId, { slack })
+    return res.end()
+  } catch (error) {
+    return res.status(500).send({ error })
+  }
+})
+
+docsRouter.put('/:docId/email', async (req, res) => {
+  try {
+    const { docId } = req.params
+    const { email } = req.body
+    const doc = await Doc.findById(docId)
+    if (doc == null) return res.status(400).json({ error: 'Invalid doc ID' })
+    await Doc.findByIdAndUpdate(doc._id, { email }, { new: true, strict: false })
+    return res.end()
+  } catch (error) {
+    return res.status(500).send({ error })
   }
 })
 

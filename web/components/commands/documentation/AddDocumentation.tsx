@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { Combobox, Dialog, Transition } from '@headlessui/react'
 import { classNames } from '../../../helpers/functions'
 import { DocumentationTypeIcon } from '../../../helpers/Icons'
@@ -47,17 +47,33 @@ type AddDocumentationProps = {
   isOpen: boolean
   setIsOpen: (isOpen: boolean) => void
   setIsAddDocLoading: (isAddingAutomation: boolean) => void
+  overrideSelectedRuleType?: AddDocumentationType
 }
 
-export default function AddDocumentation({ user, org, isOpen, setIsOpen, setIsAddDocLoading }: AddDocumentationProps) {
+export default function AddDocumentation({
+  user,
+  org,
+  isOpen,
+  setIsOpen,
+  setIsAddDocLoading,
+  overrideSelectedRuleType,
+}: AddDocumentationProps) {
   const [selectedRuleType, setSelectedRuleType] = useState<AddDocumentationType>()
   const [integrationsStatus, setIntegrationsStatus] = useState<Record<string, boolean>>({})
+
+  useEffect(() => {
+    setSelectedRuleType(overrideSelectedRuleType)
+  }, [overrideSelectedRuleType])
 
   const onClickOption = async (item: AddDocumentationSelection) => {
     setSelectedRuleType(item.type)
   }
 
   const onToPrimarySelection = () => {
+    if (overrideSelectedRuleType) {
+      setIsOpen(false)
+      return
+    }
     setSelectedRuleType(undefined)
   }
 
@@ -106,7 +122,7 @@ export default function AddDocumentation({ user, org, isOpen, setIsOpen, setIsAd
             leave="ease-in duration-200"
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
-            afterLeave={() => setSelectedRuleType(undefined)}
+            afterLeave={onToPrimarySelection}
           >
             <Dialog.Panel className="mx-auto max-w-xl transform divide-y divide-gray-100 rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
               <DocumentationConfig

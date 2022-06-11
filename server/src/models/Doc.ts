@@ -15,7 +15,9 @@ export type DocType = {
     // used for method = notion-private
     notion?: {
         pageId: string;
-    },
+    };
+    slack?: boolean;
+    email?: boolean;
 };
 
 const DocSchema = new Schema({
@@ -32,7 +34,9 @@ const DocSchema = new Schema({
     isJustAdded: { type: Boolean, default: true },
     notion: {
         pageId: { type: String, }
-    }
+    },
+    slack: { type: Boolean },
+    email: { type: Boolean }
 });
 
 const Doc = mongoose.model<DocType>('Doc', DocSchema, 'docs');

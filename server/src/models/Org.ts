@@ -47,6 +47,12 @@ export type OrgType = {
   access: {
     mode: string
   }
+  onboarding?: {
+    teamSize: string
+    usingGitHub: boolean
+    usingSlack: boolean
+    usingNone: boolean
+  }
 }
 
 const OrgSchema = new Schema({
@@ -92,6 +98,12 @@ const OrgSchema = new Schema({
   },
   access: {
     mode: { type: String, default: 'private' },
+  },
+  onboarding: {
+    teamSize: String,
+    usingGitHub: Boolean,
+    usingSlack: Boolean,
+    usingNone: Boolean,
   },
 })
 
