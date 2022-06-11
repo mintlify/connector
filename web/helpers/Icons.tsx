@@ -207,7 +207,7 @@ export const TypeIcon = ({ type, className }: { type: string; className: string 
 
 export const DocTitleIcon = ({ doc }: { doc: Doc }) => {
   return doc.favicon ? (
-    <img src={doc.favicon} alt="favicon" className="h-5 w-5 rounded-sm" />
+    <img src={doc.favicon} alt="favicon" className="h-5 w-5 aspect-square rounded-sm" />
   ) : doc.method === 'notion-private' ? (
     <img src="/assets/integrations/notion.svg" alt="favicon" className="h-5 w-5 rounded-sm" />
   ) : (

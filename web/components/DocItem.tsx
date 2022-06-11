@@ -109,9 +109,7 @@ export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs
           <span className="block">
             <h2 className="text-sm font-medium text-gray-700">
               <div className="flex items-center space-x-2">
-                <div>
-                  <DocTitleIcon doc={doc} />
-                </div>
+                <DocTitleIcon doc={doc} />
                 <Link
                   href={doc.url}
                 >
