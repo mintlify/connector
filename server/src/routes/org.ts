@@ -121,7 +121,7 @@ orgRouter.get('/:orgId/integrations', userMiddleware, async (req, res) => {
       github: org.integrations.github?.installations != null,
       notion: org.integrations.notion?.access_token != null,
       slack: org.integrations.slack?.accessToken != null,
-      google: org.integrations.google?.accessToken != null,
+      google: org.integrations.google?.access_token != null,
       vscode: isVSCodeInstalled, // dependent on the user
     };
 

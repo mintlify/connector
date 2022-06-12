@@ -30,9 +30,12 @@ export type OrgType = {
       installations: Object[];
     };
     google?: {
-      accessToken: string;
-      expiryDate: number;
-      refreshToken: string;
+      refresh_token?: string | null;
+      expiry_date?: number | null;
+      access_token?: string | null;
+      token_type?: string | null;
+      id_token?: string | null;
+      scope?: string;
     };
   };
   users: string[];
