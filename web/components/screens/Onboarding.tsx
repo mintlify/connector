@@ -124,10 +124,20 @@ export default function Onboarding({ user, org }: OnboardingProps) {
   const [teamSize, setTeamSize] = useState<string | undefined>(org.onboarding?.teamSize);
   const [appsUsing, setAppsUsing] = useState<string[]>(buildAppsUsing(user, org));
 
+  useEffect(() => {
+    const step = window.localStorage.getItem('onboarding-step');
+
+    if (step) {
+      setStep(parseInt(step));
+    }
+  }, []);
+
   const onBack = () => {
     if (step === 0) {
       return;
     }
+
+    window.localStorage.setItem('onboarding-step', (step - 1).toString());
     setStep(step - 1);
   }
 
@@ -135,6 +145,8 @@ export default function Onboarding({ user, org }: OnboardingProps) {
     if (step === 3) {
       return;
     }
+
+    window.localStorage.setItem('onboarding-step', (step + 1).toString());
     setStep(step + 1);
   }
 
