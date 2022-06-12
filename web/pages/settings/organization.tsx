@@ -501,7 +501,13 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                               <div className="text-sm">
                                 { integrationsStatus[app.id]
                                 ? <CheckCircleIcon className="h-4 w-4 text-green-600" />
-                                : <button className="text-primary font-medium">Install</button>
+                                : <Link
+                                    className="text-primary font-medium"
+                                    key={app.id}
+                                    href={app.installHref}
+                                  >
+                                    Install
+                                  </Link>
                                 }
                               </div>
                             </div>
