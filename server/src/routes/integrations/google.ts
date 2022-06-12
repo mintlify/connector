@@ -65,7 +65,7 @@ export type GoogleDocs = {
   lastEditedAgo: string
 }
 
-googleRouter.get('/sync', userMiddleware, async (_, res) => {
+googleRouter.post('/sync', userMiddleware, async (_, res) => {
   const { org: orgId } = res.locals.user
 
   const org = await Org.findById(orgId);
@@ -74,7 +74,7 @@ googleRouter.get('/sync', userMiddleware, async (_, res) => {
     return res.status(401).json({ error: 'No org found' });
   }
   let google = org.integrations?.google;
-  if (!google || !google.access_token) {
+  if (google?.access_token == null) {
     return res.status(403).json({ error: 'No access token found for Google' })
   }
 

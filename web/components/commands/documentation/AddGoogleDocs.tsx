@@ -17,12 +17,11 @@ type Icon = {
   }
 }
 
-type Page = {
+type GoogleDoc = {
   id: string
-  title: string
-  icon?: Icon
-  lastEditedTime: string
-  lastEditedAgo: string
+  name: string
+  createdTime: string
+  modifiedTime: string
 }
 
 type AddNotionProps = {
@@ -34,8 +33,8 @@ type AddNotionProps = {
 }
 
 export default function AddGoogleDocs({ user, org, onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }: AddNotionProps) {
-  const [pages, setPages] = useState<Page[]>()
-  const [selectedPages, setSelectedPages] = useState<Page[]>([])
+  const [docs, setDocs] = useState<GoogleDoc[]>()
+  const [selectedDocs, setSelectedDocs] = useState<GoogleDoc[]>([])
   const [search, setSearch] = useState('')
   const router = useRouter()
 
@@ -52,27 +51,28 @@ export default function AddGoogleDocs({ user, org, onCancel, setIsAddDocumentati
         }
       )
       .then(({ data: { results } }) => {
-        console.log(results);
+        setDocs(results);
+        setSelectedDocs(results);
       })
       .catch(async () => {
         router.push(`${API_ENDPOINT}/routes/integrations/google/install?org=${org._id}`)
       })
   }, [user.userId, router, org])
 
-  const onClickPage = (selectingPage: Page) => {
-    if (selectedPages.some((page) => page.id === selectingPage.id)) {
-      setSelectedPages(selectedPages.filter((page) => page.id !== selectingPage.id))
+  const onClickPage = (selectingDoc: GoogleDoc) => {
+    if (selectedDocs.some((doc) => doc.id === selectingDoc.id)) {
+      setSelectedDocs(selectedDocs.filter((doc) => doc.id !== selectingDoc.id))
     } else {
-      setSelectedPages([...selectedPages, selectingPage])
+      setSelectedDocs([...selectedDocs, selectingDoc])
     }
   }
 
-  const filteredPages =
-    pages?.filter((page) => {
-      return page.title.toLowerCase().includes(search.toLowerCase())
+  const filteredDocs =
+    docs?.filter((doc) => {
+      return doc.name.toLowerCase().includes(search.toLowerCase())
     }) || []
 
-  const isValidToSubmit = selectedPages.length > 0
+  const isValidToSubmit = selectedDocs.length > 0
 
   const onSubmit = async () => {
     setIsAddDocLoading(true)
@@ -80,7 +80,7 @@ export default function AddGoogleDocs({ user, org, onCancel, setIsAddDocumentati
       .post(
         `${API_ENDPOINT}/routes/docs/notion`,
         {
-          pages: selectedPages,
+          pages: selectedDocs,
         },
         {
           params: {
@@ -97,7 +97,7 @@ export default function AddGoogleDocs({ user, org, onCancel, setIsAddDocumentati
 
   return (
     <div>
-      {pages != null && selectedPages != null ? (
+      {docs != null && selectedDocs != null ? (
         <>
           <div className="relative rounded-md shadow-sm">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -114,34 +114,34 @@ export default function AddGoogleDocs({ user, org, onCancel, setIsAddDocumentati
             />
           </div>
           <div className="mt-4 grid grid-cols-1 gap-y-3 sm:grid-cols-2 sm:gap-x-4">
-            {filteredPages?.map((page) => (
+            {filteredDocs?.map((doc) => (
               <div
-                key={page.id}
+                key={doc.id}
                 className={classNames(
-                  selectedPages.some((selectedPage) => selectedPage.id === page.id) ? 'border-primary ring-1 ring-primary' : '',
+                  selectedDocs.some((selectedDoc) => selectedDoc.id === doc.id) ? 'border-primary ring-1 ring-primary' : '',
                   'relative bg-white hover:bg-gray-50 border rounded-lg shadow-sm py-3 px-4 flex cursor-pointer focus:outline-none'
                 )}
-                onClick={() => onClickPage(page)}
+                onClick={() => onClickPage(doc)}
               >
                 <span className="flex-1 flex">
                   <span className="flex flex-col">
                     <span className="flex items-center text-sm font-medium text-gray-900">
-                      <TitleIcon icon={page.icon} />
-                      {page.title}
+                      <img className="mr-1 w-4 h-4" src="assets/integrations/google-docs.svg" alt={doc.name} />
+                      {doc.name}
                     </span>
-                    <span className="mt-1 flex items-center text-sm text-gray-500">Last updated {page.lastEditedAgo}</span>
+                    <span className="mt-1 flex items-center text-sm text-gray-500">Last updated {timeAgo.format(Date.parse(doc.modifiedTime))}</span>
                   </span>
                 </span>
                 <CheckCircleIcon
                   className={classNames(
-                    selectedPages.some((selectedPage) => selectedPage.id === page.id) ? '' : 'invisible',
+                    selectedDocs.some((selectedDoc) => selectedDoc.id === doc.id) ? '' : 'invisible',
                     'h-5 w-5 text-primary'
                   )}
                   aria-hidden="true"
                 />
                 <span
                   className={classNames(
-                    selectedPages.some((selectedPage) => selectedPage.id === page.id)
+                    selectedDocs.some((selectedDoc) => selectedDoc.id === doc.id)
                       ? 'border-indigo-500'
                       : 'border-transparent',
                     'absolute -inset-px rounded-lg pointer-events-none'
@@ -165,14 +165,14 @@ export default function AddGoogleDocs({ user, org, onCancel, setIsAddDocumentati
         </div>
       )}
       <div className="flex">
-        {pages && selectedPages.length > 0 ? (
+        {docs && selectedDocs.length > 0 ? (
           <>
-            <button className="text-sm text-primary font-medium" onClick={() => setSelectedPages([])}>
+            <button className="text-sm text-primary font-medium" onClick={() => setSelectedDocs([])}>
               Deselect all
             </button>
           </>
-        ) : pages ? (
-          <button className="text-sm text-primary font-medium" onClick={() => setSelectedPages(filteredPages)}>
+        ) : docs ? (
+          <button className="text-sm text-primary font-medium" onClick={() => setSelectedDocs(filteredDocs)}>
             Select all
           </button>
         ) : null}
@@ -193,7 +193,7 @@ export default function AddGoogleDocs({ user, org, onCancel, setIsAddDocumentati
             )}
             onClick={onSubmit}
           >
-            Import ({selectedPages.length}) Notion Pages
+            Import ({selectedDocs.length}) Notion Pages
           </button>
         </div>
       </div>

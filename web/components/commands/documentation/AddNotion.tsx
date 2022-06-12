@@ -216,9 +216,7 @@ const TitleIcon = ({ icon }: { icon?: Icon }) => {
 
   if (icon.file) {
     return (
-      <span className="mr-1">
-        <img src={icon.file.url} className="h-4 w-4 rounded-sm" />
-      </span>
+      <img src={icon.file.url} className="mr-1 h-4 w-4 rounded-sm" />
     )
   }
 
