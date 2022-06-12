@@ -130,7 +130,7 @@ notionRouter.post('/sync', userMiddleware, async (_, res) => {
       },
     });
 
-    const existingDocs = await Doc.find({ org: orgId });
+    const existingDocs = await Doc.find({ org: orgId, method: 'notion-private' });
     const results: NotionPage[] = searchResults.results
       .map((page: any) => {
         return {

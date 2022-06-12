@@ -2,6 +2,7 @@ import axios from 'axios';
 import { Types } from 'mongoose';
 import Doc from '../../models/Doc';
 import { createEvent } from '../../routes/events';
+import { GoogleDoc } from '../../routes/integrations/google';
 import { NotionPage } from '../../routes/integrations/notion';
 import { indexDocForSearch } from '../../services/algolia';
 import { track } from '../../services/segment';
@@ -80,13 +81,6 @@ export const createDocsFromNotionPageId = async (pages: NotionPage[], orgId: Typ
   }));
 
   await Promise.all(addDocPromises);
-}
-
-type GoogleDoc = {
-  id: string
-  name: string
-  createdTime: string
-  modifiedTime: string
 }
 
 export const createDocsFromGoogleDocs = async (docs: GoogleDoc[], orgId: Types.ObjectId, userId: string) => {

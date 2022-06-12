@@ -1,7 +1,15 @@
 import { Router } from 'express';
 import { google as googleapis } from 'googleapis';
+import Doc from '../../models/Doc';
 import Org from '../../models/Org';
 import { userMiddleware } from '../user';
+
+export type GoogleDoc = {
+  id: string
+  name: string
+  createdTime: string
+  modifiedTime: string
+}
 
 const googleRouter = Router();
 const client_id = process.env.GOOGLE_OAUTH_CLIENT_ID,
@@ -73,7 +81,6 @@ googleRouter.post('/sync', userMiddleware, async (_, res) => {
 
   oAuth2Client.setCredentials(google)
   const googleDrive = googleapis.drive({ version: 'v3', auth: oAuth2Client })
-  let allFiles: any = []
   let nextPageToken: string | null | undefined = ''
 
   try {
@@ -89,12 +96,17 @@ googleRouter.post('/sync', userMiddleware, async (_, res) => {
           fields: 'nextPageToken, files(id, name, modifiedTime, createdTime)',
         }))
     nextPageToken = data.nextPageToken
-    allFiles = allFiles.concat(data.files);
+    const allFiles: GoogleDoc[] = data.files;
+    const existingDocs = await Doc.find({ org: orgId, method: 'googledocs-private' });
+    const results = allFiles
+      .filter((googleDoc) => {
+        return !existingDocs.some((doc) => doc.googledocs?.id === googleDoc.id);
+      });
+
+    return res.status(200).json({ results })
   } catch (error: any) {
     return res.status(500).send(error)
   }
-
-  return res.status(200).json({ results: allFiles })
 })
 
 export default googleRouter;
