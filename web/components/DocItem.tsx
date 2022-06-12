@@ -12,6 +12,7 @@ import timeAgo from '../services/timeago'
 import { getSubdomain } from "../helpers/user";
 import axios from "axios";
 import { API_ENDPOINT } from "../helpers/api";
+import { ExternalLinkIcon } from '@heroicons/react/outline';
 
 type DocItemProps = {
   user: User,
@@ -25,23 +26,16 @@ type DocItemProps = {
   integrationsStatus?: { [key: string]: boolean }
 }
 
+type MenuItem = {
+  name: string,
+  isRed: boolean,
+  isGreen: boolean,
+  onClick: () => void,
+}
+
 export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs, removeSeparators, setSelectedDoc, integrationsStatus }: DocItemProps) {
   const [silenced, setSilenced] = useState(false);
-  const [listMenu, setListMenu] = useState([{
-    name: 'Delete',
-    isRed: true,
-    isGreen: false,
-    onClick: () => {
-      setDocs(docs.filter(oneOfTheDocs => oneOfTheDocs._id !== doc._id));
-      setSelectedDoc(undefined);
-      axios.delete(`${API_ENDPOINT}/routes/docs/${doc._id}`, {
-        params: {
-          userId: user.userId,
-          subdomain: getSubdomain(window.location.host)
-        }
-      });
-    }
-  }]);
+  const [listMenu, setListMenu] = useState<MenuItem[]>([]);
 
   useEffect(() => {
     let slack = doc?.slack ?? true;
@@ -112,9 +106,12 @@ export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs
                 <DocTitleIcon doc={doc} />
                 <Link
                   href={doc.url}
-                >
-                  <a target="_blank" className="decoration-gray-300 hover:underline">
-                    {doc.title}
+                > 
+                  <a target="_blank" className="space-x-1 group flex items-center decoration-gray-300 hover:underline">
+                    <span>
+                      {doc.title}
+                    </span>
+                    <ExternalLinkIcon className="w-4 h-4 text-gray-400 invisible group-hover:visible" />
                   </a>
                 </Link>
               </div>
@@ -196,8 +193,6 @@ export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs
         </div>
       </div>
     </div>
-    <iframe className="mt-2 w-full h-96 rounded-sm" src={`${API_ENDPOINT}/routes/docs/screen?url=${doc.url}`}>
-    </iframe>
   </li>
   </div>
 }
