@@ -40,7 +40,7 @@ export const getGoogleDocsData = async (url: URL): Promise<ContentData> => {
 
   if (!res.data.body || !res.data.body.content)
     return {
-      method: 'googledocs',
+      method: 'googledocs-public',
       title,
       content: 'Error getting content data',
       favicon: GOOGLE_DOCS_ICON,
@@ -58,9 +58,8 @@ export const getGoogleDocsData = async (url: URL): Promise<ContentData> => {
     });
 
   return {
-    method: 'googledocs',
+    method: 'googledocs-public',
     title,
     content: accumulatedContent,
-    favicon: GOOGLE_DOCS_ICON,
   };
 };

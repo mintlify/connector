@@ -98,7 +98,7 @@ export const DocTitleIcon = ({ doc }: { doc: Doc }) => {
     return <img src="/assets/integrations/notion.svg" alt="favicon" className="h-5 w-5 rounded-sm" />;
   }
 
-  if (doc.method === 'googledocs') {
+  if (doc.method === 'googledocs-private') {
     return <img src="/assets/integrations/google-docs.svg" alt="favicon" className="h-5 w-5 rounded-sm" />;
   }
 

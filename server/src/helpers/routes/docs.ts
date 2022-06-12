@@ -101,7 +101,7 @@ export const createDocsFromGoogleDocs = async (docs: GoogleDoc[], orgId: Types.O
         {
           org: orgId,
           url: `https://docs.google.com/document/d/${googleDoc.id}`,
-          method: 'googledocs',
+          method: 'googledocs-private',
           notion: {
             pageId: googleDoc.id,
           },
@@ -121,7 +121,7 @@ export const createDocsFromGoogleDocs = async (docs: GoogleDoc[], orgId: Types.O
       indexDocForSearch(doc);
       track(userId, 'Add documentation', {
         doc: doc._id.toString(),
-        method: 'googledocs',
+        method: 'googledocs-private',
         org: orgId.toString(),
       });
 
