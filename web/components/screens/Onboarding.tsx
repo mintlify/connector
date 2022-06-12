@@ -14,6 +14,7 @@ import AddDocumentation, { addDocumentationMap, AddDocumentationType } from "../
 import DocItem from "../DocItem";
 import LoadingItem from "../LoadingItem";
 import ProfilePicture from "../ProfilePicture";
+import { getIntegrations, onInstallIntegration, Integration } from "../../helpers/integrations";
 
 const onboardStepLocalStateKey = 'onboarding-step';
 
@@ -436,44 +437,12 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
   </>;
 }
 
-type Integration = {
-  type: string,
-  title: string,
-  description: string,
-  iconSrc: string,
-  installUrl: string,
-  useRouter?: boolean,
-}
-
 function IntegrateStep({ user, org, onBack, onNext, appsUsing, step, totalSteps }: { user: User, org: Org, onBack: () => void, onNext: () => void, appsUsing: string[], step: number, totalSteps: number }) {
   const [isLoading, setIsLoading] = useState(false);
   const [installedIntegrations, setInstalledIntegrations] = useState<Record<string, boolean>>({});
   const router = useRouter();
 
-  const integrations: Integration[] = [
-    {
-      type: 'slack',
-      title: 'Slack',
-      description: 'Connect with your workspace',
-      iconSrc: '/assets/integrations/slack.svg',
-      installUrl: `${API_ENDPOINT}/routes/integrations/slack/install?org=${org._id}`,
-    },
-    {
-      type: 'github',
-      title: 'GitHub',
-      description: 'Enable documentation review',
-      iconSrc: '/assets/integrations/github.svg',
-      installUrl: `${API_ENDPOINT}/routes/integrations/github/install?org=${org._id}`,
-    },
-    {
-      type: 'vscode',
-      title: 'VS Code',
-      description: 'Connect code to documentation',
-      iconSrc: '/assets/integrations/vscode.svg',
-      installUrl: '/api/login/vscode',
-      useRouter: true,
-    }
-  ];
+  const integrations: Integration[] = getIntegrations(org._id);
 
   useEffect(() => {
     setIsLoading(true);
@@ -491,37 +460,6 @@ function IntegrateStep({ user, org, onBack, onNext, appsUsing, step, totalSteps 
     
     return () => clearInterval(statusInterval);
   }, [user, org._id])
-
-  const onInstallIntegration = (integration: Integration) => { 
-    if (integration.useRouter) {
-      return router.push(integration.installUrl);
-    }
-    const popupCenter = ({url, title, w, h}: { url: string, title: string, w: number, h: number }) => {
-      // Fixes dual-screen position                             Most browsers      Firefox
-      const dualScreenLeft = window.screenLeft !==  undefined ? window.screenLeft : window.screenX;
-      const dualScreenTop = window.screenTop !==  undefined   ? window.screenTop  : window.screenY;
-  
-      const width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
-      const height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
-  
-      const systemZoom = width / window.screen.availWidth;
-      const left = (width - w) / 2 / systemZoom + dualScreenLeft
-      const top = (height - h) / 2 / systemZoom + dualScreenTop
-      const newWindow = window.open(url, title, 
-        `
-        scrollbars=yes,
-        width=${w / systemZoom}, 
-        height=${h / systemZoom}, 
-        top=${top}, 
-        left=${left}
-        `
-      )
-
-      newWindow?.focus();
-    }
-
-    popupCenter({url: integration.installUrl, title: 'Connect with integration', w: 520, h: 570})
-  }
 
   const requiredIntegrations = integrations.filter(({ type }) => appsUsing.includes(type));
   const isAllIntegrationsInstalled = requiredIntegrations.every(({ type }) => installedIntegrations[type]);
@@ -551,7 +489,7 @@ function IntegrateStep({ user, org, onBack, onNext, appsUsing, step, totalSteps 
                   className={({ active }) =>
                     classNames('flex items-center cursor-default select-none rounded-xl p-3 hover:cursor-pointer', active ? 'bg-gray-50' : '')
                   }
-                  onClick={() => onInstallIntegration(integration)}
+                  onClick={() => onInstallIntegration(integration, router)}
                 >
                   {({ active }) => (
                     <>

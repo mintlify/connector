@@ -16,6 +16,7 @@ import { getSubdomain } from '../../helpers/user'
 import ProfilePicture from '../../components/ProfilePicture'
 import { CheckCircleIcon, XIcon } from '@heroicons/react/solid'
 import { navigation } from './account'
+import { Integration, onInstallIntegration } from '../../helpers/integrations';
 
 export type EmailNotifications = {
   monthlyDigest: boolean
@@ -33,57 +34,64 @@ const access: AccessOption[] = [
   { id: 'private', name: 'Private', description: 'Only invited members can join' },
 ]
 
-const getIntegrations = (orgId: string) => {
+type IntegrationSection = {
+  title: string,
+  subtitle: string,
+  integrations: Integration[]
+}
+
+const getIntegrationSections = (orgId: string): IntegrationSection[] => {
   return [
-  {
-    title: 'Alerts',
-    subtitle: 'Receive alerts about your documentation',
-    apps: [
-      {
-        id: 'slack',
-        name: 'Slack',
-        icon: '/assets/integrations/slack.svg',
-        installHref: `${API_ENDPOINT}/routes/integrations/slack/install?org=${orgId}`,
-      },
-    ],
-  },
-  {
-    title: 'Documentation',
-    subtitle: 'Integration with documentation platforms',
-    apps: [
-      {
-        id: 'google',
-        name: 'Google Docs',
-        icon: '/assets/integrations/google-docs.svg',
-        installHref: `${API_ENDPOINT}/routes/integrations/google/install?org=${orgId}`,
-      },
-      {
-        id: 'notion',
-        name: 'Notion',
-        icon: '/assets/integrations/notion.svg',
-        installHref: `${API_ENDPOINT}/routes/integrations/notion/install?org=${orgId}`,
-      },
-    ],
-  },
-  {
-    title: 'Code',
-    subtitle: 'Connect documentation with your code',
-    apps: [
-      {
-        id: 'github',
-        name: 'GitHub',
-        icon: '/assets/integrations/github.svg',
-        installHref: `${API_ENDPOINT}/routes/integrations/github/install?org=${orgId}`,
-      },
-      {
-        id: 'vscode',
-        name: 'VS Code',
-        icon: '/assets/integrations/vscode.svg',
-        installHref: 'vscode:extension/mintlify.connector',
-      },
-    ],
-  },
-]}
+    {
+      title: 'Alerts',
+      subtitle: 'Receive alerts about your documentation',
+      integrations: [
+        {
+          type: 'slack',
+          title: 'Slack',
+          iconSrc: '/assets/integrations/slack.svg',
+          installUrl: `${API_ENDPOINT}/routes/integrations/slack/install?org=${orgId}`
+        },
+      ],
+    },
+    {
+      title: 'Documentation',
+      subtitle: 'Integration with documentation platforms',
+      integrations: [
+        {
+          type: 'google',
+          title: 'Google Docs',
+          iconSrc: '/assets/integrations/google-docs.svg',
+          installUrl: `${API_ENDPOINT}/routes/integrations/google/install?org=${orgId}`
+        },
+        {
+          type: 'notion',
+          title: 'Notion',
+          iconSrc: '/assets/integrations/notion.svg',
+          installUrl: `${API_ENDPOINT}/routes/integrations/notion/install?org=${orgId}`
+        },
+      ],
+    },
+    {
+      title: 'Code',
+      subtitle: 'Connect documentation with your code',
+      integrations: [
+        {
+          type: 'github',
+          title: 'GitHub',
+          iconSrc: '/assets/integrations/github.svg',
+          installUrl: `${API_ENDPOINT}/routes/integrations/github/install?org=${orgId}`
+        },
+        {
+          type: 'vscode',
+          title: 'VS Code',
+          iconSrc: '/assets/integrations/vscode.svg',
+          installUrl: 'vscode:extension/mintlify.connector'
+        },
+      ],
+    },
+  ];
+};
 
 const notify = (title: string, description: string) =>
   toast.custom((t) => {
@@ -168,7 +176,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
     return
   }
 
-  const integrations = getIntegrations(org._id);
+  const integrationSections = getIntegrationSections(org._id);
 
   const inviteMember = async (email: string) => {
     if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email.trim()) || email.trim() === '') {
@@ -488,26 +496,25 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                     </div>
 
                     <ul role="list" className="divide-y divide-gray-200">
-                      {integrations.map((integration) => (
-                        <li key={integration.title} className="px-4 py-4 sm:px-0">
-                          <h1 className="text-gray-800 font-medium">{integration.title}</h1>
-                          <p className="text-gray-500 text-sm">{integration.subtitle}</p>
-                          {integration.apps.map((app) => (
-                            <div key={app.id} className="mt-2 flex">
+                      {integrationSections.map((section) => (
+                        <li key={section.title} className="px-4 py-4 sm:px-0">
+                          <h1 className="text-gray-800 font-medium">{section.title}</h1>
+                          <p className="text-gray-500 text-sm">{section.subtitle}</p>
+                          {section.integrations.map((integration) => (
+                            <div key={integration.type} className="mt-2 flex">
                               <div className="flex-1 flex items-center text-gray-700">
-                                <img className="h-4 w-4 mr-2" src={app.icon} alt={app.name} />
-                                {app.name}
+                                <img className="h-4 w-4 mr-2" src={integration.iconSrc} alt={integration.title} />
+                                {integration.title}
                               </div>
                               <div className="text-sm">
-                                { integrationsStatus[app.id]
+                                { integrationsStatus[integration.type]
                                 ? <CheckCircleIcon className="h-4 w-4 text-green-600" />
-                                : <Link
+                                : <button
                                     className="text-primary font-medium"
-                                    key={app.id}
-                                    href={app.installHref}
+                                    onClick={() => onInstallIntegration(integration, router)}
                                   >
                                     Install
-                                  </Link>
+                                  </button>
                                 }
                               </div>
                             </div>
