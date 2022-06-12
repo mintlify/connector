@@ -85,8 +85,7 @@ slackRouter.get('/authorization', async (req, res) => {
     });
   }
 
-  // TODO: redirect to channel
-  return res.redirect('slack://open');
+  return res.send("<script>window.close();</script>");
 });
 
 export default slackRouter;
