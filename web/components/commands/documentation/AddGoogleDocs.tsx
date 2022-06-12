@@ -78,9 +78,9 @@ export default function AddGoogleDocs({ user, org, onCancel, setIsAddDocumentati
     setIsAddDocLoading(true)
     axios
       .post(
-        `${API_ENDPOINT}/routes/docs/notion`,
+        `${API_ENDPOINT}/routes/docs/googledocs`,
         {
-          pages: selectedDocs,
+          docs: selectedDocs,
         },
         {
           params: {

@@ -58,13 +58,6 @@ googleRouter.get('/authorization', async (req, res) => {
   return res.redirect(302, FRONTEND_URL);
 });
 
-export type GoogleDocs = {
-  id: string
-  name: string
-  url: string
-  lastEditedAgo: string
-}
-
 googleRouter.post('/sync', userMiddleware, async (_, res) => {
   const { org: orgId } = res.locals.user
 
