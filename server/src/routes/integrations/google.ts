@@ -60,10 +60,7 @@ googleRouter.get('/authorization', async (req, res) => {
     return res.status(403).send({ error: 'Invalid organization ID' });
   }
 
-  const FRONTEND_URL =
-    process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : `https://${org.subdomain}.mintlify.com`;
-
-  return res.redirect(302, FRONTEND_URL);
+  return res.send("<script>window.close();</script>");
 });
 
 googleRouter.post('/sync', userMiddleware, async (_, res) => {

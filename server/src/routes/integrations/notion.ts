@@ -90,7 +90,7 @@ notionRouter.get('/authorization', async (req, res) => {
     isOrg: true,
   });
 
-  return res.redirect(`https://${org.subdomain}.mintlify.com`);
+  return res.send("<script>window.close();</script>");
 });
 
 export type NotionPage = {

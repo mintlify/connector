@@ -123,7 +123,7 @@ githubRouter.get('/authorization', async (req, res) => {
       isOrg: true,
     });
 
-    return res.redirect(`https://${org.subdomain}.mintlify.com`);
+    return res.send("<script>window.close();</script>");
 
   } catch (error: any) {
     return res.status(500).send(error?.data);
