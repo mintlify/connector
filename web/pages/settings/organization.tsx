@@ -33,7 +33,8 @@ const access: AccessOption[] = [
   { id: 'private', name: 'Private', description: 'Only invited members can join' },
 ]
 
-const integrations = [
+const getIntegrations = (orgId: string) => {
+  return [
   {
     title: 'Alerts',
     subtitle: 'Receive alerts about your documentation',
@@ -42,7 +43,7 @@ const integrations = [
         id: 'slack',
         name: 'Slack',
         icon: '/assets/integrations/slack.svg',
-        installHref: '',
+        installHref: `${API_ENDPOINT}/routes/integrations/slack/install?org=${orgId}`,
       },
     ],
   },
@@ -54,13 +55,13 @@ const integrations = [
         id: 'google',
         name: 'Google Docs',
         icon: '/assets/integrations/google-docs.svg',
-        installHref: '',
+        installHref: `${API_ENDPOINT}/routes/integrations/google/install?org=${orgId}`,
       },
       {
         id: 'notion',
         name: 'Notion',
         icon: '/assets/integrations/notion.svg',
-        installHref: '',
+        installHref: `${API_ENDPOINT}/routes/integrations/notion/install?org=${orgId}`,
       },
     ],
   },
@@ -72,17 +73,17 @@ const integrations = [
         id: 'github',
         name: 'GitHub',
         icon: '/assets/integrations/github.svg',
-        installHref: '',
+        installHref: `${API_ENDPOINT}/routes/integrations/github/install?org=${orgId}`,
       },
       {
         id: 'vscode',
         name: 'VS Code',
         icon: '/assets/integrations/vscode.svg',
-        installHref: '',
+        installHref: 'vscode:extension/mintlify.connector',
       },
     ],
   },
-]
+]}
 
 const notify = (title: string, description: string) =>
   toast.custom((t) => {
@@ -166,6 +167,8 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
     router.push('/')
     return
   }
+
+  const integrations = getIntegrations(org._id);
 
   const inviteMember = async (email: string) => {
     if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email.trim()) || email.trim() === '') {
