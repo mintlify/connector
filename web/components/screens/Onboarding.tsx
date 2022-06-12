@@ -481,6 +481,34 @@ function IntegrateStep({ user, org, onBack, onNext, appsUsing, step, totalSteps 
     return () => clearInterval(statusInterval);
   }, [user, org._id])
 
+  const onInstallIntegration = (url: string) => {
+    const popupCenter = ({url, title, w, h}: { url: string, title: string, w: number, h: number }) => {
+      // Fixes dual-screen position                             Most browsers      Firefox
+      const dualScreenLeft = window.screenLeft !==  undefined ? window.screenLeft : window.screenX;
+      const dualScreenTop = window.screenTop !==  undefined   ? window.screenTop  : window.screenY;
+  
+      const width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+      const height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+  
+      const systemZoom = width / window.screen.availWidth;
+      const left = (width - w) / 2 / systemZoom + dualScreenLeft
+      const top = (height - h) / 2 / systemZoom + dualScreenTop
+      const newWindow = window.open(url, title, 
+        `
+        scrollbars=yes,
+        width=${w / systemZoom}, 
+        height=${h / systemZoom}, 
+        top=${top}, 
+        left=${left}
+        `
+      )
+
+      newWindow?.focus();
+    }
+
+    popupCenter({url, title: 'Connect with integration', w: 520, h: 570})
+  }
+
   const remainingIntegrations = integrations.filter(({ type }) => appsUsing.includes(type) && !installedIntegrations[type]);
   const isCompleted = remainingIntegrations.length === 0;
 
@@ -503,14 +531,13 @@ function IntegrateStep({ user, org, onBack, onNext, appsUsing, step, totalSteps 
             !isLoading && <Combobox onChange={() => {}} value="">
           <Combobox.Options static className="scroll-py-3 overflow-y-auto">
             {remainingIntegrations.map((integration) => (
-              <Link key={integration.type} href={integration.installUrl}>
-                <a target="_blank">
                 <Combobox.Option
                   value={integration}
+                  key={integration.type}
                   className={({ active }) =>
                     classNames('flex items-center cursor-default select-none rounded-xl p-3 hover:cursor-pointer', active ? 'bg-gray-50' : '')
                   }
-                  onClick={() => {}}
+                  onClick={() => onInstallIntegration(integration.installUrl)}
                 >
                   {({ active }) => (
                     <>
@@ -535,8 +562,6 @@ function IntegrateStep({ user, org, onBack, onNext, appsUsing, step, totalSteps 
                     </>
                   )}
                 </Combobox.Option>
-                </a>
-              </Link>
             ))}
             {remainingIntegrations.length === 0 && <div className="text-gray-600 text-center">All required integrations have been installed 🎉</div>}
           </Combobox.Options>
