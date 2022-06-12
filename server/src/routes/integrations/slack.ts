@@ -87,8 +87,9 @@ slackRouter.get('/authorization', async (req, res) => {
     if (close) {
       return res.send("<script>window.close();</script>");
     }
+    return res.redirect(`https://${org.subdomain}.mintlify.com`);
   }
-  return res.redirect(`https://${org.subdomain}.mintlify.com`);
+  return res.redirect('slack://open');
 });
 
 export default slackRouter;
