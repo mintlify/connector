@@ -10,6 +10,7 @@ import mongoose from 'mongoose';
 import Org from '../models/Org';
 import { track } from '../services/segment';
 import { getNotionPageDataWithId } from '../services/notion';
+import { getGoogleDocsPrivateData } from '../services/googleDocs';
 
 const scanRouter = express.Router();
 
@@ -36,9 +37,18 @@ const extractFromDoc = async (doc: DocType, orgId: string): Promise<ContentData>
     const org = await Org.findById(orgId);
     const notionAccessToken = org?.integrations?.notion?.access_token;
     if (notionAccessToken == null) {
-      throw 'Unable to get organization by ID'
+      throw 'Unable to get organization by ID for Notion'
     }
     return getNotionPageDataWithId(doc.notion.pageId, notionAccessToken);
+  }
+
+  else if (doc.method === 'googledocs-private' && doc.googledocs?.id) {
+    const org = await Org.findById(orgId);
+    const googleCredentials = org?.integrations?.google;
+    if (googleCredentials == null) {
+      throw 'Unable to get organization by ID for Google Docs'
+    }
+    return getGoogleDocsPrivateData(doc.googledocs.id, googleCredentials);
   }
 
   return getDataFromWebpage(doc.url, orgId, WAIT_FOR_WEB_SCRAPE);

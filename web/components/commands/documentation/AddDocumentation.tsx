@@ -7,7 +7,7 @@ import { Org, User } from '../../../pages'
 import DocumentationConfig from './DocumentationConfig'
 
 // export type AddDocumentationType = 'webpage' | 'notion' | 'confluence' | 'googledocs';
-export type AddDocumentationType = 'webpage' | 'notion'
+export type AddDocumentationType = 'webpage' | 'notion' | 'googledocs';
 
 type AddDocumentationSelection = {
   type: AddDocumentationType
@@ -31,11 +31,11 @@ export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationS
   //   title: 'Confluence',
   //   description: 'Add Confluence documents',
   // },
-  // googledocs: {
-  //   type: 'googledocs',
-  //   title: 'Google Docs',
-  //   description: 'Add Google Docs documents',
-  // },
+  googledocs: {
+    type: 'googledocs',
+    title: 'Google Docs',
+    description: 'Add Google Docs documents',
+  },
 }
 
 type AddDocumentationProps = {
