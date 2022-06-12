@@ -27,11 +27,11 @@ export type Code = {
   endLine?: number;
 };
 
-export type State = {
+type State = {
   user?: any,
   dashboardUrl: string;
   selectedDoc: Doc;
-  codes: Code[];
+  code?: Code;
   API_ENDPOINT: string;
   docs: Doc[];
 };
@@ -46,7 +46,6 @@ const initialDoc: Doc = {
 const initialStateData: State = {
   docs: [initialDoc],
   selectedDoc: initialDoc,
-  codes: [],
   dashboardUrl: '',
   API_ENDPOINT: 'https://connect.mintlify.com/routes'
 };
@@ -104,11 +103,11 @@ const App = () => {
       subdomain: getSubdomain(state.dashboardUrl),
       docId: state.selectedDoc._id,
       title: state.selectedDoc.title,
-      org: state.codes[0].org,
-      codes: state.codes,
+      org: state.code.org,
+      code: state.code,
     };
     vscode.postMessage({ command: 'link-submit', args });
-    updateState({...state, codes: [] });
+    updateState({...state, code: undefined });
   };
 
   window.addEventListener('message', event => {
@@ -135,13 +134,13 @@ const App = () => {
             const { data: { docs } } = res;
             const selectedDoc = docs.find(doc => doc._id === docId);
             if (selectedDoc) {
-              updateState({...state, docs, selectedDoc, codes: []});
+              updateState({...state, docs, selectedDoc, code: undefined});
             }
           });
         break;
       case 'post-code':
         const code = message.args;
-        updateState({...state, codes: [code]});
+        updateState({...state, code: code});
         break;
       case 'logout':
         onLogout();
@@ -150,7 +149,7 @@ const App = () => {
   });
 
   const deleteCode = () => {
-    updateState({...state, codes: []});
+    updateState({...state, code: undefined});
   };
 
   const updateSelectedDoc = (doc: Doc) => {
@@ -176,12 +175,12 @@ const App = () => {
     );
   };
 
-  const CodesContent = (props: { codes: Code[] }) => {
-    return (props.codes == null || props.codes?.length === 0) ? (
+  const CodesContent = ({ code }: { code: Code }) => {
+    return (code == null) ? (
       <div className='italic'>No code selected</div>
     ) : (
       <div>
-        {props.codes?.map((code: Code) => <CodeContent code={code} key={code.sha} />)}
+        <CodeContent code={code} key={code.sha} />
       </div>
     );
   };
@@ -317,7 +316,7 @@ const App = () => {
             </ReactTooltip>
           </div>
           <div className='code'>
-            <CodesContent codes={state.codes} />
+            <CodesContent code={state.code} />
           </div>
           <button
             type="submit"
