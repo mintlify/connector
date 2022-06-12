@@ -39,5 +39,9 @@ export const getNotionPageDataWithId = async (pageId: string, notionAccessToken:
 }
 
 export const getNotionTitle = (page: any): string => {
-  return page.properties?.title?.title[0]?.plain_text || page.properties.Name?.title[0]?.plain_text || page.properties.Parameter.title[0]?.plain_text || ''
+  try {
+    return page.properties?.title?.title[0]?.plain_text || page.properties.Name?.title[0]?.plain_text || page.properties.Parameter.title[0]?.plain_text || ''
+  } catch {
+    return '';
+  }
 }
