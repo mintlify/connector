@@ -116,35 +116,39 @@ notionRouter.post('/sync', userMiddleware, async (_, res) => {
     return res.send({ error: 'No access to Notion' });
   }
 
-  const notion = new Client({ auth: notionAccessToken });
-  const searchResults = await notion.search({
-    page_size: 100,
-    filter: {
-      property: 'object',
-      value: 'page',
-    },
-    sort: {
-      direction: 'descending',
-      timestamp: 'last_edited_time',
-    },
-  });
-
-  const existingDocs = await Doc.find({ org: orgId });
-  const results: NotionPage[] = searchResults.results
-    .map((page: any) => {
-      return {
-        id: page.id,
-        title: getNotionTitle(page),
-        lastEditedTime: page.last_edited_time,
-        icon: page.icon,
-        url: page.url,
-      };
-    })
-    .filter((page) => {
-      return !existingDocs.some((doc) => doc.notion?.pageId === page.id);
+  try {
+    const notion = new Client({ auth: notionAccessToken });
+    const searchResults = await notion.search({
+      page_size: 100,
+      filter: {
+        property: 'object',
+        value: 'page',
+      },
+      sort: {
+        direction: 'descending',
+        timestamp: 'last_edited_time',
+      },
     });
 
-  return res.send({ results });
+    const existingDocs = await Doc.find({ org: orgId });
+    const results: NotionPage[] = searchResults.results
+      .map((page: any) => {
+        return {
+          id: page.id,
+          title: getNotionTitle(page),
+          lastEditedTime: page.last_edited_time,
+          icon: page.icon,
+          url: page.url,
+        };
+      })
+      .filter((page) => {
+        return !existingDocs.some((doc) => doc.notion?.pageId === page.id);
+      });
+
+    return res.send({ results });
+  } catch {
+    res.status(401).send({error: 'Unable to access notion'});
+  }
 });
 
 export default notionRouter;
