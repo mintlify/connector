@@ -61,7 +61,8 @@ slackRouter.get('/authorization', async (req, res) => {
   if (error) return res.status(403).send('Invalid grant code');
   if (state == null) return res.status(403).send('No state provided');
   if (response.data.ok) {
-    const { org: orgId, close } = JSON.parse(decodeURIComponent(state as string));
+    const parsedState = JSON.parse(decodeURIComponent(state as string));
+    const { org: orgId } = JSON.parse(decodeURIComponent(state as string));
 
     const { data } = response;
     const webhookData = data?.incoming_webhook;
@@ -84,7 +85,7 @@ slackRouter.get('/authorization', async (req, res) => {
       isOrg: true,
     });
 
-    if (close) {
+    if (parsedState?.close) {
       return res.send("<script>window.close();</script>");
     }
     return res.redirect(`https://${org.subdomain}.mintlify.com`);

@@ -74,8 +74,8 @@ notionRouter.get('/authorization', async (req, res) => {
   const { response, error } = await getNotionAccessTokenFromCode(code as string);
   if (error) return res.status(403).send('Invalid grant code');
   if (state == null) return res.status(403).send('No state provided');
-
-  const { org: orgId, close } = JSON.parse(decodeURIComponent(state as string));
+  const parsedState = JSON.parse(decodeURIComponent(state as string));
+  const { org: orgId} = parsedState;
   const org = await Org.findByIdAndUpdate(orgId, { 'integrations.notion': { ...response } });
 
   if (org == null) {
@@ -89,7 +89,7 @@ notionRouter.get('/authorization', async (req, res) => {
   track(org._id.toString(), 'Install Notion Integration', {
     isOrg: true,
   });
-  if (close) {
+  if (parsedState?.close) {
     return res.send("<script>window.close();</script>");
   }
   return res.redirect(`https://${org.subdomain}.mintlify.com`);

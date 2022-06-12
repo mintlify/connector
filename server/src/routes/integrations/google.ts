@@ -51,7 +51,9 @@ googleRouter.get('/authorization', async (req, res) => {
   oAuth2Client.setCredentials(tokens);
 
   if (state == null) return res.status(403).send('No state provided');
-  const { org: orgId, close } = JSON.parse(decodeURIComponent(state as string));
+  const parsedState = JSON.parse(decodeURIComponent(state as string));
+
+  const { org: orgId } = parsedState;
   const org = await Org.findByIdAndUpdate(orgId, {
     'integrations.google': tokens,
   });
@@ -59,7 +61,7 @@ googleRouter.get('/authorization', async (req, res) => {
   if (org == null) {
     return res.status(403).send({ error: 'Invalid organization ID' });
   }
-  if (close) {
+  if (parsedState?.close) {
     return res.send("<script>window.close();</script>");
   }
   return res.redirect(`https://${org.subdomain}.mintlify.com`);
