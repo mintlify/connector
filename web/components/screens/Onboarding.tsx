@@ -1,8 +1,7 @@
 import { Combobox } from "@headlessui/react";
-import { ChevronRightIcon } from "@heroicons/react/solid";
+import { CheckCircleIcon,  ChevronRightIcon } from "@heroicons/react/solid";
 import axios from "axios";
 import Head from "next/head";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { API_ENDPOINT } from "../../helpers/api";
@@ -414,7 +413,7 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
       </div>
       {
         docs.length > 0 && <div>
-        <h1 className="text-lg">Documents added</h1>
+        <h1 className="text-lg text-gray-600">Documents added</h1>
         <ul className="mt-2 bg-white rounded-md p-3 shadow-md">
           { isAddDocLoading && <LoadingItem /> }
           {docs.map((doc) => (
@@ -509,8 +508,8 @@ function IntegrateStep({ user, org, onBack, onNext, appsUsing, step, totalSteps 
     popupCenter({url, title: 'Connect with integration', w: 520, h: 570})
   }
 
-  const remainingIntegrations = integrations.filter(({ type }) => appsUsing.includes(type) && !installedIntegrations[type]);
-  const isCompleted = remainingIntegrations.length === 0;
+  const requiredIntegrations = integrations.filter(({ type }) => appsUsing.includes(type));
+  const isAllIntegrationsInstalled = requiredIntegrations.every(({ type }) => installedIntegrations[type]);
 
   return <>
     <h1 className="text-3xl font-semibold">
@@ -530,7 +529,7 @@ function IntegrateStep({ user, org, onBack, onNext, appsUsing, step, totalSteps 
           {
             !isLoading && <Combobox onChange={() => {}} value="">
           <Combobox.Options static className="scroll-py-3 overflow-y-auto">
-            {remainingIntegrations.map((integration) => (
+            {requiredIntegrations.map((integration) => (
                 <Combobox.Option
                   value={integration}
                   key={integration.type}
@@ -543,34 +542,41 @@ function IntegrateStep({ user, org, onBack, onNext, appsUsing, step, totalSteps 
                     <>
                       <img className="h-5 w-5" src={integration.iconSrc} alt={integration.title} />
                       <div className="ml-4 flex-auto">
-                        <p
-                          className={classNames(
-                            'text-sm font-medium',
-                            active ? 'text-gray-900' : 'text-gray-700'
-                          )}
-                        >
-                          {integration.title}
-                        </p>
+                        <div className="flex items-center gap-x-1">
+                          <p
+                            className={classNames(
+                              'text-sm font-medium',
+                              active ? 'text-gray-900' : 'text-gray-700'
+                            )}
+                          >
+                            {integration.title}
+                          </p>
+                          {
+                            installedIntegrations[integration.type] && <CheckCircleIcon className="w-4 h-4 text-green-600" />
+                          }
+                        </div>
                         <p className={classNames('text-sm', active ? 'text-gray-700' : 'text-gray-500')}>
                           {integration.description}
                         </p>
                       </div>
-                      <ChevronRightIcon
+                      {
+                        !installedIntegrations[integration.type] && <ChevronRightIcon
                         className="h-5 w-5 text-gray-400 group-hover:text-gray-700"
                         aria-hidden="true"
                       />
+                      }
                     </>
                   )}
                 </Combobox.Option>
             ))}
-            {remainingIntegrations.length === 0 && <div className="text-gray-600 text-center">All required integrations have been installed 🎉</div>}
+            {isAllIntegrationsInstalled && <div className="text-gray-600 text-center">All required integrations have been installed 🎉</div>}
           </Combobox.Options>
       </Combobox>
         }
         </div>
       </div>
       </div>
-    <NavButtons onBack={onBack} onNext={onNext} isCompleted={isCompleted} onSkip={onNext} />
+    <NavButtons onBack={onBack} onNext={onNext} isCompleted={isAllIntegrationsInstalled} onSkip={onNext} />
   </>;
 }
 
