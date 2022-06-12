@@ -146,7 +146,8 @@ notionRouter.post('/sync', userMiddleware, async (_, res) => {
       });
 
     return res.send({ results });
-  } catch {
+  } catch (error) {
+    console.log(error);
     return res.status(401).send({error: 'Unable to access notion'});
   }
 });
