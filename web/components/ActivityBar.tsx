@@ -51,7 +51,7 @@ function DocProfile({ doc, user }: DocProfileProps) {
       <DocTitleIcon doc={doc} />
       <div className="flex-1">
         <h1 className="text-sm font-medium">{doc.title}</h1>
-        <h2 className="mt-px text-sm text-gray-500">Added {timeAgo.format(Date.parse(doc.createdAt))}</h2>
+        <h2 className="mt-px text-sm text-gray-500">Last Updated {timeAgo.format(Date.parse(doc.lastUpdatedAt))}</h2>
         <div className="my-2 space-y-2 w-full sm:w-3/4">
           <div className="space-y-1">
             {

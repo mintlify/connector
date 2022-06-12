@@ -24,19 +24,19 @@ const DocSchema = new Schema({
     org: { type: Schema.Types.ObjectId, required: true },
     url: { type: String, required: true },
     method: { type: String, required: true },
-    content: { type: String },
-    title: { type: String },
-    favicon: { type: String },
+    content: String,
+    title: String,
+    favicon: String,
     lastUpdatedAt: { type: Date, default: Date.now },
     createdAt: { type: Date, default: Date.now },
     createdBy: { type: Schema.Types.ObjectId },
-    changeConfirmationCount: { type: Number },
+    changeConfirmationCount: Number,
     isJustAdded: { type: Boolean, default: true },
     notion: {
-        pageId: { type: String, }
+        pageId: String,
     },
-    slack: { type: Boolean },
-    email: { type: Boolean }
+    slack: Boolean,
+    email: Boolean
 });
 
 const Doc = mongoose.model<DocType>('Doc', DocSchema, 'docs');

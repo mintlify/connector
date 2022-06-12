@@ -34,7 +34,7 @@ export type Doc = {
   favicon?: string,
   method: string,
   slack?: boolean,
-  email?: boolean 
+  email?: boolean
 }
 
 export type UserSession = {
