@@ -193,7 +193,7 @@ export default function AddGoogleDocs({ user, org, onCancel, setIsAddDocumentati
             )}
             onClick={onSubmit}
           >
-            Import ({selectedDocs.length}) Notion Pages
+            Import ({selectedDocs.length}) Google Docs
           </button>
         </div>
       </div>
