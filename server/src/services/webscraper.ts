@@ -104,6 +104,9 @@ export const extractDataFromHTML = async (url: string, html: string): Promise<Co
   } else if (favicon?.startsWith('/')) {
     const urlParsed = new URL(url);
     favicon = `${urlParsed.origin}${favicon}`;
+  } else if (favicon && !/^https?:\/\//i.test(favicon)) {
+    const urlParsed = new URL(url);
+    favicon = `${urlParsed.origin}/${favicon}`;
   }
   if (!favicon) {
     try {
