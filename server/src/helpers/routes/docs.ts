@@ -102,8 +102,8 @@ export const createDocsFromGoogleDocs = async (docs: GoogleDoc[], orgId: Types.O
           org: orgId,
           url: `https://docs.google.com/document/d/${googleDoc.id}`,
           method: 'googledocs-private',
-          notion: {
-            pageId: googleDoc.id,
+          googledocs: {
+            id: googleDoc.id,
           },
           content: '', // to be scraped
           title: googleDoc.name,

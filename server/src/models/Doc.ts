@@ -16,6 +16,10 @@ export type DocType = {
     notion?: {
         pageId: string;
     };
+    // used for method = googledocs-private
+    googledocs?: {
+        id: string;
+    };
     slack?: boolean;
     email?: boolean;
 };
@@ -34,6 +38,9 @@ const DocSchema = new Schema({
     isJustAdded: { type: Boolean, default: true },
     notion: {
         pageId: String,
+    },
+    googledocs: {
+        id: String,
     },
     slack: Boolean,
     email: Boolean

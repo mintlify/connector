@@ -1,4 +1,5 @@
 import mongoose, { Schema, Types } from 'mongoose';
+import { GoogleDocsCredentials } from '../services/googleDocs';
 
 export type OrgType = {
   _id: Types.ObjectId;
@@ -29,14 +30,7 @@ export type OrgType = {
     github?: {
       installations: Object[];
     };
-    google?: {
-      refresh_token?: string | null;
-      expiry_date?: number | null;
-      access_token?: string | null;
-      token_type?: string | null;
-      id_token?: string | null;
-      scope?: string;
-    };
+    google?: GoogleDocsCredentials;
   };
   users: string[];
   invitedEmails?: string[];
