@@ -27,7 +27,7 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
         $match: matchQuery,
       },
       {
-        $sort: { lastUpdatedAt: -1 },
+        $sort: { createdAt: -1 },
       },
       {
         $lookup: {

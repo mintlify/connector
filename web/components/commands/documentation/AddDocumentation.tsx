@@ -84,8 +84,6 @@ export default function AddDocumentation({ user, org, isOpen, setIsOpen, setIsAd
         >
           <div className="fixed inset-0 bg-gray-500 bg-opacity-25 transition-opacity" />
         </Transition.Child>
-
-        <div className="fixed inset-0 overflow-y-auto p-4 sm:p-6 md:p-20">
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -96,7 +94,8 @@ export default function AddDocumentation({ user, org, isOpen, setIsOpen, setIsAd
             leaveTo="opacity-0 scale-95"
             afterLeave={onToPrimarySelection}
           >
-            <Dialog.Panel className="mx-auto max-w-xl transform divide-y divide-gray-100 rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
+            <Dialog.Panel className="fixed inset-0 my-4 sm:my-6 md:my-20 mx-auto max-w-xl transform divide-y divide-gray-100 rounded-xl transition-all overflow-auto">
+              <div className="bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5">
               <DocumentationConfig
                 user={user}
                 org={org}
@@ -107,7 +106,7 @@ export default function AddDocumentation({ user, org, isOpen, setIsOpen, setIsAd
               />
               {selectedRuleType == null && (
                 <Combobox onChange={() => {}} value="">
-                  <Combobox.Options static className="max-h-96 scroll-py-3 overflow-y-auto p-3">
+                  <Combobox.Options static className="max-h-96 scroll-py-3 p-3">
                     {Object.values(addDocumentationMap).map((item) => (
                       <Combobox.Option
                         key={item.type}
@@ -139,9 +138,9 @@ export default function AddDocumentation({ user, org, isOpen, setIsOpen, setIsAd
                   </Combobox.Options>
                 </Combobox>
               )}
+              </div>
             </Dialog.Panel>
           </Transition.Child>
-        </div>
       </Dialog>
     </Transition.Root>
   )
