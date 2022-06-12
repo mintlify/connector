@@ -16,6 +16,8 @@ import DocItem from "../DocItem";
 import LoadingItem from "../LoadingItem";
 import ProfilePicture from "../ProfilePicture";
 
+const onboardStepLocalStateKey = 'onboarding-step';
+
 type Option = {
   id: string,
   title: string,
@@ -125,7 +127,7 @@ export default function Onboarding({ user, org }: OnboardingProps) {
   const [appsUsing, setAppsUsing] = useState<string[]>(buildAppsUsing(user, org));
 
   useEffect(() => {
-    const step = window.localStorage.getItem('onboarding-step');
+    const step = window.localStorage.getItem(onboardStepLocalStateKey);
 
     if (step) {
       setStep(parseInt(step));
@@ -137,7 +139,7 @@ export default function Onboarding({ user, org }: OnboardingProps) {
       return;
     }
 
-    window.localStorage.setItem('onboarding-step', (step - 1).toString());
+    window.localStorage.setItem(onboardStepLocalStateKey, (step - 1).toString());
     setStep(step - 1);
   }
 
@@ -146,7 +148,7 @@ export default function Onboarding({ user, org }: OnboardingProps) {
       return;
     }
 
-    window.localStorage.setItem('onboarding-step', (step + 1).toString());
+    window.localStorage.setItem(onboardStepLocalStateKey, (step + 1).toString());
     setStep(step + 1);
   }
 
@@ -594,6 +596,8 @@ function InviteStep({ user, onBack, step, totalSteps }: { user: User, onBack: ()
       }
     });
     await updateSession();
+    // Remove onboarding saved step
+    window.localStorage.removeItem(onboardStepLocalStateKey);
     router.push('/');
   }
 
