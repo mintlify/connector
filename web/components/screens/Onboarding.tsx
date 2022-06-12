@@ -436,10 +436,21 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
   </>;
 }
 
+type Integration = {
+  type: string,
+  title: string,
+  description: string,
+  iconSrc: string,
+  installUrl: string,
+  useRouter?: boolean,
+}
+
 function IntegrateStep({ user, org, onBack, onNext, appsUsing, step, totalSteps }: { user: User, org: Org, onBack: () => void, onNext: () => void, appsUsing: string[], step: number, totalSteps: number }) {
   const [isLoading, setIsLoading] = useState(false);
   const [installedIntegrations, setInstalledIntegrations] = useState<Record<string, boolean>>({});
-  const integrations = [
+  const router = useRouter();
+
+  const integrations: Integration[] = [
     {
       type: 'slack',
       title: 'Slack',
@@ -459,7 +470,8 @@ function IntegrateStep({ user, org, onBack, onNext, appsUsing, step, totalSteps 
       title: 'VS Code',
       description: 'Connect code to documentation',
       iconSrc: '/assets/integrations/vscode.svg',
-      installUrl: 'vscode:extension/mintlify.connector',
+      installUrl: '/api/login/vscode',
+      useRouter: true,
     }
   ];
 
@@ -480,7 +492,10 @@ function IntegrateStep({ user, org, onBack, onNext, appsUsing, step, totalSteps 
     return () => clearInterval(statusInterval);
   }, [user, org._id])
 
-  const onInstallIntegration = (url: string) => {
+  const onInstallIntegration = (integration: Integration) => { 
+    if (integration.useRouter) {
+      return router.push(integration.installUrl);
+    }
     const popupCenter = ({url, title, w, h}: { url: string, title: string, w: number, h: number }) => {
       // Fixes dual-screen position                             Most browsers      Firefox
       const dualScreenLeft = window.screenLeft !==  undefined ? window.screenLeft : window.screenX;
@@ -505,7 +520,7 @@ function IntegrateStep({ user, org, onBack, onNext, appsUsing, step, totalSteps 
       newWindow?.focus();
     }
 
-    popupCenter({url, title: 'Connect with integration', w: 520, h: 570})
+    popupCenter({url: integration.installUrl, title: 'Connect with integration', w: 520, h: 570})
   }
 
   const requiredIntegrations = integrations.filter(({ type }) => appsUsing.includes(type));
@@ -536,7 +551,7 @@ function IntegrateStep({ user, org, onBack, onNext, appsUsing, step, totalSteps 
                   className={({ active }) =>
                     classNames('flex items-center cursor-default select-none rounded-xl p-3 hover:cursor-pointer', active ? 'bg-gray-50' : '')
                   }
-                  onClick={() => onInstallIntegration(integration.installUrl)}
+                  onClick={() => onInstallIntegration(integration)}
                 >
                   {({ active }) => (
                     <>
