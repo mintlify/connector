@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import ReactTooltip from 'react-tooltip';
 import { CheckIcon, LockClosedIcon, SelectorIcon } from '@heroicons/react/solid';
 import { vscode } from '../common/message';
-import { InfoCircleIcon, CodeSymbolIcon, XIcon } from '../common/svgs';
+import { InfoCircleIcon, CodeSymbolIcon, CodeFileIcon } from '../common/svgs';
 
 export type Doc = {
   _id: string;
@@ -152,14 +152,21 @@ const App = () => {
     updateState({...state, selectedDoc: doc});
   };
 
-  const CodeContent = (props: { code: Code }) => {
+  const CodeContent = ({ code }: { code: Code }) => {
+    let lineRange = code.line ? `:${code.line}` : '';
+    if (code.endLine && code.endLine !== code.line) {
+      lineRange += `-${code.endLine}`;
+    }
+    const title = `${code.file}${lineRange}`;
     return (
       <div className='flex flex-row justify-between'>
         <div className='flex flex-row truncate'>
           <div className='mr-1 flex flex-col justify-center'>
-            <CodeSymbolIcon />
+            {
+              lineRange ? <CodeSymbolIcon /> : <CodeFileIcon />
+            }
           </div>
-          {props.code.file}
+          {title}
         </div>
       </div>
     );
