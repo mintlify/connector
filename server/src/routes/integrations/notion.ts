@@ -142,7 +142,7 @@ notionRouter.post('/sync', userMiddleware, async (_, res) => {
         };
       })
       .filter((page) => {
-        return !existingDocs.some((doc) => doc.notion?.pageId === page.id);
+        return page.title && !existingDocs.some((doc) => doc.notion?.pageId === page.id);
       });
 
     return res.send({ results });
