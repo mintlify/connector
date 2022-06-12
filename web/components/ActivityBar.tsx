@@ -1,7 +1,6 @@
 import { XCircleIcon } from '@heroicons/react/solid';
 import axios from 'axios';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { API_ENDPOINT } from '../helpers/api';
 import { ConnectionIcon, DocTitleIcon } from '../helpers/Icons';
@@ -19,7 +18,6 @@ type DocProfileProps = {
 function DocProfile({ doc, user }: DocProfileProps) {
   const [codes, setCodes] = useState(doc.code);
   const [isVSCodeInstalled, setIsVSCodeInstalled] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     setCodes(doc.code);
@@ -48,7 +46,7 @@ function DocProfile({ doc, user }: DocProfileProps) {
 
   return <div className="pt-6">
     <div className="flex space-x-3">
-      <DocTitleIcon doc={doc} />
+      <DocTitleIcon method={doc.method} favicon={doc.favicon} />
       <div className="flex-1">
         <h1 className="text-sm font-medium">{doc.title}</h1>
         <h2 className="mt-px text-sm text-gray-500">Last Updated {timeAgo.format(Date.parse(doc.lastUpdatedAt))}</h2>

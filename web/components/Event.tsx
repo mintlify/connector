@@ -65,7 +65,7 @@ export default function EventItem({ event }: { event: Event }) {
   return (
     <li className="py-4">
       <div className="flex space-x-3">
-        <DocTitleIcon doc={event.doc} />
+        <DocTitleIcon method={event.doc.method} favicon={event.doc.favicon} />
         <div className="flex-1 space-y-1">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium">{event.doc.title}</h3>

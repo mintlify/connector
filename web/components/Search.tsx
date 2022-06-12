@@ -5,7 +5,8 @@ import { DocumentTextIcon, ExclamationIcon } from '@heroicons/react/outline'
 import { classNames } from '../helpers/functions'
 import axios from 'axios'
 import { API_ENDPOINT } from '../helpers/api'
-import { Org, User } from '../pages'
+import { Doc, Org, User } from '../pages'
+import { DocTitleIcon } from '../helpers/Icons'
 
 type DocResult = {
   objectID: string,
@@ -14,6 +15,7 @@ type DocResult = {
   url: string,
   org: string,
   favicon?: string,
+  method: string,
   _highlightResult: {
     name: { value: string },
     content: { value: string },
@@ -140,14 +142,7 @@ export default function Search({ user, org, isOpen, setIsOpen }: SearchProps) {
                                   active ? 'bg-primary text-white' : ''
                                 )}>
                                   <div className="flex items-center">
-                                {
-                                  docResult.favicon
-                                    ? <img className="h-6 w-6 flex-none" src={docResult.favicon} alt="Logo" />
-                                    : <DocumentTextIcon
-                                        className={classNames('h-6 w-6 flex-none', active ? 'text-white' : 'text-gray-400')}
-                                        aria-hidden="true"
-                                      />
-                                  }
+                                  <DocTitleIcon method={docResult.method} favicon={docResult.favicon} />
                                   <span className="ml-2 flex-auto truncate" dangerouslySetInnerHTML={{ __html: docResult._highlightResult.name.value }}></span>
                                   </div>
                                   {

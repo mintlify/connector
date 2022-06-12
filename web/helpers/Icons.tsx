@@ -93,18 +93,18 @@ export const ConnectionIcon = ({ outerSize = 10, innerSize = 6 }: { outerSize?: 
   )
 }
 
-export const DocTitleIcon = ({ doc }: { doc: Doc }) => {
-  if (doc.method === 'notion-private') {
+export const DocTitleIcon = ({ favicon, method }: { favicon?: string, method: string }) => {
+  if (method === 'notion-private') {
     return <img src="/assets/integrations/notion.svg" alt="favicon" className="h-5 w-5 rounded-sm" />;
   }
 
-  if (doc.method === 'googledocs-private') {
+  if (method === 'googledocs-private') {
     return <img src="/assets/integrations/google-docs.svg" alt="favicon" className="h-5 w-5 rounded-sm" />;
   }
 
-  if (doc.favicon == null) {
+  if (favicon == null) {
     return <DocumentTextIcon className="h-5 w-5 text-gray-600" />;
   }
 
-  return <img src={doc.favicon} alt="favicon" className="h-5 w-5 aspect-square rounded-sm" />
+  return <img src={favicon} alt="favicon" className="h-5 w-5 aspect-square rounded-sm" />
 }
