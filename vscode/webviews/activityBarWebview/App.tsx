@@ -89,6 +89,44 @@ const App = () => {
         const { data: { docs } } = res;
         updateState({...state, docs});
       });
+
+      window.addEventListener('message', event => {
+        const message = event.data;
+        switch (message.command) {
+          case 'start':
+            const API_ENDPOINT = message.args;
+            updateState({...state, API_ENDPOINT});
+            break;
+          case 'auth':
+            const user = message.args;
+            const dashboardUrl = formatSignInUrl(signInUrl);
+            updateState({...initialState, user, dashboardUrl});
+            break;
+          case 'prefill-doc':
+            const docId = message.args;
+            axios.get(`${state.API_ENDPOINT}/docs`, {
+              params: {
+                userId: state.user.userId,
+                subdomain: getSubdomain(state.dashboardUrl)
+              }
+            })
+              .then((res) => {
+                const { data: { docs } } = res;
+                const selectedDoc = docs.find(doc => doc._id === docId);
+                if (selectedDoc) {
+                  updateState({...state, docs, selectedDoc, code: undefined});
+                }
+              });
+            break;
+          case 'post-code':
+            const code = message.args;
+            updateState({...state, code: code});
+            break;
+          case 'logout':
+            onLogout();
+            break;
+        }
+      });
   }, []);
 
   const updateState = (state: State) => {
@@ -110,48 +148,6 @@ const App = () => {
     updateState({...state, code: undefined });
   };
 
-  window.addEventListener('message', event => {
-    const message = event.data;
-    switch (message.command) {
-      case 'start':
-        const API_ENDPOINT = message.args;
-        updateState({...state, API_ENDPOINT});
-        break;
-      case 'auth':
-        const user = message.args;
-        const dashboardUrl = formatSignInUrl(signInUrl);
-        updateState({...initialState, user, dashboardUrl});
-        break;
-      case 'prefill-doc':
-        const docId = message.args;
-        axios.get(`${state.API_ENDPOINT}/docs`, {
-          params: {
-            userId: state.user.userId,
-            subdomain: getSubdomain(state.dashboardUrl)
-          }
-        })
-          .then((res) => {
-            const { data: { docs } } = res;
-            const selectedDoc = docs.find(doc => doc._id === docId);
-            if (selectedDoc) {
-              updateState({...state, docs, selectedDoc, code: undefined});
-            }
-          });
-        break;
-      case 'post-code':
-        const code = message.args;
-        updateState({...state, code: code});
-        break;
-      case 'logout':
-        onLogout();
-        break;
-    }
-  });
-
-  const deleteCode = () => {
-    updateState({...state, code: undefined});
-  };
-
   const updateSelectedDoc = (doc: Doc) => {
     updateState({...state, selectedDoc: doc});
   };
@@ -159,17 +155,11 @@ const App = () => {
   const CodeContent = (props: { code: Code }) => {
     return (
       <div className='flex flex-row justify-between'>
-        <div className='flex flex-row'>
+        <div className='flex flex-row truncate'>
           <div className='mr-1 flex flex-col justify-center'>
             <CodeSymbolIcon />
           </div>
           {props.code.file}
-        </div>
-        <div
-          className='flex flex-col justify-center cursor-pointer'
-          onClick={deleteCode}
-        >
-          <XIcon />
         </div>
       </div>
     );
