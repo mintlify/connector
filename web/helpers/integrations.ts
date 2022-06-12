@@ -12,28 +12,28 @@ export type Integration = {
 
 export const getIntegrations = (orgId: string): Integration[] => {
     return [
-        {
+      {
         type: 'slack',
         title: 'Slack',
         description: 'Connect with your workspace',
         iconSrc: '/assets/integrations/slack.svg',
-        installUrl: `${API_ENDPOINT}/routes/integrations/slack/install?org=${orgId}`,
-        },
-        {
+        installUrl: `${API_ENDPOINT}/routes/integrations/slack/install?org=${orgId}&close=true`,
+      },
+      {
         type: 'github',
         title: 'GitHub',
         description: 'Enable documentation review',
         iconSrc: '/assets/integrations/github.svg',
-        installUrl: `${API_ENDPOINT}/routes/integrations/github/install?org=${orgId}`,
-        },
-        {
+        installUrl: `${API_ENDPOINT}/routes/integrations/github/install?org=${orgId}&close=true`,
+      },
+      {
         type: 'vscode',
         title: 'VS Code',
         description: 'Connect code to documentation',
         iconSrc: '/assets/integrations/vscode.svg',
         installUrl: '/api/login/vscode',
         useRouter: true,
-        }
+      }
   ];
 }
 

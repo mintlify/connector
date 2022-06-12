@@ -69,12 +69,12 @@ const githubRouter = Router();
 
 githubRouter.get('/install', (req, res) => {
   try {
-    const { org } = req.query;
+    const { org, close } = req.query;
     if (!org) {
       return res.send('Organization ID is required');
     }
   
-    const state = { org }
+    const state = { org, close }
     const encodedState = encodeURIComponent(JSON.stringify(state));
     const installationURL = ISDEV ? 'https://github.com/apps/mintlify-dev/installations/new' : 'https://github.com/apps/mintlify/installations/new';
     const urlParsed = new URL(installationURL);
@@ -122,8 +122,11 @@ githubRouter.get('/authorization', async (req, res) => {
     track(org._id.toString(), 'Install GitHub App', {
       isOrg: true,
     });
-
-    return res.send("<script>window.close();</script>");
+    
+    if (parsedState?.close) {
+      return res.send("<script>window.close();</script>");
+    }
+    return res.redirect(`https://${org.subdomain}.mintlify.com`);
 
   } catch (error: any) {
     return res.status(500).send(error?.data);

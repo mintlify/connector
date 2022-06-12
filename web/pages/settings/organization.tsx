@@ -50,7 +50,7 @@ const getIntegrationSections = (orgId: string): IntegrationSection[] => {
           type: 'slack',
           title: 'Slack',
           iconSrc: '/assets/integrations/slack.svg',
-          installUrl: `${API_ENDPOINT}/routes/integrations/slack/install?org=${orgId}`
+          installUrl: `${API_ENDPOINT}/routes/integrations/slack/install?org=${orgId}&close=true`
         },
       ],
     },
@@ -62,13 +62,13 @@ const getIntegrationSections = (orgId: string): IntegrationSection[] => {
           type: 'google',
           title: 'Google Docs',
           iconSrc: '/assets/integrations/google-docs.svg',
-          installUrl: `${API_ENDPOINT}/routes/integrations/google/install?org=${orgId}`
+          installUrl: `${API_ENDPOINT}/routes/integrations/google/install?org=${orgId}&close=true`
         },
         {
           type: 'notion',
           title: 'Notion',
           iconSrc: '/assets/integrations/notion.svg',
-          installUrl: `${API_ENDPOINT}/routes/integrations/notion/install?org=${orgId}`
+          installUrl: `${API_ENDPOINT}/routes/integrations/notion/install?org=${orgId}&close=true`
         },
       ],
     },
@@ -80,7 +80,7 @@ const getIntegrationSections = (orgId: string): IntegrationSection[] => {
           type: 'github',
           title: 'GitHub',
           iconSrc: '/assets/integrations/github.svg',
-          installUrl: `${API_ENDPOINT}/routes/integrations/github/install?org=${orgId}`
+          installUrl: `${API_ENDPOINT}/routes/integrations/github/install?org=${orgId}&close=true`
         },
         {
           type: 'vscode',
