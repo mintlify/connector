@@ -209,7 +209,7 @@ const App = () => {
           className="text-sm"
           type="text"
           value={signInUrl}
-          onChange={(e) => setSignInUrl(e.target.value)}}
+          onChange={(e) => setSignInUrl(e.target.value)}
           placeholder="name.mintlify.com"
         />
         <button
