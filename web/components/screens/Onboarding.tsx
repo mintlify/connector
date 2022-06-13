@@ -607,9 +607,10 @@ function InviteStep({ user, onBack, step, totalSteps }: { user: User, onBack: ()
               placeholder="Email address"
               aria-describedby="add-team-members-helper"
               value={invitedEmail}
+              onKeyDown={e => e.key === 'Enter' && inviteMember(invitedEmail)}
               onChange={(e) => {
-                setInviteErrorMessage(undefined)
-                setInvitedEmail(e.target.value)
+                setInviteErrorMessage(undefined);
+                setInvitedEmail(e.target.value);
               }}
               required
             />
