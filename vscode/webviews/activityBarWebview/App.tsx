@@ -300,9 +300,7 @@ const App = () => {
               <div className='text-left'>
                 <div className='font-bold'>Code Snippets</div>
                 <p>
-                  1. Highlight code in the editor <br/>
-                  2. Right click <br/>
-                  3. Select “Link code to doc” <br/>
+                  Highlight code in the editor <br/>
                 </p>
                 <div className='font-bold mt-1'>Folder/File</div>
                 <p>
