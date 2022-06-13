@@ -89,6 +89,8 @@ notionRouter.get('/authorization', async (req, res) => {
   track(org._id.toString(), 'Install Notion Integration', {
     isOrg: true,
   });
+  console.log('notion parsedState?.close: ', parsedState?.close);
+
   if (parsedState?.close) {
     return res.send("<script>window.close();</script>");
   }

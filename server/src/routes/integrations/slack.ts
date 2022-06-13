@@ -85,6 +85,8 @@ slackRouter.get('/authorization', async (req, res) => {
       isOrg: true,
     });
 
+    console.log('slack parsedState?.close: ', parsedState?.close);
+
     if (parsedState?.close) {
       return res.send("<script>window.close();</script>");
     }

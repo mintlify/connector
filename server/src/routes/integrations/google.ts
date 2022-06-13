@@ -61,6 +61,9 @@ googleRouter.get('/authorization', async (req, res) => {
   if (org == null) {
     return res.status(403).send({ error: 'Invalid organization ID' });
   }
+  
+  console.log('google parsedState?.close: ', parsedState?.close);
+
   if (parsedState?.close) {
     return res.send("<script>window.close();</script>");
   }
