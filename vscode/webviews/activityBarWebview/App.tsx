@@ -31,6 +31,8 @@ type State = {
   user?: any,
   dashboardUrl: string;
   API_ENDPOINT: string;
+  selectedDoc?: Doc;
+  code?: Code;
 };
 
 const initialDoc: Doc = {
@@ -66,8 +68,8 @@ const App = () => {
   const [API_ENDPOINT, setAPI_ENDPOINT] = useState<string>(initialState.API_ENDPOINT);
   const [signInUrl, setSignInUrl] = useState<string>('');
   const [docs, setDocs] = useState<Doc[]>([initialDoc]);
-  const [selectedDoc, setSelectedDoc] = useState<Doc>(initialDoc);
-  const [code, setCode] = useState<Code>();
+  const [selectedDoc, setSelectedDoc] = useState<Doc>(initialState.selectedDoc || initialDoc);
+  const [code, setCode] = useState<Code>(initialState.code);
 
   useEffect(() => {
     window.addEventListener('message', event => {
@@ -107,6 +109,7 @@ const App = () => {
           break;
         case 'post-code':
           const code = message.args;
+          vscode.setState({ ...initialState, code });
           setCode(code);
           break;
         case 'logout':
@@ -148,6 +151,7 @@ const App = () => {
 
   const updateSelectedDoc = (doc: Doc) => {
     setSelectedDoc(doc);
+    vscode.setState({ ...initialState, selectedDoc: doc });
   };
 
   const CodeContent = ({ code }: { code: Code }) => {
