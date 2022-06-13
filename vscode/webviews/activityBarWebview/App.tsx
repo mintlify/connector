@@ -116,7 +116,6 @@ const App = () => {
     if (!state.user?.userId) {
       return;
     }
-
     axios.get(`${state.API_ENDPOINT}/docs`, {
       params: {
         userId: state.user.userId,
@@ -127,7 +126,7 @@ const App = () => {
         const { data: { docs } } = res;
         updateState({...state, docs});
       });
-  }, []);
+  }, [signInUrl]);
 
   const updateState = (state: State) => {
     setState(state);
@@ -210,7 +209,7 @@ const App = () => {
           className="text-sm"
           type="text"
           value={signInUrl}
-          onChange={(e) => setSignInUrl(e.target.value)}
+          onChange={(e) => setSignInUrl(e.target.value)}}
           placeholder="name.mintlify.com"
         />
         <button
