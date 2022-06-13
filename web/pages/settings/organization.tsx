@@ -157,18 +157,19 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
       .then((res) => {
         setMembers(res.data.users)
       })
-
-    axios
-      .get(`${API_ENDPOINT}/routes/org/${org._id}/integrations`, {
+    
+    const statusInterval = setInterval(() => {  
+      axios.get(`${API_ENDPOINT}/routes/org/${org._id}/integrations`, {
         params: {
           userId: user.userId,
-          subdomain: getSubdomain(window.location.host),
-        },
-      })
-      .then(({ data }) => {
-        const { integrations } = data
-        setIntegrationsStatus(integrations)
-      })
+          subdomain: getSubdomain(window.location.host)
+        }
+      }).then(({ data: { integrations } }) => {
+        setIntegrationsStatus(integrations);
+        })
+      }, 1000);
+      
+      return () => clearInterval(statusInterval);
   }, [user, org])
 
   if (user == null || org == null) {
