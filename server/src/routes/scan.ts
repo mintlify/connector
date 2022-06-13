@@ -84,7 +84,11 @@ export const scanDocsInOrg = async (orgId: string) => {
     return getDiffAndContent(doc, orgId);
   });
 
+  console.log('Successfully got the diffs and content');
+
   const diffsAndContentResults = await Promise.all(getDifferencePromises);
+
+  console.log('Got the results');
 
   const diffAlerts: DiffAlert[] = [];
   const sameContentDocs: DocType[] = [];
