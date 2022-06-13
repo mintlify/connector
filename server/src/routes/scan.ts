@@ -56,6 +56,7 @@ export const extractFromDoc = async (doc: DocType, orgId: string): Promise<Conte
 
 const getDiffAndContent = async (doc: DocType, orgId: string): Promise<DiffAndContent> => {
   const previousContent = doc.content || '';
+  console.log(doc);
   const { content, title, favicon, method } = await extractFromDoc(doc, orgId);
   return {
     diff: Diff.diffWords(previousContent, content),
