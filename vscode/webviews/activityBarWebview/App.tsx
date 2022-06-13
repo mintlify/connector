@@ -80,10 +80,10 @@ const App = () => {
           break;
         case 'auth':
           const user = message.args;
-          const dashboardUrl = formatSignInUrl(signInUrl);
-          vscode.setState({ ...initialState, user, dashboardUrl });
+          const newDashboardUrl = formatSignInUrl(signInUrl);
+          vscode.setState({ ...initialState, user, dashboardUrl: newDashboardUrl });
           setUser(user);
-          setDashboardUrl(dashboardUrl);
+          setDashboardUrl(newDashboardUrl);
           break;
         case 'prefill-doc':
           if (!user?.userId || !dashboardUrl) {
