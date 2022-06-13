@@ -522,7 +522,6 @@ function IntegrateStep({ user, org, onBack, onNext, appsUsing, step, totalSteps 
                   )}
                 </Combobox.Option>
             ))}
-            {isAllIntegrationsInstalled && <div className="text-gray-600 text-center">All required integrations have been installed 🎉</div>}
           </Combobox.Options>
       </Combobox>
         }
