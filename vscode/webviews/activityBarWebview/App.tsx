@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import ReactTooltip from 'react-tooltip';
 import { CheckIcon, LockClosedIcon, SelectorIcon } from '@heroicons/react/solid';
 import { vscode } from '../common/message';
-import { InfoCircleIcon, CodeSymbolIcon, XIcon } from '../common/svgs';
+import { InfoCircleIcon, CodeSymbolIcon, CodeFileIcon } from '../common/svgs';
 
 export type Doc = {
   _id: string;
@@ -27,13 +27,12 @@ export type Code = {
   endLine?: number;
 };
 
-export type State = {
+type State = {
   user?: any,
   dashboardUrl: string;
-  selectedDoc: Doc;
-  codes: Code[];
   API_ENDPOINT: string;
-  docs: Doc[];
+  selectedDoc?: Doc;
+  code?: Code;
 };
 
 const initialDoc: Doc = {
@@ -41,14 +40,6 @@ const initialDoc: Doc = {
   title: 'Select documentation',
   url: '',
   isDefault: true,
-};
-
-const initialStateData: State = {
-  docs: [initialDoc],
-  selectedDoc: initialDoc,
-  codes: [],
-  dashboardUrl: '',
-  API_ENDPOINT: 'https://connect.mintlify.com/routes'
 };
 
 const classNames = (...classes) => {
@@ -71,117 +62,124 @@ export const getSubdomain = (url: string) => {
 };
 
 const App = () => {
-  const initialState: State = vscode.getState() || initialStateData;
-  const [state, setState] = useState<State>(initialState);
+  const initialState: State = vscode.getState();
+  const [user, setUser] = useState<any>(initialState.user);
+  const [dashboardUrl, setDashboardUrl] = useState<string>(initialState.dashboardUrl);
+  const [API_ENDPOINT, setAPI_ENDPOINT] = useState<string>(initialState.API_ENDPOINT);
   const [signInUrl, setSignInUrl] = useState<string>('');
+  const [docs, setDocs] = useState<Doc[]>([initialDoc]);
+  const [selectedDoc, setSelectedDoc] = useState<Doc>(initialState.selectedDoc || initialDoc);
+  const [code, setCode] = useState<Code | undefined>(initialState.code);
 
   useEffect(() => {
-    if (!state.user?.userId) {
+    window.addEventListener('message', event => {
+      const message = event.data;
+      switch (message.command) {
+        case 'start':
+          const API_ENDPOINT = message.args;
+          vscode.setState({ ...initialState, API_ENDPOINT });
+          setAPI_ENDPOINT(API_ENDPOINT);
+          break;
+        case 'auth':
+          const user = message.args;
+          const newDashboardUrl = formatSignInUrl(signInUrl);
+          vscode.setState({ ...initialState, user, dashboardUrl: newDashboardUrl });
+          setUser(user);
+          setDashboardUrl(newDashboardUrl);
+          break;
+        case 'prefill-doc':
+          if (!user?.userId || !dashboardUrl) {
+            return;
+          }
+          const docId = message.args;
+          axios.get(`${API_ENDPOINT}/docs`, {
+            params: {
+              userId: user.userId,
+              subdomain: getSubdomain(dashboardUrl)
+            }
+          })
+            .then((res) => {
+              const { data: { docs: docsResult } } = res;
+              const selectedDoc = docs.find(doc => doc._id === docId);
+              if (selectedDoc) {
+                setSelectedDoc(selectedDoc);
+              }
+              setDocs(docsResult);
+            });
+          break;
+        case 'post-code':
+          const code = message.args;
+          vscode.setState({ ...initialState, code });
+          setCode(code);
+          break;
+        case 'logout':
+          onLogout();
+          break;
+      }
+    });
+  }, [signInUrl, user, dashboardUrl, API_ENDPOINT]);
+
+  useEffect(() => {
+    if (!user?.userId) {
       return;
     }
-
-    axios.get(`${state.API_ENDPOINT}/docs`, {
+    axios.get(`${API_ENDPOINT}/docs`, {
       params: {
-        userId: state.user.userId,
-        subdomain: getSubdomain(state.dashboardUrl)
+        userId: user.userId,
+        subdomain: getSubdomain(dashboardUrl)
       }
     })
       .then((res) => {
-        const { data: { docs } } = res;
-        updateState({...state, docs});
+        const { data: { docs: docsResult } } = res;
+        setDocs(docsResult);
       });
-  }, []);
-
-  const updateState = (state: State) => {
-    setState(state);
-    vscode.setState(state);
-  };
+  }, [user, dashboardUrl, API_ENDPOINT]);
 
   const handleSubmit = event => {
     event.preventDefault();
     const args = {
-      userId: state.user.userId,
-      subdomain: getSubdomain(state.dashboardUrl),
-      docId: state.selectedDoc._id,
-      title: state.selectedDoc.title,
-      org: state.codes[0].org,
-      codes: state.codes,
+      userId: user.userId,
+      subdomain: getSubdomain(dashboardUrl),
+      docId: selectedDoc._id,
+      title: selectedDoc.title,
+      org: code?.org,
+      code: code,
     };
     vscode.postMessage({ command: 'link-submit', args });
-    updateState({...state, codes: [] });
-  };
-
-  window.addEventListener('message', event => {
-    const message = event.data;
-    switch (message.command) {
-      case 'start':
-        const API_ENDPOINT = message.args;
-        updateState({...state, API_ENDPOINT});
-        break;
-      case 'auth':
-        const user = message.args;
-        const dashboardUrl = formatSignInUrl(signInUrl);
-        updateState({...initialState, user, dashboardUrl});
-        break;
-      case 'prefill-doc':
-        const docId = message.args;
-        axios.get(`${state.API_ENDPOINT}/docs`, {
-          params: {
-            userId: state.user.userId,
-            subdomain: getSubdomain(state.dashboardUrl)
-          }
-        })
-          .then((res) => {
-            const { data: { docs } } = res;
-            const selectedDoc = docs.find(doc => doc._id === docId);
-            if (selectedDoc) {
-              updateState({...state, docs, selectedDoc, codes: []});
-            }
-          });
-        break;
-      case 'post-code':
-        const code = message.args;
-        updateState({...state, codes: [code]});
-        break;
-      case 'logout':
-        onLogout();
-        break;
-    }
-  });
-
-  const deleteCode = () => {
-    updateState({...state, codes: []});
+    setCode(undefined);
   };
 
   const updateSelectedDoc = (doc: Doc) => {
-    updateState({...state, selectedDoc: doc});
+    setSelectedDoc(doc);
+    vscode.setState({ ...initialState, selectedDoc: doc });
   };
 
-  const CodeContent = (props: { code: Code }) => {
+  const CodeContent = ({ code }: { code: Code }) => {
+    let lineRange = code.line ? `:${code.line + 1}` : '';
+    if (lineRange && code.endLine && code.endLine !== code.line) {
+      lineRange += `-${code.endLine + 1}`;
+    }
+    const title = `${code.file}${lineRange}`;
     return (
       <div className='flex flex-row justify-between'>
-        <div className='flex flex-row'>
+        <div className='flex flex-row truncate'>
           <div className='mr-1 flex flex-col justify-center'>
-            <CodeSymbolIcon />
+            {
+              lineRange ? <CodeSymbolIcon /> : <CodeFileIcon />
+            }
           </div>
-          {props.code.file}
-        </div>
-        <div
-          className='flex flex-col justify-center cursor-pointer'
-          onClick={deleteCode}
-        >
-          <XIcon />
+          {title}
         </div>
       </div>
     );
   };
 
-  const CodesContent = (props: { codes: Code[] }) => {
-    return (props.codes == null || props.codes?.length === 0) ? (
+  const CodesContent = ({ code }: { code?: Code }) => {
+    return (code == null) ? (
       <div className='italic'>No code selected</div>
     ) : (
       <div>
-        {props.codes?.map((code: Code) => <CodeContent code={code} key={code.sha} />)}
+        <CodeContent code={code} key={code.sha} />
       </div>
     );
   };
@@ -192,12 +190,13 @@ const App = () => {
   };
 
   const onLogout = () => {
-    updateState({...initialState, user: undefined});
+    setUser(undefined);
+    vscode.setState({ ...initialState, user: undefined });
   };
 
   const style = getComputedStyle(document.body);
 
-  const hasDocSelected = state?.selectedDoc?.isDefault !== true;
+  const hasDocSelected = selectedDoc?.isDefault !== true;
 
   return (
     <div className="space-y-1">
@@ -205,7 +204,7 @@ const App = () => {
         Mintlify
       </h1>
       {
-        state.user == null && <>
+        user == null && <>
         <p className="mt-1">
           Sign in to your account to continue
         </p>
@@ -229,30 +228,30 @@ const App = () => {
         </>
       }
       {
-        state.user != null && <>
+        user != null && <>
         <p className="mt-1">
           Link your code to documentation
         </p>
         <p>
-          <a className="cursor-pointer" href={state.dashboardUrl}>Open Dashboard</a>
+          <a className="cursor-pointer" href={dashboardUrl}>Open Dashboard</a>
         </p>
         <form className="mt-3" onSubmit={handleSubmit}>
           <label htmlFor="url" className="block">
             Documentation<span className='text-red-500'>*</span>
           </label>
           <div className="mt-1">
-          <Listbox value={state.selectedDoc} onChange={updateSelectedDoc}>
+          <Listbox value={selectedDoc} onChange={updateSelectedDoc}>
             {() => (
               <>
                 <div className="mt-1 relative">
                   <Listbox.Button className="relative w-full pl-3 pr-10 py-2 text-left code">
-                    <span className="block truncate">{state.selectedDoc.title}</span>
+                    <span className="block truncate">{selectedDoc.title}</span>
                     <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                       <SelectorIcon className="h-5 w-5" aria-hidden="true" />
                     </span>
                   </Listbox.Button>
                     <Listbox.Options className="absolute mt-1 z-10 w-full shadow-lg code py-1 overflow-auto">
-                      {state.docs.map((doc) => (
+                      {docs.map((doc) => (
                         <Listbox.Option
                           key={doc._id}
                           className={({ active }) =>
@@ -304,9 +303,7 @@ const App = () => {
               <div className='text-left'>
                 <div className='font-bold'>Code Snippets</div>
                 <p>
-                  1. Highlight code in the editor <br/>
-                  2. Right click <br/>
-                  3. Select “Link code to doc” <br/>
+                  Highlight code in the editor <br/>
                 </p>
                 <div className='font-bold mt-1'>Folder/File</div>
                 <p>
@@ -317,7 +314,7 @@ const App = () => {
             </ReactTooltip>
           </div>
           <div className='code'>
-            <CodesContent codes={state.codes} />
+            <CodesContent code={code} />
           </div>
           <button
             type="submit"

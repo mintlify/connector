@@ -48,12 +48,6 @@
           "when": "view == primary"
         }
       ],
-      "editor/context": [
-        {
-          "command": "mintlify.link-code",
-          "group": "mintlify"
-        }
-      ],
       "explorer/context": [
         {
           "command": "mintlify.link-dir",

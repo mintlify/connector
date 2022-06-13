@@ -7,7 +7,7 @@ import { getHighlightedText } from '../utils';
 export const linkCodeCommand = (provider: ViewProvider) => {
     return vscode.commands.registerCommand('mintlify.link-code', async (args) => {
         const window = vscode.window;
-        const editor = window.activeTextEditor;
+        const editor = args.editor || window.activeTextEditor;
 
         const { scheme } = args;
         if (scheme !== 'file') {
@@ -21,7 +21,7 @@ export const linkCodeCommand = (provider: ViewProvider) => {
                 const selectedLines: number[] = [selection.start.line, selection.end.line];
                 await getGitData(fileFsPath, provider, 'lines', selectedLines);
             } else {
-                await getGitData(fileFsPath, provider, 'file');
+                await getGitData(fileFsPath, provider, 'lines');
             }
         }
     });
