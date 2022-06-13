@@ -509,7 +509,15 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                               </div>
                               <div className="text-sm">
                                 { integrationsStatus[integration.type]
-                                ? <CheckCircleIcon className="h-4 w-4 text-green-600" />
+                                ? (integration.type === 'vscode' ?
+                                    <CheckCircleIcon className="h-4 w-4 text-green-600" /> :
+                                    <button
+                                      className="text-gray-700 font-medium"
+                                      onClick={() => onInstallIntegration(integration, router)}
+                                    >
+                                      Edit
+                                    </button>
+                                  )
                                 : <button
                                     className="text-primary font-medium"
                                     onClick={() => onInstallIntegration(integration, router)}
