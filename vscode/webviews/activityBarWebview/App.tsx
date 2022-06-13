@@ -154,7 +154,7 @@ const App = () => {
 
   const CodeContent = ({ code }: { code: Code }) => {
     let lineRange = code.line ? `:${code.line + 1}` : '';
-    if (code.endLine && code.endLine !== code.line) {
+    if (lineRange && code.endLine && code.endLine !== code.line) {
       lineRange += `-${code.endLine + 1}`;
     }
     const title = `${code.file}${lineRange}`;

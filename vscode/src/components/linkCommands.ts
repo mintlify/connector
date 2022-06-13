@@ -21,7 +21,7 @@ export const linkCodeCommand = (provider: ViewProvider) => {
                 const selectedLines: number[] = [selection.start.line, selection.end.line];
                 await getGitData(fileFsPath, provider, 'lines', selectedLines);
             } else {
-                await getGitData(fileFsPath, provider, 'file');
+                await getGitData(fileFsPath, provider, 'lines');
             }
         }
     });
