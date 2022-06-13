@@ -94,8 +94,9 @@ export default function AddDocumentation({ user, org, isOpen, setIsOpen, setIsAd
             leaveTo="opacity-0 scale-95"
             afterLeave={onToPrimarySelection}
           >
-            <Dialog.Panel className="fixed inset-0 my-4 sm:my-6 md:my-20 mx-auto max-w-xl transform divide-y divide-gray-100 rounded-xl transition-all overflow-auto">
-              <div className="bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5">
+            <Dialog.Panel className="fixed inset-0 mx-4 my-4 sm:my-6 md:my-20 sm:mx-auto max-w-xl transform divide-y divide-gray-100 rounded-xl transition-all">
+              <div className="absolute inset-0 z-0" onClick={() => setIsOpen(false)} />
+              <div className="absolute w-full max-h-full bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 z-10 overflow-auto">
               <DocumentationConfig
                 user={user}
                 org={org}
