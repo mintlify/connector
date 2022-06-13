@@ -64,7 +64,7 @@ const App = () => {
   const [user, setUser] = useState<any>(initialState.user);
   const [dashboardUrl, setDashboardUrl] = useState<string>(initialState.dashboardUrl);
   const [API_ENDPOINT, setAPI_ENDPOINT] = useState<string>(initialState.API_ENDPOINT);
-  const [signInUrl, setSignInUrl] = useState<string>();
+  const [signInUrl, setSignInUrl] = useState<string>('');
   const [docs, setDocs] = useState<Doc[]>([initialDoc]);
   const [selectedDoc, setSelectedDoc] = useState<Doc>(initialDoc);
   const [code, setCode] = useState<Code>();
@@ -86,7 +86,7 @@ const App = () => {
           setDashboardUrl(dashboardUrl);
           break;
         case 'prefill-doc':
-          if (!user?.userId) {
+          if (!user?.userId || !dashboardUrl) {
             return;
           }
           const docId = message.args;
