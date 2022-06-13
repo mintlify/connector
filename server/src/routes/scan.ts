@@ -54,16 +54,20 @@ export const extractFromDoc = async (doc: DocType, orgId: string): Promise<Conte
   return getDataFromWebpage(doc.url, orgId, WAIT_FOR_WEB_SCRAPE);
 }
 
-const getDiffAndContent = async (doc: DocType, orgId: string): Promise<DiffAndContent> => {
-  const previousContent = doc.content || '';
-  console.log(doc);
-  const { content, title, favicon, method } = await extractFromDoc(doc, orgId);
-  return {
-    diff: Diff.diffWords(previousContent, content),
-    newContent: content,
-    newTitle: title,
-    newFavicon: favicon,
-    newMethod: method,
+const getDiffAndContent = async (doc: DocType, orgId: string): Promise<DiffAndContent | null> => {
+  try {
+    const previousContent = doc.content || '';
+    const { content, title, favicon, method } = await extractFromDoc(doc, orgId);
+    return {
+      diff: Diff.diffWords(previousContent, content),
+      newContent: content,
+      newTitle: title,
+      newFavicon: favicon,
+      newMethod: method,
+    }
+  } catch (error) {
+    console.log(error);
+    return null;
   }
 }
 
@@ -93,6 +97,9 @@ export const scanDocsInOrg = async (orgId: string) => {
   const diffAlerts: DiffAlert[] = [];
   const sameContentDocs: DocType[] = [];
   diffsAndContentResults.forEach((diffsAndContent, i) => {
+    if (diffsAndContent == null)  {
+      return;
+    }
     const { diff } = diffsAndContent;
     const hasChanges = diff.some((diff) => (diff.added || diff.removed) && diff.value.trim());
     const doc = docsFromOrg[i];
