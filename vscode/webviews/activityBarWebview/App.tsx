@@ -141,7 +141,7 @@ const App = () => {
       subdomain: getSubdomain(state.dashboardUrl),
       docId: state.selectedDoc._id,
       title: state.selectedDoc.title,
-      org: state.code.org,
+      org: state.code?.org,
       code: state.code,
     };
     vscode.postMessage({ command: 'link-submit', args });
@@ -172,7 +172,7 @@ const App = () => {
     );
   };
 
-  const CodesContent = ({ code }: { code: Code }) => {
+  const CodesContent = ({ code }: { code?: Code }) => {
     return (code == null) ? (
       <div className='italic'>No code selected</div>
     ) : (
