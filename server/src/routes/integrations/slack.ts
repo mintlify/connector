@@ -41,12 +41,12 @@ const getSlackAccessTokenFromCode = async (code: string): Promise<any> => {
 const slackRouter = Router();
 
 slackRouter.get('/install', async (req, res) => {
-  const { org } = req.query;
+  const { org, close } = req.query;
   if (!org) {
     return res.send('Organization ID is required');
   }
 
-  const state = { org };
+  const state = { org, close };
 
   const encodedState = encodeURIComponent(JSON.stringify(state));
   const url = getSlackAuthUrl(encodedState);
@@ -84,8 +84,6 @@ slackRouter.get('/authorization', async (req, res) => {
     track(org._id.toString(), 'Install Slack Integration', {
       isOrg: true,
     });
-
-    console.log('slack parsedState?.close: ', parsedState?.close);
 
     if (parsedState?.close) {
       return res.send("<script>window.close();</script>");

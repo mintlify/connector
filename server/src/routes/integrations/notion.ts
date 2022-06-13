@@ -56,12 +56,12 @@ const getNotionAccessTokenFromCode = async (code: string): Promise<NotionAuthDat
 const notionRouter = Router();
 
 notionRouter.get('/install', (req, res) => {
-  const { org } = req.query;
+  const { org, close } = req.query;
   if (!org) {
     return res.send('Organization ID is required');
   }
 
-  const state = { org };
+  const state = { org, close };
   const encodedState = encodeURIComponent(JSON.stringify(state));
   const url = getNotionInstallURL(encodedState);
   return res.redirect(url);
@@ -89,7 +89,6 @@ notionRouter.get('/authorization', async (req, res) => {
   track(org._id.toString(), 'Install Notion Integration', {
     isOrg: true,
   });
-  console.log('notion parsedState?.close: ', parsedState?.close);
 
   if (parsedState?.close) {
     return res.send("<script>window.close();</script>");

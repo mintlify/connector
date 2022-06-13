@@ -26,7 +26,7 @@ const SCOPES = [
 ];
 
 googleRouter.get('/install', async (req, res) => {
-  const { org } = req.query;
+  const { org, close } = req.query;
   if (!org) return res.status(404).send('Organization ID is required');
 
   const authUrl = oAuth2Client.generateAuthUrl({
@@ -34,7 +34,7 @@ googleRouter.get('/install', async (req, res) => {
     scope: SCOPES,
   });
 
-  const state = { org };
+  const state = { org, close };
   const encodedState = encodeURIComponent(JSON.stringify(state));
 
   const fullAuthUrl = `${authUrl}&state=${encodedState}`;
