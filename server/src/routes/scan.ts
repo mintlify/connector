@@ -32,7 +32,7 @@ const DIFF_CONFIRMATION_THRESHOLD = 2;
 const WAIT_FOR_WEB_SCRAPE = 6000; // in ms
 
 // Currently supports webpage and notion page
-const extractFromDoc = async (doc: DocType, orgId: string): Promise<ContentData> => {
+export const extractFromDoc = async (doc: DocType, orgId: string): Promise<ContentData> => {
   if (doc.method === 'notion-private' && doc.notion?.pageId) {
     const org = await Org.findById(orgId);
     const notionAccessToken = org?.integrations?.notion?.access_token;

@@ -9,6 +9,7 @@ import { extractDataFromHTML, getDataFromWebpage } from '../services/webscraper'
 import { deleteDocForSearch, indexDocForSearch } from '../services/algolia';
 import { track } from '../services/segment';
 import { createDocFromUrl, createDocsFromGoogleDocs, createDocsFromNotionPageId } from '../helpers/routes/docs';
+import { extractFromDoc } from './scan';
 
 const docsRouter = express.Router();
 
@@ -167,6 +168,22 @@ docsRouter.get('/screen', async (req, res) => {
     res.send(data);
   } catch {
     res.status(400).end();
+  }
+});
+
+docsRouter.get('/content/:id', userMiddleware, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const doc = await Doc.findById(id);
+    if (doc == null) {
+      return res.status(400).send('No doc available');
+    }
+
+    const orgId = doc.org;
+    const { content, title, favicon, method } = await extractFromDoc(doc, orgId);
+    return res.send({ content, title, favicon, method });
+  } catch {
+    return res.status(500).send('Internal systems error');
   }
 })
 
