@@ -75,6 +75,44 @@ const App = () => {
   const [signInUrl, setSignInUrl] = useState<string>('');
 
   useEffect(() => {
+    window.addEventListener('message', event => {
+      const message = event.data;
+      switch (message.command) {
+        case 'start':
+          const API_ENDPOINT = message.args;
+          updateState({...state, API_ENDPOINT});
+          break;
+        case 'auth':
+          const user = message.args;
+          const dashboardUrl = formatSignInUrl(signInUrl);
+          updateState({...initialState, user, dashboardUrl});
+          break;
+        case 'prefill-doc':
+          const docId = message.args;
+          axios.get(`${state.API_ENDPOINT}/docs`, {
+            params: {
+              userId: state.user.userId,
+              subdomain: getSubdomain(state.dashboardUrl)
+            }
+          })
+            .then((res) => {
+              const { data: { docs } } = res;
+              const selectedDoc = docs.find(doc => doc._id === docId);
+              if (selectedDoc) {
+                updateState({...state, docs, selectedDoc, code: undefined});
+              }
+            });
+          break;
+        case 'post-code':
+          const code = message.args;
+          updateState({...state, code: code});
+          break;
+        case 'logout':
+          onLogout();
+          break;
+      }
+    });
+    
     if (!state.user?.userId) {
       return;
     }
@@ -88,44 +126,6 @@ const App = () => {
       .then((res) => {
         const { data: { docs } } = res;
         updateState({...state, docs});
-      });
-
-      window.addEventListener('message', event => {
-        const message = event.data;
-        switch (message.command) {
-          case 'start':
-            const API_ENDPOINT = message.args;
-            updateState({...state, API_ENDPOINT});
-            break;
-          case 'auth':
-            const user = message.args;
-            const dashboardUrl = formatSignInUrl(signInUrl);
-            updateState({...initialState, user, dashboardUrl});
-            break;
-          case 'prefill-doc':
-            const docId = message.args;
-            axios.get(`${state.API_ENDPOINT}/docs`, {
-              params: {
-                userId: state.user.userId,
-                subdomain: getSubdomain(state.dashboardUrl)
-              }
-            })
-              .then((res) => {
-                const { data: { docs } } = res;
-                const selectedDoc = docs.find(doc => doc._id === docId);
-                if (selectedDoc) {
-                  updateState({...state, docs, selectedDoc, code: undefined});
-                }
-              });
-            break;
-          case 'post-code':
-            const code = message.args;
-            updateState({...state, code: code});
-            break;
-          case 'logout':
-            onLogout();
-            break;
-        }
       });
   }, []);
 
