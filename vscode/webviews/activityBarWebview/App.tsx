@@ -69,7 +69,7 @@ const App = () => {
   const [signInUrl, setSignInUrl] = useState<string>('');
   const [docs, setDocs] = useState<Doc[]>([initialDoc]);
   const [selectedDoc, setSelectedDoc] = useState<Doc>(initialState.selectedDoc || initialDoc);
-  const [code, setCode] = useState<Code>(initialState.code);
+  const [code, setCode] = useState<Code | undefined>(initialState.code);
 
   useEffect(() => {
     window.addEventListener('message', event => {
