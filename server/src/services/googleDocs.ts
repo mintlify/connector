@@ -91,9 +91,13 @@ export const getGoogleDocsPrivateData = async (googleDocId: string, credentials:
   content
     .filter((block: any) => block.hasOwnProperty('paragraph'))
     .map(({ paragraph }: { paragraph: Paragraph }) => {
-      paragraph.elements.map(
-        ({ textRun: { content } }: { textRun: { content: string } }) => (accumulatedContent = `${accumulatedContent}${content}`)
-      );
+      const { elements } = paragraph;
+      elements.forEach((element) => {
+        const { textRun } = element;
+        if (textRun?.content) {
+          accumulatedContent = `${accumulatedContent}${textRun.content}`;
+        }
+      })
     });
   
   return {
