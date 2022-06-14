@@ -182,8 +182,9 @@ docsRouter.get('/content/:id', userMiddleware, async (req, res) => {
     const orgId = doc.org;
     const { content, title, favicon, method } = await extractFromDoc(doc, orgId);
     return res.send({ content, title, favicon, method });
-  } catch {
-    return res.status(500).send('Internal systems error');
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({error: 'Internal systems error'});
   }
 })
 
