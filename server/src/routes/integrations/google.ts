@@ -39,33 +39,36 @@ googleRouter.get('/install', async (req, res) => {
 
   const fullAuthUrl = `${authUrl}&state=${encodedState}`;
 
-  return res.redirect(302, fullAuthUrl);
+  return res.redirect(fullAuthUrl);
 });
 
 googleRouter.get('/authorization', async (req, res) => {
-  const { code, state } = req.query;
-  if (code == null) return res.status(403).send('Invalid or missing grant code');
+    const { code, state } = req.query;
+    if (code == null) return res.status(403).send('Invalid or missing grant code');
 
-  // Need an error handler here for Google tokens retrieval, but will implement later.
-  const { tokens } = await oAuth2Client.getToken(code as string);
-  oAuth2Client.setCredentials(tokens);
+    try {
+      const { tokens } = await oAuth2Client.getToken(code as string);
+      oAuth2Client.setCredentials(tokens);
 
-  if (state == null) return res.status(403).send('No state provided');
-  const parsedState = JSON.parse(decodeURIComponent(state as string));
+      if (state == null) return res.status(403).send('No state provided');
+      const parsedState = JSON.parse(decodeURIComponent(state as string));
 
-  const { org: orgId } = parsedState;
-  const org = await Org.findByIdAndUpdate(orgId, {
-    'integrations.google': tokens,
-  });
+      const { org: orgId } = parsedState;
+      const org = await Org.findByIdAndUpdate(orgId, {
+        'integrations.google': tokens,
+      });
 
-  if (org == null) {
-    return res.status(403).send({ error: 'Invalid organization ID' });
-  }
-  
-  if (parsedState?.close) {
-    return res.send("<script>window.close();</script>");
-  }
-  return res.redirect(`https://${org.subdomain}.mintlify.com`);
+      if (org == null) {
+        return res.status(403).send({ error: 'Invalid organization ID' });
+      }
+      
+      if (parsedState?.close) {
+        return res.send("<script>window.close();</script>");
+      }
+      return res.redirect(`https://${org.subdomain}.mintlify.com`);
+    } catch (error) {
+      return res.send("Unable to install Google integration")
+    }
 });
 
 googleRouter.post('/sync', userMiddleware, async (_, res) => {

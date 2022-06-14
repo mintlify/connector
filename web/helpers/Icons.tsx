@@ -1,7 +1,5 @@
-import { MailIcon, PencilAltIcon, BellIcon as BellIconSolid } from '@heroicons/react/solid'
-import { DocumentSearchIcon, DocumentTextIcon } from '@heroicons/react/outline'
+import { DocumentTextIcon } from '@heroicons/react/outline'
 import { AddDocumentationType } from '../components/commands/documentation/AddDocumentation'
-import { Doc } from '../pages'
 
 export type AddDocumentTypeIconProps = {
   type: AddDocumentationType
