@@ -5,7 +5,6 @@ import { track } from '../services/segment';
 import { client } from '../services/stytch';
 import { checkIfUserHasVSCodeInstalled, removeUnneededDataFromOrg, userMiddleware } from './user';
 import { EventType } from '../models/Event';
-import mongoose from 'mongoose';
 import { slackAutomationForEvent } from '../automations/slack';
 import Doc from '../models/Doc';
 
