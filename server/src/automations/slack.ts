@@ -36,7 +36,8 @@ export const publishMessage = async (text: string, channel: string, token: strin
             type: "plain_text",
             text: "View"
           },
-          url: formattedUrl
+          url: formattedUrl,
+          action_id: "button"
         }
       }
     ];
