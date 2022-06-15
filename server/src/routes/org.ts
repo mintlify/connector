@@ -250,7 +250,7 @@ orgRouter.put('/access', userMiddleware, async (req, res) => {
   return res.end();
 });
 
-orgRouter.put('/testSlack', async (req, res) => {
+orgRouter.put('/testSlack', async (_, res) => {
   const orgId = new mongoose.Types.ObjectId('62a622763a11123fd33a8724'); // dummy
   const docId = new mongoose.Types.ObjectId('62a63e009b4dbf681062b148'); // dummy
   const org = await Org.findById(orgId);
