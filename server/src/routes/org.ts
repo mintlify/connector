@@ -250,28 +250,4 @@ orgRouter.put('/access', userMiddleware, async (req, res) => {
   return res.end();
 });
 
-orgRouter.put('/testSlack', async (_, res) => {
-  const orgId = new mongoose.Types.ObjectId('62a622763a11123fd33a8724'); // dummy
-  const docId = new mongoose.Types.ObjectId('62a63e009b4dbf681062b148'); // dummy
-  const org = await Org.findById(orgId);
-  const doc = await Doc.findById(docId);
-  const fakeEvent: EventType = {
-    org: orgId,
-    doc: docId,
-    type: 'change',
-    change: [
-      {
-        count: 1,
-        removed: true,
-        value: "fix"
-      }
-    ]
-  }
-  if (org == null || doc == null) {
-    return res.end()
-  }
-  await slackAutomationForEvent(fakeEvent, org, doc);
-  return res.end();
-})
-
 export default orgRouter;
