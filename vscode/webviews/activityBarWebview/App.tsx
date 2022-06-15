@@ -123,16 +123,20 @@ const App = () => {
     if (!user?.userId || dashboardUrl == null) {
       return;
     }
-    axios.get(`${API_ENDPOINT}/docs`, {
-      params: {
-        userId: user?.userId,
-        subdomain: getSubdomain(dashboardUrl)
-      }
-    })
-      .then((res) => {
-        const { data: { docs: docsResult } } = res;
-        setDocs(docsResult);
-      });
+    try {
+      axios.get(`${API_ENDPOINT}/docs`, {
+        params: {
+          userId: user?.userId,
+          subdomain: getSubdomain(dashboardUrl)
+        }
+      })
+        .then((res) => {
+          const { data: { docs: docsResult } } = res;
+          setDocs(docsResult);
+        });
+    } catch (e) {
+      vscode.postMessage({ command: 'error', message: 'Could not fetch documents. Please log in again or re-install the extension.' });
+    }
   }, [user, dashboardUrl, API_ENDPOINT]);
 
   const handleSubmit = event => {
@@ -250,7 +254,7 @@ const App = () => {
                       <SelectorIcon className="h-5 w-5" aria-hidden="true" />
                     </span>
                   </Listbox.Button>
-                    <Listbox.Options className="absolute mt-1 z-10 w-full shadow-lg code py-1 overflow-auto">
+                    <Listbox.Options className="absolute mt-1 max-h-60 z-10 w-full shadow-lg code py-1 overflow-auto">
                       {docs.map((doc) => (
                         <Listbox.Option
                           key={doc._id}
