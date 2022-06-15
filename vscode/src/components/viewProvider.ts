@@ -28,18 +28,18 @@ export class ViewProvider implements WebviewViewProvider {
 
     constructor(private readonly _extensionUri: Uri) { }
 
-		public authenticate(user: any): void {
-			this._view?.webview.postMessage({ command: 'auth', args: user });
-		}
+	public authenticate(user: any): void {
+		this._view?.webview.postMessage({ command: 'auth', args: user });
+	}
 
-		public prefillDoc(docId: string): void {
-			this.show();
-			this._view?.webview.postMessage({ command: 'prefill-doc', args: docId });
-		}
+	public prefillDoc(docId: string): void {
+		this.show();
+		this._view?.webview.postMessage({ command: 'prefill-doc', args: docId });
+	}
 
-		public logout(): void {
-			this._view?.webview.postMessage({ command: 'logout' });
-		}
+	public logout(): void {
+		this._view?.webview.postMessage({ command: 'logout' });
+	}
 		
     public resolveWebviewView(webviewView: WebviewView): void | Thenable<void> {
 			webviewView.webview.options = {
@@ -63,17 +63,27 @@ export class ViewProvider implements WebviewViewProvider {
 								location: vscode.ProgressLocation.Notification,
 								title: 'Connecting documentation with code',
 							}, () => new Promise(async (resolve) => {
-								await axios.put(`${API_ENDPOINT}/links`, { docId, codes: [code] }, {
-									params: {
-										userId,
-										subdomain
-									}
-								});
+								try {
+									await axios.put(`${API_ENDPOINT}/links`, { docId, codes: [code] }, {
+										params: {
+											userId,
+											subdomain
+										}
+									});
+								} catch (err) {
+									const errMessage = err?.response?.data?.error ?? `Error connecting code. Please try again or report bug to hi@mintlify.com`;
+									vscode.window.showInformationMessage(errMessage);
+									resolve(null);
+								}
 								vscode.window.showInformationMessage(`Successfully connected code with ${title}`);
 								resolve(null);
 							}));
 							break;
 						}
+					case 'error': {
+						const errMessage = message?.message;
+						vscode.window.showInformationMessage(errMessage);
+					}
 				}
 			});
 

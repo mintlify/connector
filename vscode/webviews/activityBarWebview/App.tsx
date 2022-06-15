@@ -71,6 +71,27 @@ const App = () => {
   const [selectedDoc, setSelectedDoc] = useState<Doc>(initialState.selectedDoc || initialDoc);
   const [code, setCode] = useState<Code | undefined>(initialState.code);
 
+  const getDocs = () => {
+    if (!user?.userId) {
+      return;
+    }
+    try {
+      axios.get(`${API_ENDPOINT}/docs`, {
+        params: {
+          userId: user.userId,
+          subdomain: getSubdomain(dashboardUrl)
+        }
+      })
+      .then((res) => {
+        const { data: { docs: docsResult } } = res;
+        setDocs(docsResult);
+      });
+    } catch (e) {
+      vscode.postMessage({ command: 'error', message: 'Could not fetch documents. Please log in again or re-install the extension.' });
+    }
+    
+  };
+
   useEffect(() => {
     window.addEventListener('message', event => {
       const message = event.data;
@@ -79,6 +100,7 @@ const App = () => {
           const API_ENDPOINT = message.args;
           vscode.setState({ ...initialState, API_ENDPOINT });
           setAPI_ENDPOINT(API_ENDPOINT);
+          getDocs();
           break;
         case 'auth':
           const user = message.args;
@@ -120,19 +142,7 @@ const App = () => {
   }, [signInUrl, user, dashboardUrl, API_ENDPOINT]);
 
   useEffect(() => {
-    if (!user?.userId) {
-      return;
-    }
-    axios.get(`${API_ENDPOINT}/docs`, {
-      params: {
-        userId: user.userId,
-        subdomain: getSubdomain(dashboardUrl)
-      }
-    })
-      .then((res) => {
-        const { data: { docs: docsResult } } = res;
-        setDocs(docsResult);
-      });
+    getDocs();
   }, [user, dashboardUrl, API_ENDPOINT]);
 
   const handleSubmit = event => {
@@ -250,7 +260,7 @@ const App = () => {
                       <SelectorIcon className="h-5 w-5" aria-hidden="true" />
                     </span>
                   </Listbox.Button>
-                    <Listbox.Options className="absolute mt-1 z-10 w-full shadow-lg code py-1 overflow-auto">
+                    <Listbox.Options className="absolute mt-1 max-h-60 z-10 w-full shadow-lg code py-1 overflow-auto">
                       {docs.map((doc) => (
                         <Listbox.Option
                           key={doc._id}
