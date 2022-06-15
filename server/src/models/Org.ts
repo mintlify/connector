@@ -36,6 +36,13 @@ export type OrgType = {
       expires_in: string,
       refresh_token: string,
       scope: string,
+      accessibleResources: {
+        id: string,
+        url: string,
+        name: string,
+        scopes: string[],
+        avatarUrl: string
+      }[]
     }
   };
   users: string[];
@@ -96,6 +103,13 @@ const OrgSchema = new Schema({
       expires_in: String,
       refresh_token: String,
       scope: String,
+      accessibleResources: [{
+        id: String,
+        url: String,
+        name: String,
+        scopes: [String],
+        avatarUrl: String
+      }]
     }
   },
   notifications: {

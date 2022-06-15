@@ -1,15 +1,9 @@
 import axios from 'axios';
 import { Router } from 'express';
 import { ISDEV } from '../../helpers/environment';
+import { removeHtmlTagsAndGetText } from '../../helpers/routes/domparsing';
 import Org from '../../models/Org';
 import { userMiddleware } from '../user';
-
-export type GoogleDoc = {
-  id: string
-  name: string
-  createdTime: string
-  modifiedTime: string
-}
 
 const confluenceRouter = Router();
 const clientId = process.env.CONFLUENCE_CLIENT_ID;
@@ -25,7 +19,7 @@ confluenceRouter.get('/install', async (req, res) => {
   const state = { org, close };
   const encodedState = encodeURIComponent(JSON.stringify(state));
 
-  const confluenceAuthUrl = `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=${clientId}&scope=read%3Aconfluence-user%20read%3Aconfluence-content.all%20offline_access&redirect_uri=${redirectUri}&state=${encodedState}&response_type=code&prompt=consent`;
+  const confluenceAuthUrl = `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=${clientId}&scope=read%3Aconfluence-user%20read%3Aconfluence-content.summary%20read%3Aconfluence-content.all%20offline_access&redirect_uri=${redirectUri}&state=${encodedState}&response_type=code&prompt=consent`;
   return res.redirect(confluenceAuthUrl);
 });
 
@@ -43,6 +37,13 @@ confluenceRouter.get('/authorization', async (req, res) => {
         redirect_uri: redirectUri,
       });
 
+      const { data: accessibleResources } = await axios.get('https://api.atlassian.com/oauth/token/accessible-resources', {
+        headers:{ 
+          'Authorization': `Bearer ${access_token}`,
+          'Accept': 'application/json'
+        }
+      });
+
       const parsedState = JSON.parse(decodeURIComponent(state as string));
       const { org: orgId } = parsedState;
       const org = await Org.findByIdAndUpdate(orgId, {
@@ -50,7 +51,8 @@ confluenceRouter.get('/authorization', async (req, res) => {
           access_token,
           expires_in,
           refresh_token,
-          scope
+          scope,
+          accessibleResources
         },
       });
 
@@ -75,39 +77,34 @@ confluenceRouter.post('/sync', userMiddleware, async (_, res) => {
   if (org == null) {
     return res.status(401).json({ error: 'No org found' });
   }
-  // let google = org.integrations?.google;
-  // if (google?.access_token == null) {
-  //   return res.status(403).json({ error: 'No access token found for Google' })
-  // }
-
-  // oAuth2Client.setCredentials(google)
-  // const googleDrive = googleapis.drive({ version: 'v3', auth: oAuth2Client })
-  // let nextPageToken: string | null | undefined = ''
+  if (org?.integrations?.confluence?.access_token == null) {
+    return res.status(403).json({ error: 'No access found for Confluence' })
+  }
 
   try {
-  //   const { data }: any = await (nextPageToken !== ''
-  //     ? googleDrive.files.list({
-  //         q: 'mimeType="application/vnd.google-apps.document" and trashed=false',
-  //         fields: 'nextPageToken, files(id, name)',
-  //         pageToken: nextPageToken,
-  //         spaces: 'drive',
-  //       })
-  //     : googleDrive.files.list({
-  //         q: 'mimeType="application/vnd.google-apps.document" and trashed=false',
-  //         fields: 'nextPageToken, files(id, name, modifiedTime, createdTime)',
-  //       }))
-  //   nextPageToken = data.nextPageToken
-  //   const allFiles: GoogleDoc[] = data.files;
-  //   const existingDocs = await Doc.find({ org: orgId, method: 'googledocs-private' });
-  //   const results = allFiles
-  //     .filter((googleDoc) => {
-  //       return !existingDocs.some((doc) => doc.googledocs?.id === googleDoc.id);
-  //     });
+    const accessToken = org.integrations.confluence.access_token;
+    const cloudId = org.integrations.confluence.accessibleResources[0].id;
+    const { data: response } = await axios.get(`https://api.atlassian.com/ex/confluence/${cloudId}/wiki/rest/api/content`, {
+      headers: { 
+        'Authorization': `Bearer ${accessToken}`,
+        'Accept': 'application/json'
+      },
+      params: {
+        expand: ['body.view', 'history.lastUpdated'].join(','),
+      },
+    });
 
-    return res.status(500).send("Unable to install Google integration")
-    // return res.status(200).json({ results })
+    const results = response.results.map((result: any) => {
+      return {
+        ...result,
+        content: removeHtmlTagsAndGetText(result.body.view.value)
+      }
+    })
+
+    return res.status(200).json({ results });
   } catch (error: any) {
-    return res.status(500).send(error)
+    console.log(error);
+    return res.status(500).send({error})
   }
 })
 

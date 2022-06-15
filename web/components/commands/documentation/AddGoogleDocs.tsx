@@ -9,14 +9,6 @@ import { getSubdomain } from '../../../helpers/user'
 import { Org, User } from '../../../pages'
 import timeAgo from '../../../services/timeago'
 
-type Icon = {
-  type: 'emoji' | 'file'
-  emoji?: string
-  file?: {
-    url: string
-  }
-}
-
 type GoogleDoc = {
   id: string
   name: string

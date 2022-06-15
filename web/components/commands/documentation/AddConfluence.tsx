@@ -9,19 +9,16 @@ import { getSubdomain } from '../../../helpers/user'
 import { Org, User } from '../../../pages'
 import timeAgo from '../../../services/timeago'
 
-type Icon = {
-  type: 'emoji' | 'file'
-  emoji?: string
-  file?: {
-    url: string
-  }
-}
-
-type GoogleDoc = {
+type ConfluencePage = {
   id: string
-  name: string
-  createdTime: string
-  modifiedTime: string
+  type: string
+  status: string
+  title: string
+  history: {
+    lastUpdated: {
+      when: string;
+    }
+  }
 }
 
 type AddNotionProps = {
@@ -33,8 +30,8 @@ type AddNotionProps = {
 }
 
 export default function AddConfluence({ user, org, onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }: AddNotionProps) {
-  const [docs, setDocs] = useState<GoogleDoc[]>()
-  const [selectedDocs, setSelectedDocs] = useState<GoogleDoc[]>([])
+  const [pages, setPages] = useState<ConfluencePage[]>()
+  const [selectedPages, setSelectedPages] = useState<ConfluencePage[]>([])
   const [search, setSearch] = useState('')
   const router = useRouter()
 
@@ -51,36 +48,37 @@ export default function AddConfluence({ user, org, onCancel, setIsAddDocumentati
         }
       )
       .then(({ data: { results } }) => {
-        setDocs(results);
-        setSelectedDocs(results);
+        console.log(results);
+        setPages(results);
+        setSelectedPages(results);
       })
       .catch(async () => {
         router.push(`${API_ENDPOINT}/routes/integrations/confluence/install?org=${org._id}`)
       })
   }, [user.userId, router, org])
 
-  const onClickPage = (selectingDoc: GoogleDoc) => {
-    if (selectedDocs.some((doc) => doc.id === selectingDoc.id)) {
-      setSelectedDocs(selectedDocs.filter((doc) => doc.id !== selectingDoc.id))
+  const onClickPage = (selectingPage: ConfluencePage) => {
+    if (selectedPages.some((doc) => doc.id === selectingPage.id)) {
+      setSelectedPages(selectedPages.filter((page) => page.id !== selectingPage.id))
     } else {
-      setSelectedDocs([...selectedDocs, selectingDoc])
+      setSelectedPages([...selectedPages, selectingPage])
     }
   }
 
-  const filteredDocs =
-    docs?.filter((doc) => {
-      return doc.name.toLowerCase().includes(search.toLowerCase())
+  const filteredPages =
+    pages?.filter((page) => {
+      return page.title.toLowerCase().includes(search.toLowerCase())
     }) || []
 
-  const isValidToSubmit = selectedDocs.length > 0
+  const isValidToSubmit = selectedPages.length > 0
 
   const onSubmit = async () => {
     setIsAddDocLoading(true)
     axios
       .post(
-        `${API_ENDPOINT}/routes/docs/googledocs`,
+        `${API_ENDPOINT}/routes/docs/confluence`,
         {
-          docs: selectedDocs,
+          pages: selectedPages,
         },
         {
           params: {
@@ -97,7 +95,7 @@ export default function AddConfluence({ user, org, onCancel, setIsAddDocumentati
 
   return (
     <div>
-      {docs != null && selectedDocs != null ? (
+      {pages != null && selectedPages != null ? (
         <>
           <div className="relative rounded-md shadow-sm">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -114,34 +112,34 @@ export default function AddConfluence({ user, org, onCancel, setIsAddDocumentati
             />
           </div>
           <div className="mt-4 grid grid-cols-1 gap-y-3 sm:grid-cols-2 sm:gap-x-4">
-            {filteredDocs?.map((doc) => (
+            {filteredPages?.map((page) => (
               <div
-                key={doc.id}
+                key={page.id}
                 className={classNames(
-                  selectedDocs.some((selectedDoc) => selectedDoc.id === doc.id) ? 'border-primary ring-1 ring-primary' : '',
+                  selectedPages.some((selectedDoc) => selectedDoc.id === page.id) ? 'border-primary ring-1 ring-primary' : '',
                   'relative bg-white hover:bg-gray-50 border rounded-lg shadow-sm py-3 px-4 flex cursor-pointer focus:outline-none'
                 )}
-                onClick={() => onClickPage(doc)}
+                onClick={() => onClickPage(page)}
               >
                 <span className="flex-1 flex">
                   <span className="flex flex-col">
                     <span className="flex items-center text-sm font-medium text-gray-900">
-                      <img className="mr-1 w-4 h-4" src="assets/integrations/google-docs.svg" alt={doc.name} />
-                      {doc.name}
+                      <svg className="mr-1 h-4 w-4" width="24" height="24" viewBox="0 0 24 24" role="presentation"><path fill="#2684FF" fillRule="evenodd" d="M3 0h18a3 3 0 013 3v18a3 3 0 01-3 3H3a3 3 0 01-3-3V3a3 3 0 013-3zm1 18c0 .556.446 1 .995 1h8.01c.54 0 .995-.448.995-1 0-.556-.446-1-.995-1h-8.01c-.54 0-.995.448-.995 1zm0-4c0 .556.448 1 1 1h14c.555 0 1-.448 1-1 0-.556-.448-1-1-1H5c-.555 0-1 .448-1 1zm0-4c0 .556.448 1 1 1h14c.555 0 1-.448 1-1 0-.556-.448-1-1-1H5c-.555 0-1 .448-1 1zm0-4c0 .556.448 1 1 1h14c.555 0 1-.448 1-1 0-.556-.448-1-1-1H5c-.555 0-1 .448-1 1z"></path></svg>
+                      {page.title}
                     </span>
-                    <span className="mt-1 flex items-center text-sm text-gray-500">Last updated {timeAgo.format(Date.parse(doc.modifiedTime))}</span>
+                    <span className="mt-1 flex items-center text-sm text-gray-500">Last updated {timeAgo.format(Date.parse(page.history.lastUpdated.when))}</span>
                   </span>
                 </span>
                 <CheckCircleIcon
                   className={classNames(
-                    selectedDocs.some((selectedDoc) => selectedDoc.id === doc.id) ? '' : 'invisible',
+                    selectedPages.some((selectedDoc) => selectedDoc.id === page.id) ? '' : 'invisible',
                     'h-5 w-5 text-primary'
                   )}
                   aria-hidden="true"
                 />
                 <span
                   className={classNames(
-                    selectedDocs.some((selectedDoc) => selectedDoc.id === doc.id)
+                    selectedPages.some((selectedDoc) => selectedDoc.id === page.id)
                       ? 'border-indigo-500'
                       : 'border-transparent',
                     'absolute -inset-px rounded-lg pointer-events-none'
@@ -165,14 +163,14 @@ export default function AddConfluence({ user, org, onCancel, setIsAddDocumentati
         </div>
       )}
       <div className="flex">
-        {docs && selectedDocs.length > 0 ? (
+        {pages && selectedPages.length > 0 ? (
           <>
-            <button className="text-sm text-primary font-medium" onClick={() => setSelectedDocs([])}>
+            <button className="text-sm text-primary font-medium" onClick={() => setSelectedPages([])}>
               Deselect all
             </button>
           </>
-        ) : docs ? (
-          <button className="text-sm text-primary font-medium" onClick={() => setSelectedDocs(filteredDocs)}>
+        ) : pages ? (
+          <button className="text-sm text-primary font-medium" onClick={() => setSelectedPages(filteredPages)}>
             Select all
           </button>
         ) : null}
@@ -193,7 +191,7 @@ export default function AddConfluence({ user, org, onCancel, setIsAddDocumentati
             )}
             onClick={onSubmit}
           >
-            Import ({selectedDocs.length}) Confluence Pages
+            Import ({selectedPages.length}) Confluence Pages
           </button>
         </div>
       </div>
