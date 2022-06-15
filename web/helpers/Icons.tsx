@@ -70,6 +70,10 @@ export const DocumentationTypeIcon = ({ type, outerSize = 10, innerSize = 6, isA
   }
 }
 
+export const ConfluencePageIcon = ({className}: { className: string }) => {
+  return <svg className={className} width="24" height="24" viewBox="0 0 24 24" role="presentation"><path fill="#2684FF" fillRule="evenodd" d="M3 0h18a3 3 0 013 3v18a3 3 0 01-3 3H3a3 3 0 01-3-3V3a3 3 0 013-3zm1 18c0 .556.446 1 .995 1h8.01c.54 0 .995-.448.995-1 0-.556-.446-1-.995-1h-8.01c-.54 0-.995.448-.995 1zm0-4c0 .556.448 1 1 1h14c.555 0 1-.448 1-1 0-.556-.448-1-1-1H5c-.555 0-1 .448-1 1zm0-4c0 .556.448 1 1 1h14c.555 0 1-.448 1-1 0-.556-.448-1-1-1H5c-.555 0-1 .448-1 1zm0-4c0 .556.448 1 1 1h14c.555 0 1-.448 1-1 0-.556-.448-1-1-1H5c-.555 0-1 .448-1 1z"></path></svg>
+}
+
 export const SilencedDocIcon = ({ outerSize = 10, innerSize = 6 }: { outerSize?: number, innerSize?: number }) => {
   return <div className={`h-${outerSize} w-${outerSize} rounded-lg bg-red-100 flex items-center justify-center`}>
     <svg className={`h-${innerSize - 1} w-${innerSize- 1}`} viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M12.088 11.0051C12.2162 10.9601 12.327 10.8779 12.4055 10.7696C12.4839 10.6614 12.5262 10.5323 12.5266 10.4V9.75C12.5267 9.66463 12.5094 9.58007 12.4758 9.5012C12.4421 9.42233 12.3927 9.35071 12.3304 9.29045L11.1873 8.1809V5.2C11.1873 3.10895 9.72422 1.34745 7.74214 0.8177C7.54595 0.338 7.0665 0 6.5 0C5.9335 0 5.45405 0.338 5.25785 0.8177C4.37195 1.0543 3.60858 1.5509 3.01731 2.20025L0.946842 0.19045L0 1.10955L12.0532 12.8095L13 11.8904L12.088 11.0051ZM6.5 13C6.91469 13.0005 7.31925 12.8756 7.65743 12.6426C7.99561 12.4096 8.25061 12.0802 8.38699 11.7H4.61301C4.74939 12.0802 5.00439 12.4096 5.34257 12.6426C5.68075 12.8756 6.0853 13.0005 6.5 13ZM1.81266 5.2V8.1809L0.66962 9.29045C0.607317 9.35071 0.557907 9.42233 0.524235 9.5012C0.490563 9.58007 0.473294 9.66463 0.473421 9.75V10.4C0.473421 10.5724 0.54397 10.7377 0.669548 10.8596C0.795126 10.9815 0.965447 11.05 1.14304 11.05H8.42783L1.85819 4.67285C1.83744 4.84705 1.81266 5.0206 1.81266 5.2Z" fill="#AB1212"/></svg>
@@ -98,6 +102,10 @@ export const DocTitleIcon = ({ favicon, method }: { favicon?: string, method: st
 
   if (method === 'googledocs-private') {
     return <img src="/assets/integrations/google-docs.svg" alt="favicon" className="h-5 w-5 rounded-sm" />;
+  }
+
+  if (method === 'confluence-private') {
+    return <ConfluencePageIcon className="h-5 w-5 rounded-sm" />;
   }
 
   if (favicon == null) {
