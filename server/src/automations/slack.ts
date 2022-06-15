@@ -8,17 +8,42 @@ import { getDataFromWebpage } from '../services/webscraper';
 
 dotenv.config();
 
-export const publishMessage = async (text: string, channel: string, token: string) => {
+const formatUrl = (url: string) => {
+  if (!/^https?:\/\//i.test(url)) {
+    return 'https://' + url;
+  }
+  return url;
+}
+
+export const publishMessage = async (text: string, channel: string, token: string, url: string) => {
   const postMessage = async () => {
     const messageUrl = 'https://slack.com/api/chat.postMessage';
     let formattedChannel = channel;
     if (channel.charAt(0) !== '#') {
       formattedChannel = `#${channel}`;
-    } 
+    }
+    const formattedUrl = formatUrl(url);
+    const blocks = [
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text
+        },
+        accessory: {
+          type: "button",
+          text: {
+            type: "plain_text",
+            text: "View"
+          },
+          url: formattedUrl
+        }
+      }
+    ];
     return await axios.post(messageUrl, {
       channel: formattedChannel,
-      text,
-      mrkdwn: true
+      blocks,
+      text
     }, { headers: { authorization: `Bearer ${token}` } });
   }
   const handleChannelNotFound = async (err: string) => {
@@ -58,6 +83,6 @@ export const slackAutomationForEvent = async (event: EventType, org: OrgType, do
     const message = await getSlackMessage(event, org._id.toString(), doc);
     const token = org?.integrations?.slack?.accessToken;
     if (message && token) {
-        await publishMessage(message, 'docs', token);
+        await publishMessage(message, 'docs', token, doc.url);
     }
 };

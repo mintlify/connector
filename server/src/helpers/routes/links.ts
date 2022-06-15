@@ -3,7 +3,7 @@ import { Change, LineRange } from '../github/types';
 export const urlify = (str: string): string => {
     let content = str;
     if (!/^https?:\/\//i.test(str)) {
-        content = 'http://' + str;
+        content = 'https://' + str;
     }
     return content;
 }
