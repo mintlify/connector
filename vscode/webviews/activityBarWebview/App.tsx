@@ -137,18 +137,6 @@ const App = () => {
 
   const handleSubmit = event => {
     event.preventDefault();
-    if (user == null || dashboardUrl == null) {
-      vscode.postMessage({ command: 'error', message: 'Error - Please log in again'});
-      return;
-    }
-    if (selectedDoc?._id == null) {
-      vscode.postMessage({ command: 'error', message: 'Error - Please select a document'});
-      return;
-    }
-    if (code == null || code?.org == null) {
-      vscode.postMessage({ command: 'error', messaage: 'Please select code or use a repo with git'});
-      return;
-    }
     const args = {
       userId: user.userId,
       subdomain: getSubdomain(dashboardUrl),
