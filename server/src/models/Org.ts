@@ -1,4 +1,5 @@
 import mongoose, { Schema, Types } from 'mongoose';
+import { ConfluenceCredentials } from '../routes/integrations/confluence';
 import { GoogleDocsCredentials } from '../services/googleDocs';
 
 export type OrgType = {
@@ -31,19 +32,7 @@ export type OrgType = {
       installations: Object[];
     };
     google?: GoogleDocsCredentials;
-    confluence?: {
-      access_token: string,
-      expires_in: string,
-      refresh_token: string,
-      scope: string,
-      accessibleResources: {
-        id: string,
-        url: string,
-        name: string,
-        scopes: string[],
-        avatarUrl: string
-      }[]
-    }
+    confluence?: ConfluenceCredentials;
   };
   users: string[];
   invitedEmails?: string[];

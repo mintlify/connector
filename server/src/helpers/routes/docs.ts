@@ -149,7 +149,7 @@ export const createDocsFromConfluencePages = async (pages: ConfluencePage[], org
           org: orgId,
           url,
           method: 'confluence-private',
-          googledocs: {
+          confluence: {
             id: page.id,
           },
           content: page.content,

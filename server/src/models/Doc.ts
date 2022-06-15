@@ -12,14 +12,18 @@ export type DocType = {
     createdAt: Date;
     changeConfirmationCount?: number;
     isJustAdded: boolean;
-    // used for method = notion-private
+    // when method = notion-private
     notion?: {
         pageId: string;
     };
-    // used for method = googledocs-private
+    // when method = googledocs-private
     googledocs?: {
         id: string;
     };
+    // when method = confluence-private
+    confluence?: {
+        id: string;
+    }
     slack?: boolean;
     email?: boolean;
 };
@@ -40,6 +44,9 @@ const DocSchema = new Schema({
         pageId: String,
     },
     googledocs: {
+        id: String,
+    },
+    confluence: {
         id: String,
     },
     slack: Boolean,

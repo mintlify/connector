@@ -7,7 +7,7 @@ import { getContentFromHTML } from '../helpers/routes/domparsing';
 import { getNotionPageData } from './notion';
 import axios from 'axios';
 
-type WebScrapingMethod = 'readme' | 'stoplight' | 'docusaurus' | 'github' | 'notion-public' | 'notion-private' | 'googledocs-public' | 'googledocs-private' | 'confluence-public' | 'gitbook' | 'web';
+type WebScrapingMethod = 'readme' | 'stoplight' | 'docusaurus' | 'github' | 'notion-public' | 'notion-private' | 'googledocs-public' | 'googledocs-private' | 'confluence-public' | 'confluence-private' | 'gitbook' | 'web';
 
 export type ScrapingMethod = WebScrapingMethod;
 

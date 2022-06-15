@@ -11,6 +11,7 @@ import Org from '../models/Org';
 import { track } from '../services/segment';
 import { getNotionPageDataWithId } from '../services/notion';
 import { getGoogleDocsPrivateData } from '../services/googleDocs';
+import { getConfluenceContentFromPageById } from './integrations/confluence';
 
 const scanRouter = express.Router();
 
@@ -49,6 +50,15 @@ export const extractFromDoc = async (doc: DocType, orgId: string): Promise<Conte
       throw 'Unable to get organization by ID for Google Docs'
     }
     return getGoogleDocsPrivateData(doc.googledocs.id, googleCredentials);
+  }
+
+  else if (doc.method === 'confluence-private' && doc.confluence?.id) {
+    const org = await Org.findById(orgId);
+    const confluenceCredentials = org?.integrations?.confluence;
+    if (confluenceCredentials == null) {
+      throw 'Unable to get organization by ID for Confluence'
+    }
+    return getConfluenceContentFromPageById(doc.confluence.id, confluenceCredentials);
   }
 
   return getDataFromWebpage(doc.url, orgId, WAIT_FOR_WEB_SCRAPE);

@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { ISDEV } from '../../helpers/environment';
 import { removeHtmlTagsAndGetText } from '../../helpers/routes/domparsing';
 import Org from '../../models/Org';
+import { ContentData } from '../../services/webscraper';
 import { userMiddleware } from '../user';
 
 export type ConfluencePage = {
@@ -19,7 +20,26 @@ export type ConfluencePage = {
   },
   _links: {
     webui: string;
+  },
+  body: {
+    view: {
+      value: string;
+    }
   }
+}
+
+export type ConfluenceCredentials = {
+  access_token: string,
+  expires_in: string,
+  refresh_token: string,
+  scope: string,
+  accessibleResources: {
+    id: string,
+    url: string,
+    name: string,
+    scopes: string[],
+    avatarUrl: string
+  }[]
 }
 
 const confluenceRouter = Router();
@@ -111,7 +131,7 @@ confluenceRouter.post('/sync', userMiddleware, async (_, res) => {
       },
     });
 
-    const results = response.results.map((result: any) => {
+    const results = response.results.map((result: ConfluencePage) => {
       return {
         ...result,
         content: removeHtmlTagsAndGetText(result.body.view.value)
@@ -123,6 +143,24 @@ confluenceRouter.post('/sync', userMiddleware, async (_, res) => {
     console.log(error);
     return res.status(500).send({error})
   }
-})
+});
+
+export const getConfluenceContentFromPageById = async (pageId: string, confluenceCredentials: ConfluenceCredentials): Promise<ContentData> => {
+  const { data: response }: { data: ConfluencePage } = await axios.get(`https://api.atlassian.com/ex/confluence/${confluenceCredentials.accessibleResources[0].id}/wiki/rest/api/content/${pageId}`, {
+      headers: { 
+        'Authorization': `Bearer ${confluenceCredentials.access_token}`,
+        'Accept': 'application/json'
+      },
+      params: {
+        expand: ['body.view', 'history.lastUpdated'].join(','),
+      },
+    });
+  
+    return {
+      method: 'confluence-private',
+      title: response.title,
+      content: removeHtmlTagsAndGetText(response.body.view.value),
+    }
+}
 
 export default confluenceRouter;
