@@ -63,25 +63,25 @@ export const getSubdomain = (url: string) => {
 
 const App = () => {
   const initialState: State = vscode.getState();
-  const [user, setUser] = useState<any>(initialState.user);
-  const [dashboardUrl, setDashboardUrl] = useState<string>(initialState.dashboardUrl);
-  const [API_ENDPOINT, setAPI_ENDPOINT] = useState<string>(initialState.API_ENDPOINT);
+  const [user, setUser] = useState<any>(initialState?.user);
+  const [dashboardUrl, setDashboardUrl] = useState<string>(initialState?.dashboardUrl);
+  const [API_ENDPOINT, setAPI_ENDPOINT] = useState<string>(initialState?.API_ENDPOINT);
   const [signInUrl, setSignInUrl] = useState<string>('');
   const [docs, setDocs] = useState<Doc[]>([initialDoc]);
-  const [selectedDoc, setSelectedDoc] = useState<Doc>(initialState.selectedDoc || initialDoc);
-  const [code, setCode] = useState<Code | undefined>(initialState.code);
+  const [selectedDoc, setSelectedDoc] = useState<Doc>(initialState?.selectedDoc || initialDoc);
+  const [code, setCode] = useState<Code | undefined>(initialState?.code);
 
   useEffect(() => {
     window.addEventListener('message', event => {
       const message = event.data;
       switch (message.command) {
         case 'start':
-          const API_ENDPOINT = message.args;
+          const API_ENDPOINT = message?.args;
           vscode.setState({ ...initialState, API_ENDPOINT });
           setAPI_ENDPOINT(API_ENDPOINT);
           break;
         case 'auth':
-          const user = message.args;
+          const user = message?.args;
           const newDashboardUrl = formatSignInUrl(signInUrl);
           vscode.setState({ ...initialState, user, dashboardUrl: newDashboardUrl });
           setUser(user);
@@ -91,7 +91,7 @@ const App = () => {
           if (!user?.userId || !dashboardUrl) {
             return;
           }
-          const docId = message.args;
+          const docId = message?.args;
           axios.get(`${API_ENDPOINT}/docs`, {
             params: {
               userId: user.userId,
@@ -108,7 +108,7 @@ const App = () => {
             });
           break;
         case 'post-code':
-          const code = message.args;
+          const code = message?.args;
           vscode.setState({ ...initialState, code });
           setCode(code);
           break;
@@ -125,7 +125,7 @@ const App = () => {
     }
     axios.get(`${API_ENDPOINT}/docs`, {
       params: {
-        userId: user.userId,
+        userId: user?.userId,
         subdomain: getSubdomain(dashboardUrl)
       }
     })
