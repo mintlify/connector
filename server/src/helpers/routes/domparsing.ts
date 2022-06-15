@@ -5,6 +5,10 @@ export const getContentFromHTML = (element: cheerio.Cheerio<cheerio.Element>) =>
   const html = element.html();
   if (html == null) return '';
 
+  return removeHtmlTagsAndGetText(html);
+}
+
+export const removeHtmlTagsAndGetText = (html: string) => {
   const parsedHTML = html.replace(/<(?:.|\n)*?>/gm, '\n');
   const decodedHTML = he.decode(parsedHTML);
   return removeRedundantWhitespace(decodedHTML);

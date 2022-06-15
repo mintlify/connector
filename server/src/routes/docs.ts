@@ -8,7 +8,7 @@ import Event from '../models/Event';
 import { extractDataFromHTML, getDataFromWebpage } from '../services/webscraper';
 import { deleteDocForSearch, indexDocForSearch } from '../services/algolia';
 import { track } from '../services/segment';
-import { createDocFromUrl, createDocsFromGoogleDocs, createDocsFromNotionPageId } from '../helpers/routes/docs';
+import { createDocFromUrl, createDocsFromConfluencePages, createDocsFromGoogleDocs, createDocsFromNotionPageId } from '../helpers/routes/docs';
 import { extractFromDoc } from './scan';
 
 const docsRouter = express.Router();
@@ -102,6 +102,18 @@ docsRouter.post('/googledocs', userMiddleware, async (req, res) => {
   try {
     // Initial add is using light mode scan
     await createDocsFromGoogleDocs(docs, org, res.locals.user._id);
+    return res.end();
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
+});
+
+docsRouter.post('/confluence', userMiddleware, async (req, res) => {
+  const { pages } = req.body;
+  const org = res.locals.user.org;
+
+  try {
+    await createDocsFromConfluencePages(pages, org, res.locals.user._id);
     return res.end();
   } catch (error) {
     return res.status(500).send({ error });

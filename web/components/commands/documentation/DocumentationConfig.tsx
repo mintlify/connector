@@ -1,5 +1,6 @@
 import { DocumentationTypeIcon } from '../../../helpers/Icons'
 import { Org, User } from '../../../pages'
+import AddConfluence from './AddConfluence'
 import { addDocumentationMap, AddDocumentationType } from './AddDocumentation'
 import AddGoogleDocs from './AddGoogleDocs'
 import AddNotion from './AddNotion'
@@ -60,10 +61,16 @@ export default function DocumentationConfig({
       setIsAddDocumentationOpen={setIsAddDocumentationOpen}
       setIsAddDocLoading={setIsAddDocLoading}
     />,
-    }
-    // confluence: {
-    //   inputComponent: null,
-    // },
+    },
+    confluence: {
+      inputComponent: <AddConfluence
+      user={user}
+      org={org}
+      onCancel={onCancel}
+      setIsAddDocumentationOpen={setIsAddDocumentationOpen}
+      setIsAddDocLoading={setIsAddDocLoading}
+    />,
+    },
   }
 
   const ruleData = addDocumentationMap[documentationType]
