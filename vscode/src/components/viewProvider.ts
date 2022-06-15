@@ -74,6 +74,10 @@ export class ViewProvider implements WebviewViewProvider {
 							}));
 							break;
 						}
+					case 'error': {
+						const errMessage = message?.message;
+						vscode.window.showInformationMessage(errMessage);
+					}
 				}
 			});
 
