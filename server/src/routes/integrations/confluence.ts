@@ -1,7 +1,6 @@
+import axios from 'axios';
 import { Router } from 'express';
-import { google as googleapis } from 'googleapis';
 import { ISDEV } from '../../helpers/environment';
-import Doc from '../../models/Doc';
 import Org from '../../models/Org';
 import { userMiddleware } from '../user';
 
@@ -13,12 +12,11 @@ export type GoogleDoc = {
 }
 
 const confluenceRouter = Router();
-const client_id = ISDEV
-  ? 'XbG4M6XbC63P3J8USptlNwvWkKQUC23P'
-  : 'IUsX3rcUbGOQ7Jjkn0xFG6HNtdvhjmAg';
-const redirect_uri = ISDEV
+const clientId = process.env.CONFLUENCE_CLIENT_ID;
+const clientSecret = process.env.CONFLUENCE_CLIENT_SECRET;
+const redirectUri = ISDEV
   ? 'http://localhost:5000/routes/integrations/confluence/authorization'
-  : 'https://connect.mintlify.com/routes/integrations/confluence/authorization';
+  : 'https://connect.mintlify.com/routes/integrations/confluence/authorization'
 
 confluenceRouter.get('/install', async (req, res) => {
   const { org, close } = req.query;
@@ -27,38 +25,45 @@ confluenceRouter.get('/install', async (req, res) => {
   const state = { org, close };
   const encodedState = encodeURIComponent(JSON.stringify(state));
 
-  const confluenceAuthUrl = `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=${client_id}&scope=read%3Aconfluence-user%20read%3Aconfluence-content.all&redirect_uri=${redirect_uri}&state=${encodedState}&response_type=code&prompt=consent`;
+  const confluenceAuthUrl = `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=${clientId}&scope=read%3Aconfluence-user%20read%3Aconfluence-content.all%20offline_access&redirect_uri=${redirectUri}&state=${encodedState}&response_type=code&prompt=consent`;
   return res.redirect(confluenceAuthUrl);
 });
 
 confluenceRouter.get('/authorization', async (req, res) => {
     const { code, state } = req.query;
     if (code == null) return res.status(403).send('Invalid or missing grant code');
+    if (state == null) return res.status(403).send('No state provided');
 
     try {
-      // const { tokens } = await oAuth2Client.getToken(code as string);
-      // oAuth2Client.setCredentials(tokens);
+      const { data: { access_token, expires_in, scope, refresh_token } } = await axios.post('https://auth.atlassian.com/oauth/token', {
+        grant_type: 'authorization_code',
+        client_id: clientId,
+        client_secret: clientSecret,
+        code,
+        redirect_uri: redirectUri,
+      });
 
-      // if (state == null) return res.status(403).send('No state provided');
-      // const parsedState = JSON.parse(decodeURIComponent(state as string));
+      const parsedState = JSON.parse(decodeURIComponent(state as string));
+      const { org: orgId } = parsedState;
+      const org = await Org.findByIdAndUpdate(orgId, {
+        'integrations.confluence': {
+          access_token,
+          expires_in,
+          refresh_token,
+          scope
+        },
+      });
 
-      // const { org: orgId } = parsedState;
-      // const org = await Org.findByIdAndUpdate(orgId, {
-      //   'integrations.google': tokens,
-      // });
-
-      // if (org == null) {
-      //   return res.status(403).send({ error: 'Invalid organization ID' });
-      // }
+      if (org == null) {
+        return res.status(403).send({ error: 'Invalid organization ID' });
+      }
       
-      // if (parsedState?.close) {
-      //   return res.send("<script>window.close();</script>");
-      // }
-      // return res.redirect(`https://${org.subdomain}.mintlify.com`);
-      console.log(code);
-      res.end();
+      if (parsedState?.close) {
+        return res.send("<script>window.close();</script>");
+      }
+      return res.redirect(`https://${org.subdomain}.mintlify.com`);
     } catch (error) {
-      return res.status(500).send("Unable to install Google integration")
+      return res.status(500).send("Unable to install Confluence integration. Refresh to try again")
     }
 });
 

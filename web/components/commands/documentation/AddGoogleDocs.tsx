@@ -200,23 +200,3 @@ export default function AddGoogleDocs({ user, org, onCancel, setIsAddDocumentati
     </div>
   )
 }
-
-const TitleIcon = ({ icon }: { icon?: Icon }) => {
-  if (icon == null) {
-    return null
-  }
-
-  if (icon.emoji) {
-    return <span className="mr-1">{icon?.emoji}</span>
-  }
-
-  if (icon.file) {
-    return (
-      <span className="mr-1">
-        <img src={icon.file.url} className="h-4 w-4 rounded-sm" />
-      </span>
-    )
-  }
-
-  return null
-}

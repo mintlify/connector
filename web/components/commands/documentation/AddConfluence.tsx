@@ -193,30 +193,10 @@ export default function AddConfluence({ user, org, onCancel, setIsAddDocumentati
             )}
             onClick={onSubmit}
           >
-            Import ({selectedDocs.length}) Google Docs
+            Import ({selectedDocs.length}) Confluence Pages
           </button>
         </div>
       </div>
     </div>
   )
-}
-
-const TitleIcon = ({ icon }: { icon?: Icon }) => {
-  if (icon == null) {
-    return null
-  }
-
-  if (icon.emoji) {
-    return <span className="mr-1">{icon?.emoji}</span>
-  }
-
-  if (icon.file) {
-    return (
-      <span className="mr-1">
-        <img src={icon.file.url} className="h-4 w-4 rounded-sm" />
-      </span>
-    )
-  }
-
-  return null
 }

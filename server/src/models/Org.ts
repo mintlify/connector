@@ -31,6 +31,12 @@ export type OrgType = {
       installations: Object[];
     };
     google?: GoogleDocsCredentials;
+    confluence?: {
+      access_token: string,
+      expires_in: string,
+      refresh_token: string,
+      scope: string,
+    }
   };
   users: string[];
   invitedEmails?: string[];
@@ -85,6 +91,12 @@ const OrgSchema = new Schema({
       id_token: String,
       scope: String,
     },
+    confluence: {
+      access_token: String,
+      expires_in: String,
+      refresh_token: String,
+      scope: String,
+    }
   },
   notifications: {
     monthlyDigest: { type: Boolean, default: true },
