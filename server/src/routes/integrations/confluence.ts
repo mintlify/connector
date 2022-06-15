@@ -5,6 +5,23 @@ import { removeHtmlTagsAndGetText } from '../../helpers/routes/domparsing';
 import Org from '../../models/Org';
 import { userMiddleware } from '../user';
 
+export type ConfluencePage = {
+  id: string;
+  status: string;
+  type: 'page';
+  title: string;
+  content: string;
+  history: {
+    createdDate: string;
+    lastUpdated: {
+      when: string;
+    }
+  },
+  _links: {
+    webui: string;
+  }
+}
+
 const confluenceRouter = Router();
 const clientId = process.env.CONFLUENCE_CLIENT_ID;
 const clientSecret = process.env.CONFLUENCE_CLIENT_SECRET;
