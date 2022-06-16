@@ -14,7 +14,7 @@ import DocItem from "../DocItem";
 import LoadingItem from "../LoadingItem";
 import ProfilePicture from "../ProfilePicture";
 import { getIntegrations, onInstallIntegration, Integration } from "../../helpers/integrations";
-import { Org, User } from "../../context/ProfileContex";
+import { Org, useProfile, User } from "../../context/ProfileContex";
 
 const onboardStepLocalStateKey = 'onboarding-step';
 
@@ -108,24 +108,33 @@ const buildAppsUsing = (user: User, org: Org) => {
   return apps;
 }
 
-type OnboardingProps = {
-  user: User,
-  org: Org,
-}
-
-export default function Onboarding({ user, org }: OnboardingProps) {
+export default function Onboarding() {
+  const { profile } = useProfile();
   const [step, setStep] = useState(0);
-  const [role, setRole] = useState<string | undefined>(user.onboarding?.role);
-  const [teamSize, setTeamSize] = useState<string | undefined>(org.onboarding?.teamSize);
-  const [appsUsing, setAppsUsing] = useState<string[]>(buildAppsUsing(user, org));
+  const [role, setRole] = useState<string>();
+  const [teamSize, setTeamSize] = useState<string>();
+  const [appsUsing, setAppsUsing] = useState<string[]>([]);
+
+  const { user, org } = profile;
 
   useEffect(() => {
+    if (user == null || org == null) {
+      return;
+    }
     const step = window.localStorage.getItem(onboardStepLocalStateKey);
+
+    setRole(user.onboarding?.role);
+    setTeamSize(org.onboarding?.teamSize);
+    setAppsUsing(buildAppsUsing(user, org));
 
     if (step) {
       setStep(parseInt(step));
     }
-  }, []);
+  }, [user, org]);
+
+  if (user == null || org == null) {
+    return null;
+  }
 
   const onBack = () => {
     if (step === 0) {
@@ -656,7 +665,7 @@ function InviteStep({ user, onBack, step, totalSteps }: { user: User, onBack: ()
                                 </svg>
                               </span>
                             ) : (
-                              <ProfilePicture size={10} user={member} />
+                              <ProfilePicture size={10} />
                             )}
                             <div className="ml-4">
                               <div

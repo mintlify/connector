@@ -2,35 +2,45 @@ import { XCircleIcon } from '@heroicons/react/solid';
 import axios from 'axios';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useProfile } from '../context/ProfileContex';
 import { API_ENDPOINT } from '../helpers/api';
 import { ConnectionIcon, DocTitleIcon } from '../helpers/Icons';
 import { getSubdomain } from '../helpers/user';
-import { Doc, User } from '../pages';
+import { Doc } from '../pages';
 import timeAgo from '../services/timeago';
 import EventItem, { Event } from './Event';
 import Tooltip from './Tooltip';
 
 type DocProfileProps = {
   doc: Doc,
-  user: User,
 }
 
-function DocProfile({ doc, user }: DocProfileProps) {
+function DocProfile({ doc }: DocProfileProps) {
+  const { profile } = useProfile();
   const [codes, setCodes] = useState(doc.code);
   const [isVSCodeInstalled, setIsVSCodeInstalled] = useState(false);
+
+  const { user } = profile;
 
   useEffect(() => {
     setCodes(doc.code);
   }, [doc]);
 
   useEffect(() => {
+    if (user == null) {
+      return;
+    }
     axios.get(`${API_ENDPOINT}/routes/user/${user.userId}/install-vscode`)
       .then(({ data }) => {
         if (data.isVSCodeInstalled) {
           setIsVSCodeInstalled(data.isVSCodeInstalled)
         }
       })
-  }, [user.userId]);
+  }, [user]);
+
+  if (user == null) {
+    return null;
+  }
 
   const onDeleteCode = async (codeId: string) => {
     setCodes(codes.filter(code => code._id !== codeId));
@@ -101,14 +111,13 @@ function DocProfile({ doc, user }: DocProfileProps) {
 
 type ActivityBarProps = {
   events: Event[];
-  user: User;
   selectedDoc?: Doc;
 }
 
-export default function ActivityBar({ events, user, selectedDoc }: ActivityBarProps) {
+export default function ActivityBar({ events, selectedDoc }: ActivityBarProps) {
   return (
     <div className="relative pl-6 lg:w-80">
-      {selectedDoc && <DocProfile doc={selectedDoc} user={user} />}
+      {selectedDoc && <DocProfile doc={selectedDoc} />}
         <div className="pt-4 pb-2">
           <h2 className="text-sm font-semibold">Activity</h2>
         </div>

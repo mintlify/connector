@@ -114,7 +114,7 @@ export default function Home() {
         <Head>
           <title>Finish setting up your account</title>
         </Head>
-        <Setup userSession={session} />
+        <Setup />
       </>
     )
   }
@@ -129,7 +129,7 @@ export default function Home() {
   }
 
   if (!user?.onboarding?.isCompleted) {
-    return <Onboarding user={user} org={org} />
+    return <Onboarding />
   }
 
   const onClickDoc = (doc: Doc) => {
@@ -194,7 +194,6 @@ export default function Home() {
                 {docs?.map((doc) => (
                   <DocItem
                     key={doc._id}
-                    user={user}
                     doc={doc}
                     onClick={onClickDoc}
                     selectedDoc={selectedDoc}
@@ -212,7 +211,6 @@ export default function Home() {
             <ActivityBar
               events={events}
               selectedDoc={selectedDoc}
-              user={user}
             />
           </div>
         </div>

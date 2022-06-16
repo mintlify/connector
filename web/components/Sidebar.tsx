@@ -48,7 +48,6 @@ export default function Sidebar({
                 <div className="flex-shrink-0 h-12 w-12">
                   <ProfilePicture
                     size={12}
-                    user={user}
                   />
                 </div>
                 <div className="space-y-px">

@@ -1,6 +1,12 @@
-import { User } from "../context/ProfileContex";
+import { useProfile } from "../context/ProfileContex";
 
-export default function ProfilePicture({ size, user }: { size: number; user: User }) {
+export default function ProfilePicture({ size }: { size: number }) {
+  const { profile } = useProfile();
+  const { user } = profile;
+  if (user == null) {
+    return null;
+  }
+
   const textSize = size <= 8 ? "text-xs" : "text-base";
   if (!user.profilePicture) {
     const initials = (user.firstName ? user.firstName[0] : '') + (user.lastName ? user.lastName[0] : '');

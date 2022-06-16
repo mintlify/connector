@@ -447,7 +447,7 @@ export default function Settings() {
                                                   </svg>
                                                 </span>
                                               ) : (
-                                                <ProfilePicture size={10} user={member} />
+                                                <ProfilePicture size={10} />
                                               )}
                                               <div className="ml-4">
                                                 <div

@@ -100,7 +100,6 @@ export default function Navbar() {
                       <span className="sr-only">Open user menu</span>
                       <ProfilePicture
                         size={8}
-                        user={user}
                       />
                     </Menu.Button>
                     <Transition
@@ -178,7 +177,6 @@ export default function Navbar() {
                 <div className="flex-shrink-0">
                   <ProfilePicture
                     size={10}
-                    user={user}
                   />
                 </div>
                 <div className="ml-3">
