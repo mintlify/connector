@@ -417,7 +417,6 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
           { isAddDocLoading && <LoadingItem /> }
           {docs.map((doc) => (
             <DocItem
-              user={user}
               key={doc._id}
               doc={doc}
               docs={docs}

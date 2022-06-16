@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import Link from "next/link";
 import { classNames } from "../helpers/functions";
-import { Doc, User } from "../pages";
+import { Doc } from "../pages";
 import { Menu } from '@headlessui/react'
 import {
   ChevronRightIcon,

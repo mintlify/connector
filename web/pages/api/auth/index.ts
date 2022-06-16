@@ -1,5 +1,4 @@
 import {  NextApiResponse } from "next";
-import { User } from "../..";
 import { getOrgFromSubdomainAndPotentiallyJoin, getOrgFromSubdomainForAuth, getSubdomain, getUserFromUserId } from "../../../helpers/user";
 import { loadStytch } from "../../../lib/loadStytch";
 import { withSession } from "../../../lib/withSession";
@@ -25,7 +24,7 @@ async function handler(req: any, res: NextApiResponse) {
     }
 
     const subdomain = getSubdomain(req.headers.host);
-    const existingUser: User = await getUserFromUserId(response.user_id);
+    const existingUser = await getUserFromUserId(response.user_id);
 
     const authSource = req.session.get("authSource");
     req.session.destroy();
