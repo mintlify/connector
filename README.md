@@ -9,7 +9,7 @@
   <a href="https://www.loom.com/share/892d08e178144cd89b109f9396e4db98"> <img src="./assets/WatchDemo.svg" alt="Watch Demo"> </a>
 </p>
 
-## Main features
+## Features
 
 The goal of Mintlify is to increase visibility over documentation across your entire team so that you can easily maintain it. Mintlify allows you to:
 
