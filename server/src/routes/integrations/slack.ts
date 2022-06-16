@@ -93,4 +93,8 @@ slackRouter.get('/authorization', async (req, res) => {
   return res.redirect('slack://open');
 });
 
+slackRouter.post('/actions', async (_, res) => {
+  return res.status(200).end();
+})
+
 export default slackRouter;
