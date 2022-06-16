@@ -3,7 +3,7 @@ import qs from 'qs';
 import { Router } from 'express';
 
 import Org from '../../models/Org';
-import { track } from '../../services/segment';
+import { track, trackEvent } from '../../services/segment';
 
 const clientId = '2329388587911.3498023797925';
 const redirectUri = 'https://connect.mintlify.com/routes/integrations/slack/authorization';
@@ -93,8 +93,8 @@ slackRouter.get('/authorization', async (req, res) => {
   return res.redirect('slack://open');
 });
 
-slackRouter.post('/actions', async (req, res) => {
-  console.log({req});
+slackRouter.post('/actions', async (_, res) => {
+  trackEvent('View Slack message');
   return res.status(200).end();
 })
 
