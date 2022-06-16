@@ -4,7 +4,10 @@
 
 [Mintlify](https://www.mintlify.com/) helps teams easily track and manage documentation.
 
-[▶️ Watch our 2 min demo](https://www.loom.com/share/892d08e178144cd89b109f9396e4db98)
+<p align="center" class="flex row">
+  <a href="https://www.mintlify.com/create"> <img src="./assets/GetStarted.svg" alt="Get Started"> </a>
+  <a href="https://www.loom.com/share/892d08e178144cd89b109f9396e4db98"> <img src="./assets/WatchDemo.svg" alt="Watch Demo"> </a>
+</p>
 
 ## Main features
 
@@ -38,8 +41,6 @@ We are currently integrated with:
 - Confluence
 - GitHub
 - Slack
-
-[⚡️ Get started and create an account](https://www.mintlify.com/create)
 
 ---
 
