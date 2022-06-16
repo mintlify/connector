@@ -2,7 +2,6 @@ import Layout from '../../components/layout'
 import toast, { Toaster } from 'react-hot-toast'
 import { GetServerSideProps } from 'next'
 import { withSession } from '../../lib/withSession'
-import { UserSession } from '..'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import axios from 'axios'
@@ -16,7 +15,7 @@ import ProfilePicture from '../../components/ProfilePicture'
 import { CheckCircleIcon, XIcon } from '@heroicons/react/solid'
 import { navigation } from './account'
 import { Integration, onInstallIntegration } from '../../helpers/integrations';
-import { AccessMode, User } from '../../context/ProfileContex'
+import { AccessMode, useProfile, User } from '../../context/ProfileContex'
 
 export type EmailNotifications = {
   monthlyDigest: boolean
@@ -132,12 +131,11 @@ const notify = (title: string, description: string) =>
     )
   })
 
-export default function Settings({ userSession }: { userSession: UserSession }) {
-  const { user, org } = userSession
-
+export default function Settings() {
+  const { profile, isLoadingProfile, session } = useProfile();
   const router = useRouter()
-  const [orgName, setOrgName] = useState(org?.name)
-  const [orgAccessMode, setOrgAccessMode] = useState(org?.access?.mode || 'public')
+  const [orgName, setOrgName] = useState(profile?.org?.name)
+  const [orgAccessMode, setOrgAccessMode] = useState(profile?.org?.access?.mode || 'public')
   const [invitedEmail, setInvitedEmail] = useState('')
   const [inviteErrorMessage, setInviteErrorMessage] = useState<string | undefined>(undefined)
   const [isSendingInvite, setIsSendingInvite] = useState(false)
@@ -145,6 +143,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
   const [integrationsStatus, setIntegrationsStatus] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
+    const { user, org } = profile;
     if (user == null || org == null) return
     // get all members of the organization
     axios
@@ -170,7 +169,9 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
       }, 1000);
       
       return () => clearInterval(statusInterval);
-  }, [user, org])
+  }, [profile]);
+
+  const { user, org } = profile;
 
   if (user == null || org == null) {
     router.push('/')
@@ -541,11 +542,3 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
     </>
   )
 }
-
-const getServerSidePropsHandler: GetServerSideProps = async ({ req }: any) => {
-  const userSession = req.session.get('user') ?? null
-  const props = { userSession }
-  return { props }
-}
-
-export const getServerSideProps = withSession(getServerSidePropsHandler)

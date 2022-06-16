@@ -3,16 +3,15 @@ import { getOrgFromSubdomain, getSubdomain, getUserFromUserId } from "../../help
 import { withSession } from "../../lib/withSession";
 
 async function handler(req: any, res: NextApiResponse) {
-  // await req.session.destroy();
-  const userSession = req.session.get('user');
+  const session = req.session.get('user');
 
-  if (!userSession?.userId) {
-    return res.redirect('/');
+  if (session?.userId == null) {
+    return res.end();
   }
 
-  const user = await getUserFromUserId(userSession.userId);
+  const user = await getUserFromUserId(session.userId);
   const subdomain = getSubdomain(req.headers.host);
-  const org = await getOrgFromSubdomain(subdomain, userSession.userId);
+  const org = await getOrgFromSubdomain(subdomain, session.userId);
 
   res.send({ user, org });
 }

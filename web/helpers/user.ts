@@ -1,6 +1,18 @@
 import axios from "axios";
-import { Profile, User, Org } from "../context/ProfileContex";
+import { Profile, User, Org, Session } from "../context/ProfileContex";
 import { API_ENDPOINT } from "./api";
+
+export type OrgForAuth = {
+  id: string,
+  name: string,
+  favicon: string,
+  logo: string,
+}
+
+export const getSession = async () => {
+  const { data: session }: { data: Session } = await axios.get('/api/session');
+  return session;
+}
 
 export const getProfile = async () => {
   const { data: profile }: { data: Profile } = await axios.get('/api/profile');
@@ -17,13 +29,6 @@ export const getUserFromUserId = async (userId: string): Promise<User> => {
 
 export const getSubdomain = (host: string) => {
   return host.split('.')[0];
-}
-
-export type OrgForAuth = {
-  id: string,
-  name: string,
-  favicon: string,
-  logo: string,
 }
 
 export const getOrgFromSubdomainForAuth = async (subdomain: string) => {

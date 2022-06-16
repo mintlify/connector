@@ -1,4 +1,3 @@
-import type { GetServerSideProps } from 'next'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar'
 import Layout from '../components/layout'
@@ -8,7 +7,6 @@ import { API_ENDPOINT } from '../helpers/api'
 import Head from 'next/head'
 import 'react-loading-skeleton/dist/skeleton.css'
 import LoadingItem from '../components/LoadingItem'
-import { withSession } from '../lib/withSession'
 import SignIn from '../components/screens/SignIn'
 import Setup from '../components/screens/Setup'
 import { DocumentTextIcon } from '@heroicons/react/outline'
@@ -38,21 +36,8 @@ export type Doc = {
   email?: boolean
 }
 
-export type UserSession = {
-  userId: string
-  user?: User
-  org?: Org
-  tempAuthData?: {
-    email: string
-    firstName?: string
-    lastName?: string
-    orgId?: string
-    orgName?: string
-  }
-}
-
-export default function Home({ userSession }: { userSession: UserSession }) {
-  const { profile, isLoadingProfile } = useProfile()
+export default function Home() {
+  const { profile, isLoadingProfile, session } = useProfile()
   const [docs, setDocs] = useState<Doc[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedDoc, setSelectedDoc] = useState<Doc>();
@@ -118,7 +103,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     return null;
   }
 
-  if (!userSession) {
+  if (!session) {
     return <SignIn />
   }
 
@@ -130,7 +115,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
         <Head>
           <title>Finish setting up your account</title>
         </Head>
-        <Setup userSession={userSession} />
+        <Setup userSession={session} />
       </>
     )
   }
@@ -238,11 +223,3 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     </>
   )
 }
-
-const getServerSidePropsHandler: GetServerSideProps = async ({ req }: any) => {
-  const userSession = req.session.get('user') ?? null
-  const props = { userSession }
-  return { props }
-}
-
-export const getServerSideProps = withSession(getServerSidePropsHandler)

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { getProfile, getUserFromUserId } from '../helpers/user';
+import { getProfile, getSession } from '../helpers/user';
 
 export type User = {
   userId: string,
@@ -38,14 +38,27 @@ export type Org = {
   }
 }
 
+export type Session = {
+  userId: string
+  tempAuthData?: {
+    email: string
+    firstName?: string
+    lastName?: string
+    orgId?: string
+    orgName?: string
+  }
+}
+
 export type Profile = {
   user?: User;
   org?: Org;
+  session?: Session;
 }
 
 type ProfileContextType = {
   profile: Profile,
   isLoadingProfile: boolean,
+  session?: Session
 }
 
 const defaultProfile = {
@@ -57,6 +70,7 @@ const ProfileContext = createContext<ProfileContextType>({ profile: defaultProfi
 
 export function ProfileContextProvider({ children }: { children: any }) {
   const [profile, setProfile] = useState<Profile>();
+  const [session, setSession] = useState<Session>();
   const [isLoadingProfile, setIsLoadingProfile] = useState<boolean>(true);
 
   useEffect(() => {
@@ -66,11 +80,16 @@ export function ProfileContextProvider({ children }: { children: any }) {
         setProfile(profile);
         setIsLoadingProfile(false);
       });
+    getSession()
+      .then((session) => {
+        setSession(session);
+      })
   }, []);
 
   const value = {
     profile: profile || defaultProfile,
-    isLoadingProfile
+    isLoadingProfile,
+    session,
   }
 
   return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
