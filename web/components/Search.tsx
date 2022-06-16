@@ -6,7 +6,7 @@ import { classNames } from '../helpers/functions'
 import axios from 'axios'
 import { API_ENDPOINT } from '../helpers/api'
 import { DocTitleIcon } from '../helpers/Icons'
-import { useProfile } from '../context/ProfileContex'
+import { useProfile } from '../context/ProfileContext'
 
 type DocResult = {
   objectID: string,

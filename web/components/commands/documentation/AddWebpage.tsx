@@ -1,7 +1,7 @@
 import axios from "axios"
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { useProfile } from "../../../context/ProfileContex"
+import { useProfile } from "../../../context/ProfileContext"
 import { API_ENDPOINT } from "../../../helpers/api"
 import { classNames } from "../../../helpers/functions"
 import { getSubdomain } from "../../../helpers/user"

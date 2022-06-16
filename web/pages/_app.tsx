@@ -2,7 +2,7 @@ import '../styles/globals.css'
 import type { AppProps } from 'next/app'
 import { IntercomProvider } from 'react-use-intercom';
 import { INTERCOM_APP_ID } from '../services/intercom';
-import { ProfileContextProvider } from '../context/ProfileContex';
+import { ProfileContextProvider } from '../context/ProfileContext';
 
 function App({ Component, pageProps }: AppProps) {
   return (

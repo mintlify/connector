@@ -2,7 +2,7 @@ import { UserAddIcon } from "@heroicons/react/solid";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { useProfile } from "../../context/ProfileContex";
+import { useProfile } from "../../context/ProfileContext";
 
 export default function Setup() {
   const { session } = useProfile();

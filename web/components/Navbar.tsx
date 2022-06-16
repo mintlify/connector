@@ -10,7 +10,7 @@ import { classNames } from '../helpers/functions'
 import Link from 'next/link'
 import ProfilePicture from './ProfilePicture'
 import Search from './Search'
-import { useProfile } from '../context/ProfileContex'
+import { useProfile } from '../context/ProfileContext'
 
 const userNavigation = [
   { name: 'Account', href: '/settings/account' },

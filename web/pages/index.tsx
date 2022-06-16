@@ -15,7 +15,7 @@ import ActivityBar from '../components/ActivityBar'
 import { getSubdomain } from '../helpers/user'
 import Onboarding from '../components/screens/Onboarding'
 import DocItem from '../components/DocItem'
-import { useProfile } from '../context/ProfileContex'
+import { useProfile } from '../context/ProfileContext'
 
 type Code = {
   _id: string

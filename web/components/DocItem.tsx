@@ -13,7 +13,7 @@ import { getSubdomain } from "../helpers/user";
 import axios from "axios";
 import { API_ENDPOINT } from "../helpers/api";
 import { ExternalLinkIcon } from '@heroicons/react/outline';
-import { useProfile } from '../context/ProfileContex';
+import { useProfile } from '../context/ProfileContext';
 
 type DocItemProps = {
   doc: Doc,

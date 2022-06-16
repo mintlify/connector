@@ -9,7 +9,7 @@ import { useRouter } from "next/router"
 import Head from "next/head"
 import { getSubdomain } from "../../helpers/user"
 import { CheckCircleIcon, XIcon } from "@heroicons/react/solid";
-import { useProfile } from "../../context/ProfileContex";
+import { useProfile } from "../../context/ProfileContext";
 
 export type EmailNotifications = {
   monthlyDigest: boolean

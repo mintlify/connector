@@ -4,7 +4,7 @@ import { PlusIcon } from '@heroicons/react/solid'
 import Link from 'next/link';
 import AddDocumentation from './commands/documentation/AddDocumentation'
 import ProfilePicture from './ProfilePicture';
-import { Org, useProfile, User } from '../context/ProfileContex';
+import { Org, useProfile, User } from '../context/ProfileContext';
 
 type SidebarProps = {
   setIsAddDocLoading: (isAddingDoc: boolean) => void;

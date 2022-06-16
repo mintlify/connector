@@ -1,4 +1,4 @@
-import { useProfile } from "../context/ProfileContex";
+import { useProfile } from "../context/ProfileContext";
 import Navbar from "./Navbar";
 
 type LayoutProps = {

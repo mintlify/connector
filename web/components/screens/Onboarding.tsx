@@ -14,7 +14,7 @@ import DocItem from "../DocItem";
 import LoadingItem from "../LoadingItem";
 import ProfilePicture from "../ProfilePicture";
 import { getIntegrations, onInstallIntegration, Integration } from "../../helpers/integrations";
-import { Org, useProfile, User } from "../../context/ProfileContex";
+import { Org, useProfile, User } from "../../context/ProfileContext";
 
 const onboardStepLocalStateKey = 'onboarding-step';
 

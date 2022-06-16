@@ -1,4 +1,4 @@
-import { useProfile } from "../context/ProfileContex";
+import { useProfile } from "../context/ProfileContext";
 
 export default function ProfilePicture({ size }: { size: number }) {
   const { profile } = useProfile();

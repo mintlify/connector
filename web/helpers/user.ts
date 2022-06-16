@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Profile, User, Org, Session } from "../context/ProfileContex";
+import { Profile, User, Org, Session } from "../context/ProfileContext";
 import { API_ENDPOINT } from "./api";
 
 export type OrgForAuth = {

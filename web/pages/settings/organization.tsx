@@ -12,7 +12,7 @@ import ProfilePicture from '../../components/ProfilePicture'
 import { CheckCircleIcon, XIcon } from '@heroicons/react/solid'
 import { navigation } from './account'
 import { Integration, onInstallIntegration } from '../../helpers/integrations';
-import { AccessMode, useProfile, User } from '../../context/ProfileContex'
+import { AccessMode, useProfile, User } from '../../context/ProfileContext'
 
 type AccessOption = {
   id: AccessMode
