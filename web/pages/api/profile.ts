@@ -9,9 +9,8 @@ async function handler(req: any, res: NextApiResponse) {
     return res.end();
   }
 
-  const user = await getUserFromUserId(session.userId);
   const subdomain = getSubdomain(req.headers.host);
-  const org = await getOrgFromSubdomain(subdomain, session.userId);
+  const [user, org] = await Promise.all([getUserFromUserId(session.userId), getOrgFromSubdomain(subdomain, session.userId)]);
 
   res.send({ user, org });
 }
