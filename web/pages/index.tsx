@@ -1,9 +1,7 @@
-import axios from 'axios'
 import Sidebar from '../components/Sidebar'
 import Layout from '../components/layout'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { API_ENDPOINT } from '../helpers/api'
 import Head from 'next/head'
 import 'react-loading-skeleton/dist/skeleton.css'
 import LoadingItem from '../components/LoadingItem'
@@ -12,10 +10,10 @@ import Setup from '../components/screens/Setup'
 import { DocumentTextIcon } from '@heroicons/react/outline'
 import { Event } from '../components/Event'
 import ActivityBar from '../components/ActivityBar'
-import { getSubdomain } from '../helpers/user'
 import Onboarding from '../components/screens/Onboarding'
 import DocItem from '../components/DocItem'
 import { useProfile } from '../context/ProfileContext'
+import { request } from '../helpers/request'
 
 type Code = {
   _id: string
@@ -53,15 +51,7 @@ export default function Home() {
       return
     }
 
-    const userId = user.userId
-
-    axios
-      .get(`${API_ENDPOINT}/routes/docs`, {
-        params: {
-          userId: userId,
-          subdomain: getSubdomain(window.location.host),
-        },
-      })
+    request('GET', 'routes/docs')
       .then((docsResponse) => {
         const { docs } = docsResponse.data
         setDocs(docs)
@@ -69,34 +59,19 @@ export default function Home() {
       .finally(() => {
         setIsLoading(false)
       })
-
-    axios
-      .get(`${API_ENDPOINT}/routes/events`, {
-        params: {
-          userId,
-          subdomain: getSubdomain(window.location.host),
-          doc: selectedDoc ? selectedDoc._id : undefined,
-        },
-      })
-      .then((eventsResponse) => {
+    request('GET', 'routes/events', {
+      params: {
+        doc: selectedDoc ? selectedDoc._id : undefined,
+      }
+    }).then((eventsResponse) => {
         const { events } = eventsResponse.data
         setEvents(events)
       });
-
-    if (user == null || org == null) {
-      return;
-    }
-
-    axios.get(`${API_ENDPOINT}/routes/org/${org._id}/integrations`, {
-      params: {
-        userId: user.userId,
-        subdomain: getSubdomain(window.location.host)
-      }
-    })
-    .then(({ data }) => {
-      const { integrations } = data;
-      setIntegrationsStatus(integrations);
-    })
+    request('GET', `routes/org/${org._id}/integrations`)
+      .then(({ data }) => {
+        const { integrations } = data;
+        setIntegrationsStatus(integrations);
+      })
 
   }, [org, user, selectedDoc, isAddDocLoading])
 
