@@ -94,7 +94,7 @@ slackRouter.get('/authorization', async (req, res) => {
 });
 
 slackRouter.post('/actions', async (req, res) => {
-  console.log(req.body);
+  console.log({req});
   return res.status(200).end();
 })
 
