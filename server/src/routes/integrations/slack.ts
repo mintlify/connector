@@ -93,9 +93,14 @@ slackRouter.get('/authorization', async (req, res) => {
   return res.redirect('slack://open');
 });
 
-slackRouter.post('/actions', async (req, res) => {
-  const  { payload } = req.body;
-  console.log({ payload });
+slackRouter.post('/actions', async (ctx, res) => {
+  console.log({ctx});
+  const anyCtx = ctx as any;
+  if (anyCtx?.request?.body?.payload) {
+    const payload = JSON.parse(anyCtx?.request?.body?.payload);
+    console.log({ payload });
+  }
+  
   trackEvent('View Slack message');
   return res.status(200).end();
 })
