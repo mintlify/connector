@@ -3,13 +3,11 @@ import toast, { Toaster } from 'react-hot-toast';
 import { UserCircleIcon, UserGroupIcon, ViewGridAddIcon } from "@heroicons/react/outline"
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import axios from "axios"
-import { API_ENDPOINT } from "../../helpers/api"
 import { useRouter } from "next/router"
 import Head from "next/head"
-import { getSubdomain } from "../../helpers/user"
 import { CheckCircleIcon, XIcon } from "@heroicons/react/solid";
 import { useProfile } from "../../context/ProfileContext";
+import { request } from "../../helpers/request";
 
 export type EmailNotifications = {
   monthlyDigest: boolean
@@ -94,8 +92,10 @@ export default function Settings() {
     if (!firstName || firstName === user.firstName) {
       return;
     }
-    await axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/firstname`, {
-      firstName,
+    await request('PUT', `routes/user/${user.userId}/firstname`, {
+      data: {
+        firstName,
+      }
     })
     notify('Profile name updated', 'Your first name has been updated.');
   }
@@ -104,8 +104,10 @@ export default function Settings() {
     if (!lastName || lastName === user.lastName) {
       return;
     }
-    await axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/lastname`, {
-      lastName,
+    await request('PUT', `routes/user/${user.userId}/lastname`, {
+      data: {
+        lastName,
+      }
     })
     notify('Profile name updated', 'Your last name has been updated.');
   }
@@ -113,12 +115,9 @@ export default function Settings() {
   const updateEmailNotifications = async (newNotifications: EmailNotifications) => {
     setNotifications(newNotifications)
     // update the organization's new notifications in the database
-    await axios.put(`${API_ENDPOINT}/routes/org/${org._id}/notifications`, {
-      ...newNotifications,
-    }, {
-      params: {
-        userId: user.userId,
-        subdomain: getSubdomain(window.location.host)
+    await request('PUT', `routes/org/${org._id}/notifications`, {
+      data: {
+        ...newNotifications,
       }
     })
     notify('Updated notification settings', 'Your notification preferences have been updated.');
