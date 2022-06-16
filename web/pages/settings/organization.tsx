@@ -13,6 +13,7 @@ import { CheckCircleIcon, XIcon } from '@heroicons/react/solid'
 import { navigation } from './account'
 import { Integration, onInstallIntegration } from '../../helpers/integrations';
 import { AccessMode, useProfile, User } from '../../context/ProfileContext'
+import { request } from '../../helpers/request'
 
 type AccessOption = {
   id: AccessMode
@@ -146,27 +147,17 @@ export default function Settings() {
     setOrgName(org.name);
 
     // get all members of the organization
-    axios
-      .get(`${API_ENDPOINT}/routes/org/users`, {
-        params: {
-          userId: user.userId,
-          subdomain: getSubdomain(window.location.host),
-        },
-      })
+    request('GET', 'routes/org/users')
       .then((res) => {
         setMembers(res.data.users)
       })
     
     const statusInterval = setInterval(() => {  
-      axios.get(`${API_ENDPOINT}/routes/org/${org._id}/integrations`, {
-        params: {
-          userId: user.userId,
-          subdomain: getSubdomain(window.location.host)
-        }
-      }).then(({ data: { integrations } }) => {
-        setIntegrationsStatus(integrations);
-        })
-      }, 1000);
+      request('GET', `routes/org/${org._id}/integrations`)
+        .then(({ data: { integrations } }) => {
+          setIntegrationsStatus(integrations);
+          })
+        }, 1000);
       
       return () => clearInterval(statusInterval);
   }, [profile, isLoadingProfile, router]);
@@ -189,19 +180,14 @@ export default function Settings() {
     setInvitedEmail('')
     // create a pending account by calling the invitation API
     const emails = [email]
-    await axios
-      .post(
-        `${API_ENDPOINT}/routes/user/invite-to-org`,
-        {
-          emails,
-        },
-        {
-          params: {
-            userId: user.userId,
-          },
-        }
-      )
-      .then(() => {
+    await request('POST', 'routes/user/invite-to-org', {
+      data: {
+        emails,
+      },
+      params: {
+        userId: user.userId,
+      }
+    }).then(() => {
         const invitedMembers: any = emails.map((email) => {
           return {
             email,
@@ -220,12 +206,11 @@ export default function Settings() {
     if (!orgName || orgName === org.name) {
       return
     }
-    await axios.put(
-      `${API_ENDPOINT}/routes/org/${org._id}/name`,
+    await request('PUT', `routes/org/${org._id}/name`,
       {
-        name: orgName,
-      },
-      {
+        data: {
+          name: orgName,
+        },
         params: {
           userId: user.userId,
           subdomain: getSubdomain(window.location.host),
@@ -237,12 +222,11 @@ export default function Settings() {
 
   const updateAccessSetting = async (newAccessMode: AccessMode) => {
     setOrgAccessMode(newAccessMode)
-    await axios.put(
-      `${API_ENDPOINT}/routes/org/access`,
+    request('PUT', 'routes/org/access',
       {
-        mode: newAccessMode,
-      },
-      {
+        data: {
+          mode: newAccessMode,
+        },
         params: {
           userId: user.userId,
           subdomain: getSubdomain(window.location.host),

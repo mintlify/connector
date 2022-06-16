@@ -78,6 +78,7 @@ export function ProfileContextProvider({ children }: { children: any }) {
     getProfile()
       .then((profile) => {
         setProfile(profile);
+      }).finally(() => {
         setIsLoadingProfile(false);
       });
     getSession()
