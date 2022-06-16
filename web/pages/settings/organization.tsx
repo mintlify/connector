@@ -5,7 +5,6 @@ import Link from 'next/link'
 import axios from 'axios'
 import { API_ENDPOINT } from '../../helpers/api'
 import { classNames } from '../../helpers/functions'
-import { updateSession } from '../../helpers/session'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { getSubdomain } from '../../helpers/user'
@@ -233,7 +232,6 @@ export default function Settings() {
         },
       }
     )
-    updateSession()
     notify('Organization name updated', 'Your organization name has been updated.')
   }
 
@@ -251,7 +249,6 @@ export default function Settings() {
         },
       }
     )
-    updateSession()
     if (newAccessMode === 'private') {
       notify('Updated access settings', 'Only invited members can join the organization')
     } else {

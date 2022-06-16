@@ -7,14 +7,14 @@ import { useEffect, useState } from "react";
 import { API_ENDPOINT } from "../../helpers/api";
 import { classNames } from "../../helpers/functions";
 import { DocumentationTypeIcon } from "../../helpers/Icons";
-import { updateSession } from "../../helpers/session";
 import { getSubdomain } from "../../helpers/user";
-import { Doc, Org, User } from "../../pages";
+import { Doc } from "../../pages";
 import AddDocumentation, { addDocumentationMap, AddDocumentationType } from "../commands/documentation/AddDocumentation";
 import DocItem from "../DocItem";
 import LoadingItem from "../LoadingItem";
 import ProfilePicture from "../ProfilePicture";
 import { getIntegrations, onInstallIntegration, Integration } from "../../helpers/integrations";
+import { Org, User } from "../../context/ProfileContex";
 
 const onboardStepLocalStateKey = 'onboarding-step';
 
@@ -246,8 +246,6 @@ function IntroStep({ user, onBack, onNext, role, setRole, teamSize, setTeamSize,
         userId: user.userId,
         subdomain: getSubdomain(window.location.host)
       }
-    }).then(() => {
-      updateSession();
     })
     onNext();
   }
@@ -578,7 +576,6 @@ function InviteStep({ user, onBack, step, totalSteps }: { user: User, onBack: ()
         subdomain: getSubdomain(window.location.host)
       }
     });
-    await updateSession();
     // Remove onboarding saved step
     window.localStorage.removeItem(onboardStepLocalStateKey);
     router.push('/');

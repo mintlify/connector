@@ -5,7 +5,6 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import axios from "axios"
 import { API_ENDPOINT } from "../../helpers/api"
-import { updateSession } from "../../helpers/session"
 import { useRouter } from "next/router"
 import Head from "next/head"
 import { getSubdomain } from "../../helpers/user"
@@ -98,7 +97,6 @@ export default function Settings() {
     await axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/firstname`, {
       firstName,
     })
-    updateSession();
     notify('Profile name updated', 'Your first name has been updated.');
   }
 
@@ -109,7 +107,6 @@ export default function Settings() {
     await axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/lastname`, {
       lastName,
     })
-    updateSession();
     notify('Profile name updated', 'Your last name has been updated.');
   }
 
@@ -124,7 +121,6 @@ export default function Settings() {
         subdomain: getSubdomain(window.location.host)
       }
     })
-    updateSession();
     notify('Updated notification settings', 'Your notification preferences have been updated.');
   }
 
