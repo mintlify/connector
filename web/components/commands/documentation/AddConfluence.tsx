@@ -1,13 +1,12 @@
 import { SearchIcon } from '@heroicons/react/outline'
 import { CheckCircleIcon } from '@heroicons/react/solid'
-import axios from 'axios'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { Org, useProfile, User } from '../../../context/ProfileContext'
+import { useProfile } from '../../../context/ProfileContext'
 import { API_ENDPOINT } from '../../../helpers/api'
 import { classNames } from '../../../helpers/functions'
 import { ConfluencePageIcon } from '../../../helpers/Icons'
-import { getSubdomain } from '../../../helpers/user'
+import { request } from '../../../helpers/request'
 import timeAgo from '../../../services/timeago'
 
 type ConfluencePage = {
@@ -41,17 +40,7 @@ export default function AddConfluence({ onCancel, setIsAddDocumentationOpen, set
     if (user == null || org == null) {
       return;
     }
-    axios
-      .post(
-        `${API_ENDPOINT}/routes/integrations/confluence/sync`,
-        null,
-        {
-          params: {
-            userId: user.userId,
-            subdomain: getSubdomain(window.location.host),
-          },
-        }
-      )
+    request('POST', 'routes/integrations/confluence/sync')
       .then(({ data: { results } }) => {
         console.log(results);
         setPages(results);
@@ -83,17 +72,10 @@ export default function AddConfluence({ onCancel, setIsAddDocumentationOpen, set
 
   const onSubmit = async () => {
     setIsAddDocLoading(true)
-    axios
-      .post(
-        `${API_ENDPOINT}/routes/docs/confluence`,
-        {
-          pages: selectedPages,
-        },
-        {
-          params: {
-            userId: user.userId,
-            subdomain: getSubdomain(window.location.host),
-          },
+    request('POST', 'routes/docs/confluence', {
+          data: {
+            pages: selectedPages,
+          }
         }
       )
       .then(() => {

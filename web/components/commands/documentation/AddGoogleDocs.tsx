@@ -1,12 +1,11 @@
 import { SearchIcon } from '@heroicons/react/outline'
 import { CheckCircleIcon } from '@heroicons/react/solid'
-import axios from 'axios'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { useProfile } from '../../../context/ProfileContext'
 import { API_ENDPOINT } from '../../../helpers/api'
 import { classNames } from '../../../helpers/functions'
-import { getSubdomain } from '../../../helpers/user'
+import { request } from '../../../helpers/request'
 import timeAgo from '../../../services/timeago'
 
 type GoogleDoc = {
@@ -35,17 +34,7 @@ export default function AddGoogleDocs({ onCancel, setIsAddDocumentationOpen, set
     if (user == null || org == null) {
       return;
     }
-    axios
-      .post(
-        `${API_ENDPOINT}/routes/integrations/google/sync`,
-        null,
-        {
-          params: {
-            userId: user.userId,
-            subdomain: getSubdomain(window.location.host),
-          },
-        }
-      )
+    request('POST', 'routes/integrations/google/sync')
       .then(({ data: { results } }) => {
         setDocs(results);
         setSelectedDocs(results);
@@ -76,17 +65,11 @@ export default function AddGoogleDocs({ onCancel, setIsAddDocumentationOpen, set
 
   const onSubmit = async () => {
     setIsAddDocLoading(true)
-    axios
-      .post(
-        `${API_ENDPOINT}/routes/docs/googledocs`,
+    request('POST', 'routes/docs/googledocs',
         {
-          docs: selectedDocs,
-        },
-        {
-          params: {
-            userId: user.userId,
-            subdomain: getSubdomain(window.location.host),
-          },
+          data: {
+            docs: selectedDocs,
+          }
         }
       )
       .then(() => {

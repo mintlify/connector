@@ -1,12 +1,11 @@
 import { SearchIcon } from '@heroicons/react/outline'
 import { CheckCircleIcon } from '@heroicons/react/solid'
-import axios from 'axios'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { useProfile } from '../../../context/ProfileContext'
 import { API_ENDPOINT } from '../../../helpers/api'
 import { classNames } from '../../../helpers/functions'
-import { getSubdomain } from '../../../helpers/user'
+import { request } from '../../../helpers/request'
 import timeAgo from '../../../services/timeago'
 
 type Icon = {
@@ -44,17 +43,7 @@ export default function AddNotion({ onCancel, setIsAddDocumentationOpen, setIsAd
     if (user == null || org == null) {
       return;
     }
-    axios
-      .post(
-        `${API_ENDPOINT}/routes/integrations/notion/sync`,
-        {},
-        {
-          params: {
-            userId: user.userId,
-            subdomain: getSubdomain(window.location.host),
-          },
-        }
-      )
+    request('POST', 'routes/integrations/notion/sync')
       .then(({ data: { results } }) => {
         const pages = results.map((page: Page) => {
           return { ...page, lastEditedAgo: timeAgo.format(Date.parse(page.lastEditedTime)) }
@@ -88,19 +77,12 @@ export default function AddNotion({ onCancel, setIsAddDocumentationOpen, setIsAd
 
   const onSubmit = async () => {
     setIsAddDocLoading(true)
-    axios
-      .post(
-        `${API_ENDPOINT}/routes/docs/notion`,
-        {
+    request('POST', 'routes/docs/notion',
+      {
+        data: {
           pages: selectedPages,
         },
-        {
-          params: {
-            userId: user.userId,
-            subdomain: getSubdomain(window.location.host),
-          },
-        }
-      )
+      })
       .then(() => {
         setIsAddDocLoading(false)
       })

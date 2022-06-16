@@ -1,9 +1,8 @@
-import axios from "axios"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useProfile } from "../../../context/ProfileContext"
-import { API_ENDPOINT } from "../../../helpers/api"
 import { classNames } from "../../../helpers/functions"
+import { request } from "../../../helpers/request"
 import { getSubdomain } from "../../../helpers/user"
 
 export const isUrlValid = (str: string): boolean => {
@@ -39,7 +38,7 @@ export default function AddWebpage({onCancel, setIsAddDocumentationOpen, setIsAd
     }
 
     setIsLoading(true);
-    axios.get(`${API_ENDPOINT}/routes/docs/preview`, {
+    request('GET', 'routes/docs/preview', {
       params: {
         url
       }
@@ -57,18 +56,16 @@ export default function AddWebpage({onCancel, setIsAddDocumentationOpen, setIsAd
 
   const onSubmit = async () => {
     setIsAddDocLoading(true);
-    await axios
-      .post(
-        `${API_ENDPOINT}/routes/docs`,
-        {
-          url,
+    await request('POST', 'routes/docs',
+      {
+        data: {
+          url
         },
-        {
-          params: {
-            userId: user.userId,
-            subdomain: getSubdomain(window.location.host),
-          },
-        }
+        params: {
+          userId: user.userId,
+          subdomain: getSubdomain(window.location.host),
+        },
+      }
     )
 
     setIsAddDocLoading(false);
