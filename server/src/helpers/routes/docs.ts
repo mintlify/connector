@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { Types } from 'mongoose';
 import Doc from '../../models/Doc';
+import Org from '../../models/Org';
 import { createEvent } from '../../routes/events';
+import { ConfluencePage } from '../../routes/integrations/confluence';
 import { GoogleDoc } from '../../routes/integrations/google';
 import { NotionPage } from '../../routes/integrations/notion';
 import { indexDocForSearch } from '../../services/algolia';
@@ -104,6 +106,57 @@ export const createDocsFromGoogleDocs = async (docs: GoogleDoc[], orgId: Types.O
           createdBy: userId,
           isJustAdded: true,
           lastUpdatedAt: Date.parse(googleDoc.modifiedTime)
+        },
+        {
+          upsert: true,
+          new: true,
+        }
+      );
+
+      await createEvent(orgId, doc._id, 'add', {});
+      indexDocForSearch(doc);
+      track(userId, 'Add documentation', {
+        doc: doc._id.toString(),
+        method: 'googledocs-private',
+        org: orgId.toString(),
+      });
+
+      resolve();
+    }
+    catch {
+      resolve();
+    }
+  }));
+
+  await Promise.all(addDocPromises);
+};
+
+export const createDocsFromConfluencePages = async (pages: ConfluencePage[], orgId: Types.ObjectId, userId: string) => {
+  const addDocPromises = pages.map((page) => new Promise<void>(async (resolve) => {
+    try {
+      const org = await Org.findById(orgId);
+      const firstSpace = org?.integrations?.confluence?.accessibleResources[0];
+      if (org?.integrations?.confluence?.accessibleResources[0] == null) {
+        throw 'No organization found with accessible resources';
+      }
+      const url = `${firstSpace?.url}/wiki/${page._links.webui}`;
+      const doc = await Doc.findOneAndUpdate(
+        {
+          org: orgId,
+          url,
+        },
+        {
+          org: orgId,
+          url,
+          method: 'confluence-private',
+          confluence: {
+            id: page.id,
+          },
+          content: page.content,
+          title: page.title,
+          createdBy: userId,
+          isJustAdded: false,
+          lastUpdatedAt: Date.parse(page.history.lastUpdated.when)
         },
         {
           upsert: true,
