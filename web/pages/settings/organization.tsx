@@ -1,7 +1,5 @@
 import Layout from '../../components/layout'
 import toast, { Toaster } from 'react-hot-toast'
-import { GetServerSideProps } from 'next'
-import { withSession } from '../../lib/withSession'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import axios from 'axios'
@@ -16,11 +14,6 @@ import { CheckCircleIcon, XIcon } from '@heroicons/react/solid'
 import { navigation } from './account'
 import { Integration, onInstallIntegration } from '../../helpers/integrations';
 import { AccessMode, useProfile, User } from '../../context/ProfileContex'
-
-export type EmailNotifications = {
-  monthlyDigest: boolean
-  newsletter: boolean
-}
 
 type AccessOption = {
   id: AccessMode
@@ -132,9 +125,9 @@ const notify = (title: string, description: string) =>
   })
 
 export default function Settings() {
-  const { profile, isLoadingProfile, session } = useProfile();
+  const { profile, isLoadingProfile } = useProfile();
   const router = useRouter()
-  const [orgName, setOrgName] = useState(profile?.org?.name)
+  const [orgName, setOrgName] = useState<string>('')
   const [orgAccessMode, setOrgAccessMode] = useState(profile?.org?.access?.mode || 'public')
   const [invitedEmail, setInvitedEmail] = useState('')
   const [inviteErrorMessage, setInviteErrorMessage] = useState<string | undefined>(undefined)
@@ -144,7 +137,15 @@ export default function Settings() {
 
   useEffect(() => {
     const { user, org } = profile;
-    if (user == null || org == null) return
+    if (user == null || org == null) {
+      if (!isLoadingProfile) {
+        router.push('/')
+      }
+      return
+    }
+
+    setOrgName(org.name);
+
     // get all members of the organization
     axios
       .get(`${API_ENDPOINT}/routes/org/users`, {
@@ -169,13 +170,11 @@ export default function Settings() {
       }, 1000);
       
       return () => clearInterval(statusInterval);
-  }, [profile]);
+  }, [profile, isLoadingProfile, router]);
 
   const { user, org } = profile;
-
-  if (user == null || org == null) {
-    router.push('/')
-    return
+  if (isLoadingProfile || user == null || org == null) {
+    return null;
   }
 
   const integrationSections = getIntegrationSections(org._id);

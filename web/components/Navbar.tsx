@@ -97,15 +97,13 @@ export default function Navbar({ user, org }: NavbarProps) {
 
                   {/* Profile dropdown */}
                   <Menu as="div" className="ml-4 relative flex-shrink-0">
-                    <div>
-                      <Menu.Button className="bg-gray-800 rounded-full flex text-sm text-white">
-                        <span className="sr-only">Open user menu</span>
-                        <ProfilePicture
-                          size={8}
-                          user={user}
-                        />
-                      </Menu.Button>
-                    </div>
+                    <Menu.Button className="bg-gray-800 rounded-full flex text-sm text-white">
+                      <span className="sr-only">Open user menu</span>
+                      <ProfilePicture
+                        size={8}
+                        user={user}
+                      />
+                    </Menu.Button>
                     <Transition
                       as={Fragment}
                       enter="transition ease-out duration-100"

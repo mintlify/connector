@@ -46,8 +46,9 @@ export default function Home() {
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
   const [integrationsStatus, setIntegrationsStatus] = useState<{ [key: string]: boolean }>();
 
+  const { user, org } = profile;
+
   useEffect(() => {
-    const { user, org } = profile;
     if (user == null || org == null) {
       return
     }
@@ -106,8 +107,6 @@ export default function Home() {
   if (!session) {
     return <SignIn />
   }
-
-  const { user, org } = profile;
 
   if (user == null) {
     return (

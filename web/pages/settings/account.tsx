@@ -1,9 +1,6 @@
 import Layout from "../../components/layout"
 import toast, { Toaster } from 'react-hot-toast';
 import { UserCircleIcon, UserGroupIcon, ViewGridAddIcon } from "@heroicons/react/outline"
-import { GetServerSideProps } from "next"
-import { withSession } from "../../lib/withSession"
-import { UserSession } from ".."
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import axios from "axios"
@@ -13,6 +10,7 @@ import { useRouter } from "next/router"
 import Head from "next/head"
 import { getSubdomain } from "../../helpers/user"
 import { CheckCircleIcon, XIcon } from "@heroicons/react/solid";
+import { useProfile } from "../../context/ProfileContex";
 
 export type EmailNotifications = {
   monthlyDigest: boolean
@@ -63,25 +61,35 @@ const notify = (title: string, description: string) => toast.custom((t) => {
   )
 });
 
-export default function Settings({ userSession }: { userSession: UserSession }) {
-  const { user, org } = userSession;
+export default function Settings() {
+  const { profile, isLoadingProfile } = useProfile();
+  const { user, org } = profile;
+  
   const router = useRouter();
-  const [firstName, setFirstName] = useState(user?.firstName)
-  const [lastName, setLastName] = useState(user?.lastName)
+  const [firstName, setFirstName] = useState<string>('')
+  const [lastName, setLastName] = useState<string>('')
   const [emailNotifications, setNotifications] = useState<EmailNotifications>({
     monthlyDigest: false,
     newsletter: false,
-  })
+  });
 
   useEffect(() => {
-    if (user == null || org == null) return;
-    setNotifications(org.notifications);
-  }, [user, org])
+    const { user, org } = profile;
+    if (user == null || org == null) {
+      if (!isLoadingProfile) {
+        router.push('/');
+      }
+      return;
+    };
 
-  if (user == null || org == null) {
-    router.push('/');
-    return;
-  };
+    setFirstName(user.firstName);
+    setLastName(user.lastName);
+    setNotifications(org.notifications);
+  }, [profile, router, isLoadingProfile]);
+
+  if (isLoadingProfile || user == null || org == null) {
+    return null;
+  }
 
   const onBlurFirstNameInput = async () => {
     if (!firstName || firstName === user.firstName) {
@@ -280,11 +288,3 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
     </>
   )
 }
-
-const getServerSidePropsHandler: GetServerSideProps = async ({ req }: any) => {
-  const userSession = req.session.get("user") ?? null
-  const props = { userSession }
-  return { props }
-}
-
-export const getServerSideProps = withSession(getServerSidePropsHandler)
