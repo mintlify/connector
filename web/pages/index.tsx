@@ -17,7 +17,7 @@ import ActivityBar from '../components/ActivityBar'
 import { getSubdomain } from '../helpers/user'
 import Onboarding from '../components/screens/Onboarding'
 import DocItem from '../components/DocItem'
-import { User, useProfile } from '../context/ProfileContex'
+import { User, useProfile, Org } from '../context/ProfileContex'
 
 type Code = {
   _id: string
@@ -51,29 +51,6 @@ export type UserSession = {
   }
 }
 
-export type AccessMode = 'private' | 'public'
-
-export type Org = {
-  _id: string
-  name: string
-  logo: string
-  favicon: string
-  subdomain: string
-  notifications: {
-    monthlyDigest: boolean
-    newsletter: boolean
-  }
-  access?: {
-    mode: AccessMode
-  },
-  onboarding?: {
-    teamSize: string;
-    usingGitHub: boolean;
-    usingSlack: boolean;
-    usingNone: boolean;
-  }
-}
-
 export default function Home({ userSession }: { userSession: UserSession }) {
   const { profile, isLoadingProfile } = useProfile()
   const [docs, setDocs] = useState<Doc[]>([]);
@@ -85,11 +62,12 @@ export default function Home({ userSession }: { userSession: UserSession }) {
   const [integrationsStatus, setIntegrationsStatus] = useState<{ [key: string]: boolean }>();
 
   useEffect(() => {
-    if (userSession == null || userSession.user == null || userSession.org == null) {
+    const { user, org } = profile;
+    if (user == null || org == null) {
       return
     }
 
-    const userId = userSession.userId
+    const userId = user.userId
 
     axios
       .get(`${API_ENDPOINT}/routes/docs`, {
@@ -118,8 +96,6 @@ export default function Home({ userSession }: { userSession: UserSession }) {
         const { events } = eventsResponse.data
         setEvents(events)
       });
-    
-    const { user, org } = userSession;
 
     if (user == null || org == null) {
       return;
@@ -136,7 +112,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       setIntegrationsStatus(integrations);
     })
 
-  }, [userSession, selectedDoc, isAddDocLoading])
+  }, [profile, selectedDoc, isAddDocLoading])
 
   if (isLoadingProfile) {
     return null;
@@ -146,10 +122,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     return <SignIn />
   }
 
-  const { user } = profile;
-  const { org } = userSession;
-
-  console.log(user);
+  const { user, org } = profile;
 
   if (user == null) {
     return (

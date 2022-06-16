@@ -9,9 +9,8 @@ import { XIcon } from '@heroicons/react/outline'
 import { classNames } from '../helpers/functions'
 import Link from 'next/link'
 import ProfilePicture from './ProfilePicture'
-import { Org } from '../pages'
 import Search from './Search'
-import { User } from '../context/ProfileContex'
+import { User, Org } from '../context/ProfileContex'
 
 const userNavigation = [
   { name: 'Account', href: '/settings/account' },

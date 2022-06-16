@@ -3,9 +3,8 @@ import { ChatAlt2Icon, CogIcon, DocumentTextIcon, LightningBoltIcon, ViewGridAdd
 import { PlusIcon } from '@heroicons/react/solid'
 import Link from 'next/link';
 import AddDocumentation from './commands/documentation/AddDocumentation'
-import { Org } from '../pages';
 import ProfilePicture from './ProfilePicture';
-import { User } from '../context/UserContex';
+import { Org, User } from '../context/ProfileContex';
 
 type SidebarProps = {
   user: User;

@@ -3,12 +3,11 @@ import { CheckCircleIcon } from '@heroicons/react/solid'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { User } from '../../../context/UserContex'
+import { Org, User } from '../../../context/ProfileContex'
 import { API_ENDPOINT } from '../../../helpers/api'
 import { classNames } from '../../../helpers/functions'
 import { ConfluencePageIcon } from '../../../helpers/Icons'
 import { getSubdomain } from '../../../helpers/user'
-import { Org } from '../../../pages'
 import timeAgo from '../../../services/timeago'
 
 type ConfluencePage = {

@@ -15,9 +15,32 @@ export type User = {
   }
 }
 
+export type AccessMode = 'private' | 'public'
+
+export type Org = {
+  _id: string
+  name: string
+  logo: string
+  favicon: string
+  subdomain: string
+  notifications: {
+    monthlyDigest: boolean
+    newsletter: boolean
+  }
+  access?: {
+    mode: AccessMode
+  },
+  onboarding?: {
+    teamSize: string;
+    usingGitHub: boolean;
+    usingSlack: boolean;
+    usingNone: boolean;
+  }
+}
+
 export type Profile = {
   user?: User;
-  org?: string
+  org?: Org;
 }
 
 type ProfileContextType = {

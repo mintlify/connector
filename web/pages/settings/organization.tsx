@@ -2,7 +2,7 @@ import Layout from '../../components/layout'
 import toast, { Toaster } from 'react-hot-toast'
 import { GetServerSideProps } from 'next'
 import { withSession } from '../../lib/withSession'
-import { AccessMode, UserSession } from '..'
+import { UserSession } from '..'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import axios from 'axios'
@@ -16,7 +16,7 @@ import ProfilePicture from '../../components/ProfilePicture'
 import { CheckCircleIcon, XIcon } from '@heroicons/react/solid'
 import { navigation } from './account'
 import { Integration, onInstallIntegration } from '../../helpers/integrations';
-import { User } from '../../context/ProfileContex'
+import { AccessMode, User } from '../../context/ProfileContex'
 
 export type EmailNotifications = {
   monthlyDigest: boolean

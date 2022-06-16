@@ -1,6 +1,5 @@
 import axios from "axios";
-import { Profile, User } from "../context/ProfileContex";
-import { Org } from "../pages";
+import { Profile, User, Org } from "../context/ProfileContex";
 import { API_ENDPOINT } from "./api";
 
 export const getProfile = async () => {

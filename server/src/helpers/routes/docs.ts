@@ -139,7 +139,7 @@ export const createDocsFromConfluencePages = async (pages: ConfluencePage[], org
       if (org?.integrations?.confluence?.accessibleResources[0] == null) {
         throw 'No organization found with accessible resources';
       }
-      const url = `${firstSpace?.url}/wiki/${page._links.webui}`;
+      const url = `${firstSpace?.url}/wiki${page._links.webui}`;
       const doc = await Doc.findOneAndUpdate(
         {
           org: orgId,
