@@ -73,7 +73,7 @@ export default function Home() {
         setIntegrationsStatus(integrations);
       })
 
-  }, [org, user, selectedDoc, isAddDocLoading])
+  }, [org, user, selectedDoc, isAddDocLoading]);
 
   if (isLoadingProfile) {
     return null;
