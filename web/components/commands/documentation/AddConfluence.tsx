@@ -3,7 +3,7 @@ import { CheckCircleIcon } from '@heroicons/react/solid'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { Org, User } from '../../../context/ProfileContex'
+import { Org, useProfile, User } from '../../../context/ProfileContex'
 import { API_ENDPOINT } from '../../../helpers/api'
 import { classNames } from '../../../helpers/functions'
 import { ConfluencePageIcon } from '../../../helpers/Icons'
@@ -23,20 +23,24 @@ type ConfluencePage = {
 }
 
 type AddNotionProps = {
-  user: User
-  org: Org
   onCancel: () => void
   setIsAddDocumentationOpen: (isOpen: boolean) => void
   setIsAddDocLoading: (isAddingAutomation: boolean) => void
 }
 
-export default function AddConfluence({ user, org, onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }: AddNotionProps) {
+export default function AddConfluence({ onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }: AddNotionProps) {
+  const { profile } = useProfile();
   const [pages, setPages] = useState<ConfluencePage[]>()
   const [selectedPages, setSelectedPages] = useState<ConfluencePage[]>([])
   const [search, setSearch] = useState('')
   const router = useRouter()
 
+  const { user, org } = profile;
+
   useEffect(() => {
+    if (user == null || org == null) {
+      return;
+    }
     axios
       .post(
         `${API_ENDPOINT}/routes/integrations/confluence/sync`,
@@ -56,7 +60,11 @@ export default function AddConfluence({ user, org, onCancel, setIsAddDocumentati
       .catch(async () => {
         router.push(`${API_ENDPOINT}/routes/integrations/confluence/install?org=${org._id}`)
       })
-  }, [user.userId, router, org])
+  }, [user, org, router]);
+
+  if (user == null || org == null) {
+    return null;
+  }
 
   const onClickPage = (selectingPage: ConfluencePage) => {
     if (selectedPages.some((doc) => doc.id === selectingPage.id)) {

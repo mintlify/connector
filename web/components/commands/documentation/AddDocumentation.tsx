@@ -4,7 +4,6 @@ import { classNames } from '../../../helpers/functions'
 import { DocumentationTypeIcon } from '../../../helpers/Icons'
 import { ChevronRightIcon } from '@heroicons/react/solid'
 import DocumentationConfig from './DocumentationConfig'
-import { Org, User } from '../../../context/ProfileContex'
 
 export type AddDocumentationType = 'webpage' | 'notion' | 'googledocs' | 'confluence';
 
@@ -38,20 +37,18 @@ export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationS
 }
 
 type AddDocumentationProps = {
-  user: User;
-  org: Org;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   setIsAddDocLoading: (isAddingAutomation: boolean) => void;
   overrideSelectedRuleType?: AddDocumentationType;
 }
 
-export default function AddDocumentation({ user, org, isOpen, setIsOpen, setIsAddDocLoading, overrideSelectedRuleType }: AddDocumentationProps) {
+export default function AddDocumentation({ isOpen, setIsOpen, setIsAddDocLoading, overrideSelectedRuleType }: AddDocumentationProps) {
   const [selectedRuleType, setSelectedRuleType] = useState<AddDocumentationType>();
 
   useEffect(() => {
     setSelectedRuleType(overrideSelectedRuleType);
-  }, [overrideSelectedRuleType])
+  }, [overrideSelectedRuleType]);
 
   const onClickOption = async (item: AddDocumentationSelection) => {
     setSelectedRuleType(item.type)
@@ -97,8 +94,6 @@ export default function AddDocumentation({ user, org, isOpen, setIsOpen, setIsAd
               <div className="absolute inset-0 z-0" onClick={() => setIsOpen(false)} />
               <div className="absolute w-full max-h-full bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 z-10 overflow-auto">
               <DocumentationConfig
-                user={user}
-                org={org}
                 documentationType={selectedRuleType}
                 onCancel={onToPrimarySelection}
                 setIsAddDocumentationOpen={setIsOpen}

@@ -3,7 +3,7 @@ import { CheckCircleIcon } from '@heroicons/react/solid'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { Org, User } from '../../../context/ProfileContex'
+import { Org, useProfile, User } from '../../../context/ProfileContex'
 import { API_ENDPOINT } from '../../../helpers/api'
 import { classNames } from '../../../helpers/functions'
 import { getSubdomain } from '../../../helpers/user'
@@ -26,20 +26,24 @@ type Page = {
 }
 
 type AddNotionProps = {
-  user: User
-  org: Org
   onCancel: () => void
   setIsAddDocumentationOpen: (isOpen: boolean) => void
   setIsAddDocLoading: (isAddingAutomation: boolean) => void
 }
 
-export default function AddNotion({ user, org, onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }: AddNotionProps) {
+export default function AddNotion({ onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }: AddNotionProps) {
+  const { profile } = useProfile();
   const [pages, setPages] = useState<Page[]>()
   const [selectedPages, setSelectedPages] = useState<Page[]>([])
   const [search, setSearch] = useState('')
-  const router = useRouter()
+  const router = useRouter();
+
+  const { user, org } = profile;
 
   useEffect(() => {
+    if (user == null || org == null) {
+      return;
+    }
     axios
       .post(
         `${API_ENDPOINT}/routes/integrations/notion/sync`,
@@ -61,7 +65,11 @@ export default function AddNotion({ user, org, onCancel, setIsAddDocumentationOp
       .catch(async () => {
         router.push(`${API_ENDPOINT}/routes/integrations/notion/install?org=${org._id}`)
       })
-  }, [user.userId, router, org])
+  }, [user, org, router]);
+
+  if (user == null || org == null) {
+    return null;
+  }
 
   const onClickPage = (selectingPage: Page) => {
     if (selectedPages.some((page) => page.id === selectingPage.id)) {

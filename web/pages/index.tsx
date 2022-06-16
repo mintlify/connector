@@ -153,14 +153,12 @@ export default function Home() {
         <link rel="shortcut icon" href={org.favicon} type="image/x-icon" />
         <title>{org.name} Dashboard</title>
       </Head>
-      <Layout user={user} org={org}>
+      <Layout>
         <ClearSelectedFrame />
         <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
           {/* Left sidebar & main wrapper */}
           <div className="flex-1 min-w-0 xl:flex">
             <Sidebar
-              org={org}
-              user={user}
               setIsAddDocLoading={setIsAddDocLoading}
               isAddDocumentOpen={isAddDocumentOpen}
               setIsAddDocumentOpen={setIsAddDocumentOpen}

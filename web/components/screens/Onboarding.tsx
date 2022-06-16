@@ -347,8 +347,6 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
 
   return <>
     <AddDocumentation
-      user={user}
-      org={org}
       isOpen={isAddingDocOpen}
       setIsOpen={setIsAddingDocOpen}
       setIsAddDocLoading={setIsAddDocLoading}

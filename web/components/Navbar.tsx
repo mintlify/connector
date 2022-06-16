@@ -10,7 +10,7 @@ import { classNames } from '../helpers/functions'
 import Link from 'next/link'
 import ProfilePicture from './ProfilePicture'
 import Search from './Search'
-import { User, Org } from '../context/ProfileContex'
+import { useProfile } from '../context/ProfileContex'
 
 const userNavigation = [
   { name: 'Account', href: '/settings/account' },
@@ -18,23 +18,22 @@ const userNavigation = [
   { name: 'Sign out', href: '/api/logout' },
 ]
 
-type NavbarProps = {
-  user: User,
-  org: Org
-}
-
-export default function Navbar({ user, org }: NavbarProps) {
+export default function Navbar() {
+  const { profile } = useProfile();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  const fullName = `${user.firstName} ${user.lastName}`;
-
   useHotkeys('cmd+k', () => setIsSearchOpen(true));
+
+  const { user, org } = profile;
+  if (user == null || org == null) {
+    return null;
+  }
+
+  const fullName = `${user.firstName} ${user.lastName}`;
   
   return (
     <>
     <Search
-      user={user}
-      org={org}
       isOpen={isSearchOpen}
       setIsOpen={setIsSearchOpen}
     />

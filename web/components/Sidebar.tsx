@@ -4,24 +4,27 @@ import { PlusIcon } from '@heroicons/react/solid'
 import Link from 'next/link';
 import AddDocumentation from './commands/documentation/AddDocumentation'
 import ProfilePicture from './ProfilePicture';
-import { Org, User } from '../context/ProfileContex';
+import { Org, useProfile, User } from '../context/ProfileContex';
 
 type SidebarProps = {
-  user: User;
-  org: Org;
   setIsAddDocLoading: (isAddingDoc: boolean) => void;
   isAddDocumentOpen: boolean;
   setIsAddDocumentOpen: (isAddingDoc: boolean) => void;
 }
 
 export default function Sidebar({
-  user,
-  org,
   setIsAddDocLoading,
   isAddDocumentOpen,
   setIsAddDocumentOpen
 }: SidebarProps) {
   const { boot, show } = useIntercom();
+  const { profile } = useProfile();
+
+  const { user, org } = profile;
+  if (user == null || org == null) {
+    return null;
+  }
+
   const fullName = user.firstName + ' ' + user.lastName;
   const onClickHelp = () => {
     boot({ userId: user.userId, email: user.email, company: { companyId: org._id, name: org.name } })
@@ -31,8 +34,6 @@ export default function Sidebar({
   return (
     <>
     <AddDocumentation
-      user={user}
-      org={org}
       isOpen={isAddDocumentOpen}
       setIsOpen={setIsAddDocumentOpen}
       setIsAddDocLoading={setIsAddDocLoading}

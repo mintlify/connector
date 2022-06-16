@@ -3,7 +3,7 @@ import { CheckCircleIcon } from '@heroicons/react/solid'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { Org, User } from '../../../context/ProfileContex'
+import { useProfile } from '../../../context/ProfileContex'
 import { API_ENDPOINT } from '../../../helpers/api'
 import { classNames } from '../../../helpers/functions'
 import { getSubdomain } from '../../../helpers/user'
@@ -17,20 +17,24 @@ type GoogleDoc = {
 }
 
 type AddNotionProps = {
-  user: User
-  org: Org
   onCancel: () => void
   setIsAddDocumentationOpen: (isOpen: boolean) => void
   setIsAddDocLoading: (isAddingAutomation: boolean) => void
 }
 
-export default function AddGoogleDocs({ user, org, onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }: AddNotionProps) {
+export default function AddGoogleDocs({ onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }: AddNotionProps) {
+  const { profile } = useProfile();
   const [docs, setDocs] = useState<GoogleDoc[]>()
   const [selectedDocs, setSelectedDocs] = useState<GoogleDoc[]>([])
   const [search, setSearch] = useState('')
   const router = useRouter()
 
+  const { user, org } = profile;
+
   useEffect(() => {
+    if (user == null || org == null) {
+      return;
+    }
     axios
       .post(
         `${API_ENDPOINT}/routes/integrations/google/sync`,
@@ -49,7 +53,11 @@ export default function AddGoogleDocs({ user, org, onCancel, setIsAddDocumentati
       .catch(async () => {
         router.push(`${API_ENDPOINT}/routes/integrations/google/install?org=${org._id}`)
       })
-  }, [user.userId, router, org])
+  }, [user, org, router])
+
+  if (user == null || org == null) {
+    return null;
+  }
 
   const onClickPage = (selectingDoc: GoogleDoc) => {
     if (selectedDocs.some((doc) => doc.id === selectingDoc.id)) {

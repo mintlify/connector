@@ -130,7 +130,7 @@ export default function Settings() {
       <link rel="shortcut icon" href={org.favicon} type="image/x-icon" />
       <title>Settings</title>
     </Head>
-    <Layout user={user} org={org}>
+    <Layout>
       <Toaster position="bottom-right" reverseOrder={false} />
       <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8">
         <div className="my-6 lg:grid lg:grid-cols-12 lg:gap-x-5">

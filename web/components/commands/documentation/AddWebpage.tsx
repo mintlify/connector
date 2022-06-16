@@ -1,7 +1,7 @@
 import axios from "axios"
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { User } from "../../../context/ProfileContex"
+import { useProfile } from "../../../context/ProfileContex"
 import { API_ENDPOINT } from "../../../helpers/api"
 import { classNames } from "../../../helpers/functions"
 import { getSubdomain } from "../../../helpers/user"
@@ -20,13 +20,13 @@ export const isUrlValid = (str: string): boolean => {
 }
 
 type AddWebpageProps = {
-  user: User,
   onCancel: () => void,
   setIsAddDocumentationOpen: (isOpen: boolean) => void,
   setIsAddDocLoading: (isAddingAutomation: boolean) => void;
 }
 
-export default function AddWebpage({user, onCancel, setIsAddDocumentationOpen, setIsAddDocLoading}: AddWebpageProps) {
+export default function AddWebpage({onCancel, setIsAddDocumentationOpen, setIsAddDocLoading}: AddWebpageProps) {
+  const { profile } = useProfile();
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [favicon, setFavicon] = useState();
@@ -49,6 +49,11 @@ export default function AddWebpage({user, onCancel, setIsAddDocumentationOpen, s
       setFavicon(favicon);
     })
   }, [url]);
+
+  const { user } = profile;
+  if (user == null) {
+    return null;
+  }
 
   const onSubmit = async () => {
     setIsAddDocLoading(true);
