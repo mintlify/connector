@@ -48,7 +48,8 @@ export const publishMessage = async (text: string, channel: string, token: strin
     return await slackApp.client.chat.postMessage( {
       channel: formattedChannel,
       blocks,
-      text
+      text,
+      mrkdwn: true
     });
   }
   const handleChannelNotFound = async (err: string) => {
