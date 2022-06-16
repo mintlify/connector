@@ -1,15 +1,10 @@
 import Layout from '../../components/layout'
 import toast, { Toaster } from 'react-hot-toast'
-import { GetServerSideProps } from 'next'
-import { withSession } from '../../lib/withSession'
-import { AccessMode, UserSession } from '..'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import axios from 'axios'
 import { API_ENDPOINT } from '../../helpers/api'
 import { classNames } from '../../helpers/functions'
-import { User } from '..'
-import { updateSession } from '../../helpers/session'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { getSubdomain } from '../../helpers/user'
@@ -17,11 +12,8 @@ import ProfilePicture from '../../components/ProfilePicture'
 import { CheckCircleIcon, XIcon } from '@heroicons/react/solid'
 import { navigation } from './account'
 import { Integration, onInstallIntegration } from '../../helpers/integrations';
-
-export type EmailNotifications = {
-  monthlyDigest: boolean
-  newsletter: boolean
-}
+import { AccessMode, useProfile, User } from '../../context/ProfileContext'
+import { request } from '../../helpers/request'
 
 type AccessOption = {
   id: AccessMode
@@ -132,12 +124,11 @@ const notify = (title: string, description: string) =>
     )
   })
 
-export default function Settings({ userSession }: { userSession: UserSession }) {
-  const { user, org } = userSession
-
+export default function Settings() {
+  const { profile, isLoadingProfile } = useProfile();
   const router = useRouter()
-  const [orgName, setOrgName] = useState(org?.name)
-  const [orgAccessMode, setOrgAccessMode] = useState(org?.access?.mode || 'public')
+  const [orgName, setOrgName] = useState<string>('')
+  const [orgAccessMode, setOrgAccessMode] = useState(profile?.org?.access?.mode || 'public')
   const [invitedEmail, setInvitedEmail] = useState('')
   const [inviteErrorMessage, setInviteErrorMessage] = useState<string | undefined>(undefined)
   const [isSendingInvite, setIsSendingInvite] = useState(false)
@@ -145,36 +136,35 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
   const [integrationsStatus, setIntegrationsStatus] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
-    if (user == null || org == null) return
+    const { user, org } = profile;
+    if (user == null || org == null) {
+      if (!isLoadingProfile) {
+        router.push('/')
+      }
+      return
+    }
+
+    setOrgName(org.name);
+
     // get all members of the organization
-    axios
-      .get(`${API_ENDPOINT}/routes/org/users`, {
-        params: {
-          userId: user.userId,
-          subdomain: getSubdomain(window.location.host),
-        },
-      })
+    request('GET', 'routes/org/users')
       .then((res) => {
         setMembers(res.data.users)
       })
     
     const statusInterval = setInterval(() => {  
-      axios.get(`${API_ENDPOINT}/routes/org/${org._id}/integrations`, {
-        params: {
-          userId: user.userId,
-          subdomain: getSubdomain(window.location.host)
-        }
-      }).then(({ data: { integrations } }) => {
-        setIntegrationsStatus(integrations);
-        })
-      }, 1000);
+      request('GET', `routes/org/${org._id}/integrations`)
+        .then(({ data: { integrations } }) => {
+          setIntegrationsStatus(integrations);
+          })
+        }, 1000);
       
       return () => clearInterval(statusInterval);
-  }, [user, org])
+  }, [profile, isLoadingProfile, router]);
 
-  if (user == null || org == null) {
-    router.push('/')
-    return
+  const { user, org } = profile;
+  if (isLoadingProfile || user == null || org == null) {
+    return null;
   }
 
   const integrationSections = getIntegrationSections(org._id);
@@ -190,19 +180,14 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
     setInvitedEmail('')
     // create a pending account by calling the invitation API
     const emails = [email]
-    await axios
-      .post(
-        `${API_ENDPOINT}/routes/user/invite-to-org`,
-        {
-          emails,
-        },
-        {
-          params: {
-            userId: user.userId,
-          },
-        }
-      )
-      .then(() => {
+    await request('POST', 'routes/user/invite-to-org', {
+      data: {
+        emails,
+      },
+      params: {
+        userId: user.userId,
+      }
+    }).then(() => {
         const invitedMembers: any = emails.map((email) => {
           return {
             email,
@@ -221,37 +206,33 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
     if (!orgName || orgName === org.name) {
       return
     }
-    await axios.put(
-      `${API_ENDPOINT}/routes/org/${org._id}/name`,
+    await request('PUT', `routes/org/${org._id}/name`,
       {
-        name: orgName,
-      },
-      {
+        data: {
+          name: orgName,
+        },
         params: {
           userId: user.userId,
           subdomain: getSubdomain(window.location.host),
         },
       }
     )
-    updateSession()
     notify('Organization name updated', 'Your organization name has been updated.')
   }
 
   const updateAccessSetting = async (newAccessMode: AccessMode) => {
     setOrgAccessMode(newAccessMode)
-    await axios.put(
-      `${API_ENDPOINT}/routes/org/access`,
+    request('PUT', 'routes/org/access',
       {
-        mode: newAccessMode,
-      },
-      {
+        data: {
+          mode: newAccessMode,
+        },
         params: {
           userId: user.userId,
           subdomain: getSubdomain(window.location.host),
         },
       }
     )
-    updateSession()
     if (newAccessMode === 'private') {
       notify('Updated access settings', 'Only invited members can join the organization')
     } else {
@@ -265,7 +246,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
         <link rel="shortcut icon" href={org.favicon} type="image/x-icon" />
         <title>Settings</title>
       </Head>
-      <Layout user={user} org={org}>
+      <Layout>
         <Toaster position="bottom-right" reverseOrder={false} />
         <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8">
           <div className="my-6 lg:grid lg:grid-cols-12 lg:gap-x-5">
@@ -450,7 +431,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
                                                   </svg>
                                                 </span>
                                               ) : (
-                                                <ProfilePicture size={10} user={member} />
+                                                <ProfilePicture size={10} />
                                               )}
                                               <div className="ml-4">
                                                 <div
@@ -541,11 +522,3 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
     </>
   )
 }
-
-const getServerSidePropsHandler: GetServerSideProps = async ({ req }: any) => {
-  const userSession = req.session.get('user') ?? null
-  const props = { userSession }
-  return { props }
-}
-
-export const getServerSideProps = withSession(getServerSidePropsHandler)

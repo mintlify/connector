@@ -1,18 +1,13 @@
 import Layout from "../../components/layout"
 import toast, { Toaster } from 'react-hot-toast';
 import { UserCircleIcon, UserGroupIcon, ViewGridAddIcon } from "@heroicons/react/outline"
-import { GetServerSideProps } from "next"
-import { withSession } from "../../lib/withSession"
-import { UserSession } from ".."
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import axios from "axios"
-import { API_ENDPOINT } from "../../helpers/api"
-import { updateSession } from "../../helpers/session"
 import { useRouter } from "next/router"
 import Head from "next/head"
-import { getSubdomain } from "../../helpers/user"
 import { CheckCircleIcon, XIcon } from "@heroicons/react/solid";
+import { useProfile } from "../../context/ProfileContext";
+import { request } from "../../helpers/request";
 
 export type EmailNotifications = {
   monthlyDigest: boolean
@@ -63,34 +58,45 @@ const notify = (title: string, description: string) => toast.custom((t) => {
   )
 });
 
-export default function Settings({ userSession }: { userSession: UserSession }) {
-  const { user, org } = userSession;
+export default function Settings() {
+  const { profile, isLoadingProfile } = useProfile();
+  const { user, org } = profile;
+  
   const router = useRouter();
-  const [firstName, setFirstName] = useState(user?.firstName)
-  const [lastName, setLastName] = useState(user?.lastName)
+  const [firstName, setFirstName] = useState<string>('')
+  const [lastName, setLastName] = useState<string>('')
   const [emailNotifications, setNotifications] = useState<EmailNotifications>({
     monthlyDigest: false,
     newsletter: false,
-  })
+  });
 
   useEffect(() => {
-    if (user == null || org == null) return;
-    setNotifications(org.notifications);
-  }, [user, org])
+    const { user, org } = profile;
+    if (user == null || org == null) {
+      if (!isLoadingProfile) {
+        router.push('/');
+      }
+      return;
+    };
 
-  if (user == null || org == null) {
-    router.push('/');
-    return;
-  };
+    setFirstName(user.firstName);
+    setLastName(user.lastName);
+    setNotifications(org.notifications);
+  }, [profile, router, isLoadingProfile]);
+
+  if (isLoadingProfile || user == null || org == null) {
+    return null;
+  }
 
   const onBlurFirstNameInput = async () => {
     if (!firstName || firstName === user.firstName) {
       return;
     }
-    await axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/firstname`, {
-      firstName,
+    await request('PUT', `routes/user/${user.userId}/firstname`, {
+      data: {
+        firstName,
+      }
     })
-    updateSession();
     notify('Profile name updated', 'Your first name has been updated.');
   }
 
@@ -98,25 +104,22 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
     if (!lastName || lastName === user.lastName) {
       return;
     }
-    await axios.put(`${API_ENDPOINT}/routes/user/${user.userId}/lastname`, {
-      lastName,
+    await request('PUT', `routes/user/${user.userId}/lastname`, {
+      data: {
+        lastName,
+      }
     })
-    updateSession();
     notify('Profile name updated', 'Your last name has been updated.');
   }
 
   const updateEmailNotifications = async (newNotifications: EmailNotifications) => {
     setNotifications(newNotifications)
     // update the organization's new notifications in the database
-    await axios.put(`${API_ENDPOINT}/routes/org/${org._id}/notifications`, {
-      ...newNotifications,
-    }, {
-      params: {
-        userId: user.userId,
-        subdomain: getSubdomain(window.location.host)
+    await request('PUT', `routes/org/${org._id}/notifications`, {
+      data: {
+        ...newNotifications,
       }
     })
-    updateSession();
     notify('Updated notification settings', 'Your notification preferences have been updated.');
   }
 
@@ -126,7 +129,7 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
       <link rel="shortcut icon" href={org.favicon} type="image/x-icon" />
       <title>Settings</title>
     </Head>
-    <Layout user={user} org={org}>
+    <Layout>
       <Toaster position="bottom-right" reverseOrder={false} />
       <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8">
         <div className="my-6 lg:grid lg:grid-cols-12 lg:gap-x-5">
@@ -280,11 +283,3 @@ export default function Settings({ userSession }: { userSession: UserSession }) 
     </>
   )
 }
-
-const getServerSidePropsHandler: GetServerSideProps = async ({ req }: any) => {
-  const userSession = req.session.get("user") ?? null
-  const props = { userSession }
-  return { props }
-}
-
-export const getServerSideProps = withSession(getServerSidePropsHandler)

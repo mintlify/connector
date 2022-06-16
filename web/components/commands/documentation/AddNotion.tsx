@@ -1,12 +1,11 @@
 import { SearchIcon } from '@heroicons/react/outline'
 import { CheckCircleIcon } from '@heroicons/react/solid'
-import axios from 'axios'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import { useProfile } from '../../../context/ProfileContext'
 import { API_ENDPOINT } from '../../../helpers/api'
 import { classNames } from '../../../helpers/functions'
-import { getSubdomain } from '../../../helpers/user'
-import { Org, User } from '../../../pages'
+import { request } from '../../../helpers/request'
 import timeAgo from '../../../services/timeago'
 
 type Icon = {
@@ -26,31 +25,25 @@ type Page = {
 }
 
 type AddNotionProps = {
-  user: User
-  org: Org
   onCancel: () => void
   setIsAddDocumentationOpen: (isOpen: boolean) => void
   setIsAddDocLoading: (isAddingAutomation: boolean) => void
 }
 
-export default function AddNotion({ user, org, onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }: AddNotionProps) {
+export default function AddNotion({ onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }: AddNotionProps) {
+  const { profile } = useProfile();
   const [pages, setPages] = useState<Page[]>()
   const [selectedPages, setSelectedPages] = useState<Page[]>([])
   const [search, setSearch] = useState('')
-  const router = useRouter()
+  const router = useRouter();
+
+  const { user, org } = profile;
 
   useEffect(() => {
-    axios
-      .post(
-        `${API_ENDPOINT}/routes/integrations/notion/sync`,
-        {},
-        {
-          params: {
-            userId: user.userId,
-            subdomain: getSubdomain(window.location.host),
-          },
-        }
-      )
+    if (user == null || org == null) {
+      return;
+    }
+    request('POST', 'routes/integrations/notion/sync')
       .then(({ data: { results } }) => {
         const pages = results.map((page: Page) => {
           return { ...page, lastEditedAgo: timeAgo.format(Date.parse(page.lastEditedTime)) }
@@ -61,7 +54,11 @@ export default function AddNotion({ user, org, onCancel, setIsAddDocumentationOp
       .catch(async () => {
         router.push(`${API_ENDPOINT}/routes/integrations/notion/install?org=${org._id}`)
       })
-  }, [user.userId, router, org])
+  }, [user, org, router]);
+
+  if (user == null || org == null) {
+    return null;
+  }
 
   const onClickPage = (selectingPage: Page) => {
     if (selectedPages.some((page) => page.id === selectingPage.id)) {
@@ -80,19 +77,12 @@ export default function AddNotion({ user, org, onCancel, setIsAddDocumentationOp
 
   const onSubmit = async () => {
     setIsAddDocLoading(true)
-    axios
-      .post(
-        `${API_ENDPOINT}/routes/docs/notion`,
-        {
+    request('POST', 'routes/docs/notion',
+      {
+        data: {
           pages: selectedPages,
         },
-        {
-          params: {
-            userId: user.userId,
-            subdomain: getSubdomain(window.location.host),
-          },
-        }
-      )
+      })
       .then(() => {
         setIsAddDocLoading(false)
       })

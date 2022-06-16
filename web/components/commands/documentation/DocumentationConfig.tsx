@@ -1,5 +1,4 @@
 import { DocumentationTypeIcon } from '../../../helpers/Icons'
-import { Org, User } from '../../../pages'
 import AddConfluence from './AddConfluence'
 import { addDocumentationMap, AddDocumentationType } from './AddDocumentation'
 import AddGoogleDocs from './AddGoogleDocs'
@@ -11,8 +10,6 @@ type DocConfigSettings = {
 }
 
 type DocumentationConfigProps = {
-  user: User
-  org: Org
   documentationType?: AddDocumentationType
   onCancel: () => void
   setIsAddDocumentationOpen: (isOpen: boolean) => void
@@ -20,8 +17,6 @@ type DocumentationConfigProps = {
 }
 
 export default function DocumentationConfig({
-  user,
-  org,
   documentationType,
   onCancel,
   setIsAddDocumentationOpen,
@@ -35,7 +30,6 @@ export default function DocumentationConfig({
     webpage: {
       inputComponent: (
         <AddWebpage
-          user={user}
           onCancel={onCancel}
           setIsAddDocumentationOpen={setIsAddDocumentationOpen}
           setIsAddDocLoading={setIsAddDocLoading}
@@ -45,8 +39,6 @@ export default function DocumentationConfig({
     notion: {
       inputComponent: (
         <AddNotion
-          user={user}
-          org={org}
           onCancel={onCancel}
           setIsAddDocumentationOpen={setIsAddDocumentationOpen}
           setIsAddDocLoading={setIsAddDocLoading}
@@ -55,8 +47,6 @@ export default function DocumentationConfig({
     },
     googledocs: {
       inputComponent: <AddGoogleDocs
-      user={user}
-      org={org}
       onCancel={onCancel}
       setIsAddDocumentationOpen={setIsAddDocumentationOpen}
       setIsAddDocLoading={setIsAddDocLoading}
@@ -64,8 +54,6 @@ export default function DocumentationConfig({
     },
     confluence: {
       inputComponent: <AddConfluence
-      user={user}
-      org={org}
       onCancel={onCancel}
       setIsAddDocumentationOpen={setIsAddDocumentationOpen}
       setIsAddDocLoading={setIsAddDocLoading}

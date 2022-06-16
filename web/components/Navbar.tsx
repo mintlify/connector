@@ -8,10 +8,9 @@ import {
 import { XIcon } from '@heroicons/react/outline'
 import { classNames } from '../helpers/functions'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import ProfilePicture from './ProfilePicture'
-import { Org, User } from '../pages'
 import Search from './Search'
+import { useProfile } from '../context/ProfileContext'
 
 const userNavigation = [
   { name: 'Account', href: '/settings/account' },
@@ -19,29 +18,22 @@ const userNavigation = [
   { name: 'Sign out', href: '/api/logout' },
 ]
 
-const navButtonClass = (isActive: boolean) => {
-  return isActive
-    ? 'bg-gray-800 text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer hover:bg-gray-800'
-    : 'text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer'
-}
-
-type NavbarProps = {
-  user: User,
-  org: Org
-}
-
-export default function Navbar({ user, org }: NavbarProps) {
+export default function Navbar() {
+  const { profile } = useProfile();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  const fullName = `${user.firstName} ${user.lastName}`;
-
   useHotkeys('cmd+k', () => setIsSearchOpen(true));
+
+  const { user, org } = profile;
+  if (user == null || org == null) {
+    return null;
+  }
+
+  const fullName = `${user.firstName} ${user.lastName}`;
   
   return (
     <>
     <Search
-      user={user}
-      org={org}
       isOpen={isSearchOpen}
       setIsOpen={setIsSearchOpen}
     />
@@ -104,15 +96,12 @@ export default function Navbar({ user, org }: NavbarProps) {
 
                   {/* Profile dropdown */}
                   <Menu as="div" className="ml-4 relative flex-shrink-0">
-                    <div>
-                      <Menu.Button className="bg-gray-800 rounded-full flex text-sm text-white">
-                        <span className="sr-only">Open user menu</span>
-                        <ProfilePicture
-                          size={8}
-                          user={user}
-                        />
-                      </Menu.Button>
-                    </div>
+                    <Menu.Button className="bg-gray-800 rounded-full flex text-sm text-white">
+                      <span className="sr-only">Open user menu</span>
+                      <ProfilePicture
+                        size={8}
+                      />
+                    </Menu.Button>
                     <Transition
                       as={Fragment}
                       enter="transition ease-out duration-100"
@@ -188,7 +177,6 @@ export default function Navbar({ user, org }: NavbarProps) {
                 <div className="flex-shrink-0">
                   <ProfilePicture
                     size={10}
-                    user={user}
                   />
                 </div>
                 <div className="ml-3">

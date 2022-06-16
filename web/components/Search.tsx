@@ -5,8 +5,8 @@ import { DocumentTextIcon, ExclamationIcon } from '@heroicons/react/outline'
 import { classNames } from '../helpers/functions'
 import axios from 'axios'
 import { API_ENDPOINT } from '../helpers/api'
-import { Doc, Org, User } from '../pages'
 import { DocTitleIcon } from '../helpers/Icons'
+import { useProfile } from '../context/ProfileContext'
 
 type DocResult = {
   objectID: string,
@@ -31,17 +31,21 @@ type SearchResults = {
 }
 
 type SearchProps = {
-  user: User,
-  org: Org,
   isOpen: boolean,
   setIsOpen: (isOpen: boolean) => void,
 }
 
-export default function Search({ user, org, isOpen, setIsOpen }: SearchProps) {
+export default function Search({ isOpen, setIsOpen }: SearchProps) {
+  const { profile } = useProfile();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResults>({ docs: [] });
 
+  const { user, org } = profile;
+
   useEffect(() => {
+    if (user == null || org == null) {
+      return;
+    }
     if (!query) {
       setResults({ docs: [] });
       return;
@@ -56,9 +60,9 @@ export default function Search({ user, org, isOpen, setIsOpen }: SearchProps) {
       .then(({ data: { results } }: { data: { results: SearchResults } }) => {
         setResults(results)
       })
-  }, [query, user, org._id]);
+  }, [query, user, org]);
 
-  if (!isOpen) {
+  if (!isOpen || user == null || org == null) {
     return null;
   }
 

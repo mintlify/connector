@@ -1,22 +1,19 @@
-import type { GetServerSideProps } from 'next'
-import axios from 'axios'
 import Sidebar from '../components/Sidebar'
 import Layout from '../components/layout'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { API_ENDPOINT } from '../helpers/api'
 import Head from 'next/head'
 import 'react-loading-skeleton/dist/skeleton.css'
 import LoadingItem from '../components/LoadingItem'
-import { withSession } from '../lib/withSession'
 import SignIn from '../components/screens/SignIn'
 import Setup from '../components/screens/Setup'
 import { DocumentTextIcon } from '@heroicons/react/outline'
 import { Event } from '../components/Event'
 import ActivityBar from '../components/ActivityBar'
-import { getSubdomain } from '../helpers/user'
 import Onboarding from '../components/screens/Onboarding'
 import DocItem from '../components/DocItem'
+import { useProfile } from '../context/ProfileContext'
+import { request } from '../helpers/request'
 
 type Code = {
   _id: string
@@ -37,57 +34,8 @@ export type Doc = {
   email?: boolean
 }
 
-export type UserSession = {
-  userId: string
-  user?: User
-  org?: Org
-  tempAuthData?: {
-    email: string
-    firstName?: string
-    lastName?: string
-    orgId?: string
-    orgName?: string
-  }
-}
-
-export type AccessMode = 'private' | 'public'
-
-export type Org = {
-  _id: string
-  name: string
-  logo: string
-  favicon: string
-  subdomain: string
-  notifications: {
-    monthlyDigest: boolean
-    newsletter: boolean
-  }
-  access?: {
-    mode: AccessMode
-  },
-  onboarding?: {
-    teamSize: string;
-    usingGitHub: boolean;
-    usingSlack: boolean;
-    usingNone: boolean;
-  }
-}
-
-export type User = {
-  userId: string,
-  email: string,
-  firstName: string,
-  lastName: string,
-  profilePicture?: string,
-  pending?: boolean;
-  onboarding?: {
-    isCompleted: boolean;
-    role: string;
-    usingVSCode: boolean;
-  }
-}
-
-export default function Home({ userSession }: { userSession: UserSession }) {
+export default function Home() {
+  const { profile, isLoadingProfile, session } = useProfile()
   const [docs, setDocs] = useState<Doc[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedDoc, setSelectedDoc] = useState<Doc>();
@@ -96,20 +44,14 @@ export default function Home({ userSession }: { userSession: UserSession }) {
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
   const [integrationsStatus, setIntegrationsStatus] = useState<{ [key: string]: boolean }>();
 
+  const { user, org } = profile;
+
   useEffect(() => {
-    if (userSession == null || userSession.user == null || userSession.org == null) {
+    if (user == null || org == null) {
       return
     }
 
-    const userId = userSession.userId
-
-    axios
-      .get(`${API_ENDPOINT}/routes/docs`, {
-        params: {
-          userId: userId,
-          subdomain: getSubdomain(window.location.host),
-        },
-      })
+    request('GET', 'routes/docs')
       .then((docsResponse) => {
         const { docs } = docsResponse.data
         setDocs(docs)
@@ -117,44 +59,29 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       .finally(() => {
         setIsLoading(false)
       })
-
-    axios
-      .get(`${API_ENDPOINT}/routes/events`, {
-        params: {
-          userId,
-          subdomain: getSubdomain(window.location.host),
-          doc: selectedDoc ? selectedDoc._id : undefined,
-        },
-      })
-      .then((eventsResponse) => {
+    request('GET', 'routes/events', {
+      params: {
+        doc: selectedDoc ? selectedDoc._id : undefined,
+      }
+    }).then((eventsResponse) => {
         const { events } = eventsResponse.data
         setEvents(events)
+      });
+    request('GET', `routes/org/${org._id}/integrations`)
+      .then(({ data }) => {
+        const { integrations } = data;
+        setIntegrationsStatus(integrations);
       })
-    
-    const { user, org } = userSession;
 
-    if (user == null || org == null) {
-      return;
-    }
+  }, [org, user, selectedDoc, isAddDocLoading]);
 
-    axios.get(`${API_ENDPOINT}/routes/org/${org._id}/integrations`, {
-      params: {
-        userId: user.userId,
-        subdomain: getSubdomain(window.location.host)
-      }
-    })
-    .then(({ data }) => {
-      const { integrations } = data;
-      setIntegrationsStatus(integrations);
-    })
-
-  }, [userSession, selectedDoc, isAddDocLoading])
-
-  if (!userSession) {
-    return <SignIn />
+  if (isLoadingProfile) {
+    return null;
   }
 
-  const { user, org } = userSession;
+  if (!session) {
+    return <SignIn />
+  }
 
   if (user == null) {
     return (
@@ -162,7 +89,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
         <Head>
           <title>Finish setting up your account</title>
         </Head>
-        <Setup userSession={userSession} />
+        <Setup />
       </>
     )
   }
@@ -176,8 +103,8 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     )
   }
 
-  if (!user.onboarding?.isCompleted) {
-    return <Onboarding user={user} org={org} />
+  if (!user?.onboarding?.isCompleted) {
+    return <Onboarding />
   }
 
   const onClickDoc = (doc: Doc) => {
@@ -201,14 +128,12 @@ export default function Home({ userSession }: { userSession: UserSession }) {
         <link rel="shortcut icon" href={org.favicon} type="image/x-icon" />
         <title>{org.name} Dashboard</title>
       </Head>
-      <Layout user={user} org={org}>
+      <Layout>
         <ClearSelectedFrame />
         <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex">
           {/* Left sidebar & main wrapper */}
           <div className="flex-1 min-w-0 xl:flex">
             <Sidebar
-              org={org}
-              user={user}
               setIsAddDocLoading={setIsAddDocLoading}
               isAddDocumentOpen={isAddDocumentOpen}
               setIsAddDocumentOpen={setIsAddDocumentOpen}
@@ -244,7 +169,6 @@ export default function Home({ userSession }: { userSession: UserSession }) {
                 {docs?.map((doc) => (
                   <DocItem
                     key={doc._id}
-                    user={user}
                     doc={doc}
                     onClick={onClickDoc}
                     selectedDoc={selectedDoc}
@@ -262,7 +186,6 @@ export default function Home({ userSession }: { userSession: UserSession }) {
             <ActivityBar
               events={events}
               selectedDoc={selectedDoc}
-              user={user}
             />
           </div>
         </div>
@@ -270,11 +193,3 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     </>
   )
 }
-
-const getServerSidePropsHandler: GetServerSideProps = async ({ req }: any) => {
-  const userSession = req.session.get('user') ?? null
-  const props = { userSession }
-  return { props }
-}
-
-export const getServerSideProps = withSession(getServerSidePropsHandler)

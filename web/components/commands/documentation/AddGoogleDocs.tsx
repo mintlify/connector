@@ -1,12 +1,11 @@
 import { SearchIcon } from '@heroicons/react/outline'
 import { CheckCircleIcon } from '@heroicons/react/solid'
-import axios from 'axios'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import { useProfile } from '../../../context/ProfileContext'
 import { API_ENDPOINT } from '../../../helpers/api'
 import { classNames } from '../../../helpers/functions'
-import { getSubdomain } from '../../../helpers/user'
-import { Org, User } from '../../../pages'
+import { request } from '../../../helpers/request'
 import timeAgo from '../../../services/timeago'
 
 type GoogleDoc = {
@@ -17,31 +16,25 @@ type GoogleDoc = {
 }
 
 type AddNotionProps = {
-  user: User
-  org: Org
   onCancel: () => void
   setIsAddDocumentationOpen: (isOpen: boolean) => void
   setIsAddDocLoading: (isAddingAutomation: boolean) => void
 }
 
-export default function AddGoogleDocs({ user, org, onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }: AddNotionProps) {
+export default function AddGoogleDocs({ onCancel, setIsAddDocumentationOpen, setIsAddDocLoading }: AddNotionProps) {
+  const { profile } = useProfile();
   const [docs, setDocs] = useState<GoogleDoc[]>()
   const [selectedDocs, setSelectedDocs] = useState<GoogleDoc[]>([])
   const [search, setSearch] = useState('')
   const router = useRouter()
 
+  const { user, org } = profile;
+
   useEffect(() => {
-    axios
-      .post(
-        `${API_ENDPOINT}/routes/integrations/google/sync`,
-        null,
-        {
-          params: {
-            userId: user.userId,
-            subdomain: getSubdomain(window.location.host),
-          },
-        }
-      )
+    if (user == null || org == null) {
+      return;
+    }
+    request('POST', 'routes/integrations/google/sync')
       .then(({ data: { results } }) => {
         setDocs(results);
         setSelectedDocs(results);
@@ -49,7 +42,11 @@ export default function AddGoogleDocs({ user, org, onCancel, setIsAddDocumentati
       .catch(async () => {
         router.push(`${API_ENDPOINT}/routes/integrations/google/install?org=${org._id}`)
       })
-  }, [user.userId, router, org])
+  }, [user, org, router])
+
+  if (user == null || org == null) {
+    return null;
+  }
 
   const onClickPage = (selectingDoc: GoogleDoc) => {
     if (selectedDocs.some((doc) => doc.id === selectingDoc.id)) {
@@ -68,17 +65,11 @@ export default function AddGoogleDocs({ user, org, onCancel, setIsAddDocumentati
 
   const onSubmit = async () => {
     setIsAddDocLoading(true)
-    axios
-      .post(
-        `${API_ENDPOINT}/routes/docs/googledocs`,
+    request('POST', 'routes/docs/googledocs',
         {
-          docs: selectedDocs,
-        },
-        {
-          params: {
-            userId: user.userId,
-            subdomain: getSubdomain(window.location.host),
-          },
+          data: {
+            docs: selectedDocs,
+          }
         }
       )
       .then(() => {

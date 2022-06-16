@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import Link from "next/link";
 import { classNames } from "../helpers/functions";
-import { Doc, User } from "../pages";
+import { Doc } from "../pages";
 import { Menu } from '@headlessui/react'
 import {
   ChevronRightIcon,
@@ -13,9 +13,9 @@ import { getSubdomain } from "../helpers/user";
 import axios from "axios";
 import { API_ENDPOINT } from "../helpers/api";
 import { ExternalLinkIcon } from '@heroicons/react/outline';
+import { useProfile } from '../context/ProfileContext';
 
 type DocItemProps = {
-  user: User,
   doc: Doc,
   onClick: (doc: Doc) => void,
   docs: Doc[],
@@ -33,11 +33,18 @@ type MenuItem = {
   onClick: () => void,
 }
 
-export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs, removeSeparators, setSelectedDoc, integrationsStatus }: DocItemProps) {
+export default function DocItem({ doc, onClick, selectedDoc, docs, setDocs, removeSeparators, setSelectedDoc, integrationsStatus }: DocItemProps) {
+  const { profile } = useProfile();
   const [silenced, setSilenced] = useState(false);
   const [listMenu, setListMenu] = useState<MenuItem[]>([]);
 
   useEffect(() => {
+    const { user } = profile;
+
+    if (user == null) {
+      return;
+    }
+    
     let slack = doc?.slack ?? true;
     if (integrationsStatus == null || !integrationsStatus['slack']) { slack = false }
     const email = doc?.email ?? true;
@@ -86,7 +93,7 @@ export default function DocItem({ user, doc, onClick, selectedDoc, docs, setDocs
       }
     });
     setListMenu(menu);
-  }, [doc, integrationsStatus, docs, setDocs, setSelectedDoc, user.userId]);
+  }, [doc, integrationsStatus, docs, setDocs, setSelectedDoc, profile]);
 
 
 

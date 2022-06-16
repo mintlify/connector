@@ -1,10 +1,9 @@
-import axios from "axios"
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { API_ENDPOINT } from "../../../helpers/api"
+import { useProfile } from "../../../context/ProfileContext"
 import { classNames } from "../../../helpers/functions"
+import { request } from "../../../helpers/request"
 import { getSubdomain } from "../../../helpers/user"
-import { User } from "../../../pages"
 
 export const isUrlValid = (str: string): boolean => {
   const pattern = new RegExp(
@@ -20,13 +19,13 @@ export const isUrlValid = (str: string): boolean => {
 }
 
 type AddWebpageProps = {
-  user: User,
   onCancel: () => void,
   setIsAddDocumentationOpen: (isOpen: boolean) => void,
   setIsAddDocLoading: (isAddingAutomation: boolean) => void;
 }
 
-export default function AddWebpage({user, onCancel, setIsAddDocumentationOpen, setIsAddDocLoading}: AddWebpageProps) {
+export default function AddWebpage({onCancel, setIsAddDocumentationOpen, setIsAddDocLoading}: AddWebpageProps) {
+  const { profile } = useProfile();
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [favicon, setFavicon] = useState();
@@ -39,7 +38,7 @@ export default function AddWebpage({user, onCancel, setIsAddDocumentationOpen, s
     }
 
     setIsLoading(true);
-    axios.get(`${API_ENDPOINT}/routes/docs/preview`, {
+    request('GET', 'routes/docs/preview', {
       params: {
         url
       }
@@ -50,20 +49,23 @@ export default function AddWebpage({user, onCancel, setIsAddDocumentationOpen, s
     })
   }, [url]);
 
+  const { user } = profile;
+  if (user == null) {
+    return null;
+  }
+
   const onSubmit = async () => {
     setIsAddDocLoading(true);
-    await axios
-      .post(
-        `${API_ENDPOINT}/routes/docs`,
-        {
-          url,
+    await request('POST', 'routes/docs',
+      {
+        data: {
+          url
         },
-        {
-          params: {
-            userId: user.userId,
-            subdomain: getSubdomain(window.location.host),
-          },
-        }
+        params: {
+          userId: user.userId,
+          subdomain: getSubdomain(window.location.host),
+        },
+      }
     )
 
     setIsAddDocLoading(false);

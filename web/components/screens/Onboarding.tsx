@@ -7,14 +7,14 @@ import { useEffect, useState } from "react";
 import { API_ENDPOINT } from "../../helpers/api";
 import { classNames } from "../../helpers/functions";
 import { DocumentationTypeIcon } from "../../helpers/Icons";
-import { updateSession } from "../../helpers/session";
 import { getSubdomain } from "../../helpers/user";
-import { Doc, Org, User } from "../../pages";
+import { Doc } from "../../pages";
 import AddDocumentation, { addDocumentationMap, AddDocumentationType } from "../commands/documentation/AddDocumentation";
 import DocItem from "../DocItem";
 import LoadingItem from "../LoadingItem";
 import ProfilePicture from "../ProfilePicture";
 import { getIntegrations, onInstallIntegration, Integration } from "../../helpers/integrations";
+import { Org, useProfile, User } from "../../context/ProfileContext";
 
 const onboardStepLocalStateKey = 'onboarding-step';
 
@@ -61,14 +61,7 @@ type NavButtonsProps = {
 const ProgressBar = ({ step, totalSteps }: { step: number, totalSteps: number }) => {
   return <div className="mt-4 flex space-x-2">
   {Array.from(Array(totalSteps).keys()).map((i) => (
-    <>
-      {
-        i > step && <span key={i} className="h-1 w-14 bg-slate-200 rounded-sm"></span>
-      }
-      {
-        i <= step && <span key={i} className="h-1 w-14 bg-primary rounded-sm"></span>
-      }
-    </>
+      <span key={i} className={classNames(`h-1 w-14 rounded-sm`, i > step ? 'bg-slate-200' : 'bg-primary')}></span>
     ))
   }
 </div>
@@ -115,24 +108,33 @@ const buildAppsUsing = (user: User, org: Org) => {
   return apps;
 }
 
-type OnboardingProps = {
-  user: User,
-  org: Org,
-}
-
-export default function Onboarding({ user, org }: OnboardingProps) {
+export default function Onboarding() {
+  const { profile } = useProfile();
   const [step, setStep] = useState(0);
-  const [role, setRole] = useState<string | undefined>(user.onboarding?.role);
-  const [teamSize, setTeamSize] = useState<string | undefined>(org.onboarding?.teamSize);
-  const [appsUsing, setAppsUsing] = useState<string[]>(buildAppsUsing(user, org));
+  const [role, setRole] = useState<string>();
+  const [teamSize, setTeamSize] = useState<string>();
+  const [appsUsing, setAppsUsing] = useState<string[]>([]);
+
+  const { user, org } = profile;
 
   useEffect(() => {
+    if (user == null || org == null) {
+      return;
+    }
     const step = window.localStorage.getItem(onboardStepLocalStateKey);
+
+    setRole(user.onboarding?.role);
+    setTeamSize(org.onboarding?.teamSize);
+    setAppsUsing(buildAppsUsing(user, org));
 
     if (step) {
       setStep(parseInt(step));
     }
-  }, []);
+  }, [user, org]);
+
+  if (user == null || org == null) {
+    return null;
+  }
 
   const onBack = () => {
     if (step === 0) {
@@ -246,8 +248,6 @@ function IntroStep({ user, onBack, onNext, role, setRole, teamSize, setTeamSize,
         userId: user.userId,
         subdomain: getSubdomain(window.location.host)
       }
-    }).then(() => {
-      updateSession();
     })
     onNext();
   }
@@ -356,8 +356,6 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
 
   return <>
     <AddDocumentation
-      user={user}
-      org={org}
       isOpen={isAddingDocOpen}
       setIsOpen={setIsAddingDocOpen}
       setIsAddDocLoading={setIsAddDocLoading}
@@ -419,7 +417,6 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
           { isAddDocLoading && <LoadingItem /> }
           {docs.map((doc) => (
             <DocItem
-              user={user}
               key={doc._id}
               doc={doc}
               docs={docs}
@@ -578,10 +575,9 @@ function InviteStep({ user, onBack, step, totalSteps }: { user: User, onBack: ()
         subdomain: getSubdomain(window.location.host)
       }
     });
-    await updateSession();
     // Remove onboarding saved step
     window.localStorage.removeItem(onboardStepLocalStateKey);
-    router.push('/');
+    router.reload();
   }
 
   const isCompleted = true;
@@ -668,7 +664,7 @@ function InviteStep({ user, onBack, step, totalSteps }: { user: User, onBack: ()
                                 </svg>
                               </span>
                             ) : (
-                              <ProfilePicture size={10} user={member} />
+                              <ProfilePicture size={10} />
                             )}
                             <div className="ml-4">
                               <div
