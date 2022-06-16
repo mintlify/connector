@@ -8,7 +8,6 @@ import Link from 'next/link'
 import axios from 'axios'
 import { API_ENDPOINT } from '../../helpers/api'
 import { classNames } from '../../helpers/functions'
-import { User } from '..'
 import { updateSession } from '../../helpers/session'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
@@ -17,6 +16,7 @@ import ProfilePicture from '../../components/ProfilePicture'
 import { CheckCircleIcon, XIcon } from '@heroicons/react/solid'
 import { navigation } from './account'
 import { Integration, onInstallIntegration } from '../../helpers/integrations';
+import { User } from '../../context/ProfileContex'
 
 export type EmailNotifications = {
   monthlyDigest: boolean

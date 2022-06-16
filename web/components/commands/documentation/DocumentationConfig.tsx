@@ -1,5 +1,6 @@
+import { User } from '../../../context/UserContex'
 import { DocumentationTypeIcon } from '../../../helpers/Icons'
-import { Org, User } from '../../../pages'
+import { Org } from '../../../pages'
 import AddConfluence from './AddConfluence'
 import { addDocumentationMap, AddDocumentationType } from './AddDocumentation'
 import AddGoogleDocs from './AddGoogleDocs'

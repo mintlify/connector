@@ -3,10 +3,12 @@ import { CheckCircleIcon } from '@heroicons/react/solid'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import { User } from '../../../context/UserContex'
 import { API_ENDPOINT } from '../../../helpers/api'
 import { classNames } from '../../../helpers/functions'
+import { ConfluencePageIcon } from '../../../helpers/Icons'
 import { getSubdomain } from '../../../helpers/user'
-import { Org, User } from '../../../pages'
+import { Org } from '../../../pages'
 import timeAgo from '../../../services/timeago'
 
 type ConfluencePage = {
@@ -124,7 +126,7 @@ export default function AddConfluence({ user, org, onCancel, setIsAddDocumentati
                 <span className="flex-1 flex">
                   <span className="flex flex-col">
                     <span className="flex items-center text-sm font-medium text-gray-900">
-                      <svg className="mr-1 h-4 w-4" width="24" height="24" viewBox="0 0 24 24" role="presentation"><path fill="#2684FF" fillRule="evenodd" d="M3 0h18a3 3 0 013 3v18a3 3 0 01-3 3H3a3 3 0 01-3-3V3a3 3 0 013-3zm1 18c0 .556.446 1 .995 1h8.01c.54 0 .995-.448.995-1 0-.556-.446-1-.995-1h-8.01c-.54 0-.995.448-.995 1zm0-4c0 .556.448 1 1 1h14c.555 0 1-.448 1-1 0-.556-.448-1-1-1H5c-.555 0-1 .448-1 1zm0-4c0 .556.448 1 1 1h14c.555 0 1-.448 1-1 0-.556-.448-1-1-1H5c-.555 0-1 .448-1 1zm0-4c0 .556.448 1 1 1h14c.555 0 1-.448 1-1 0-.556-.448-1-1-1H5c-.555 0-1 .448-1 1z"></path></svg>
+                      <ConfluencePageIcon className="mr-1 h-4 w-4" />
                       {page.title}
                     </span>
                     <span className="mt-1 flex items-center text-sm text-gray-500">Last updated {timeAgo.format(Date.parse(page.history.lastUpdated.when))}</span>

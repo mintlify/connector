@@ -17,6 +17,7 @@ import ActivityBar from '../components/ActivityBar'
 import { getSubdomain } from '../helpers/user'
 import Onboarding from '../components/screens/Onboarding'
 import DocItem from '../components/DocItem'
+import { User, useProfile } from '../context/ProfileContex'
 
 type Code = {
   _id: string
@@ -73,21 +74,8 @@ export type Org = {
   }
 }
 
-export type User = {
-  userId: string,
-  email: string,
-  firstName: string,
-  lastName: string,
-  profilePicture?: string,
-  pending?: boolean;
-  onboarding?: {
-    isCompleted: boolean;
-    role: string;
-    usingVSCode: boolean;
-  }
-}
-
 export default function Home({ userSession }: { userSession: UserSession }) {
+  const { profile, isLoadingProfile } = useProfile()
   const [docs, setDocs] = useState<Doc[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedDoc, setSelectedDoc] = useState<Doc>();
@@ -129,7 +117,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
       .then((eventsResponse) => {
         const { events } = eventsResponse.data
         setEvents(events)
-      })
+      });
     
     const { user, org } = userSession;
 
@@ -150,11 +138,18 @@ export default function Home({ userSession }: { userSession: UserSession }) {
 
   }, [userSession, selectedDoc, isAddDocLoading])
 
+  if (isLoadingProfile) {
+    return null;
+  }
+
   if (!userSession) {
     return <SignIn />
   }
 
-  const { user, org } = userSession;
+  const { user } = profile;
+  const { org } = userSession;
+
+  console.log(user);
 
   if (user == null) {
     return (
@@ -176,7 +171,7 @@ export default function Home({ userSession }: { userSession: UserSession }) {
     )
   }
 
-  if (!user.onboarding?.isCompleted) {
+  if (!user?.onboarding?.isCompleted) {
     return <Onboarding user={user} org={org} />
   }
 

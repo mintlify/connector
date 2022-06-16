@@ -1,6 +1,12 @@
 import axios from "axios";
-import { Org, User } from "../pages";
+import { Profile, User } from "../context/ProfileContex";
+import { Org } from "../pages";
 import { API_ENDPOINT } from "./api";
+
+export const getProfile = async () => {
+  const { data: profile }: { data: Profile } = await axios.get('/api/profile');
+  return profile;
+}
 
 export const getUserFromUserId = async (userId: string): Promise<User> => {
   const {

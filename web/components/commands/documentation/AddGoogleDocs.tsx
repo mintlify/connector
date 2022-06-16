@@ -3,10 +3,11 @@ import { CheckCircleIcon } from '@heroicons/react/solid'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import { User } from '../../../context/UserContex'
 import { API_ENDPOINT } from '../../../helpers/api'
 import { classNames } from '../../../helpers/functions'
 import { getSubdomain } from '../../../helpers/user'
-import { Org, User } from '../../../pages'
+import { Org } from '../../../pages'
 import timeAgo from '../../../services/timeago'
 
 type GoogleDoc = {

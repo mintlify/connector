@@ -1,10 +1,10 @@
 import axios from "axios"
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import { User } from "../../../context/UserContex"
 import { API_ENDPOINT } from "../../../helpers/api"
 import { classNames } from "../../../helpers/functions"
 import { getSubdomain } from "../../../helpers/user"
-import { User } from "../../../pages"
 
 export const isUrlValid = (str: string): boolean => {
   const pattern = new RegExp(

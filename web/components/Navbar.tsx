@@ -8,22 +8,16 @@ import {
 import { XIcon } from '@heroicons/react/outline'
 import { classNames } from '../helpers/functions'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import ProfilePicture from './ProfilePicture'
-import { Org, User } from '../pages'
+import { Org } from '../pages'
 import Search from './Search'
+import { User } from '../context/ProfileContex'
 
 const userNavigation = [
   { name: 'Account', href: '/settings/account' },
   { name: 'Organization', href: '/settings/organization' },
   { name: 'Sign out', href: '/api/logout' },
 ]
-
-const navButtonClass = (isActive: boolean) => {
-  return isActive
-    ? 'bg-gray-800 text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer hover:bg-gray-800'
-    : 'text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer'
-}
 
 type NavbarProps = {
   user: User,

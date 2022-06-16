@@ -3,8 +3,9 @@ import { Combobox, Dialog, Transition } from '@headlessui/react'
 import { classNames } from '../../../helpers/functions'
 import { DocumentationTypeIcon } from '../../../helpers/Icons'
 import { ChevronRightIcon } from '@heroicons/react/solid'
-import { Org, User } from '../../../pages'
+import { Org } from '../../../pages'
 import DocumentationConfig from './DocumentationConfig'
+import { User } from '../../../context/UserContex'
 
 export type AddDocumentationType = 'webpage' | 'notion' | 'googledocs' | 'confluence';
 
