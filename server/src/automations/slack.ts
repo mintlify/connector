@@ -49,7 +49,8 @@ export const publishMessage = async (text: string, channel: string, token: strin
       channel: formattedChannel,
       blocks,
       text,
-      mrkdwn: true
+      mrkdwn: true,
+      unfurl_links: false
     });
   }
   const handleChannelNotFound = async (err: string) => {

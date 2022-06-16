@@ -93,7 +93,8 @@ slackRouter.get('/authorization', async (req, res) => {
   return res.redirect('slack://open');
 });
 
-slackRouter.post('/actions', async (_, res) => {
+slackRouter.post('/actions', async (req, res) => {
+  console.log(req.body);
   return res.status(200).end();
 })
 
