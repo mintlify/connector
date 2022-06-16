@@ -15,7 +15,7 @@ import ActivityBar from '../components/ActivityBar'
 import { getSubdomain } from '../helpers/user'
 import Onboarding from '../components/screens/Onboarding'
 import DocItem from '../components/DocItem'
-import { User, useProfile, Org } from '../context/ProfileContex'
+import { useProfile } from '../context/ProfileContex'
 
 type Code = {
   _id: string
@@ -98,7 +98,7 @@ export default function Home() {
       setIntegrationsStatus(integrations);
     })
 
-  }, [profile, selectedDoc, isAddDocLoading])
+  }, [org, user, selectedDoc, isAddDocLoading])
 
   if (isLoadingProfile) {
     return null;

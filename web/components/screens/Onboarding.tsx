@@ -61,14 +61,7 @@ type NavButtonsProps = {
 const ProgressBar = ({ step, totalSteps }: { step: number, totalSteps: number }) => {
   return <div className="mt-4 flex space-x-2">
   {Array.from(Array(totalSteps).keys()).map((i) => (
-    <>
-      {
-        i > step && <span key={i} className="h-1 w-14 bg-slate-200 rounded-sm"></span>
-      }
-      {
-        i <= step && <span key={i} className="h-1 w-14 bg-primary rounded-sm"></span>
-      }
-    </>
+      <span key={i} className={classNames(`h-1 w-14 rounded-sm`, i > step ? 'bg-slate-200' : 'bg-primary')}></span>
     ))
   }
 </div>
@@ -578,7 +571,7 @@ function InviteStep({ user, onBack, step, totalSteps }: { user: User, onBack: ()
     });
     // Remove onboarding saved step
     window.localStorage.removeItem(onboardStepLocalStateKey);
-    router.push('/');
+    router.reload();
   }
 
   const isCompleted = true;
