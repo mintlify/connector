@@ -2,7 +2,7 @@
 
 [![discord](https://img.shields.io/discord/911693009253466123?logo=Discord&logoColor=white)](https://discord.gg/6W7GuYuxra) [![GitHub Stars](https://img.shields.io/github/stars/mintlify/mintlify?style=social)](https://github.com/mintlify/mintlify) [![Twitter](https://img.shields.io/twitter/follow/mintlify?style=social)](https://twitter.com/mintlify)
 
-[Mintlify](https://www.mintlify.com/) lets software teams easily track and manage documentation.
+[Mintlify](https://www.mintlify.com/) helps teams easily track and manage documentation.
 
 [▶️ Watch our 2 min demo](https://www.loom.com/share/892d08e178144cd89b109f9396e4db98)
 
