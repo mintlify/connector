@@ -1,11 +1,10 @@
-import axios from 'axios';
 import dotenv from 'dotenv';
 import { EventType } from '../models/Event';
 import { DocType } from '../models/Doc';
 import { OrgType } from '../models/Org';
 import Code, { CodeType } from '../models/Code';
 import { getDataFromWebpage } from '../services/webscraper';
-
+import { App } from '@slack/bolt';
 dotenv.config();
 
 const formatUrl = (url: string) => {
@@ -15,9 +14,14 @@ const formatUrl = (url: string) => {
   return url;
 }
 
+const signingSecret = process.env.SLACK_SIGNING_SECRET || '';
+
 export const publishMessage = async (text: string, channel: string, token: string, url: string) => {
+  if (!process.env.SLACK_SIGNING_SECRET) {
+    return;
+  }
+  const slackApp =  new App({token, signingSecret})
   const postMessage = async () => {
-    const messageUrl = 'https://slack.com/api/chat.postMessage';
     let formattedChannel = channel;
     if (channel.charAt(0) !== '#') {
       formattedChannel = `#${channel}`;
@@ -41,24 +45,24 @@ export const publishMessage = async (text: string, channel: string, token: strin
         }
       }
     ];
-    return await axios.post(messageUrl, {
+    return await slackApp.client.chat.postMessage( {
       channel: formattedChannel,
       blocks,
       text
-    }, { headers: { authorization: `Bearer ${token}` } });
+    });
   }
   const handleChannelNotFound = async (err: string) => {
     if (err === 'channel_not_found') {
-      const url = 'https://slack.com/api/conversations.create';
-      await axios.post(url, {
-        name: channel
-      }, { headers: { authorization: `Bearer ${token}` } });
+      await slackApp.client.admin.conversations.create({
+        name: channel,
+        is_private: false
+      });
       await postMessage();
     }
   }
   try {
-    const res = await postMessage();
-    await handleChannelNotFound(res.data.error);
+    const res = await postMessage() as any;
+    await handleChannelNotFound(res?.data?.error);
   } catch (error: any) {
     await handleChannelNotFound(error?.data?.error);
   }
