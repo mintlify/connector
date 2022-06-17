@@ -180,13 +180,10 @@ export default function Settings() {
     setInvitedEmail('')
     // create a pending account by calling the invitation API
     const emails = [email]
-    await request('POST', 'routes/user/invite-to-org', {
+    await request('POST', 'routes/user/invite', {
       data: {
         emails,
       },
-      params: {
-        userId: user.userId,
-      }
     }).then(() => {
         const invitedMembers: any = emails.map((email) => {
           return {
@@ -196,8 +193,6 @@ export default function Settings() {
         })
         setMembers(members.concat(invitedMembers))
       })
-    // send login invitation
-    await axios.post('/api/login/magiclink', { email })
     notify('Invited user', 'Sent invitation email to ' + email)
     setIsSendingInvite(false)
   }
@@ -375,6 +370,11 @@ export default function Settings() {
                                   setInviteErrorMessage(undefined)
                                   setInvitedEmail(e.target.value)
                                 }}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') { 
+                                    inviteMember(invitedEmail);
+                                  }
+                                }}
                                 required
                               />
                               {inviteErrorMessage && <div className="text-red-500 pt-2 pl-2">{inviteErrorMessage}</div>}
@@ -389,7 +389,7 @@ export default function Settings() {
                                 }}
                                 className="inline-flex items-center justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-hover focus:outline-none focus:ring-0 focus:ring-offset-2 sm:w-auto hover:cursor-pointer"
                               >
-                                Add member
+                                Invite member
                               </button>
                             </span>
                           </div>

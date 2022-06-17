@@ -15,6 +15,7 @@ import LoadingItem from "../LoadingItem";
 import ProfilePicture from "../ProfilePicture";
 import { getIntegrations, onInstallIntegration, Integration } from "../../helpers/integrations";
 import { Org, useProfile, User } from "../../context/ProfileContext";
+import { request } from "../../helpers/request";
 
 const onboardStepLocalStateKey = 'onboarding-step';
 
@@ -546,12 +547,9 @@ function InviteStep({ user, onBack, step, totalSteps }: { user: User, onBack: ()
     setInvitedEmail("")
     // create a pending account by calling the invitation API
     const emails = [email];
-    await axios
-      .post(`${API_ENDPOINT}/routes/user/invite-to-org`, {
-        emails,
-      }, {
-        params: {
-          userId: user.userId,
+    request('POST', 'routes/user/invite', {
+        data: {
+          emails,
         }
       })
       .then(() => {
@@ -563,8 +561,6 @@ function InviteStep({ user, onBack, step, totalSteps }: { user: User, onBack: ()
         })
         setMembers(members.concat(invitedMembers))
       })
-    // send login invitation
-    await axios.post("/api/login/magiclink", { email });
   }
 
   const onSubmit = async () => {
@@ -621,7 +617,7 @@ function InviteStep({ user, onBack, step, totalSteps }: { user: User, onBack: ()
               }}
               className="inline-flex items-center justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-hover focus:outline-none focus:ring-0 focus:ring-offset-2 sm:w-auto hover:cursor-pointer"
             >
-              Add member
+              Invite member
             </button>
           </span>
         </div>

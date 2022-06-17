@@ -1,5 +1,6 @@
 import express from "express";
 import { ISDEV } from "../helpers/environment";
+import { ENDPOINT } from "../helpers/github/octokit";
 import Org from "../models/Org";
 import User from "../models/User";
 import { identify, track } from "../services/segment";
@@ -99,20 +100,35 @@ userRouter.get('/login', async (req, res) => {
   return res.redirect(redirectUrl);
 })
 
-userRouter.post("/invite-to-org", userMiddleware, async (req: express.Request, res: express.Response) => {
+userRouter.post("/invite", userMiddleware, async (req: express.Request, res: express.Response) => {
     const { emails } = req.body;
     const orgId = res.locals.user.org;
 
     try {
-      await Org.findOneAndUpdate({ _id: orgId, invitedEmails: { $ne: emails } }, { $push: { invitedEmails: { $each: emails } } });
+      const org = await Org.findOneAndUpdate({ _id: orgId, invitedEmails: { $ne: emails } }, { $push: { invitedEmails: { $each: emails } } });
 
       track(res.locals.user.userId, 'Invite member', {
         emails,
         org: orgId.toString()
+      });
+
+      const state = JSON.stringify({
+        method: 'magiclink',
+        host: org?.subdomain, // org will never be null
       })
+      const redirectUrl = `${ENDPOINT}/routes/user/login?state=${state}`;
+      const invitePromises = emails.map((email: string) => {
+        return client.magicLinks.email.invite({
+          email,
+          invite_magic_link_url: redirectUrl,
+        })
+      });
+
+      await Promise.all(invitePromises);
 
       return res.status(200).end();
     } catch (error) {
+      console.log({error});
       return res.status(500).json({ error });
     }
   }
