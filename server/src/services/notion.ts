@@ -29,12 +29,14 @@ export const getNotionPageDataWithId = async (pageId: string, notionAccessToken:
   const n2m = new NotionToMarkdown({ notionClient: notion });
   const mdBlocks = await n2m.pageToMarkdown(pageId);
   const mdString = n2m.toMarkdownString(mdBlocks);
+  // Temp fix: remove images from Notion
+  const content = mdString.replace(/!\[\] *\([^)]*\) */gm, '');
 
   return {
     // the favicon field should be added later
     method: 'notion-private',
     title,
-    content: mdString,
+    content,
   };
 }
 
