@@ -66,7 +66,7 @@ export default function Home() {
     }).then((eventsResponse) => {
         const { events } = eventsResponse.data
         setEvents(events)
-      });
+      }).catch((err) => console.log(err));
     request('GET', `routes/org/${org._id}/integrations`)
       .then(({ data }) => {
         const { integrations } = data;

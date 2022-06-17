@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useProfile } from "../../context/ProfileContext";
 
 export default function Setup() {
-  const { session } = useProfile();
+  const { session, isLoadingProfile } = useProfile();
   const router = useRouter();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -23,6 +23,9 @@ export default function Setup() {
   }, [session]);
 
   if (session == null || !session.tempAuthData?.email) {
+    if (!isLoadingProfile) {
+      router.push('/api/logout')
+    }
     return null;
   }
 
