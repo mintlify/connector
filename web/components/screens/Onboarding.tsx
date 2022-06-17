@@ -36,7 +36,7 @@ const rolesOptions: Option[] = [
 
 const sizeOptions: Option[] = [
   { id: '1', title: 'Individual' },
-  { id: '2-5', title: '2 - 10' },
+  { id: '2-10', title: '2 - 10' },
   { id: '11-50', title: '11 - 50' },
   { id: '51-200', title: '51 - 200' },
   { id: '200+', title: '200+' },
