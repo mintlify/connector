@@ -1,7 +1,5 @@
 # 🌿 Mintlify
 
-[![Twitter](https://img.shields.io/twitter/follow/mintlify?style=social)](https://twitter.com/mintlify)
-
 [Mintlify](https://www.mintlify.com/) helps teams easily track and manage documentation.
 
 <p align="center" class="flex row">
