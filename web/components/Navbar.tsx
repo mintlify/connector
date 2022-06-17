@@ -8,51 +8,32 @@ import {
 import { XIcon } from '@heroicons/react/outline'
 import { classNames } from '../helpers/functions'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import ProfilePicture from './ProfilePicture'
-import { Org, User } from '../pages'
 import Search from './Search'
-
-const navigation = [
-  {
-    name: 'Documentation',
-    href: '/',
-  },
-  {
-    name: 'Automations',
-    href: '/automations',
-  }
-]
+import { useProfile } from '../context/ProfileContext'
 
 const userNavigation = [
-  { name: 'Settings', href: '/settings' },
+  { name: 'Account', href: '/settings/account' },
+  { name: 'Organization', href: '/settings/organization' },
   { name: 'Sign out', href: '/api/logout' },
 ]
 
-const navButtonClass = (isActive: boolean) => {
-  return isActive
-    ? 'bg-gray-800 text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer hover:bg-gray-800'
-    : 'text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer'
-}
-
-type NavbarProps = {
-  user: User,
-  org: Org
-}
-
-export default function Navbar({ user, org }: NavbarProps) {
+export default function Navbar() {
+  const { profile } = useProfile();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const router = useRouter();
-
-  const fullName = `${user.firstName} ${user.lastName}`;
 
   useHotkeys('cmd+k', () => setIsSearchOpen(true));
+
+  const { user, org } = profile;
+  if (user == null || org == null) {
+    return null;
+  }
+
+  const fullName = `${user.firstName} ${user.lastName}`;
   
   return (
     <>
     <Search
-      user={user}
-      org={org}
       isOpen={isSearchOpen}
       setIsOpen={setIsSearchOpen}
     />
@@ -60,7 +41,7 @@ export default function Navbar({ user, org }: NavbarProps) {
       {({ open }) => (
         <>
           <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-            <div className="relative flex items-center justify-between h-16">
+            <div className="relative flex items-center justify-between h-16 flex-row">
               <div className="flex items-center px-2 lg:px-0">
                 <Link href="/">
                   <button className="flex-shrink-0">
@@ -71,28 +52,12 @@ export default function Navbar({ user, org }: NavbarProps) {
                     />
                   </button>
                 </Link>
-                <div className="hidden lg:block lg:ml-6">
-                  <div className="flex space-x-4">
-                    {
-                      navigation.map((nav) => (
-                        <Link
-                          key={nav.name}
-                          href={nav.href}
-                        >
-                          <span className={navButtonClass(router.pathname === nav.href)}>
-                            {nav.name}
-                          </span>
-                        </Link>
-                      ))
-                    }
-                  </div>
-                </div>
               </div>
-              <button
-                className="flex-1 flex justify-center px-2 lg:ml-6 lg:justify-end focus:outline-none"
-                onClick={() => setIsSearchOpen(true)}
-              >
-                <div className="max-w-lg w-full lg:max-w-xs">
+              <div className="flex lg:justify-end focus:outline-none">
+                <button
+                  className="md:w-96 lg:max-w-xs w-full"
+                  onClick={() => setIsSearchOpen(true)}
+                >
                   <label htmlFor="search" className="sr-only">
                     Search
                   </label>
@@ -113,8 +78,8 @@ export default function Navbar({ user, org }: NavbarProps) {
                       </kbd>
                     </div>
                   </div>
-                </div>
-              </button>
+                </button>
+              </div>
               <div className="flex lg:hidden">
                 {/* Mobile menu button */}
                 <Disclosure.Button className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
@@ -126,20 +91,17 @@ export default function Navbar({ user, org }: NavbarProps) {
                   )}
                 </Disclosure.Button>
               </div>
-              <div className="hidden flex-1 lg:block lg:ml-4">
+              <div className="hidden lg:block lg:ml-4">
                 <div className="flex flex-row-reverse">
 
                   {/* Profile dropdown */}
                   <Menu as="div" className="ml-4 relative flex-shrink-0">
-                    <div>
-                      <Menu.Button className="bg-gray-800 rounded-full flex text-sm text-white">
-                        <span className="sr-only">Open user menu</span>
-                        <ProfilePicture
-                          size={8}
-                          user={user}
-                        />
-                      </Menu.Button>
-                    </div>
+                    <Menu.Button className="bg-gray-800 rounded-full flex text-sm text-white">
+                      <span className="sr-only">Open user menu</span>
+                      <ProfilePicture
+                        size={8}
+                      />
+                    </Menu.Button>
                     <Transition
                       as={Fragment}
                       enter="transition ease-out duration-100"
@@ -149,23 +111,58 @@ export default function Navbar({ user, org }: NavbarProps) {
                       leaveFrom="transform opacity-100 scale-100"
                       leaveTo="transform opacity-0 scale-95"
                     >
-                      <Menu.Items className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5">
-                        {
-                          userNavigation.map((nav) => (
-                          <Menu.Item key={nav.href}>
+                     <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none">
+                        <div className="px-4 py-3">
+                          <p className="text-sm">Signed in as</p>
+                          <p className="text-sm font-medium text-gray-900 truncate">{user.email}</p>
+                        </div>
+                        <div className="py-1">
+                        <Link href="/settings/account">
+                            <Menu.Item>
+                              {({ active }) => (
+                                  <a
+                                    className={classNames(
+                                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                      'block px-4 py-2 text-sm cursor-pointer'
+                                    )}
+                                  >
+                                    Account settings
+                                  </a>
+                              )}
+                            </Menu.Item>
+                          </Link>
+                          <Link href="/settings/organization">
+                          <Menu.Item>
                             {({ active }) => (
                               <a
-                                href={nav.href}
                                 className={classNames(
-                                  active ? 'bg-gray-100' : '',
-                                  'block px-4 py-2 text-sm text-gray-700'
+                                  active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                  'block px-4 py-2 text-sm cursor-pointer'
                                 )}
                               >
-                                {nav.name}
+                                Organization
                               </a>
                             )}
-                          </Menu.Item>))
-                        }
+                          </Menu.Item>
+                          </Link>
+                        </div>
+                        <div className="py-1">
+                        <Link href="/api/logout">
+                          <Menu.Item>
+                            {({ active }) => (
+                                <button
+                                  type="submit"
+                                  className={classNames(
+                                    active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                    'block w-full text-left px-4 py-2 text-sm'
+                                  )}
+                                >
+                                  Sign out
+                                </button>
+                            )}
+                          </Menu.Item>
+                          </Link>
+                        </div>
                       </Menu.Items>
                     </Transition>
                   </Menu>
@@ -175,27 +172,11 @@ export default function Navbar({ user, org }: NavbarProps) {
           </div>
 
           <Disclosure.Panel className="lg:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1">
-              {
-                navigation.map((nav) => (
-                  <Disclosure.Button
-                    key={nav.name}
-                    as="a"
-                    href={nav.href}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-800"
-                  >
-                    {nav.name}
-                  </Disclosure.Button>
-                  )
-                )
-              }
-            </div>
             <div className="pt-4 pb-3 border-t border-gray-700">
               <div className="flex items-center px-5">
                 <div className="flex-shrink-0">
                   <ProfilePicture
                     size={10}
-                    user={user}
                   />
                 </div>
                 <div className="ml-3">

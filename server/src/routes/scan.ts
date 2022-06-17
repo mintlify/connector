@@ -2,41 +2,88 @@ import express from 'express';
 import * as Diff from 'diff';
 import Doc, { DocType } from '../models/Doc';
 import Event, { EventType } from '../models/Event';
-import { getDataFromWebpage } from '../services/webscraper';
+import { ContentData, getDataFromWebpage } from '../services/webscraper';
 import { triggerAutomationsForEvents } from '../automations';
 import { updateDocContentForSearch } from '../services/algolia';
 import { workQueue } from '../workers';
 import mongoose from 'mongoose';
 import Org from '../models/Org';
 import { track } from '../services/segment';
+import { getNotionPageDataWithId } from '../services/notion';
+import { getGoogleDocsPrivateData } from '../services/googleDocs';
+import { getConfluenceContentFromPageById } from './integrations/confluence';
 
 const scanRouter = express.Router();
 
 type DiffAndContent = {
   diff: Diff.Change[],
   newContent: string,
+  newTitle: string,
+  newMethod: string,
+  newFavicon?: string,
 }
 
-type DiffAlert = {
-  diff: Diff.Change[],
-  newContent: string,
+interface DiffAlert extends DiffAndContent {
   doc: DocType
 }
 
-type DocUpdateStatus = 'first-change' | 'continuous-change' | 'event-trigger';
+type DocUpdateStatus = 'just-added' | 'first-change' | 'continuous-change' | 'event-trigger';
 
 const DIFF_CONFIRMATION_THRESHOLD = 2;
+const WAIT_FOR_WEB_SCRAPE = 6000; // in ms
 
-const getDiffAndContent = async (url: string, previousContent: string, orgId: string): Promise<DiffAndContent> => {
-  const { content } = await getDataFromWebpage(url, orgId, 6000);
-  return {
-    diff: Diff.diffWords(previousContent, content),
-    newContent: content
+// Currently supports webpage and notion page
+export const extractFromDoc = async (doc: DocType, orgId: string): Promise<ContentData> => {
+  if (doc.method === 'notion-private' && doc.notion?.pageId) {
+    const org = await Org.findById(orgId);
+    const notionAccessToken = org?.integrations?.notion?.access_token;
+    if (notionAccessToken == null) {
+      throw 'Unable to get organization by ID for Notion'
+    }
+    return getNotionPageDataWithId(doc.notion.pageId, notionAccessToken);
+  }
+
+  else if (doc.method === 'googledocs-private' && doc.googledocs?.id) {
+    const org = await Org.findById(orgId);
+    const googleCredentials = org?.integrations?.google;
+    if (googleCredentials == null) {
+      throw 'Unable to get organization by ID for Google Docs'
+    }
+    return getGoogleDocsPrivateData(doc.googledocs.id, googleCredentials);
+  }
+
+  else if (doc.method === 'confluence-private' && doc.confluence?.id) {
+    const org = await Org.findById(orgId);
+    const confluenceCredentials = org?.integrations?.confluence;
+    if (confluenceCredentials == null) {
+      throw 'Unable to get organization by ID for Confluence'
+    }
+    return getConfluenceContentFromPageById(doc.confluence.id, confluenceCredentials);
+  }
+
+  return getDataFromWebpage(doc.url, orgId, WAIT_FOR_WEB_SCRAPE);
+}
+
+const getDiffAndContent = async (doc: DocType, orgId: string): Promise<DiffAndContent | null> => {
+  try {
+    const previousContent = doc.content || '';
+    const { content, title, favicon, method } = await extractFromDoc(doc, orgId);
+    return {
+      diff: Diff.diffWords(previousContent, content),
+      newContent: content,
+      newTitle: title,
+      newFavicon: favicon,
+      newMethod: method,
+    }
+  } catch (error) {
+    return null;
   }
 }
 
 const getDocUpdateStatus = (doc: DocType): DocUpdateStatus => {
-  if (doc.changeConfirmationCount == null) {
+  if (doc.isJustAdded) {
+    return 'just-added';
+  } else if (doc.changeConfirmationCount == null) {
     return 'first-change'
   } else if (doc.changeConfirmationCount < DIFF_CONFIRMATION_THRESHOLD) {
     return 'continuous-change'
@@ -47,30 +94,40 @@ const getDocUpdateStatus = (doc: DocType): DocUpdateStatus => {
 export const scanDocsInOrg = async (orgId: string) => {
   const docsFromOrg = await Doc.find({ org: orgId });
   const getDifferencePromises = docsFromOrg.map((doc) => {
-    return getDiffAndContent(doc.url, doc.content ?? '', orgId);
+    return getDiffAndContent(doc, orgId);
   });
 
-  const diffsAndContent = await Promise.all(getDifferencePromises);
+  const diffsAndContentResults = await Promise.all(getDifferencePromises);
 
   const diffAlerts: DiffAlert[] = [];
   const sameContentDocs: DocType[] = [];
-  diffsAndContent.forEach(({ diff, newContent }, i) => {
+  diffsAndContentResults.forEach((diffsAndContent, i) => {
+    if (diffsAndContent == null)  {
+      return;
+    }
+    const { diff } = diffsAndContent;
     const hasChanges = diff.some((diff) => (diff.added || diff.removed) && diff.value.trim());
     const doc = docsFromOrg[i];
-    if (hasChanges) {
+    if (hasChanges || doc.isJustAdded) {
       diffAlerts.push({
+        ...diffsAndContent,
         doc,
-        newContent,
-        diff
       });
     } else {
       sameContentDocs.push(doc);
     }
   });
 
-  const newContentUpdateQueries = diffAlerts.map(({ doc, newContent }) => {
+  const newContentUpdateQueries = diffAlerts.map(({ doc, newContent, newTitle, newFavicon }) => {
     const updateStatus = getDocUpdateStatus(doc);
     switch (updateStatus) {
+      case 'just-added':
+        return {
+          updateOne: {
+            filter: { _id: doc._id },
+            update: { isJustAdded: false, content: newContent, title: newTitle, favicon: newFavicon }
+          }
+        }
       case 'first-change':
         return {
           updateOne: {

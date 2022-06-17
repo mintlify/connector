@@ -1,4 +1,6 @@
-import mongoose, { Schema, Types } from "mongoose";
+import mongoose, { Schema, Types } from 'mongoose';
+import { ConfluenceCredentials } from '../routes/integrations/confluence';
+import { GoogleDocsCredentials } from '../services/googleDocs';
 
 export type OrgType = {
   _id: Types.ObjectId;
@@ -29,15 +31,23 @@ export type OrgType = {
     github?: {
       installations: Object[];
     };
+    google?: GoogleDocsCredentials;
+    confluence?: ConfluenceCredentials;
   };
-  users: string[],
-  invitedEmails?: string[],
+  users: string[];
+  invitedEmails?: string[];
   notifications: {
-    monthlyDigest: boolean,
-    newsletter: boolean,
-  },
+    monthlyDigest: boolean;
+    newsletter: boolean;
+  };
   access: {
-    mode: string,
+    mode: string;
+  },
+  onboarding?: {
+    teamSize: string;
+    usingGitHub: boolean;
+    usingSlack: boolean;
+    usingNone: boolean;
   }
 };
 
@@ -47,28 +57,49 @@ const OrgSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
   users: { type: [String], default: [] },
   invitedEmails: { type: [String], default: [] },
-  logo: { type: String },
-  favicon: { type: String },
+  logo: String,
+  favicon: String,
   integrations: {
     github: Object,
     slack: {
-      accessToken: { type: String },
-      appId: { type: String },
+      accessToken: String,
+      appId: String,
       team: {
-        id: { type: String },
-        name: { type: String },
+        id: String,
+        name: String,
       },
-      channel: { type: String },
-      channelId: { type: String },
-      configurationUrl: { type: String },
+      channel: String,
+      channelId: String,
+      configurationUrl: String,
     },
     notion: {
-      access_token: { type: String },
-      bot_id: { type: String },
-      workspace_id: { type: String },
-      workspace_name: { type: String },
-      workspace_icon: { type: String },
+      access_token: String,
+      bot_id: String,
+      workspace_id: String,
+      workspace_name: String,
+      workspace_icon: String,
     },
+    google: {
+      refresh_token: String,
+      expiry_date: String,
+      access_token: String,
+      token_type: String,
+      id_token: String,
+      scope: String,
+    },
+    confluence: {
+      access_token: String,
+      expires_in: String,
+      refresh_token: String,
+      scope: String,
+      accessibleResources: [{
+        id: String,
+        url: String,
+        name: String,
+        scopes: [String],
+        avatarUrl: String
+      }]
+    }
   },
   notifications: {
     monthlyDigest: { type: Boolean, default: true },
@@ -76,9 +107,15 @@ const OrgSchema = new Schema({
   },
   access: {
     mode: { type: String, default: 'private' },
+  },
+  onboarding: {
+    teamSize: String,
+    usingGitHub: Boolean,
+    usingSlack: Boolean,
+    usingNone: Boolean,
   }
 });
 
-const Org = mongoose.model<OrgType>("Org", OrgSchema, "orgs");
+const Org = mongoose.model<OrgType>('Org', OrgSchema, 'orgs');
 
 export default Org;

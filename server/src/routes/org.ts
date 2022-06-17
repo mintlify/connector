@@ -4,6 +4,10 @@ import User from '../models/User';
 import { track } from '../services/segment';
 import { client } from '../services/stytch';
 import { checkIfUserHasVSCodeInstalled, removeUnneededDataFromOrg, userMiddleware } from './user';
+import { EventType } from '../models/Event';
+import { slackAutomationForEvent } from '../automations/slack';
+import Doc from '../models/Doc';
+
 // import { sendEmail } from '../services/mandrill';
 
 const orgRouter = express.Router();
@@ -76,7 +80,7 @@ orgRouter.get('/users', userMiddleware, async (_: any, res: express.Response) =>
       email,
       pending: true,
     };
-  });
+  }) as any;
   return res.status(200).json({ users: users.concat(invitedUsers) });
 });
 
@@ -121,8 +125,10 @@ orgRouter.get('/:orgId/integrations', userMiddleware, async (req, res) => {
       github: org.integrations.github?.installations != null,
       notion: org.integrations.notion?.access_token != null,
       slack: org.integrations.slack?.accessToken != null,
+      google: org.integrations.google?.access_token != null,
       vscode: isVSCodeInstalled, // dependent on the user
     };
+
     return res.send({ integrations });
   } catch (error) {
     return res.status(500).send({ error });
@@ -242,5 +248,28 @@ orgRouter.put('/access', userMiddleware, async (req, res) => {
 
   return res.end();
 });
+
+orgRouter.put('/testSlack', async (req, res) => {
+  const { orgId, docId } = req.body;
+  const org = await Org.findById(orgId);
+  const doc = await Doc.findById(docId);
+  const fakeEvent: EventType = {
+    org: orgId,
+    doc: docId,
+    type: 'change',
+    change: [
+      {
+        count: 1,
+        removed: true,
+        value: "fix"
+      }
+    ]
+  }
+  if (org == null || doc == null) {
+    return res.end()
+  }
+  await slackAutomationForEvent(fakeEvent, org, doc);
+  return res.end();
+})
 
 export default orgRouter;

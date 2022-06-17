@@ -58,22 +58,31 @@ export class ViewProvider implements WebviewViewProvider {
 						break;
 					case 'link-submit':
 						{
-							const { userId, docId, title, codes, subdomain } = message.args;
+							const { userId, docId, title, code, subdomain } = message.args;
 							vscode.window.withProgress({
 								location: vscode.ProgressLocation.Notification,
 								title: 'Connecting documentation with code',
 							}, () => new Promise(async (resolve) => {
-								await axios.put(`${API_ENDPOINT}/links`, { docId, codes }, {
-									params: {
-										userId,
-										subdomain
-									}
-								});
-								vscode.window.showInformationMessage(`Successfully connected code with ${title}`);
+								try {
+									await axios.put(`${API_ENDPOINT}/links`, { docId, codes: [code] }, {
+										params: {
+											userId,
+											subdomain
+										}
+									});
+									vscode.window.showInformationMessage(`Successfully connected code with ${title}`);
+								} catch (err) {
+									const errMessage = err?.response?.data?.error ?? `Error connecting code. Please log back in, re-install the extension, or report bug to hi@mintlify.com`;
+									vscode.window.showInformationMessage(errMessage);
+								}
 								resolve(null);
 							}));
 							break;
 						}
+					case 'error': {
+						const errMessage = message?.message;
+						vscode.window.showInformationMessage(errMessage);
+					}
 				}
 			});
 

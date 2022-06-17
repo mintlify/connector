@@ -30,3 +30,12 @@ export const track = (userId: string, event: string, properties?: Properties) =>
     });
   })
 }
+
+export const trackEvent = (event: string) => {
+  runIfProduction(() => {
+    analytics.track({
+      anonymousId: 'Slack',
+      event
+    });
+  })
+}

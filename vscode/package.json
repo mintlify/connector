@@ -2,7 +2,7 @@
   "name": "connector",
   "publisher": "mintlify",
   "displayName": "Mintlify",
-  "version": "0.2.0",
+  "version": "0.3.15",
   "icon": "assets/logo.png",
   "galleryBanner": {
     "color": "#041811",
@@ -46,12 +46,6 @@
         {
           "command": "mintlify.logout",
           "when": "view == primary"
-        }
-      ],
-      "editor/context": [
-        {
-          "command": "mintlify.link-code",
-          "group": "mintlify"
         }
       ],
       "explorer/context": [

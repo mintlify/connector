@@ -1,6 +1,7 @@
-import { DocumentAddIcon, DocumentTextIcon } from "@heroicons/react/outline"
+import { DocumentAddIcon } from "@heroicons/react/outline"
 import { MinusIcon, PlusIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/solid"
 import { useState } from "react"
+import { DocTitleIcon } from "../helpers/Icons"
 import { Doc } from "../pages"
 import timeAgo from "../services/timeago"
 
@@ -64,13 +65,7 @@ export default function EventItem({ event }: { event: Event }) {
   return (
     <li className="py-4">
       <div className="flex space-x-3">
-        {
-          event.doc.favicon ? <img
-          className="h-5 w-5 rounded-sm"
-          src={event.doc.favicon}
-          alt={event.doc.title}
-        /> : <DocumentTextIcon className="h-5 w-5 text-gray-600" />
-        }
+        <DocTitleIcon method={event.doc.method} favicon={event.doc.favicon} />
         <div className="flex-1 space-y-1">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium">{event.doc.title}</h3>

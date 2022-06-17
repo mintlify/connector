@@ -5,56 +5,30 @@ import { userMiddleware } from './user';
 import { createEvent } from './events';
 import Doc from '../models/Doc';
 import Event from '../models/Event';
-import { getDataFromWebpage } from '../services/webscraper';
+import { extractDataFromHTML, getDataFromWebpage } from '../services/webscraper';
 import { deleteDocForSearch, indexDocForSearch } from '../services/algolia';
 import { track } from '../services/segment';
+import { createDocFromUrl, createDocsFromConfluencePages, createDocsFromGoogleDocs, createDocsFromNotionPageId } from '../helpers/routes/docs';
+import { extractFromDoc } from './scan';
 
 const docsRouter = express.Router();
 
-// userId is the _id of the user not `userId`
-export const createDocFromUrl = async (url: string, orgId: string, userId: Types.ObjectId) => {
-  const { content, method, title, favicon } = await getDataFromWebpage(url, orgId);
-  let foundFavicon = favicon;
-  if (!foundFavicon) {
-    try {
-      const faviconRes = await axios.get(`https://s2.googleusercontent.com/s2/favicons?sz=128&domain_url=${url}`);
-      foundFavicon = faviconRes.request.res.responseUrl;
-    } catch {
-      foundFavicon = undefined;
-    }
-  }
-  const doc = await Doc.findOneAndUpdate(
-    {
-      org: orgId,
-      url,
-    },
-    {
-      org: orgId,
-      url,
-      method,
-      content,
-      title,
-      favicon,
-      createdBy: userId,
-    },
-    {
-      upsert: true,
-      new: true,
-    }
-  );
-
-  return { content, doc, method };
-};
-
-docsRouter.get('/', userMiddleware, async (_, res) => {
+docsRouter.get('/', userMiddleware, async (req, res) => {
   const org = res.locals.user.org;
+  const { shouldShowCreatedBySelf } = req.query;
+
+  const matchQuery: { org: Types.ObjectId, createdBy?: Types.ObjectId } = { org };
+  if (shouldShowCreatedBySelf) {
+    matchQuery.createdBy = res.locals.user._id;
+  }
+
   try {
     const docs = await Doc.aggregate([
       {
-        $match: { org },
+        $match: matchQuery,
       },
       {
-        $sort: { lastUpdatedAt: -1 },
+        $sort: { createdAt: -1 },
       },
       {
         $lookup: {
@@ -63,15 +37,7 @@ docsRouter.get('/', userMiddleware, async (_, res) => {
           localField: '_id',
           as: 'code',
         },
-      },
-      {
-        $lookup: {
-          from: 'automations',
-          foreignField: 'source.doc',
-          localField: '_id',
-          as: 'automations',
-        },
-      },
+      }
     ]);
     return res.status(200).send({ docs });
   } catch (error) {
@@ -79,25 +45,80 @@ docsRouter.get('/', userMiddleware, async (_, res) => {
   }
 });
 
+docsRouter.get('/preview', async (req, res) => {
+  const url = req.query.url as string;
+  if (!url) {
+    return res.end();
+  }
+
+  try {
+    const response = await axios.get(url);
+    const { title, favicon } = await extractDataFromHTML(url, response.data);
+    return res.send({title, favicon});
+  } catch {
+    return res.status(400).send({error: 'Unable to fetch content from URL'});
+  }
+});
+
 docsRouter.post('/', userMiddleware, async (req, res) => {
   const { url } = req.body;
   const org = res.locals.user.org;
   try {
+    // Initial add is using light mode scan
     const { content, doc, method } = await createDocFromUrl(url, org, res.locals.user._id);
-    if (doc != null) {
-      await createEvent(org, doc._id, 'add', {});
-      indexDocForSearch(doc);
-      track(res.locals.user.userId, 'Add documentation', {
-        doc: doc._id.toString(),
-        method,
-        org: org.toString(),
-      });
-    } else console.log('Doc is null');
-    res.send({ content });
+    if (doc == null) {
+      return res.status(400).send({error: 'No doc available'});
+    }
+    await createEvent(org, doc._id, 'add', {});
+    indexDocForSearch(doc);
+    track(res.locals.user.userId, 'Add documentation', {
+      doc: doc._id.toString(),
+      method,
+      org: org.toString(),
+    });
+    return res.send({ content });
   } catch (error) {
-    res.status(500).send({ error });
+    return res.status(500).send({ error });
   }
 });
+
+docsRouter.post('/notion', userMiddleware, async (req, res) => {
+  const { pages } = req.body;
+  const org = res.locals.user.org;
+
+  try {
+    // Initial add is using light mode scan
+    await createDocsFromNotionPageId(pages, org, res.locals.user._id);
+    return res.end();
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
+});
+
+docsRouter.post('/googledocs', userMiddleware, async (req, res) => {
+  const { docs } = req.body;
+  const org = res.locals.user.org;
+
+  try {
+    // Initial add is using light mode scan
+    await createDocsFromGoogleDocs(docs, org, res.locals.user._id);
+    return res.end();
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
+});
+
+docsRouter.post('/confluence', userMiddleware, async (req, res) => {
+  const { pages } = req.body;
+  const org = res.locals.user.org;
+
+  try {
+    await createDocsFromConfluencePages(pages, org, res.locals.user._id);
+    return res.end();
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
+})
 
 docsRouter.delete('/:docId', userMiddleware, async (req, res) => {
   const { docId } = req.params;
@@ -125,5 +146,58 @@ docsRouter.post('/content', async (req, res) => {
     res.status(500).send({ error });
   }
 });
+
+docsRouter.put('/:docId/slack', async (req, res) => {
+  try {
+    const { docId } = req.params;
+    const { slack } = req.body;
+    const doc = await Doc.findById(docId);
+    if (doc == null) return res.status(400).json({ error: 'Invalid doc ID' });
+    await Doc.findByIdAndUpdate(docId, { slack });
+    return res.end();
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
+});
+
+docsRouter.put('/:docId/email', async (req, res) => {
+  try {
+    const { docId } = req.params;
+    const { email } = req.body;
+    const doc = await Doc.findById(docId);
+    if (doc == null) return res.status(400).json({ error: 'Invalid doc ID' });
+    await Doc.findByIdAndUpdate(doc._id, { email }, {new: true, strict: false});
+    return res.end();
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
+});
+
+docsRouter.get('/screen', async (req, res) => {
+  try {
+    const url = req.query.url as string;
+    const { data } = await axios.get(url);
+    res.send(data);
+  } catch {
+    res.status(400).end();
+  }
+});
+
+docsRouter.get('/content/:id', userMiddleware, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const doc = await Doc.findById(id);
+    if (doc == null) {
+      return res.status(400).send('No doc available');
+    }
+
+    const orgId = doc.org;
+    const { content, title, favicon, method } = await extractFromDoc(doc, orgId);
+    return res.send({ content, title, favicon, method });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({error: 'Internal systems error'});
+  }
+})
 
 export default docsRouter;

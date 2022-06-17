@@ -1,5 +1,6 @@
 import express from "express";
 import { ISDEV } from "../helpers/environment";
+import { ENDPOINT } from "../helpers/github/octokit";
 import Org from "../models/Org";
 import User from "../models/User";
 import { identify, track } from "../services/segment";
@@ -99,20 +100,35 @@ userRouter.get('/login', async (req, res) => {
   return res.redirect(redirectUrl);
 })
 
-userRouter.post("/invite-to-org", userMiddleware, async (req: express.Request, res: express.Response) => {
+userRouter.post("/invite", userMiddleware, async (req: express.Request, res: express.Response) => {
     const { emails } = req.body;
     const orgId = res.locals.user.org;
 
     try {
-      await Org.findOneAndUpdate({ _id: orgId, invitedEmails: { $ne: emails } }, { $push: { invitedEmails: { $each: emails } } });
+      const org = await Org.findOneAndUpdate({ _id: orgId, invitedEmails: { $ne: emails } }, { $push: { invitedEmails: { $each: emails } } });
 
       track(res.locals.user.userId, 'Invite member', {
         emails,
         org: orgId.toString()
+      });
+
+      const state = JSON.stringify({
+        method: 'magiclink',
+        host: org?.subdomain, // org will never be null
       })
+      const redirectUrl = `${ENDPOINT}/routes/user/login?state=${state}`;
+      const invitePromises = emails.map((email: string) => {
+        return client.magicLinks.email.invite({
+          email,
+          invite_magic_link_url: redirectUrl,
+        })
+      });
+
+      await Promise.all(invitePromises);
 
       return res.status(200).end();
     } catch (error) {
+      console.log({error});
       return res.status(500).json({ error });
     }
   }
@@ -267,5 +283,33 @@ userRouter.put('/:userId/install-vscode', async (req, res) => {
     return res.status(500).send({ error });
   }
 });
+
+userRouter.post('/onboarding', userMiddleware, async (req, res) => {
+  const { role, teamSize, appsUsing } = req.body;
+
+  if (!role || !teamSize || appsUsing == null) {
+    return res.status(400).send({ error: 'No data provided' });
+  }
+
+  try {
+    const userUpdateQuery = { onboarding: { role, usingVSCode: appsUsing.includes('vscode') } };
+    const orgUpdateQuery = { onboarding: { teamSize, usingGitHub: appsUsing.includes('github'), usingSlack: appsUsing.includes('slack'), usingNone: appsUsing.includes('none') } }
+    const updateUserPromise = User.findByIdAndUpdate(res.locals.user._id, userUpdateQuery);
+    const updateOrgPromise = Org.findByIdAndUpdate(res.locals.user.org, orgUpdateQuery);
+    await Promise.all([updateUserPromise, updateOrgPromise]);
+    return res.end();
+  } catch (error) {
+    return res.status(500).send({ error: 'System error' });
+  }
+});
+
+userRouter.put('/onboarding/complete', userMiddleware, async (_, res) => {
+  try {
+    await User.findByIdAndUpdate(res.locals.user._id, { 'onboarding.isCompleted': true });
+    return res.end();
+  } catch (error) {
+    return res.status(500).send({ error: 'System error' });
+  }
+})
 
 export default userRouter;

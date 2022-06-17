@@ -1,6 +1,5 @@
 import algoliasearch from 'algoliasearch';
 import dotenv from 'dotenv';
-import { AutomationType } from '../models/Automation';
 import { DocType } from '../models/Doc';
 
 dotenv.config();
@@ -8,75 +7,59 @@ dotenv.config();
 const algoliaSecret = process.env.ALGOLIA_SECRET as string;
 const algoliaClientId = process.env.ALGOLIA_APP_ID as string;
 const client = algoliasearch(algoliaClientId, algoliaSecret);
+const docsIndex = client.initIndex('docs');
 
 type SearchResults = {
-    docs: any[],
-    automations: any[]
+    docs: any[]
 }
 
-export const searchDocsAndAutomations = async (query: string, orgId: string): Promise<SearchResults> => {
-    const queries = [{
-        indexName: 'docs',
-        query,
-        params: {
-            filters: `org:${orgId}`
-        }
-      }, {
-        indexName: 'automations',
-        query,
-        params: {
-            filters: `org:${orgId}`
-        }
-      }];
-    
-    const { results } = await client.multipleQueries(queries);
+export const searchDocs = async (query: string, orgId: string): Promise<SearchResults> => {    
+    const results = await docsIndex.search(query, {
+        filters: `org:${orgId}`
+    })
     return {
-        docs: results[0].hits,
-        automations: results[1].hits
+        docs: results.hits
     }
 }
 
-const docsIndex = client.initIndex('docs');
-const automationsIndex = client.initIndex('automations');
-
 export const indexDocForSearch = async (doc: DocType) => {
-    const record = {
-        objectID: doc._id,
-        name: doc.title,
-        content: doc.content,
-        url: doc.url,
-        org: doc.org,
-        favicon: doc.favicon
-    };
-    await docsIndex.saveObject(record);
+    try {
+        const record = {
+            objectID: doc._id,
+            name: doc.title,
+            content: doc.content,
+            url: doc.url,
+            org: doc.org,
+            favicon: doc.favicon,
+            method: doc.method,
+        };
+        await docsIndex.saveObject(record);
+    }
+    catch (error) {
+        // Todo: manage oversize
+        console.log(error);
+    }
 }
 
 export const updateDocContentForSearch = async (doc: DocType, newContent: string) => {
-    const record = {
-        objectID: doc._id,
-        name: doc.title,
-        content: newContent,
-        url: doc.url,
-        org: doc.org,
-        favicon: doc.favicon
-    };
-    await docsIndex.saveObject(record);
+    try {
+        const record = {
+            objectID: doc._id,
+            name: doc.title,
+            content: newContent,
+            url: doc.url,
+            org: doc.org,
+            favicon: doc.favicon,
+            method: doc.method,
+        };
+        await docsIndex.saveObject(record);
+    }
+    catch (error) {
+        // Todo: manage oversize
+        console.log(error);
+    }
 }
 
 export const deleteDocForSearch = async (objectID: string): Promise<any> => {
     return docsIndex.deleteObject(objectID);
-}
-
-export const indexAutomationForSearch = async (automation: AutomationType) => {
-    const record = {
-        objectID: automation._id,
-        name: automation.name,
-        org: automation.org,
-        type: automation.type
-    }
-    await automationsIndex.saveObject(record);
-}
-
-export const deleteAutomationForSearch = async (objectID: string) => {
-    await automationsIndex.deleteObject(objectID);
 }

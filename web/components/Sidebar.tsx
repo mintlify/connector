@@ -1,38 +1,31 @@
 import { useIntercom } from 'react-use-intercom';
-import { ChatAlt2Icon, CogIcon, DocumentTextIcon, LightningBoltIcon } from '@heroicons/react/outline';
+import { ChatAlt2Icon, CogIcon, DocumentTextIcon, LightningBoltIcon, ViewGridAddIcon } from '@heroicons/react/outline';
 import { PlusIcon } from '@heroicons/react/solid'
 import Link from 'next/link';
-import AddDocument from './commands/AddDocument'
-import AddAutomation from './commands/AddAutomation'
-import { Org, User } from '../pages';
+import AddDocumentation from './commands/documentation/AddDocumentation'
 import ProfilePicture from './ProfilePicture';
+import { Org, useProfile, User } from '../context/ProfileContext';
 
 type SidebarProps = {
-  user: User;
-  org: Org;
-  setIsAddingDoc?: (isAddingDoc: boolean) => void;
-  setIsAddingAutomation?: (isAddingAutomation: boolean) => void;
+  setIsAddDocLoading: (isAddingDoc: boolean) => void;
   isAddDocumentOpen: boolean;
-  setIsAddDocumentOpen: (isAddingAutomation: boolean) => void;
-  isAddAutomationOpen: boolean;
-  setIsAddAutomationOpen: (isAddingAutomation: boolean) => void;
+  setIsAddDocumentOpen: (isAddingDoc: boolean) => void;
 }
 
 export default function Sidebar({
-  user,
-  org,
-  setIsAddingDoc,
-  setIsAddingAutomation,
-  isAddAutomationOpen,
+  setIsAddDocLoading,
   isAddDocumentOpen,
-  setIsAddAutomationOpen,
   setIsAddDocumentOpen
 }: SidebarProps) {
-
   const { boot, show } = useIntercom();
+  const { profile } = useProfile();
+
+  const { user, org } = profile;
+  if (user == null || org == null) {
+    return null;
+  }
 
   const fullName = user.firstName + ' ' + user.lastName;
-
   const onClickHelp = () => {
     boot({ userId: user.userId, email: user.email, company: { companyId: org._id, name: org.name } })
     show();
@@ -40,17 +33,10 @@ export default function Sidebar({
 
   return (
     <>
-    <AddDocument
-      user={user}
+    <AddDocumentation
       isOpen={isAddDocumentOpen}
       setIsOpen={setIsAddDocumentOpen}
-      setIsAddingDoc={setIsAddingDoc}
-    />
-    <AddAutomation
-      user={user}
-      isOpen={isAddAutomationOpen}
-      setIsOpen={setIsAddAutomationOpen}
-      setIsAddingAutomation={setIsAddingAutomation}
+      setIsAddDocLoading={setIsAddDocLoading}
     />
     <div className="xl:flex-shrink-0 xl:w-64 xl:border-r xl:border-gray-200">
       <div className="pl-4 pr-6 py-6 sm:pl-6 lg:pl-8 xl:pl-0">
@@ -62,7 +48,6 @@ export default function Sidebar({
                 <div className="flex-shrink-0 h-12 w-12">
                   <ProfilePicture
                     size={12}
-                    user={user}
                   />
                 </div>
                 <div className="space-y-px">
@@ -93,28 +78,20 @@ export default function Sidebar({
                     Add Review Check
                   </button>
                 </Link>
-                <button
-                  type="button"
-                  className="mt-3 inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 sm:mt-0 sm:ml-3 xl:ml-0 xl:mt-3 xl:w-full"
-                  onClick={() => setIsAddAutomationOpen(true)}
-                >
-                  <LightningBoltIcon className="h-4 w-4 mr-1" />
-                  Add Automation
-                </button>
               </div>
             </div>
             {/* Meta info */}
-            <div className="flex flex-col space-y-6 sm:flex-row sm:space-y-0 sm:space-x-8 xl:flex-col xl:space-x-0 xl:space-y-6">
-              <Link href="/settings#setting-organization">
+            <div className="flex flex-col space-y-5 sm:flex-row sm:space-y-0 sm:space-x-8 xl:flex-col xl:space-x-0 xl:space-y-5">
+              <Link href="/settings/organization#invite">
                 <div className="flex items-center space-x-2 cursor-pointer text-gray-500 hover:text-gray-700">
                   <PlusIcon className="h-5 w-5" aria-hidden="true" />
                   <span className="text-sm font-medium">Invite team member</span>
                 </div>
               </Link>
-              <Link href="/settings">
+              <Link href="/settings/organization#integrations">
                 <div className="flex items-center space-x-2 cursor-pointer text-gray-500 hover:text-gray-700">
-                  <CogIcon className="h-5 w-5" aria-hidden="true" />
-                  <span className="text-sm font-medium">Settings</span>
+                  <ViewGridAddIcon className="h-5 w-5" aria-hidden="true" />
+                  <span className="text-sm font-medium">Manage Integrations</span>
                 </div>
               </Link>
               <button onClick={onClickHelp}>

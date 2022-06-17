@@ -1,20 +1,35 @@
 import { UserAddIcon } from "@heroicons/react/solid";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
-import { UserSession } from "../pages";
+import { useEffect, useState } from "react";
+import { useProfile } from "../../context/ProfileContext";
 
-type SetupProps = {
-  userSession: UserSession
-};
-
-export default function Setup({ userSession }: SetupProps) {
+export default function Setup() {
+  const { session, isLoadingProfile } = useProfile();
   const router = useRouter();
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [orgName, setOrgName] = useState('');
 
-  const tempAuthData = userSession.tempAuthData!;
-  const [firstName, setFirstName] = useState(tempAuthData.firstName || "");
-  const [lastName, setLastName] = useState(tempAuthData.lastName || "");
-  const [orgName, setOrgName] = useState(tempAuthData.orgName || "");
+  useEffect(() => {
+    if (session == null) {
+      return;
+    }
+
+    const tempAuthData = session.tempAuthData;
+    setFirstName(tempAuthData?.firstName || '');
+    setLastName(tempAuthData?.lastName || '');
+    setOrgName(tempAuthData?.orgName || '');
+  }, [session]);
+
+  if (session == null || !session.tempAuthData?.email) {
+    if (!isLoadingProfile) {
+      router.push('/api/logout')
+    }
+    return null;
+  }
+
+  const tempAuthData = session.tempAuthData;
 
   const onSubmit = () => {
     router.push({

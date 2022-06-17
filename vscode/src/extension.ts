@@ -11,4 +11,9 @@ export function activate(context: vscode.ExtensionContext) {
 		linkDirCommand(provider)
 	);
 	registerAuthRoute(provider);
+
+	vscode.window.onDidChangeTextEditorSelection((event) => {
+		const editor = event.textEditor;
+		vscode.commands.executeCommand('mintlify.link-code', { editor, scheme: 'file' });
+	});
 }
