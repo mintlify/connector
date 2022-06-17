@@ -24,6 +24,7 @@
   "dependencies": {
     "@notionhq/client": "^1.0.4",
     "@octokit/auth-app": "^3.6.1",
+    "@octokit/webhooks-types": "^5.8.0",
     "@slack/bolt": "^3.11.2",
     "@slack/interactive-messages": "^2.0.2",
     "@types/analytics-node": "^3.1.8",

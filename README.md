@@ -1,7 +1,5 @@
 # 🌿 Mintlify
 
-[![discord](https://img.shields.io/discord/911693009253466123?logo=Discord&logoColor=white)](https://discord.gg/6W7GuYuxra) [![GitHub Stars](https://img.shields.io/github/stars/mintlify/mintlify?style=social)](https://github.com/mintlify/mintlify) [![Twitter](https://img.shields.io/twitter/follow/mintlify?style=social)](https://twitter.com/mintlify)
-
 [Mintlify](https://www.mintlify.com/) helps teams easily track and manage documentation.
 
 <p align="center" class="flex row">
