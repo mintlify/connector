@@ -7,6 +7,7 @@ export type CodeType = {
     provider: string;
     file: string;
     org: string;
+    gitOrg: string;
     repo: string;
     type: string;
     url: string;
@@ -21,6 +22,7 @@ const CodeSchema = new Schema({
     provider: { type: String, required: true },
     file: { type: String, required: true },
     gitOrg: { type: String, required: true },
+    org: { type: String, required: true },
     repo: { type: String, required: true },
     type: { type: String, required: true },
     url: { type: String, required: true },

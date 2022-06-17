@@ -9,6 +9,8 @@ const linksRouter = express.Router();
 linksRouter.put('/', userMiddleware, async (req, res) => {
     try {
         const { docId, codes } = req.body;
+        const org = res.locals.user.org;
+
         const doc = await Doc.findById(docId);
 
         if (doc == null) {
@@ -17,7 +19,17 @@ linksRouter.put('/', userMiddleware, async (req, res) => {
 
         const codePromises: Promise<CodeType>[] = codes.map((code: CodeType) => {
             code.doc = doc._id;
-            return Code.create(code);
+            return Code.findOneAndUpdate(
+              {
+                org,
+                doc: doc._id,
+                url: code.url
+              },
+              code,
+              {
+                upsert: true
+              }
+            );
         });
         await Promise.all(codePromises);
 
