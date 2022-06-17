@@ -1,7 +1,7 @@
 import { Context } from "probot";
 import { ISDEV } from "../environment";
 
-export const ADMIN_LOGIN = ISDEV ? 'mintlify-connect-dev' : 'mintlify-connect';
+export const ADMIN_LOGIN = ISDEV ? 'mintlify-dev' : 'mintlify';
 export const ENDPOINT = ISDEV ? 'http://localhost:5000' : 'https://connect.mintlify.com'
 
 export const getReviewComments = async (context: Context) => {
