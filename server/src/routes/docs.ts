@@ -4,7 +4,7 @@ import { Types } from 'mongoose';
 import { userMiddleware } from './user';
 import Doc, { DocType } from '../models/Doc';
 import Event from '../models/Event';
-import { ContentData, getDataFromWebpage } from '../services/webscraper';
+import { ContentData } from '../services/webscraper';
 import { deleteDocForSearch } from '../services/algolia';
 import { createDocsFromConfluencePages, createDocsFromGoogleDocs, createDocsFromNotionPageId } from '../helpers/routes/docs';
 import Org from '../models/Org';
@@ -126,17 +126,6 @@ docsRouter.delete('/:docId', userMiddleware, async (req, res) => {
 
     await Promise.all([deleteDocPromise, deleteEventsPromise, deleteDocForSearchPromise]);
     res.end();
-  } catch (error) {
-    res.status(500).send({ error });
-  }
-});
-
-docsRouter.post('/content', async (req, res) => {
-  const { url, orgId } = req.body;
-
-  try {
-    const page = await getDataFromWebpage(url, orgId, 6000);
-    res.send({ page });
   } catch (error) {
     res.status(500).send({ error });
   }

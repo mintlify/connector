@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { Types } from 'mongoose';
 import Doc from '../../models/Doc';
 import Org from '../../models/Org';
@@ -8,35 +7,6 @@ import { GoogleDoc } from '../../routes/integrations/google';
 import { NotionPage } from '../../routes/integrations/notion';
 import { indexDocForSearch } from '../../services/algolia';
 import { track } from '../../services/segment';
-import { extractDataFromHTML } from '../../services/webscraper';
-
-// userId is the _id of the user not `userId`
-export const createDocFromUrl = async (url: string, orgId: string, userId: Types.ObjectId) => {
-  const response = await axios.get(url);
-  const { content, method, title, favicon } = await extractDataFromHTML(url, response.data);
-  const doc = await Doc.findOneAndUpdate(
-    {
-      org: orgId,
-      url,
-    },
-    {
-      org: orgId,
-      url,
-      method,
-      content,
-      title,
-      favicon,
-      createdBy: userId,
-      isJustAdded: true,
-    },
-    {
-      upsert: true,
-      new: true,
-    }
-  );
-
-  return { content, doc, method };
-};
 
 export const createDocsFromNotionPageId = async (pages: NotionPage[], orgId: Types.ObjectId, userId: string) => {
   const addDocPromises = pages.map((page) => new Promise<void>(async (resolve) => {

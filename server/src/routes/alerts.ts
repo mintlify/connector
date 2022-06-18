@@ -39,7 +39,7 @@ alertsRouter.post('/', async (req, res) => {
             case 'file':
                 filesWithContent.map((file) => {
                     if (file.filename.endsWith(code.file) || code.file.endsWith(file.filename)) {
-                        alertPromises.push(codeToAlert(code, file, orgId));
+                        alertPromises.push(codeToAlert(code, file));
                         hasAlert = true;
                     }
                 });
@@ -47,7 +47,7 @@ alertsRouter.post('/', async (req, res) => {
             case 'folder':
                 filesWithContent.map((file) => {
                     if (file.filename.includes(code.file)) {
-                        alertPromises.push(codeToAlert(code, file, orgId));
+                        alertPromises.push(codeToAlert(code, file));
                         hasAlert = true;
                     }
                 });
@@ -55,7 +55,7 @@ alertsRouter.post('/', async (req, res) => {
             case 'lines':
                 filesWithContent.map((file: FileInfo) => {
                     if (didChange(code, file)) {
-                        alertPromises.push(codeToAlert(code, file, orgId));
+                        alertPromises.push(codeToAlert(code, file));
                         hasAlert = true;
                     }
                 });

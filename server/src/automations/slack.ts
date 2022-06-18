@@ -3,7 +3,6 @@ import { EventType } from '../models/Event';
 import { DocType } from '../models/Doc';
 import { OrgType } from '../models/Org';
 import Code, { CodeType } from '../models/Code';
-import { getDataFromWebpage } from '../services/webscraper';
 import { App } from '@slack/bolt';
 dotenv.config();
 
@@ -70,11 +69,10 @@ export const publishMessage = async (text: string, channel: string, token: strin
   }
 }
 
-const getSlackMessage = async (event: EventType, orgId: string, doc: DocType): Promise<string|null> => {
+const getSlackMessage = async (event: EventType, doc: DocType): Promise<string|null> => {
   let title = 'your document';
-  if (doc != null) {
-    const { title: pageTitle } = await getDataFromWebpage(doc.url, orgId);
-    title = pageTitle;
+  if (doc?.title) {
+    title = doc.title;
   }
   if (event.type === 'change') {
     return `Changes have been made to <${doc?.url}|${title}>`;
@@ -87,7 +85,7 @@ const getSlackMessage = async (event: EventType, orgId: string, doc: DocType): P
 }
 
 export const slackAutomationForEvent = async (event: EventType, org: OrgType, doc: DocType) => {
-    const message = await getSlackMessage(event, org._id.toString(), doc);
+    const message = await getSlackMessage(event, doc);
     const token = org?.integrations?.slack?.accessToken;
     if (message && token) {
         await publishMessage(message, 'docs', token, doc.url);

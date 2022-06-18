@@ -1,8 +1,7 @@
 import { CodeType } from '../../models/Code';
 import { FileInfo } from '../github/patch';
 import Doc, { DocType } from '../../models/Doc';
-import { createMessage } from './messages';
-import { Link, Alert, LineRange } from '../github/types';
+import { Alert, LineRange } from '../github/types';
 import { getChangesInRange, getLineRange } from './links';
 
 const getLineRangeFromCode = (code: CodeType, file: FileInfo): LineRange => {
@@ -23,16 +22,11 @@ const getLineRangeFromCode = (code: CodeType, file: FileInfo): LineRange => {
     }
 }
 
-export const codeToAlert = async (code: CodeType, file: FileInfo, orgId: string): Promise<Alert|null> => {
+export const codeToAlert = async (code: CodeType, file: FileInfo): Promise<Alert|null> => {
     const doc: DocType | null = await Doc.findByIdAndUpdate(code.doc, { blocker: true });
     if (doc == null) return null;
     const lineRange = getLineRangeFromCode(code, file);
-    const link: Link = {
-        url: doc.url,
-        type: code.type,
-        lineRange,
-    };
-    const message = await createMessage(link, orgId);
+    const message = `Does [${doc.title || 'this document'}](${doc.url}) need to be updated?`
     return {
         url: doc.url,
         message,
