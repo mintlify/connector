@@ -123,11 +123,16 @@ export default function ActivityBar({ events, selectedDoc }: ActivityBarProps) {
         </div>
         <div>
           <ul role="list" className="divide-y divide-gray-200">
-            {events.map((event) => (
+            {events.length > 0 && events.map((event) => (
               <EventItem key={event._id} event={event} />
             ))}
           </ul>
-          <div className="py-4 text-sm border-t border-gray-200"></div>
+          <div className="py-1 text-sm border-t border-gray-200"></div>
+          {
+            events.length === 0 && <div className="text-sm text-gray-500">
+              No activities yet
+            </div>
+          }
         </div>
       </div>
   )
