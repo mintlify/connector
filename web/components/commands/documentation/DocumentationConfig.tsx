@@ -3,7 +3,6 @@ import AddConfluence from './AddConfluence'
 import { addDocumentationMap, AddDocumentationType } from './AddDocumentation'
 import AddGoogleDocs from './AddGoogleDocs'
 import AddNotion from './AddNotion'
-import AddWebpage from './AddWebpage'
 
 type DocConfigSettings = {
   inputComponent: JSX.Element | null
@@ -27,15 +26,6 @@ export default function DocumentationConfig({
   }
 
   const configOptions: Record<AddDocumentationType, DocConfigSettings> = {
-    webpage: {
-      inputComponent: (
-        <AddWebpage
-          onCancel={onCancel}
-          setIsAddDocumentationOpen={setIsAddDocumentationOpen}
-          setIsAddDocLoading={setIsAddDocLoading}
-        />
-      ),
-    },
     notion: {
       inputComponent: (
         <AddNotion

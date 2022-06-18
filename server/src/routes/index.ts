@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
-import scanRouter from "./scan";
 import integrationsRouter from "./integrations";
 import docsRouter from "./docs";
 import alertsRouter from "./alerts";
@@ -32,7 +31,5 @@ headRouter.use("/links", linksRouter);
 headRouter.use("/search", searchRouter);
 // Integrations
 headRouter.use("/integrations", integrationsRouter);
-// Cron job
-headRouter.use("/scan", scanRouter);
 
 export default headRouter;

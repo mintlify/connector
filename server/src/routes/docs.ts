@@ -2,16 +2,48 @@ import axios from 'axios';
 import express from 'express';
 import { Types } from 'mongoose';
 import { userMiddleware } from './user';
-import { createEvent } from './events';
-import Doc from '../models/Doc';
+import Doc, { DocType } from '../models/Doc';
 import Event from '../models/Event';
-import { extractDataFromHTML, getDataFromWebpage } from '../services/webscraper';
-import { deleteDocForSearch, indexDocForSearch } from '../services/algolia';
-import { track } from '../services/segment';
-import { createDocFromUrl, createDocsFromConfluencePages, createDocsFromGoogleDocs, createDocsFromNotionPageId } from '../helpers/routes/docs';
-import { extractFromDoc } from './scan';
+import { ContentData, getDataFromWebpage } from '../services/webscraper';
+import { deleteDocForSearch } from '../services/algolia';
+import { createDocsFromConfluencePages, createDocsFromGoogleDocs, createDocsFromNotionPageId } from '../helpers/routes/docs';
+import Org from '../models/Org';
+import { getNotionPageDataWithId } from '../services/notion';
+import { getConfluenceContentFromPageById } from './integrations/confluence';
+import { getGoogleDocsPrivateData } from '../services/googleDocs';
 
 const docsRouter = express.Router();
+
+export const extractFromDoc = async (doc: DocType, orgId: string): Promise<ContentData | null> => {
+  if (doc.method === 'notion-private' && doc.notion?.pageId) {
+    const org = await Org.findById(orgId);
+    const notionAccessToken = org?.integrations?.notion?.access_token;
+    if (notionAccessToken == null) {
+      throw 'Unable to get organization by ID for Notion'
+    }
+    return getNotionPageDataWithId(doc.notion.pageId, notionAccessToken);
+  }
+
+  else if (doc.method === 'googledocs-private' && doc.googledocs?.id) {
+    const org = await Org.findById(orgId);
+    const googleCredentials = org?.integrations?.google;
+    if (googleCredentials == null) {
+      throw 'Unable to get organization by ID for Google Docs'
+    }
+    return getGoogleDocsPrivateData(doc.googledocs.id, googleCredentials);
+  }
+
+  else if (doc.method === 'confluence-private' && doc.confluence?.id) {
+    const org = await Org.findById(orgId);
+    const confluenceCredentials = org?.integrations?.confluence;
+    if (confluenceCredentials == null) {
+      throw 'Unable to get organization by ID for Confluence'
+    }
+    return getConfluenceContentFromPageById(doc.confluence.id, confluenceCredentials);
+  }
+
+  return null;
+}
 
 docsRouter.get('/', userMiddleware, async (req, res) => {
   const org = res.locals.user.org;
@@ -42,43 +74,6 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
     return res.status(200).send({ docs });
   } catch (error) {
     return res.status(500).send({ error, docs: [] });
-  }
-});
-
-docsRouter.get('/preview', async (req, res) => {
-  const url = req.query.url as string;
-  if (!url) {
-    return res.end();
-  }
-
-  try {
-    const response = await axios.get(url);
-    const { title, favicon } = await extractDataFromHTML(url, response.data);
-    return res.send({title, favicon});
-  } catch {
-    return res.status(400).send({error: 'Unable to fetch content from URL'});
-  }
-});
-
-docsRouter.post('/', userMiddleware, async (req, res) => {
-  const { url } = req.body;
-  const org = res.locals.user.org;
-  try {
-    // Initial add is using light mode scan
-    const { content, doc, method } = await createDocFromUrl(url, org, res.locals.user._id);
-    if (doc == null) {
-      return res.status(400).send({error: 'No doc available'});
-    }
-    await createEvent(org, doc._id, 'add', {});
-    indexDocForSearch(doc);
-    track(res.locals.user.userId, 'Add documentation', {
-      doc: doc._id.toString(),
-      method,
-      org: org.toString(),
-    });
-    return res.send({ content });
-  } catch (error) {
-    return res.status(500).send({ error });
   }
 });
 
@@ -192,7 +187,12 @@ docsRouter.get('/content/:id', userMiddleware, async (req, res) => {
     }
 
     const orgId = doc.org;
-    const { content, title, favicon, method } = await extractFromDoc(doc, orgId);
+    const docData = await extractFromDoc(doc, orgId);
+    if (docData == null) {
+      return res.status(400).send('Invalid doc')
+    }
+
+    const { content, title, favicon, method } = docData;
     return res.send({ content, title, favicon, method });
   } catch (error) {
     console.log(error);

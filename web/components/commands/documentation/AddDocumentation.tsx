@@ -5,7 +5,7 @@ import { DocumentationTypeIcon } from '../../../helpers/Icons'
 import { ChevronRightIcon } from '@heroicons/react/solid'
 import DocumentationConfig from './DocumentationConfig'
 
-export type AddDocumentationType = 'webpage' | 'notion' | 'googledocs' | 'confluence';
+export type AddDocumentationType = 'notion' | 'googledocs' | 'confluence';
 
 type AddDocumentationSelection = {
   type: AddDocumentationType
@@ -14,11 +14,6 @@ type AddDocumentationSelection = {
 }
 
 export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationSelection> = {
-  webpage: {
-    type: 'webpage',
-    title: 'Web page',
-    description: 'Add content from a website',
-  },
   notion: {
     type: 'notion',
     title: 'Notion',
