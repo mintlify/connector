@@ -55,6 +55,7 @@
     "probot": "^11.4.1",
     "qs": "^6.10.5",
     "query-string": "^7.1.1",
+    "stripe": "^9.9.0",
     "stytch": "^5.2.1",
     "ts-node": "^10.7.0",
     "tsconfig-paths": "^3.14.1",
