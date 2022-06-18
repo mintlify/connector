@@ -2,8 +2,6 @@ import Layout from '../../components/layout'
 import toast, { Toaster } from 'react-hot-toast'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import axios from 'axios'
-import { API_ENDPOINT } from '../../helpers/api'
 import { classNames } from '../../helpers/functions'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
@@ -11,7 +9,6 @@ import { getSubdomain } from '../../helpers/user'
 import ProfilePicture from '../../components/ProfilePicture'
 import { CheckCircleIcon, XIcon } from '@heroicons/react/solid'
 import { navigation } from './account'
-import { Integration, onInstallIntegration } from '../../helpers/integrations';
 import { AccessMode, useProfile, User } from '../../context/ProfileContext'
 import { request } from '../../helpers/request'
 
@@ -25,65 +22,6 @@ const access: AccessOption[] = [
   { id: 'public', name: 'Public', description: 'Anyone can join' },
   { id: 'private', name: 'Private', description: 'Only invited members can join' },
 ]
-
-type IntegrationSection = {
-  title: string,
-  subtitle: string,
-  integrations: Integration[]
-}
-
-const getIntegrationSections = (orgId: string): IntegrationSection[] => {
-  return [
-    {
-      title: 'Alerts',
-      subtitle: 'Receive alerts about your documentation',
-      integrations: [
-        {
-          type: 'slack',
-          title: 'Slack',
-          iconSrc: '/assets/integrations/slack.svg',
-          installUrl: `${API_ENDPOINT}/routes/integrations/slack/install?org=${orgId}&close=true`
-        },
-      ],
-    },
-    {
-      title: 'Documentation',
-      subtitle: 'Integration with documentation platforms',
-      integrations: [
-        {
-          type: 'google',
-          title: 'Google Docs',
-          iconSrc: '/assets/integrations/google-docs.svg',
-          installUrl: `${API_ENDPOINT}/routes/integrations/google/install?org=${orgId}&close=true`
-        },
-        {
-          type: 'notion',
-          title: 'Notion',
-          iconSrc: '/assets/integrations/notion.svg',
-          installUrl: `${API_ENDPOINT}/routes/integrations/notion/install?org=${orgId}&close=true`
-        },
-      ],
-    },
-    {
-      title: 'Code',
-      subtitle: 'Connect documentation with your code',
-      integrations: [
-        {
-          type: 'github',
-          title: 'GitHub',
-          iconSrc: '/assets/integrations/github.svg',
-          installUrl: `${API_ENDPOINT}/routes/integrations/github/install?org=${orgId}&close=true`
-        },
-        {
-          type: 'vscode',
-          title: 'VS Code',
-          iconSrc: '/assets/integrations/vscode.svg',
-          installUrl: 'vscode:extension/mintlify.connector'
-        },
-      ],
-    },
-  ];
-};
 
 const notify = (title: string, description: string) =>
   toast.custom((t) => {
@@ -133,7 +71,6 @@ export default function Settings() {
   const [inviteErrorMessage, setInviteErrorMessage] = useState<string | undefined>(undefined)
   const [isSendingInvite, setIsSendingInvite] = useState(false)
   const [members, setMembers] = useState<User[]>([])
-  const [integrationsStatus, setIntegrationsStatus] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     const { user, org } = profile;
@@ -151,23 +88,12 @@ export default function Settings() {
       .then((res) => {
         setMembers(res.data.users)
       })
-    
-    const statusInterval = setInterval(() => {  
-      request('GET', `routes/org/${org._id}/integrations`)
-        .then(({ data: { integrations } }) => {
-          setIntegrationsStatus(integrations);
-          })
-        }, 1000);
-      
-      return () => clearInterval(statusInterval);
   }, [profile, isLoadingProfile, router]);
 
   const { user, org } = profile;
   if (isLoadingProfile || user == null || org == null) {
     return null;
   }
-
-  const integrationSections = getIntegrationSections(org._id);
 
   const inviteMember = async (email: string) => {
     if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email.trim()) || email.trim() === '') {
@@ -466,52 +392,6 @@ export default function Settings() {
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </form>
-              <form method="POST" id="integrations">
-                <div className="shadow sm:rounded-md">
-                  <div className="bg-white pt-6 pb-8 px-4 space-y-4 sm:px-6">
-                    <div>
-                      <h3 className="text-lg leading-6 font-medium text-gray-900">Integrations</h3>
-                      <p className="mt-1 text-sm text-gray-500">Connections for your documentation stack</p>
-                    </div>
-
-                    <ul role="list" className="divide-y divide-gray-200">
-                      {integrationSections.map((section) => (
-                        <li key={section.title} className="px-4 py-4 sm:px-0">
-                          <h1 className="text-gray-800 font-medium">{section.title}</h1>
-                          <p className="text-gray-500 text-sm">{section.subtitle}</p>
-                          {section.integrations.map((integration) => (
-                            <div key={integration.type} className="mt-2 flex">
-                              <div className="flex-1 flex items-center text-gray-700">
-                                <img className="h-4 w-4 mr-2" src={integration.iconSrc} alt={integration.title} />
-                                {integration.title}
-                              </div>
-                              <div className="text-sm">
-                                { integrationsStatus[integration.type]
-                                ? (integration.type === 'vscode' ?
-                                    <CheckCircleIcon className="h-4 w-4 text-green-600" /> :
-                                    <button
-                                      className="text-gray-700 font-medium"
-                                      onClick={() => onInstallIntegration(integration, router)}
-                                    >
-                                      Edit
-                                    </button>
-                                  )
-                                : <button
-                                    className="text-primary font-medium"
-                                    onClick={() => onInstallIntegration(integration, router)}
-                                  >
-                                    Install
-                                  </button>
-                                }
-                              </div>
-                            </div>
-                          ))}
-                        </li>
-                      ))}
-                    </ul>
                   </div>
                 </div>
               </form>

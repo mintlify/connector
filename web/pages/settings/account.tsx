@@ -17,7 +17,7 @@ export type EmailNotifications = {
 export const navigation = [
   { name: "Account", href: "/settings/account", icon: UserCircleIcon },
   { name: "Organization", href: "/settings/organization", icon: UserGroupIcon },
-  { name: "Integrations", href: "/settings/organization#integrations", icon: ViewGridAddIcon },
+  { name: "Integrations", href: "/settings/integrations", icon: ViewGridAddIcon },
 ]
 
 const notify = (title: string, description: string) => toast.custom((t) => {
