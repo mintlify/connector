@@ -1,6 +1,5 @@
-import { Types } from 'mongoose';
 import Doc from '../../models/Doc';
-import Org from '../../models/Org';
+import { OrgType } from '../../models/Org';
 import { createEvent } from '../../routes/events';
 import { ConfluencePage } from '../../routes/integrations/confluence';
 import { GoogleDoc } from '../../routes/integrations/google';
@@ -8,7 +7,8 @@ import { NotionPage } from '../../routes/integrations/notion';
 import { indexDocForSearch } from '../../services/algolia';
 import { track } from '../../services/segment';
 
-export const createDocsFromNotionPageId = async (pages: NotionPage[], orgId: Types.ObjectId, userId: string) => {
+export const createDocsFromNotionPageId = async (pages: NotionPage[], org: OrgType, userId: string) => {
+  const orgId = org._id;
   const addDocPromises = pages.map((page) => new Promise<void>(async (resolve) => {
     try {
       // Add doc without content
@@ -55,13 +55,14 @@ export const createDocsFromNotionPageId = async (pages: NotionPage[], orgId: Typ
   await Promise.all(addDocPromises);
 }
 
-export const createDocsFromGoogleDocs = async (docs: GoogleDoc[], orgId: Types.ObjectId, userId: string) => {
+export const createDocsFromGoogleDocs = async (docs: GoogleDoc[], org: OrgType, userId: string) => {
+  const orgId = org._id;
   const addDocPromises = docs.map((googleDoc) => new Promise<void>(async (resolve) => {
     try {
       // Add doc without content
       const doc = await Doc.findOneAndUpdate(
         {
-          org: orgId,
+          org: org._id,
           url: `https://docs.google.com/document/d/${googleDoc.id}`,
         },
         {
@@ -101,10 +102,10 @@ export const createDocsFromGoogleDocs = async (docs: GoogleDoc[], orgId: Types.O
   await Promise.all(addDocPromises);
 };
 
-export const createDocsFromConfluencePages = async (pages: ConfluencePage[], orgId: Types.ObjectId, userId: string) => {
+export const createDocsFromConfluencePages = async (pages: ConfluencePage[], org: OrgType, userId: string) => {
   const addDocPromises = pages.map((page) => new Promise<void>(async (resolve) => {
     try {
-      const org = await Org.findById(orgId);
+      const orgId = org._id;
       const firstSpace = org?.integrations?.confluence?.accessibleResources[0];
       if (org?.integrations?.confluence?.accessibleResources[0] == null) {
         throw 'No organization found with accessible resources';

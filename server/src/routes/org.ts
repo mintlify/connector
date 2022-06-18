@@ -33,10 +33,12 @@ orgRouter.get('/subdomain/:subdomain/auth', async (req, res) => {
 
 orgRouter.get('/subdomain/:subdomain/details', userMiddleware, async (req, res) => {
   const { subdomain } = req.params;
-  const { userId } = res.locals.user;
+  const { org } = res.locals.user;
 
   try {
-    const org = await Org.findOne({ subdomain, users: userId });
+    if (org.subdomain !== subdomain) {
+      throw 'User does not have access to subdomain'
+    }
     const formattedOrg = removeUnneededDataFromOrg(org);
     return res.json({ org: formattedOrg });
   } catch (error) {
@@ -46,7 +48,7 @@ orgRouter.get('/subdomain/:subdomain/details', userMiddleware, async (req, res) 
 
 orgRouter.put('/:orgId/notifications', userMiddleware, async (req: express.Request, res: express.Response) => {
   const { orgId } = req.params;
-  const userOrgId = res.locals.user.org.toString();
+  const userOrgId = res.locals.user.org._id.toString();
   const { monthlyDigest, newsletter } = req.body;
 
   if (userOrgId !== orgId) {
@@ -66,15 +68,9 @@ orgRouter.put('/:orgId/notifications', userMiddleware, async (req: express.Reque
 
 // Given an orgId from the request query, return all the user objects within that organization
 orgRouter.get('/users', userMiddleware, async (_: any, res: express.Response) => {
-  const orgId = res.locals.user.org;
-
-  if (!orgId) return res.status(400).json({ error: 'orgId not provided' });
-
-  const org = await Org.findById(orgId);
-  if (org == null) return res.status(400).json({ error: 'Invalid organization ID' });
-
+  const { org } = res.locals.user;
   const users = await User.find({ userId: org.users });
-  const invitedEmails = org.invitedEmails || [];
+  const invitedEmails: string[] = org.invitedEmails || [];
   const invitedUsers = invitedEmails.map((email) => {
     return {
       email,
@@ -86,7 +82,7 @@ orgRouter.get('/users', userMiddleware, async (_: any, res: express.Response) =>
 
 orgRouter.put('/:orgId/name', userMiddleware, async (req, res) => {
   const { orgId } = req.params;
-  const userOrgId = res.locals.user.org.toString();
+  const userOrgId = res.locals.user.org._id.toString();
   const { name } = req.body;
 
   if (!name) {
@@ -105,17 +101,10 @@ orgRouter.put('/:orgId/name', userMiddleware, async (req, res) => {
   }
 });
 
-orgRouter.get('/:orgId/integrations', userMiddleware, async (req, res) => {
-  const { orgId } = req.params;
-  const userOrgId = res.locals.user.org.toString();
-
-  if (userOrgId !== orgId) {
-    return res.status(403).send({ error: 'User does not have permission' });
-  }
+orgRouter.get('/:orgId/integrations', userMiddleware, async (_, res) => {
+  const { org } = res.locals.user;
 
   try {
-    const org = await Org.findById(orgId);
-
     if (org?.integrations == null) {
       return res.send({ integrations: { github: false, notion: false, vscode: false, slack: false } });
     }
@@ -130,28 +119,6 @@ orgRouter.get('/:orgId/integrations', userMiddleware, async (req, res) => {
     };
 
     return res.send({ integrations });
-  } catch (error) {
-    return res.status(500).send({ error });
-  }
-});
-
-orgRouter.get('/repos', userMiddleware, async (_, res) => {
-  const orgId = res.locals.user.org.toString();
-
-  try {
-    const org = await Org.findById(orgId);
-    if (org?.integrations?.github?.installations == null) {
-      return res.send({ repos: [] });
-    }
-
-    const allRepos: string[] = [];
-    org.integrations.github.installations.map((installation: any) => {
-      installation.repositories.forEach((repo: { name: string }) => {
-        allRepos.push(repo.name);
-      });
-    });
-
-    return res.send({ repos: allRepos });
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -242,7 +209,7 @@ orgRouter.put('/access', userMiddleware, async (req, res) => {
     return res.status(400).send({ error: 'Invalid mode' });
   }
 
-  await Org.findByIdAndUpdate(res.locals.user.org, {
+  await Org.findByIdAndUpdate(res.locals.user.org._id, {
     'access.mode': mode,
   });
 

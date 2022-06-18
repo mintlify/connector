@@ -23,7 +23,9 @@ searchRouter.get('/', async (req, res) => {
 });
 
 searchRouter.get('/click', userMiddleware, async (_, res) => {
-  track(res.locals.user.userId, "Click on search result");
+  track(res.locals.user.userId, "Click on search result", {
+    org: res.locals.user.org._id.toString(),
+  });
   res.end();
 })
 

@@ -72,13 +72,8 @@ googleRouter.get('/authorization', async (req, res) => {
 });
 
 googleRouter.post('/sync', userMiddleware, async (_, res) => {
-  const { org: orgId } = res.locals.user
+  const { org } = res.locals.user
 
-  const org = await Org.findById(orgId);
-
-  if (org == null) {
-    return res.status(401).json({ error: 'No org found' });
-  }
   let google = org.integrations?.google;
   if (google?.access_token == null) {
     return res.status(403).json({ error: 'No access token found for Google' })
@@ -102,7 +97,7 @@ googleRouter.post('/sync', userMiddleware, async (_, res) => {
         }))
     nextPageToken = data.nextPageToken
     const allFiles: GoogleDoc[] = data.files;
-    const existingDocs = await Doc.find({ org: orgId, method: 'googledocs-private' });
+    const existingDocs = await Doc.find({ org: org._id, method: 'googledocs-private' });
     const results = allFiles
       .filter((googleDoc) => {
         return !existingDocs.some((doc) => doc.googledocs?.id === googleDoc.id);

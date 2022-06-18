@@ -41,7 +41,7 @@ export const userMiddleware = async (
   }
 
   // Add org to user Id
-  user.org = org._id;
+  user.org = org;
   res.locals.user = user;
 
   next();
@@ -102,11 +102,10 @@ userRouter.get('/login', async (req, res) => {
 
 userRouter.post("/invite", userMiddleware, async (req: express.Request, res: express.Response) => {
     const { emails } = req.body;
-    const orgId = res.locals.user.org;
+    const orgId = res.locals.user.org._id;
 
     try {
       const org = await Org.findOneAndUpdate({ _id: orgId, invitedEmails: { $ne: emails } }, { $push: { invitedEmails: { $each: emails } } });
-
       track(res.locals.user.userId, 'Invite member', {
         emails,
         org: orgId.toString()
@@ -295,7 +294,7 @@ userRouter.post('/onboarding', userMiddleware, async (req, res) => {
     const userUpdateQuery = { onboarding: { role, usingVSCode: appsUsing.includes('vscode') } };
     const orgUpdateQuery = { onboarding: { teamSize, usingGitHub: appsUsing.includes('github'), usingSlack: appsUsing.includes('slack'), usingNone: appsUsing.includes('none') } }
     const updateUserPromise = User.findByIdAndUpdate(res.locals.user._id, userUpdateQuery);
-    const updateOrgPromise = Org.findByIdAndUpdate(res.locals.user.org, orgUpdateQuery);
+    const updateOrgPromise = Org.findByIdAndUpdate(res.locals.user.org._id, orgUpdateQuery);
     await Promise.all([updateUserPromise, updateOrgPromise]);
     return res.end();
   } catch (error) {

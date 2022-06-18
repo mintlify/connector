@@ -109,12 +109,9 @@ export type NotionPage = {
 };
 
 notionRouter.post('/sync', userMiddleware, async (_, res) => {
-  const { org: orgId } = res.locals.user;
-
-  const org = await Org.findById(orgId);
+  const { org } = res.locals.user;
 
   const notionAccessToken = org?.integrations?.notion?.access_token;
-
   if (notionAccessToken == null) {
     return res.send({ error: 'No access to Notion' });
   }
@@ -133,7 +130,7 @@ notionRouter.post('/sync', userMiddleware, async (_, res) => {
       },
     });
 
-    const existingDocs = await Doc.find({ org: orgId, method: 'notion-private' });
+    const existingDocs = await Doc.find({ org: org._id, method: 'notion-private' });
     const results: NotionPage[] = searchResults.results
       .map((page: any) => {
         return {

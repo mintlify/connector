@@ -107,14 +107,9 @@ confluenceRouter.get('/authorization', async (req, res) => {
 });
 
 confluenceRouter.post('/sync', userMiddleware, async (_, res) => {
-  const { org: orgId } = res.locals.user
+  const { org } = res.locals.user
 
-  const org = await Org.findById(orgId);
-
-  if (org == null) {
-    return res.status(401).json({ error: 'No org found' });
-  }
-  if (org?.integrations?.confluence?.access_token == null) {
+  if (org.integrations?.confluence?.access_token == null) {
     return res.status(403).json({ error: 'No access found for Confluence' })
   }
 

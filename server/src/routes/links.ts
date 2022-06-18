@@ -21,7 +21,7 @@ linksRouter.put('/', userMiddleware, async (req, res) => {
             code.doc = doc._id;
             return Code.findOneAndUpdate(
               {
-                org,
+                org: org._id,
                 doc: doc._id,
                 url: code.url
               },
@@ -41,7 +41,7 @@ linksRouter.put('/', userMiddleware, async (req, res) => {
     }
     catch (error) {
       console.log(error);
-        return res.status(400).send({error})
+      return res.status(400).send({error})
     }
 });
 
@@ -50,7 +50,7 @@ linksRouter.delete('/:codeId', userMiddleware, async (req, res) => {
     const { org } = res.locals.user;
     
     try {
-      await Code.findOneAndDelete({ _id: codeId, org });
+      await Code.findOneAndDelete({ _id: codeId, org: org._id });
       res.end();
     } catch (error) {
       res.status(500).send({error})

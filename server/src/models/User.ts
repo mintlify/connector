@@ -1,4 +1,5 @@
-import mongoose, { Schema, Types } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
+import { OrgType } from './Org';
 
 export type UserType = {
     userId: string,
@@ -16,7 +17,7 @@ export type UserType = {
         role: string,
         usingVSCode: boolean,
     },
-    org?: Types.ObjectId,
+    org?: OrgType,
 }
 
 const UserSchema = new Schema({
