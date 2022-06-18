@@ -15,6 +15,7 @@ import { useProfile } from '../context/ProfileContext'
 const userNavigation = [
   { name: 'Account', href: '/settings/account' },
   { name: 'Organization', href: '/settings/organization' },
+  { name: 'Integrations', href: '/settings/integrations' },
   { name: 'Sign out', href: '/api/logout' },
 ]
 
@@ -141,6 +142,20 @@ export default function Navbar() {
                                 )}
                               >
                                 Organization
+                              </a>
+                            )}
+                          </Menu.Item>
+                          </Link>
+                          <Link href="/settings/integrations">
+                          <Menu.Item>
+                            {({ active }) => (
+                              <a
+                                className={classNames(
+                                  active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                  'block px-4 py-2 text-sm cursor-pointer'
+                                )}
+                              >
+                                Integrations
                               </a>
                             )}
                           </Menu.Item>

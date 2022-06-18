@@ -88,7 +88,7 @@ export default function Sidebar({
                   <span className="text-sm font-medium">Invite team member</span>
                 </div>
               </Link>
-              <Link href="/settings/organization#integrations">
+              <Link href="/settings/integrations">
                 <div className="flex items-center space-x-2 cursor-pointer text-gray-500 hover:text-gray-700">
                   <ViewGridAddIcon className="h-5 w-5" aria-hidden="true" />
                   <span className="text-sm font-medium">Manage Integrations</span>
