@@ -6,10 +6,14 @@ import { stripe } from '../services/stripe';
 const stripeRouter = express.Router();
 
 stripeRouter.get('/checkout', async (req, res) => {
-  const { priceId, orgId } = req.query;
+  const { priceId, orgId, email } = req.query;
 
   if (!priceId || typeof priceId !== 'string') {
-    return res.status(400).send({error: 'No price ID put'});
+    return res.status(400).send({error: 'No price ID provided'});
+  }
+
+  if (!email || typeof email !== 'string') {
+    return res.status(400).send({error: 'No email provided'});
   }
 
   const org = await Org.findById(orgId);
@@ -27,14 +31,16 @@ stripeRouter.get('/checkout', async (req, res) => {
         quantity: 1,
       },
     ],
+    customer_email: email,
     mode: 'subscription',
     success_url: `${DOMAIN}/?success=true&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${DOMAIN}/settings/billing`,
     subscription_data: {
       metadata: {
         orgId: org._id.toString()
-      }
-    }
+      },
+      trial_period_days: 14
+    },
   });
 
   return res.redirect(303, checkoutSession.url || DOMAIN);

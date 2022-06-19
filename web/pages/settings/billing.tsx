@@ -74,7 +74,7 @@ function PurchaseButton({ tier, currentPlan }: { tier: Tier, currentPlan: string
     type="submit"
     disabled={isFree}
   >
-    { isFree ? 'Downgrade' : 'Try for free' }
+    { isFree ? 'Downgrade' : 'Try for 14 days' }
   </button>
 }
 
@@ -167,6 +167,7 @@ export default function Settings() {
                         <form action={`${API_ENDPOINT}/routes/stripe/checkout`} method="GET">
                           <input type="hidden" name="priceId" value={isMonthly ? tier.monthly.priceId : tier.yearly.priceId} /> 
                           <input type="hidden" name="orgId" value={org._id} /> 
+                          <input type="hidden" name="email" value={user.email} /> 
                           <PurchaseButton
                             tier={tier}
                             currentPlan={currentPlan}
