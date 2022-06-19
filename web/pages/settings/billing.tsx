@@ -34,7 +34,7 @@ const tiers: Tier[] = [
       price: 0,
     },
     description: 'All the basics for better documentation',
-    includedFeatures: ['One integration with a documentation platform', 'Integrations from Notion, Google Docs, and Confluence', 'Workflow automations', 'Max 1 member per organization'],
+    includedFeatures: ['One integration with a documentation platform', 'Track documentation from Notion, Google Docs, and Confluence', 'Workflow automations', 'Max 1 member per organization'],
   },
   {
     id: 'pro',
@@ -50,7 +50,7 @@ const tiers: Tier[] = [
     description: 'Automating world class documentation',
     includedFeatures: [
       'Unlimited integrations',
-      'Integrations with all documentation platforms',
+      'Track documentation from any platform',
       'Private hosted documentation management',
       'Unlimited members, teams and ownership assignments',
       'Integrating with task management systems',
