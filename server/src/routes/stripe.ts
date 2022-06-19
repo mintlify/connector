@@ -69,7 +69,7 @@ stripeRouter.post('/webhook', async (req, res) => {
         if (!subscription.metadata.orgId) {
           return res.end();
         }
-        await Org.findById(subscription.metadata.orgId, { 'plan.name': 'free' });
+        await Org.findByIdAndUpdate(subscription.metadata.orgId, { 'plan.name': 'free' });
         // Then define and call a method to handle the subscription deleted.
         // handleSubscriptionDeleted(subscriptionDeleted);
         break;
@@ -78,7 +78,7 @@ stripeRouter.post('/webhook', async (req, res) => {
         if (!subscription.metadata.orgId) {
           return res.end();
         }
-        await Org.findById(subscription.metadata.orgId, { plan: { name: 'pro', subscribedAt: new Date() } })
+        await Org.findByIdAndUpdate(subscription.metadata.orgId, { plan: { name: 'pro', subscribedAt: new Date() } })
         break;
       case 'customer.subscription.updated':
         subscription = event.data.object;
