@@ -33,8 +33,8 @@ const tiers: Tier[] = [
     yearly: {
       price: 0,
     },
-    description: 'All the basics for starting a new business',
-    includedFeatures: ['Potenti felis, in cras at at ligula nunc.', 'Orci neque eget pellentesque.'],
+    description: 'All the basics for better documentation',
+    includedFeatures: ['One integration with a documentation platform', 'Integrations from Notion, Google Docs, and Confluence', 'Workflow automations', 'Max 1 member per organization'],
   },
   {
     id: 'pro',
@@ -47,12 +47,15 @@ const tiers: Tier[] = [
       price: 40,
       priceId: ISDEV ? 'price_1LC85UIslOV3ufr23xDxmChm' : 'price_1L7apaIslOV3ufr2k7zGiTds',
     },
-    description: 'All the basics for starting a new business',
+    description: 'Automating world class documentation',
     includedFeatures: [
-      'Potenti felis, in cras at at ligula nunc. ',
-      'Orci neque eget pellentesque.',
-      'Donec mauris sit in eu tincidunt etiam.',
-      'Faucibus volutpat magna.',
+      'Unlimited integrations',
+      'Integrations with all documentation platforms',
+      'Private hosted documentation management',
+      'Unlimited members, teams and ownership assignments',
+      'Integrating with task management systems',
+      'Custom domain',
+      'Priority on-call support',
     ],
   },
 ]
