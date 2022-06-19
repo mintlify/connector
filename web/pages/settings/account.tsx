@@ -1,6 +1,6 @@
 import Layout from "../../components/layout"
 import toast, { Toaster } from 'react-hot-toast';
-import { UserCircleIcon, UserGroupIcon, ViewGridAddIcon } from "@heroicons/react/outline"
+import { CreditCardIcon, UserCircleIcon, UserGroupIcon, ViewGridAddIcon } from "@heroicons/react/outline"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/router"
@@ -18,6 +18,7 @@ export const navigation = [
   { name: "Account", href: "/settings/account", icon: UserCircleIcon },
   { name: "Organization", href: "/settings/organization", icon: UserGroupIcon },
   { name: "Integrations", href: "/settings/integrations", icon: ViewGridAddIcon },
+  { name: "Billing", href: "/settings/billing", icon: CreditCardIcon },
 ]
 
 const notify = (title: string, description: string) => toast.custom((t) => {
