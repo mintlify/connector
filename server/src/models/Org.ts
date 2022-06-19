@@ -48,6 +48,10 @@ export type OrgType = {
     usingGitHub: boolean;
     usingSlack: boolean;
     usingNone: boolean;
+  },
+  plan?: {
+    name: 'free' | 'pro',
+    subscribedAt: Date,
   }
 };
 
@@ -113,6 +117,10 @@ const OrgSchema = new Schema({
     usingGitHub: Boolean,
     usingSlack: Boolean,
     usingNone: Boolean,
+  },
+  plan: {
+    name: { type: String, default: 'free' },
+    subscribedAt: { type: Date, default: Date.now },
   }
 });
 

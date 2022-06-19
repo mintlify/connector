@@ -29,23 +29,21 @@ stripeRouter.get('/checkout', async (req, res) => {
     ],
     mode: 'subscription',
     success_url: `${DOMAIN}/?success=true&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${DOMAIN}?canceled=true`,
+    cancel_url: `${DOMAIN}/settings/billing`,
+    subscription_data: {
+      metadata: {
+        orgId: org._id.toString()
+      }
+    }
   });
 
   return res.redirect(303, checkoutSession.url || DOMAIN);
 })
 
-stripeRouter.post('/webhook', (req, res) => {
+stripeRouter.post('/webhook', async (req, res) => {
     let event = req.body;
-    // Replace this endpoint secret with your endpoint's unique secret
-    // If you are testing with the CLI, find the secret by running 'stripe listen'
-    // If you are using an endpoint defined with the API or dashboard, look in your webhook settings
-    // at https://dashboard.stripe.com/webhooks
-    const endpointSecret = 'whsec_12345';
-    // Only verify the event if you have an endpoint secret defined.
-    // Otherwise use the basic event deserialized with JSON.parse
+    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
     if (endpointSecret) {
-      // Get the signature sent by Stripe
       const signature = req.headers['stripe-signature'] as string;
       try {
         event = stripe.webhooks.constructEvent(
@@ -59,34 +57,31 @@ stripeRouter.post('/webhook', (req, res) => {
       }
     }
     let subscription;
-    let status;
     // Handle the event
     switch (event.type) {
       case 'customer.subscription.trial_will_end':
         subscription = event.data.object;
-        status = subscription.status;
-        console.log(`Subscription status is ${status}.`);
         // Then define and call a method to handle the subscription trial ending.
         // handleSubscriptionTrialEnding(subscription);
         break;
       case 'customer.subscription.deleted':
         subscription = event.data.object;
-        status = subscription.status;
-        console.log(`Subscription status is ${status}.`);
+        if (!subscription.metadata.orgId) {
+          return res.end();
+        }
+        await Org.findById(subscription.metadata.orgId, { 'plan.name': 'free' });
         // Then define and call a method to handle the subscription deleted.
         // handleSubscriptionDeleted(subscriptionDeleted);
         break;
       case 'customer.subscription.created':
         subscription = event.data.object;
-        status = subscription.status;
-        console.log(`Subscription status is ${status}.`);
-        // Then define and call a method to handle the subscription created.
-        // handleSubscriptionCreated(subscription);
+        if (!subscription.metadata.orgId) {
+          return res.end();
+        }
+        await Org.findById(subscription.metadata.orgId, { plan: { name: 'pro', subscribedAt: new Date() } })
         break;
       case 'customer.subscription.updated':
         subscription = event.data.object;
-        status = subscription.status;
-        console.log(`Subscription status is ${status}.`);
         // Then define and call a method to handle the subscription update.
         // handleSubscriptionUpdated(subscription);
         break;
