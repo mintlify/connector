@@ -44,7 +44,25 @@ stripeRouter.get('/checkout', async (req, res) => {
   });
 
   return res.redirect(303, checkoutSession.url || DOMAIN);
-})
+});
+
+stripeRouter.get('/portal', async (req, res) => {
+  const { orgId } = req.query;
+
+  const org = await Org.findById(orgId);
+  if (org?.plan?.customerId == null) {
+    return res.status(400).send({error: 'No org found'});
+  }
+
+  const DOMAIN = ISDEV ? 'http://localhost:3000' : `https://${org.subdomain}.mintlify.com`;
+
+  const portalSession = await stripe.billingPortal.sessions.create({
+    customer: org.plan.customerId,
+    return_url: `${DOMAIN}/settings/billing`,
+  });
+
+  return res.redirect(303, portalSession.url);
+});
 
 stripeRouter.post('/webhook', async (req, res) => {
     let event = req.body;
@@ -84,7 +102,8 @@ stripeRouter.post('/webhook', async (req, res) => {
         if (!subscription.metadata.orgId) {
           return res.end();
         }
-        await Org.findByIdAndUpdate(subscription.metadata.orgId, { plan: { name: 'pro', subscribedAt: new Date() } })
+        console.log({subscription});
+        await Org.findByIdAndUpdate(subscription.metadata.orgId, { plan: { name: 'pro', subscribedAt: new Date(), customerId: subscription.customer } })
         break;
       case 'customer.subscription.updated':
         subscription = event.data.object;

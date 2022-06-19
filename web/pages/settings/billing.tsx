@@ -75,7 +75,6 @@ function PurchaseButton({ tier, currentPlan }: { tier: Tier, currentPlan: string
     className="mt-8 block w-full bg-gray-700 border border-gray-800 rounded-md py-2 text-sm font-semibold text-white text-center hover:bg-gray-800"
     id="checkout-and-portal-button"
     type="submit"
-    disabled={isFree}
   >
     { isFree ? 'Downgrade' : 'Try for 14 days' }
   </button>
@@ -85,8 +84,6 @@ export default function Settings() {
   const { profile, isLoadingProfile } = useProfile();
   const [billingPeriod, setBillingPeriod] = useState<'month' | 'year'>('year');
   const router = useRouter();
-
-  const currentPlan = 'free';
 
   useEffect(() => {
     const { user, org } = profile;
@@ -103,6 +100,7 @@ export default function Settings() {
     return null;
   }
 
+  const currentPlan = org.plan?.name || 'free';
   const isMonthly = billingPeriod === 'month';
 
   return (
@@ -167,7 +165,7 @@ export default function Settings() {
                           <span className="text-4xl font-extrabold text-gray-900">${isMonthly ? tier.monthly.price : tier.yearly.price}</span>{' '}
                           <span className="text-base font-medium text-gray-500">/mo</span>
                         </p>
-                        <form action={`${API_ENDPOINT}/routes/stripe/checkout`} method="GET">
+                        <form action={`${API_ENDPOINT}/routes/stripe/${tier.id === 'free' ? 'portal' : 'checkout'}`} method="GET">
                           <input type="hidden" name="priceId" value={isMonthly ? tier.monthly.priceId : tier.yearly.priceId} /> 
                           <input type="hidden" name="orgId" value={org._id} /> 
                           <input type="hidden" name="email" value={user.email} /> 

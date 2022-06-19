@@ -35,6 +35,9 @@ export type Org = {
     usingGitHub: boolean;
     usingSlack: boolean;
     usingNone: boolean;
+  },
+  plan?: {
+    name: 'free' | 'pro',
   }
 }
 

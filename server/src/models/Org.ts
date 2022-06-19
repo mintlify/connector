@@ -52,6 +52,7 @@ export type OrgType = {
   plan?: {
     name: 'free' | 'pro',
     subscribedAt: Date,
+    customerId: string
   }
 };
 
@@ -121,6 +122,7 @@ const OrgSchema = new Schema({
   plan: {
     name: { type: String, default: 'free' },
     subscribedAt: { type: Date, default: Date.now },
+    customerId: String,
   }
 });
 
