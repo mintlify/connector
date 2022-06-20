@@ -34,7 +34,7 @@ googleRouter.get('/install', async (req, res) => {
     scope: SCOPES,
   });
 
-  const state = { org, close };
+  const state = { orgId: org, close };
   const encodedState = encodeURIComponent(JSON.stringify(state));
 
   const fullAuthUrl = `${authUrl}&state=${encodedState}`;
@@ -53,7 +53,7 @@ googleRouter.get('/authorization', async (req, res) => {
       if (state == null) return res.status(403).send('No state provided');
       const parsedState = JSON.parse(decodeURIComponent(state as string));
 
-      const { org: orgId } = parsedState;
+      const { orgId } = parsedState;
       const org = await Org.findByIdAndUpdate(orgId, {
         'integrations.google': tokens,
       });
