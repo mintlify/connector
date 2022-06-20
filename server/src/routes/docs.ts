@@ -4,7 +4,7 @@ import { Types } from 'mongoose';
 import { userMiddleware } from './user';
 import Doc, { DocType } from '../models/Doc';
 import Event from '../models/Event';
-import { ContentData } from '../services/webscraper';
+import { ContentData, ScrapingMethod } from '../services/webscraper';
 import { deleteDocForSearch } from '../services/algolia';
 import { createDocsFromConfluencePages, createDocsFromGoogleDocs } from '../helpers/routes/docs';
 import Org from '../models/Org';
@@ -76,6 +76,38 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
     return res.status(500).send({ error, docs: [] });
   }
 });
+
+const groupNameMap: Record<ScrapingMethod, string> = {
+  'notion-private': 'Notion Workspace',
+  'confluence-private': 'Confluence Pages',
+  'googledocs-private': 'Google Docs',
+  'web': 'Ohter',
+}
+
+docsRouter.get('/groups', userMiddleware, async (_, res) => {
+  const { org } = res.locals.user;
+  const groups = await Doc.aggregate([
+    { $match: {
+      org: org._id
+    }
+    },
+    {
+    $group: {
+      _id: "$method",
+      count: { $sum: 1 },
+      lastUpdatedAt: { $max: "$lastUpdatedAt" }
+    }
+  }]);
+
+  const groupsWithNames = groups.map((group: { _id: ScrapingMethod }) => {
+    return {
+      ...group,
+      name: groupNameMap[group._id],
+    }
+  })
+
+  return res.send({ groups: groupsWithNames })
+})
 
 docsRouter.post('/googledocs', userMiddleware, async (req, res) => {
   const { docs } = req.body;
