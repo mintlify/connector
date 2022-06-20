@@ -14,6 +14,7 @@ export type CodeType = {
     branch?: string;
     line?: number;
     endLine?: number;
+    randomType?: string;
 };
 
 const CodeSchema = new Schema({
