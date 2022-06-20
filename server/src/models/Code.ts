@@ -8,13 +8,13 @@ export type CodeType = {
     file: string;
     org: string;
     gitOrg: string;
+    randomType?: string;
     repo: string;
     type: string;
     url: string;
     branch?: string;
     line?: number;
     endLine?: number;
-    randomType?: string;
 };
 
 const CodeSchema = new Schema({
