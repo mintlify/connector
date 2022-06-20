@@ -2,9 +2,7 @@ import axios from 'axios';
 import { Router } from 'express';
 import { Client } from '@notionhq/client';
 import { ISDEV } from '../../helpers/environment';
-import { ENDPOINT } from '../../helpers/github/octokit';
 import Org from '../../models/Org';
-import Doc from '../../models/Doc';
 import { track } from '../../services/segment';
 import { getNotionTitle } from '../../services/notion';
 import { importDocsFromNotion } from '../../helpers/routes/docs';
@@ -35,7 +33,7 @@ type NotionAuthData = {
 };
 
 const clientId = 'ec770c41-07f8-44bd-a4d8-66d30e9786c8';
-const redirectUrl = `${ENDPOINT}/routes/integrations/notion/authorization`;
+const redirectUrl = ISDEV ? 'https://connect.mintlify.com/routes/integrations/notion/authorization/local' : 'https://connect.mintlify.com/routes/integrations/notion/authorization';
 
 const getNotionInstallURL = (state?: string) => {
   const url = new URL('https://api.notion.com/v1/oauth/authorize');
@@ -98,24 +96,17 @@ notionRouter.get('/authorization', async (req, res) => {
     return res.status(403).send({ error: 'No access token' });
   }
 
-  if (ISDEV) {
-    return res.redirect(org.subdomain);
-  }
-
   const notionPages = await getNotionDocs(response?.access_token);
-  const existingDocs = await Doc.find({ org: org._id, method: 'notion-private' });
-  const results: NotionPage[] = notionPages
-    .filter((page) => {
-      return page.title && !existingDocs.some((doc) => doc.notion?.pageId === page.id);
-    });
-
-  await importDocsFromNotion(results, org, userId);
+  await importDocsFromNotion(notionPages, org, userId);
   track(org._id.toString(), 'Install Notion Integration', {
     isOrg: true,
   });
 
   if (parsedState?.close) {
     return res.send("<script>window.close();</script>");
+  }
+  if (ISDEV) {
+    return res.redirect(org.subdomain);
   }
   return res.redirect(`https://${org.subdomain}.mintlify.com`);
 });
@@ -145,7 +136,7 @@ export const getNotionDocs = async (notionAccessToken: string) => {
           id: page.id,
           title: getNotionTitle(page),
           lastEditedTime: page.last_edited_time,
-          icon: page.icon,
+          icon: page.icon?.url,
           url: page.url,
         };
       })

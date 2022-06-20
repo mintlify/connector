@@ -12,6 +12,7 @@ export type DocType = {
     createdAt: Date;
     changeConfirmationCount?: number;
     isJustAdded: boolean;
+    createdBy?: string,
     // when method = notion-private
     notion?: {
         pageId: string;
@@ -37,7 +38,7 @@ const DocSchema = new Schema({
     favicon: String,
     lastUpdatedAt: { type: Date, default: Date.now },
     createdAt: { type: Date, default: Date.now },
-    createdBy: { type: Schema.Types.ObjectId },
+    createdBy: String,
     changeConfirmationCount: Number,
     isJustAdded: { type: Boolean, default: true },
     notion: {
