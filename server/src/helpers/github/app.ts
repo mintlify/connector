@@ -3,6 +3,8 @@ import { Context } from "probot";
 import { FileInfo, getEncompassingRangeAndSideForAlert, parsePatch, PatchLineRange } from "./patch";
 import { AlertsRequest, Alert } from "./types";
 import { ENDPOINT, getReviewComments } from "./octokit";
+// import { EventType } from "../../models/Event";
+// import Org from '../../models/Org';
 
 type FilesPatchLineRangesMap = Record<string, PatchLineRange[]>;
 
@@ -90,6 +92,28 @@ export const filterNewAlerts = (previousAlerts: Alert[], incomingAlerts: Alert[]
   }));
 }
 
+
+// const createEventsFromAlerts = async (context: Context, alerts: Alert[]) => {
+//   const gitOwner = context.payload.repository.owner.login;
+//   const org = await Org.findOne({'integrations.github.installations': {
+//     $elemMatch: {
+//         'account.login': gitOwner
+//     }
+//   }});
+
+//   if (org == null) {
+//     return;
+//   }
+
+
+//   const events: EventType[] = alerts.map((alert: Alert) => {
+//     const event: EventType = {
+//       org: org._id,
+//       doc: alert
+//     }
+//   })
+// }
+
 export const createReviewCommentsFromAlerts = async (context: Context, alerts: Alert[], filesPatchLineRangesMap: FilesPatchLineRangesMap) => {
   const owner = context.payload.repository.owner.login;
   const repo = context.payload.repository.name;
@@ -114,5 +138,7 @@ export const createReviewCommentsFromAlerts = async (context: Context, alerts: A
     })
   });
   const reviewComments = await Promise.all(reviewCommentPromises);
+  console.log({context});
+  console.log('reviewComments', reviewComments[0]?.data);
   return reviewComments;
 }
