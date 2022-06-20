@@ -159,7 +159,7 @@ export default function Home() {
                       onClick={() => setIsAddDocumentOpen(true)}
                     >
                       <DocumentTextIcon className="h-4 w-4 mr-1" />
-                      Add Documentation
+                      Import Documentation
                     </button>
                   </div>
                 </div>

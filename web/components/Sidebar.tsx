@@ -67,7 +67,7 @@ export default function Sidebar({
                   onClick={() => setIsAddDocumentOpen(true)}
                 >
                   <DocumentTextIcon className="h-4 w-4 mr-1" />
-                  Add Documentation
+                  Import Documentation
                 </button>
                 <Link href="vscode://mintlify.connector/prefill-doc?docId=id">
                   <button
