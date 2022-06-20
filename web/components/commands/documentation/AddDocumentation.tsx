@@ -17,17 +17,17 @@ export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationS
   notion: {
     type: 'notion',
     title: 'Notion',
-    description: 'Add Notion pages',
+    description: 'Import Notion workspace',
   },
   confluence: {
     type: 'confluence',
     title: 'Confluence',
-    description: 'Add Confluence documents',
+    description: 'Import Confluence pages',
   },
   googledocs: {
     type: 'googledocs',
     title: 'Google Docs',
-    description: 'Add Google Docs documents',
+    description: 'Import Google Docs documents',
   },
 }
 

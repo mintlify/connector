@@ -3,11 +3,36 @@ import { Router } from 'express';
 import { Client } from '@notionhq/client';
 import { ISDEV } from '../../helpers/environment';
 import { ENDPOINT } from '../../helpers/github/octokit';
-import Org, { OrgType } from '../../models/Org';
+import Org from '../../models/Org';
 import Doc from '../../models/Doc';
 import { track } from '../../services/segment';
-import { userMiddleware } from '../user';
 import { getNotionTitle } from '../../services/notion';
+import { importDocsFromNotion } from '../../helpers/routes/docs';
+
+export type NotionPage = {
+  id: string;
+  title: string;
+  lastEditedTime: string;
+  icon?: {
+    type: string;
+    emoji?: string;
+    file?: string;
+  };
+  url: string;
+};
+
+type NotionAuthResponse = {
+  access_token: string;
+  bot_id: string;
+  workspace_name: string;
+  workspace_icon: string;
+  workspace_id: string;
+};
+
+type NotionAuthData = {
+  response?: NotionAuthResponse;
+  error?: string;
+};
 
 const clientId = 'ec770c41-07f8-44bd-a4d8-66d30e9786c8';
 const redirectUrl = `${ENDPOINT}/routes/integrations/notion/authorization`;
@@ -22,19 +47,6 @@ const getNotionInstallURL = (state?: string) => {
     url.searchParams.append('state', state);
   }
   return url.toString();
-};
-
-type NotionAuthResponse = {
-  access_token: string;
-  bot_id: string;
-  workspace_name: string;
-  workspace_icon: string;
-  workspace_id: string;
-};
-
-type NotionAuthData = {
-  response?: NotionAuthResponse;
-  error?: string;
 };
 
 const getNotionAccessTokenFromCode = async (code: string): Promise<NotionAuthData> => {
@@ -56,12 +68,12 @@ const getNotionAccessTokenFromCode = async (code: string): Promise<NotionAuthDat
 const notionRouter = Router();
 
 notionRouter.get('/install', (req, res) => {
-  const { org, close } = req.query;
+  const { org, close, userId } = req.query;
   if (!org) {
     return res.send('Organization ID is required');
   }
 
-  const state = { org, close };
+  const state = { org, close, userId };
   const encodedState = encodeURIComponent(JSON.stringify(state));
   const url = getNotionInstallURL(encodedState);
   return res.redirect(url);
@@ -75,17 +87,29 @@ notionRouter.get('/authorization', async (req, res) => {
   if (error) return res.status(403).send('Invalid grant code');
   if (state == null) return res.status(403).send('No state provided');
   const parsedState = JSON.parse(decodeURIComponent(state as string));
-  const { org: orgId} = parsedState;
+  const { org: orgId, userId } = parsedState;
   const org = await Org.findByIdAndUpdate(orgId, { 'integrations.notion': { ...response } });
 
   if (org == null) {
     return res.status(403).send({ error: 'Invalid organization ID' });
   }
 
+  if (!response?.access_token) {
+    return res.status(403).send({ error: 'No access token' });
+  }
+
   if (ISDEV) {
     return res.redirect(org.subdomain);
   }
 
+  const notionPages = await getNotionDocs(response?.access_token);
+  const existingDocs = await Doc.find({ org: org._id, method: 'notion-private' });
+  const results: NotionPage[] = notionPages
+    .filter((page) => {
+      return page.title && !existingDocs.some((doc) => doc.notion?.pageId === page.id);
+    });
+
+  await importDocsFromNotion(results, org, userId);
   track(org._id.toString(), 'Install Notion Integration', {
     isOrg: true,
   });
@@ -96,20 +120,8 @@ notionRouter.get('/authorization', async (req, res) => {
   return res.redirect(`https://${org.subdomain}.mintlify.com`);
 });
 
-export type NotionPage = {
-  id: string;
-  title: string;
-  lastEditedTime: string;
-  icon?: {
-    type: string;
-    emoji?: string;
-    file?: string;
-  };
-  url: string;
-};
 
-export const getNotionDocs = async (org: OrgType) => {
-  const notionAccessToken = org?.integrations?.notion?.access_token;
+export const getNotionDocs = async (notionAccessToken: string) => {
   if (notionAccessToken == null) {
     throw 'No access to Notion';
   }
@@ -140,25 +152,5 @@ export const getNotionDocs = async (org: OrgType) => {
 
     return results;
 }
-
-notionRouter.post('/sync', userMiddleware, async (_, res) => {
-  const { org } = res.locals.user;
-  try {
-    const notionPages = await getNotionDocs(org);
-
-    const existingDocs = await Doc.find({ org: org._id, method: 'notion-private' });
-    const results: NotionPage[] = notionPages
-      .filter((page) => {
-        return page.title && !existingDocs.some((doc) => doc.notion?.pageId === page.id);
-      });
-
-    console.log({results});
-
-    return res.send({ results });
-  } catch (error) {
-    console.log(error);
-    return res.status(401).send({error: 'Unable to access notion'});
-  }
-});
 
 export default notionRouter;

@@ -15,7 +15,7 @@ type IntegrationSection = {
   integrations: Integration[]
 }
 
-const getIntegrationSections = (orgId: string): IntegrationSection[] => {
+const getIntegrationSections = (orgId: string, userId: string): IntegrationSection[] => {
   return [
     {
       title: 'Alerts',
@@ -43,7 +43,7 @@ const getIntegrationSections = (orgId: string): IntegrationSection[] => {
           type: 'notion',
           title: 'Notion',
           iconSrc: '/assets/integrations/notion.svg',
-          installUrl: `${API_ENDPOINT}/routes/integrations/notion/install?org=${orgId}&close=true`
+          installUrl: `${API_ENDPOINT}/routes/integrations/notion/install?org=${orgId}&close=true&userId=${userId}`
         },
       ],
     },
@@ -98,7 +98,7 @@ export default function Settings() {
     return null;
   }
 
-  const integrationSections = getIntegrationSections(org._id);
+  const integrationSections = getIntegrationSections(org._id, user.userId);
 
 
   return (

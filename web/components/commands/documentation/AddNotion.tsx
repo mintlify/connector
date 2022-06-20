@@ -52,7 +52,7 @@ export default function AddNotion({ onCancel, setIsAddDocumentationOpen, setIsAd
         setSelectedPages(pages)
       })
       .catch(async () => {
-        router.push(`${API_ENDPOINT}/routes/integrations/notion/install?org=${org._id}`)
+        router.push(`${API_ENDPOINT}/routes/integrations/notion/install?org=${org._id}&userId=${user.userId}`)
       })
   }, [user, org, router]);
 

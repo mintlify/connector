@@ -7,7 +7,7 @@ import { NotionPage } from '../../routes/integrations/notion';
 import { indexDocForSearch } from '../../services/algolia';
 import { track } from '../../services/segment';
 
-export const createDocsFromNotionPageId = async (pages: NotionPage[], org: OrgType, userId: string) => {
+export const importDocsFromNotion = async (pages: NotionPage[], org: OrgType, userId: string) => {
   const orgId = org._id;
   const addDocPromises = pages.map((page) => new Promise<void>(async (resolve) => {
     try {

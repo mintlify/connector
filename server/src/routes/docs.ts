@@ -6,7 +6,7 @@ import Doc, { DocType } from '../models/Doc';
 import Event from '../models/Event';
 import { ContentData } from '../services/webscraper';
 import { deleteDocForSearch } from '../services/algolia';
-import { createDocsFromConfluencePages, createDocsFromGoogleDocs, createDocsFromNotionPageId } from '../helpers/routes/docs';
+import { createDocsFromConfluencePages, createDocsFromGoogleDocs } from '../helpers/routes/docs';
 import Org from '../models/Org';
 import { getNotionPageDataWithId } from '../services/notion';
 import { getConfluenceContentFromPageById } from './integrations/confluence';
@@ -74,19 +74,6 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
     return res.status(200).send({ docs });
   } catch (error) {
     return res.status(500).send({ error, docs: [] });
-  }
-});
-
-docsRouter.post('/notion', userMiddleware, async (req, res) => {
-  const { pages } = req.body;
-  const org = res.locals.user.org;
-
-  try {
-    // Initial add is using light mode scan
-    await createDocsFromNotionPageId(pages, org, res.locals.user._id);
-    return res.end();
-  } catch (error) {
-    return res.status(500).send({ error });
   }
 });
 
