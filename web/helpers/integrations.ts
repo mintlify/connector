@@ -64,8 +64,6 @@ export const onInstallIntegration = (integration: Integration, router: NextRoute
 
       newWindow?.focus();
     }
-    console.log('before popupCenter');
     popupCenter({url: integration.installUrl, title: 'Connect with integration', w: 520, h: 570})
-    console.log('after popupCenter');
   }
 
