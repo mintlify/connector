@@ -61,7 +61,8 @@ const getIntegrationSections = (orgId: string): IntegrationSection[] => {
           type: 'vscode',
           title: 'VS Code',
           iconSrc: '/assets/integrations/vscode.svg',
-          installUrl: 'vscode:extension/mintlify.connector'
+          installUrl: 'vscode:extension/mintlify.connector',
+          useRouter: true
         },
       ],
     },
