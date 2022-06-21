@@ -141,6 +141,11 @@ export const getNotionDocs = async (org: OrgType) => {
     return results;
 }
 
+notionRouter.get('/authorization/local', (req, res) => {
+  const { code, state } = req.query;
+  return res.redirect(`http://localhost:5000/routes/integrations/notion/authorization?code=${code}&state=${state}`)
+})
+
 notionRouter.post('/sync', userMiddleware, async (_, res) => {
   const { org } = res.locals.user;
   try {
