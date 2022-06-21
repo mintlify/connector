@@ -6,7 +6,7 @@ import Doc, { DocType } from '../models/Doc';
 import Event from '../models/Event';
 import { ContentData, ScrapingMethod } from '../services/webscraper';
 import { deleteDocForSearch } from '../services/algolia';
-import { createDocsFromConfluencePages, createDocsFromGoogleDocs } from '../helpers/routes/docs';
+import { createDocsFromGoogleDocs } from '../helpers/routes/docs';
 import Org from '../models/Org';
 import { getNotionPageDataWithId } from '../services/notion';
 import { getConfluenceContentFromPageById } from './integrations/confluence';
@@ -126,18 +126,6 @@ docsRouter.post('/googledocs', userMiddleware, async (req, res) => {
     return res.status(500).send({ error });
   }
 });
-
-docsRouter.post('/confluence', userMiddleware, async (req, res) => {
-  const { pages } = req.body;
-  const org = res.locals.user.org;
-
-  try {
-    await createDocsFromConfluencePages(pages, org, res.locals.user._id);
-    return res.end();
-  } catch (error) {
-    return res.status(500).send({ error });
-  }
-})
 
 docsRouter.delete('/:docId', userMiddleware, async (req, res) => {
   const { docId } = req.params;

@@ -102,7 +102,7 @@ export const createDocsFromGoogleDocs = async (docs: GoogleDoc[], org: OrgType, 
   await Promise.all(addDocPromises);
 };
 
-export const createDocsFromConfluencePages = async (pages: ConfluencePage[], org: OrgType, userId: string) => {
+export const importDocsFromConfluence = async (pages: ConfluencePage[], org: OrgType, userId: string) => {
   const addDocPromises = pages.map((page) => new Promise<void>(async (resolve) => {
     try {
       const orgId = org._id;

@@ -39,11 +39,7 @@ export default function DocumentationConfig({
     />,
     },
     confluence: {
-      inputComponent: <AddConfluence
-      onCancel={onCancel}
-      setIsAddDocumentationOpen={setIsAddDocumentationOpen}
-      setIsAddDocLoading={setIsAddDocLoading}
-    />,
+      inputComponent: <AddConfluence />,
     },
   }
 
