@@ -1,31 +1,9 @@
 import express from 'express';
-import mongoose, { Types } from 'mongoose';
-import Event, { EventType, EventTypeMeta } from '../models/Event';
+import mongoose from 'mongoose';
+import Event from '../models/Event';
 import { userMiddleware } from './user';
-import * as Diff from 'diff';
 
 const eventsRouter = express.Router();
-
-export const createEvent = (org: Types.ObjectId, doc: Types.ObjectId, type: EventTypeMeta, data: Object) => {
-  const event: EventType = {
-    org,
-    doc,
-    type,
-  };
-
-  switch (type) {
-    case 'add':
-      event.add = data;
-      break;
-    case 'change':
-      event.change = data as Diff.Change[];
-      break;
-    default:
-      return;
-  }
-
-  return Event.create(event);
-}
 
 eventsRouter.get('/', userMiddleware, async (req, res) => {
   try {

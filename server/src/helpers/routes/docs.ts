@@ -1,6 +1,5 @@
 import Doc from '../../models/Doc';
 import { OrgType } from '../../models/Org';
-import { createEvent } from '../../routes/events';
 import { ConfluencePage } from '../../routes/integrations/confluence';
 import { GoogleDoc } from '../../routes/integrations/google';
 import { NotionPage } from '../../routes/integrations/notion';
@@ -36,8 +35,7 @@ export const importDocsFromNotion = async (pages: NotionPage[], org: OrgType, us
           new: true,
         }
       );
-
-      await createEvent(orgId, doc._id, 'add', {});
+      
       indexDocForSearch(doc);
       track(userId, 'Add documentation', {
         doc: doc._id.toString(),
@@ -84,7 +82,6 @@ export const createDocsFromGoogleDocs = async (docs: GoogleDoc[], org: OrgType, 
         }
       );
 
-      await createEvent(orgId, doc._id, 'add', {});
       indexDocForSearch(doc);
       track(userId, 'Add documentation', {
         doc: doc._id.toString(),
@@ -135,7 +132,6 @@ export const importDocsFromConfluence = async (pages: ConfluencePage[], org: Org
         }
       );
 
-      await createEvent(orgId, doc._id, 'add', {});
       indexDocForSearch(doc);
       track(userId, 'Add documentation', {
         doc: doc._id.toString(),
@@ -186,7 +182,6 @@ export const createDocsFromGitHubReadmes = async (readmes: GitHubReadme[], org: 
         }
       );
 
-      await createEvent(orgId, doc._id, 'add', {});
       indexDocForSearch(doc);
       track(userId, 'Add documentation', {
         doc: doc._id.toString(),
