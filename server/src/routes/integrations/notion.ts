@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { Client } from '@notionhq/client';
 import { ISDEV } from '../../helpers/environment';
 import { ENDPOINT } from '../../helpers/github/octokit';
-import Org from '../../models/Org';
+import Org, { OrgType } from '../../models/Org';
 import Doc from '../../models/Doc';
 import { track } from '../../services/segment';
 import { userMiddleware } from '../user';
@@ -108,16 +108,13 @@ export type NotionPage = {
   url: string;
 };
 
-notionRouter.post('/sync', userMiddleware, async (_, res) => {
-  const { org } = res.locals.user;
-
+export const getNotionDocs = async (org: OrgType) => {
   const notionAccessToken = org?.integrations?.notion?.access_token;
   if (notionAccessToken == null) {
-    return res.send({ error: 'No access to Notion' });
+    throw 'No access to Notion';
   }
 
-  try {
-    const notion = new Client({ auth: notionAccessToken });
+  const notion = new Client({ auth: notionAccessToken });
     const searchResults = await notion.search({
       page_size: 100,
       filter: {
@@ -130,7 +127,6 @@ notionRouter.post('/sync', userMiddleware, async (_, res) => {
       },
     });
 
-    const existingDocs = await Doc.find({ org: org._id, method: 'notion-private' });
     const results: NotionPage[] = searchResults.results
       .map((page: any) => {
         return {
@@ -141,9 +137,22 @@ notionRouter.post('/sync', userMiddleware, async (_, res) => {
           url: page.url,
         };
       })
+
+    return results;
+}
+
+notionRouter.post('/sync', userMiddleware, async (_, res) => {
+  const { org } = res.locals.user;
+  try {
+    const notionPages = await getNotionDocs(org);
+
+    const existingDocs = await Doc.find({ org: org._id, method: 'notion-private' });
+    const results: NotionPage[] = notionPages
       .filter((page) => {
         return page.title && !existingDocs.some((doc) => doc.notion?.pageId === page.id);
       });
+
+    console.log({results});
 
     return res.send({ results });
   } catch (error) {

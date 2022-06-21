@@ -44,7 +44,6 @@ const getGitHubInstallations = async (accessToken: string) => {
       'Authorization': `token ${accessToken}`
     }
   })
-
   return installations
 }
 
