@@ -3,6 +3,7 @@ import axios from "axios";
 import { getReviewComments, checkIfAllAlertsAreResolve, createSuccessCheck, createActionRequiredCheck, createInProgressCheck, ENDPOINT } from "./helpers/github/octokit";
 import headRouter from "./routes";
 import { createReviewCommentsFromAlerts, filterNewAlerts, getAlerts, getAllFilesAndMap } from "./helpers/github/app";
+import './services/mongoose';
 
 export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
   app.on(["pull_request.opened", "pull_request.reopened", "pull_request.synchronize"], async (context) => {
