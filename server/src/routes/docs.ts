@@ -93,12 +93,16 @@ docsRouter.get('/groups', userMiddleware, async (_, res) => {
     }
     },
     {
-    $group: {
-      _id: "$method",
-      count: { $sum: 1 },
-      lastUpdatedAt: { $max: "$lastUpdatedAt" }
+      $group: {
+        _id: "$method",
+        count: { $sum: 1 },
+        lastUpdatedAt: { $max: "$lastUpdatedAt" }
+      },
+    },
+    {
+      $sort: { lastUpdatedAt: -1 }
     }
-  }]);
+  ]);
 
   const groupsWithNames = groups.map((group: { _id: ScrapingMethod }) => {
     return {

@@ -79,13 +79,21 @@ const getReadmesContent = async (accessToken: string, org: string): Promise<GitH
   const contentPromises = readmeResults.items.map((result: any) => {
     return new Promise(async (resolve) => {
       try {
-        const response = await axios.get(result.url, {
+        const contentPromise = axios.get(result.url, {
           headers: {
             'Authorization': `Bearer ${accessToken}`
           }
         });
 
-        resolve(response);
+        const commitPromise = axios.get(`https://api.github.com/repos/${org}/${result.repository.name}/commits?path=${result.path}&per_page=1`, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+
+        const [content, commit] = await Promise.all([contentPromise, commitPromise]);
+
+        resolve([content, commit]);
       } catch (error) {
         resolve(null);
       }
@@ -93,20 +101,23 @@ const getReadmesContent = async (accessToken: string, org: string): Promise<GitH
   });
 
   const contentResponse = await Promise.all(contentPromises);
-  const content: GitHubReadme[] = [];
+  const readmesContent: GitHubReadme[] = [];
   contentResponse.forEach((response, i) => {
     if (response == null) return;
 
-    const contentString = Buffer.from(response.data.content, 'base64').toString();
+    const [content, commit] = response;
+
+    const contentString = Buffer.from(content.data.content, 'base64').toString();
     const resultFromSearch = readmeResults.items[i];
-    content.push({
+    readmesContent.push({
       url: resultFromSearch.html_url,
       path: `${resultFromSearch.repository.name}/${readmeResults.items[i].path}`, // include repo name
       content: contentString,
+      lastUpdatedAt: commit.data[0].commit.author.date
     })
   });
 
-  return content;
+  return readmesContent;
 }
 
 const githubRouter = Router();
@@ -181,6 +192,7 @@ githubRouter.get('/authorization', async (req, res) => {
     return res.redirect(`https://${org.subdomain}.mintlify.com`);
 
   } catch (error: any) {
+    console.log(error);
     return res.status(500).send(error?.data);
   }
 });

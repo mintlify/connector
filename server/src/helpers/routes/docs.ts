@@ -156,7 +156,8 @@ export const createDocsFromConfluencePages = async (pages: ConfluencePage[], org
 export type GitHubReadme = {
   path: string,
   url: string,
-  content: string
+  content: string,
+  lastUpdatedAt: string
 }
 
 export const createDocsFromGitHubReadmes = async (readmes: GitHubReadme[], org: OrgType, userId: string) => {
@@ -177,6 +178,7 @@ export const createDocsFromGitHubReadmes = async (readmes: GitHubReadme[], org: 
           title: readme.path,
           createdBy: userId,
           isJustAdded: false,
+          lastUpdatedAt: Date.parse(readme.lastUpdatedAt)
         },
         {
           upsert: true,
