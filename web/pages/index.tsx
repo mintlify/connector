@@ -8,7 +8,6 @@ import LoadingItem from '../components/LoadingItem'
 import SignIn from '../components/screens/SignIn'
 import Setup from '../components/screens/Setup'
 import { ChevronLeftIcon, DocumentTextIcon } from '@heroicons/react/outline'
-import { Event } from '../components/Event'
 import ActivityBar from '../components/ActivityBar'
 import Onboarding from '../components/screens/Onboarding'
 import DocItem from '../components/DocItem'
@@ -43,7 +42,6 @@ export default function Home() {
   const [docs, setDocs] = useState<Doc[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<Group>();
-  const [events, setEvents] = useState<Event[]>([]);
   const [selectedDoc, setSelectedDoc] = useState<Doc>();
   const [isAddDocLoading, setIsAddDocLoading] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,14 +69,6 @@ export default function Home() {
       .finally(() => {
         setIsLoading(false)
       })
-    request('GET', 'routes/events', {
-      params: {
-        doc: selectedDoc ? selectedDoc._id : undefined,
-      }
-    }).then((eventsResponse) => {
-        const { events } = eventsResponse.data
-        setEvents(events)
-      }).catch((err) => console.log(err));
     request('GET', `routes/org/${org._id}/integrations`)
       .then(({ data }) => {
         const { integrations } = data;
@@ -208,7 +198,6 @@ export default function Home() {
           {/* Activity feed */}
           <div className="relative bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0 z-10">
             <ActivityBar
-              events={events}
               selectedDoc={selectedDoc}
             />
           </div>

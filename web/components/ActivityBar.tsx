@@ -8,7 +8,6 @@ import { ConnectionIcon, DocTitleIcon } from '../helpers/Icons';
 import { getSubdomain } from '../helpers/user';
 import { Doc } from '../pages';
 import timeAgo from '../services/timeago';
-import EventItem, { Event } from './Event';
 import Tooltip from './Tooltip';
 
 type DocProfileProps = {
@@ -112,29 +111,21 @@ function DocProfile({ doc }: DocProfileProps) {
 }
 
 type ActivityBarProps = {
-  events: Event[];
   selectedDoc?: Doc;
 }
 
-export default function ActivityBar({ events, selectedDoc }: ActivityBarProps) {
+export default function ActivityBar({ selectedDoc }: ActivityBarProps) {
   return (
     <div className="relative pl-6 lg:w-80">
       {selectedDoc && <DocProfile doc={selectedDoc} />}
         <div className="pt-4 pb-2">
-          <h2 className="text-sm font-semibold">Activity</h2>
+          <h2 className="text-sm font-semibold">Update Requests</h2>
         </div>
         <div>
-          <ul role="list" className="divide-y divide-gray-200">
-            {events.length > 0 && events.map((event) => (
-              <EventItem key={event._id} event={event} />
-            ))}
-          </ul>
           <div className="py-1 text-sm border-t border-gray-200"></div>
-          {
-            events.length === 0 && <div className="text-sm text-gray-500">
-              No activities yet
+           <div className="text-sm text-gray-600">
+            🚧 Under construction
             </div>
-          }
         </div>
       </div>
   )
