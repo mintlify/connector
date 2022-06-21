@@ -1,4 +1,4 @@
-import { FileInfo } from "./patch";
+import { CodeType } from '../../models/Code';
 
 export type Change = {
     type: 'add' | 'delete';
@@ -17,18 +17,13 @@ export type Alert = {
     filename: string;
     lineRange: LineRange;
     type: string;
+    code?: CodeType;
 }
   
 export type Link = {
     url: string;
     lineRange: LineRange;
     type: string;
-}
-
-export type AlertsRequest = {
-    files: FileInfo[],
-    owner: string,
-    repo: string,
 }
 
 export type TaskRequest = {

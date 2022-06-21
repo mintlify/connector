@@ -3,6 +3,8 @@ import mongoose, { Types } from 'mongoose';
 import Event, { EventType, EventTypeMeta } from '../models/Event';
 import { userMiddleware } from './user';
 import * as Diff from 'diff';
+import { Alert } from '../helpers/github/types';
+import { track } from '../services/segment';
 
 const eventsRouter = express.Router();
 
@@ -71,4 +73,27 @@ eventsRouter.get('/', userMiddleware, async (req, res) => {
   }
 });
 
+eventsRouter.post('/alerts', async (req, res) => {
+  const { alerts, org } = req.body;
+  const events: EventType[] = [];
+  alerts.forEach((alert: Alert) => {
+    if (alert?.code == null) return;
+    const event: EventType = {
+      org: org._id,
+      doc: alert.code.doc,
+      type: 'code',
+      code: {
+        id: alert.code._id,
+        isAddressed: false 
+      }
+    }
+    events.push(event);
+  })
+  await Event.insertMany(events);
+  track(org._id.toString(), 'GitHub alert triggered', {
+    isOrg: true,
+    numberOfEvents: events.length,
+  })
+  return res.status(200);
+})
 export default eventsRouter;

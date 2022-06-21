@@ -11,7 +11,6 @@
     "github",
     "probot-app"
   ],
-  "nodemonConfig": { "ignore": ["*.test.ts", "lib/*", "node_modules/*", "dump.rdb"] },
   "scripts": {
     "build": "tsc",
     "start": "probot run ./lib/index.js",

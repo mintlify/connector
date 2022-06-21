@@ -1,10 +1,9 @@
-import axios from "axios";
 import { Context } from "probot";
 import { FileInfo, getEncompassingRangeAndSideForAlert, parsePatch, PatchLineRange } from "./patch";
-import { AlertsRequest, Alert } from "./types";
-import { ENDPOINT, getReviewComments } from "./octokit";
-// import { EventType } from "../../models/Event";
-// import Org from '../../models/Org';
+import { Alert } from "./types";
+import { getReviewComments, ENDPOINT } from "./octokit";
+import { CodeType } from '../../models/Code';
+import axios from 'axios';
 
 type FilesPatchLineRangesMap = Record<string, PatchLineRange[]>;
 
@@ -65,15 +64,13 @@ type AlertsResponse = {
   previousAlerts: Alert[],
 }
 
-export const getAlerts = async (context: Context, files: FileInfo[]): Promise<AlertsResponse> => {
-  const owner = context.payload.repository.owner.login;
-  const repo = context.payload.pull_request.head.repo.name;
-  const alertsRequest: AlertsRequest = { files, owner, repo }
+export const getAlerts = async (context: Context, files: FileInfo[], codes: CodeType[]): Promise<AlertsResponse> => {
+  const incomingAlertsPromise = axios.post(`${ENDPOINT}/routes/alerts/`, { files, codes });;
   const previousAlertsPromise = getReviewComments(context);
-  const alertsPromise = axios.post(`${ENDPOINT}/routes/alerts/`, alertsRequest);
-  const [alertsResponse, previousAlerts] = await Promise.all([alertsPromise, previousAlertsPromise]);
+  
+  const [incomingAlerts, previousAlerts] = await Promise.all([incomingAlertsPromise, previousAlertsPromise]);
   return {
-    incomingAlerts: alertsResponse.data.alerts,
+    incomingAlerts: incomingAlerts.data.alerts,
     previousAlerts,
   }
 }
@@ -91,28 +88,6 @@ export const filterNewAlerts = (previousAlerts: Alert[], incomingAlerts: Alert[]
     return incomingAlert.message !== previousAlertData.content && incomingAlert.filename !== previousAlertData.path
   }));
 }
-
-
-// const createEventsFromAlerts = async (context: Context, alerts: Alert[]) => {
-//   const gitOwner = context.payload.repository.owner.login;
-//   const org = await Org.findOne({'integrations.github.installations': {
-//     $elemMatch: {
-//         'account.login': gitOwner
-//     }
-//   }});
-
-//   if (org == null) {
-//     return;
-//   }
-
-
-//   const events: EventType[] = alerts.map((alert: Alert) => {
-//     const event: EventType = {
-//       org: org._id,
-//       doc: alert
-//     }
-//   })
-// }
 
 export const createReviewCommentsFromAlerts = async (context: Context, alerts: Alert[], filesPatchLineRangesMap: FilesPatchLineRangesMap) => {
   const owner = context.payload.repository.owner.login;
@@ -138,7 +113,5 @@ export const createReviewCommentsFromAlerts = async (context: Context, alerts: A
     })
   });
   const reviewComments = await Promise.all(reviewCommentPromises);
-  console.log({context});
-  console.log('reviewComments', reviewComments[0]?.data);
   return reviewComments;
 }
