@@ -2,8 +2,10 @@ import { Fragment, useEffect, useState } from 'react'
 import { Combobox, Dialog, Transition } from '@headlessui/react'
 import { classNames } from '../../../helpers/functions'
 import { DocumentationTypeIcon } from '../../../helpers/Icons'
-import { ChevronRightIcon } from '@heroicons/react/solid'
+import { CheckCircleIcon, ChevronRightIcon } from '@heroicons/react/solid'
 import DocumentationConfig from './DocumentationConfig'
+import { IntegrationsStatus } from '../../../pages'
+import { RefreshIcon } from '@heroicons/react/outline'
 
 export type AddDocumentationType = 'notion' | 'googledocs' | 'confluence';
 
@@ -11,6 +13,7 @@ type AddDocumentationSelection = {
   type: AddDocumentationType
   title: string
   description: string
+  installedDescription: string
 }
 
 export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationSelection> = {
@@ -18,16 +21,19 @@ export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationS
     type: 'notion',
     title: 'Notion',
     description: 'Import Notion workspace',
+    installedDescription: 'Re-import Notion workspace',
   },
   confluence: {
     type: 'confluence',
     title: 'Confluence',
     description: 'Import Confluence pages',
+    installedDescription: 'Re-import Confluence documents',
   },
   googledocs: {
     type: 'googledocs',
     title: 'Google Docs',
     description: 'Import Google Docs documents',
+    installedDescription: 'Re-import Google Docs documents',
   },
 }
 
@@ -36,9 +42,10 @@ type AddDocumentationProps = {
   setIsOpen: (isOpen: boolean) => void;
   setIsAddDocLoading: (isAddingAutomation: boolean) => void;
   overrideSelectedRuleType?: AddDocumentationType;
+  integrationsStatus: IntegrationsStatus;
 }
 
-export default function AddDocumentation({ isOpen, setIsOpen, setIsAddDocLoading, overrideSelectedRuleType }: AddDocumentationProps) {
+export default function AddDocumentation({ isOpen, setIsOpen, setIsAddDocLoading, overrideSelectedRuleType, integrationsStatus }: AddDocumentationProps) {
   const [selectedRuleType, setSelectedRuleType] = useState<AddDocumentationType>();
 
   useEffect(() => {
@@ -113,14 +120,17 @@ export default function AddDocumentation({ isOpen, setIsOpen, setIsAddDocLoading
                           <>
                             <DocumentationTypeIcon type={item.type} />
                             <div className="ml-4 flex-auto">
-                              <p className={classNames('text-sm font-medium', active ? 'text-gray-900' : 'text-gray-700')}>
+                              <span className={classNames('flex items-center text-sm font-medium', active ? 'text-gray-900' : 'text-gray-700')}>
                                 {item.title}
-                              </p>
+                                {integrationsStatus[item.type] && <CheckCircleIcon className="ml-1 h-4 w-4 text-green-600" />}
+                              </span>
                               <p className={classNames('text-sm', active ? 'text-gray-700' : 'text-gray-500')}>
-                                {item.description}
+                                {integrationsStatus[item.type] ? item.installedDescription : item.description}
                               </p>
                             </div>
-                            <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-gray-700" aria-hidden="true" />
+                            {
+                              integrationsStatus[item.type] ? <RefreshIcon className="h-5 w-4 text-gray-400 group-hover:text-gray-700" /> : <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-gray-700" aria-hidden="true" />
+                            }
                           </>
                         )}
                       </Combobox.Option>

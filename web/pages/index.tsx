@@ -36,6 +36,8 @@ export type Doc = {
   email?: boolean
 }
 
+export type IntegrationsStatus = { [key: string]: boolean };
+
 export default function Home() {
   const { profile, isLoadingProfile, session } = useProfile()
   const [docs, setDocs] = useState<Doc[]>([]);
@@ -46,7 +48,7 @@ export default function Home() {
   const [isAddDocLoading, setIsAddDocLoading] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
-  const [integrationsStatus, setIntegrationsStatus] = useState<{ [key: string]: boolean }>();
+  const [integrationsStatus, setIntegrationsStatus] = useState<IntegrationsStatus>();
 
   const { user, org } = profile;
 
@@ -148,6 +150,7 @@ export default function Home() {
               setIsAddDocLoading={setIsAddDocLoading}
               isAddDocumentOpen={isAddDocumentOpen}
               setIsAddDocumentOpen={setIsAddDocumentOpen}
+              integrationsStatus={integrationsStatus || {}}
             />
             {/* Projects List */}
             <div className="bg-white lg:min-w-0 lg:flex-1">

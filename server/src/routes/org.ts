@@ -1,5 +1,5 @@
 import express from 'express';
-import Org from '../models/Org';
+import Org, { OrgType } from '../models/Org';
 import User from '../models/User';
 import { track } from '../services/segment';
 import { client } from '../services/stytch';
@@ -102,7 +102,7 @@ orgRouter.put('/:orgId/name', userMiddleware, async (req, res) => {
 });
 
 orgRouter.get('/:orgId/integrations', userMiddleware, async (_, res) => {
-  const { org } = res.locals.user;
+  const { org }: { org: OrgType } = res.locals.user;
 
   try {
     if (org?.integrations == null) {
@@ -115,6 +115,7 @@ orgRouter.get('/:orgId/integrations', userMiddleware, async (_, res) => {
       notion: org.integrations.notion?.access_token != null,
       slack: org.integrations.slack?.accessToken != null,
       google: org.integrations.google?.access_token != null,
+      confluence: org.integrations.confluence?.access_token != null,
       vscode: isVSCodeInstalled, // dependent on the user
     };
 

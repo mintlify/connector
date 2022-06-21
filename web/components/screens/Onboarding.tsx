@@ -333,7 +333,7 @@ function IntroStep({ user, onBack, onNext, role, setRole, teamSize, setTeamSize,
   </>;
 }
 
-function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: User, org: Org, onBack: () => void, onNext: () => void, step: number, totalSteps: number }) {
+function AddDocStep({ user, onBack, onNext, step, totalSteps }: { user: User, org: Org, onBack: () => void, onNext: () => void, step: number, totalSteps: number }) {
   const [docs, setDocs] = useState<Doc[]>([]);
   const [isAddingDocOpen, setIsAddingDocOpen] = useState(false);
   const [addDocumentationType, setAddDocumentationType] = useState<AddDocumentationType>();
@@ -361,6 +361,7 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
       setIsOpen={setIsAddingDocOpen}
       setIsAddDocLoading={setIsAddDocLoading}
       overrideSelectedRuleType={addDocumentationType}
+      integrationsStatus={{}} // TBD: Add integration status
     />
     <h1 className="text-3xl font-semibold">
       Let&apos;s add some <span className="text-primary">documentation</span> 🗃
