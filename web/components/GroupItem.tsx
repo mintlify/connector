@@ -4,7 +4,6 @@ import {
 } from '@heroicons/react/solid'
 import { DocTitleIcon } from '../helpers/Icons'
 import timeAgo from '../services/timeago'
-import { ExternalLinkIcon } from '@heroicons/react/outline';
 import { useProfile } from '../context/ProfileContext';
 
 export type Group = {
@@ -44,11 +43,10 @@ export default function GroupItem({ group, setSelectedGroup }: GroupItemProps) {
             <h2 className="text-sm font-medium text-gray-700">
               <div className="flex items-center space-x-2">
                 <DocTitleIcon method={group._id} />
-                <a target="_blank" className="space-x-1 group flex items-center decoration-gray-300 hover:underline">
+                <a target="_blank" className="space-x-1 group flex items-center decoration-gray-300">
                   <span>
                     {group.name}
                   </span>
-                  <ExternalLinkIcon className="w-4 h-4 text-gray-400 invisible group-hover:visible" />
                 </a>
               </div>
             </h2>
