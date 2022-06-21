@@ -81,7 +81,7 @@ const groupNameMap: Record<ScrapingMethod, string> = {
   'notion-private': 'Notion Workspace',
   'confluence-private': 'Confluence Pages',
   'googledocs-private': 'Google Docs',
-  'web': 'Ohter',
+  'web': 'Web Pages',
 }
 
 docsRouter.get('/groups', userMiddleware, async (_, res) => {

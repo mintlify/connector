@@ -154,7 +154,7 @@ export default function Home() {
               <ClearSelectedFrame />
               <div className="pl-4 pr-6 pt-4 pb-4 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
                 <div className="flex items-center">
-                  { selectedGroup && <button onClick={() => setSelectedGroup(undefined)} className="p-1 rounded-lg hover:bg-gray-100 text-gray-700 mr-2"><ChevronLeftIcon className="h-5 w-5" /></button> }
+                  { selectedGroup && <button onClick={() => { setSelectedGroup(undefined); setSelectedDoc(undefined)}} className="p-1 rounded-lg hover:bg-gray-100 text-gray-700 mr-2 z-20"><ChevronLeftIcon className="h-5 w-5" /></button> }
                   { selectedGroup && <span className="mr-2"><DocTitleIcon method={selectedGroup._id} /></span> }
                   {hasDocs && <h1 className="flex-1 text-lg font-medium text-gray-700">{ selectedGroup ? selectedGroup.name : 'Documentation' }</h1>}
                 </div>
