@@ -81,6 +81,7 @@ const groupNameMap: Record<ScrapingMethod, string> = {
   'notion-private': 'Notion Workspace',
   'confluence-private': 'Confluence Pages',
   'googledocs-private': 'Google Docs',
+  'github': 'GitHub READMEs',
   'web': 'Web Pages',
 }
 

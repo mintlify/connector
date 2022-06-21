@@ -108,6 +108,10 @@ export const DocTitleIcon = ({ favicon, method }: { favicon?: string, method: st
     return <ConfluencePageIcon className="h-5 w-5 rounded-sm" />;
   }
 
+  if (method === 'github') {
+    return <img src="/assets/integrations/github.svg" alt="favicon" className="h-5 w-5 rounded-sm" />;
+  }
+
   if (favicon == null) {
     return <DocumentTextIcon className="h-5 w-5 text-gray-600" />;
   }

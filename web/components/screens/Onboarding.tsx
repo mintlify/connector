@@ -441,7 +441,7 @@ function IntegrateStep({ user, org, onBack, onNext, appsUsing, step, totalSteps 
   const [installedIntegrations, setInstalledIntegrations] = useState<Record<string, boolean>>({});
   const router = useRouter();
 
-  const integrations: Integration[] = getIntegrations(org._id);
+  const integrations: Integration[] = getIntegrations(org._id, user.userId);
 
   useEffect(() => {
     setIsLoading(true);

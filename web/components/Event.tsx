@@ -67,8 +67,8 @@ export default function EventItem({ event }: { event: Event }) {
       <div className="flex space-x-3">
         <DocTitleIcon method={event.doc.method} favicon={event.doc.favicon} />
         <div className="flex-1 space-y-1">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium">{event.doc.title}</h3>
+          <div className="flex justify-between">
+            <h3 className="text-sm font-medium truncate" style={{maxWidth: '11rem'}}>{event.doc.title}</h3>
             <p className="text-sm text-gray-500">{timeAgo.format(Date.parse(event.createdAt))}</p>
           </div>
           {

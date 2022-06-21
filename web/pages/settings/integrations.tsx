@@ -55,7 +55,7 @@ const getIntegrationSections = (orgId: string, userId: string): IntegrationSecti
           type: 'github',
           title: 'GitHub',
           iconSrc: '/assets/integrations/github.svg',
-          installUrl: `${API_ENDPOINT}/routes/integrations/github/install?org=${orgId}&close=true`
+          installUrl: `${API_ENDPOINT}/routes/integrations/github/install?org=${orgId}&close=true&userId=${userId}`
         },
         {
           type: 'vscode',
@@ -99,7 +99,6 @@ export default function Settings() {
   }
 
   const integrationSections = getIntegrationSections(org._id, user.userId);
-
 
   return (
     <>

@@ -10,7 +10,7 @@ export type Integration = {
     useRouter?: boolean,
 }
 
-export const getIntegrations = (orgId: string): Integration[] => {
+export const getIntegrations = (orgId: string, userId: string): Integration[] => {
     return [
       {
         type: 'slack',
@@ -24,7 +24,7 @@ export const getIntegrations = (orgId: string): Integration[] => {
         title: 'GitHub',
         description: 'Enable documentation review',
         iconSrc: '/assets/integrations/github.svg',
-        installUrl: `${API_ENDPOINT}/routes/integrations/github/install?org=${orgId}&close=true`,
+        installUrl: `${API_ENDPOINT}/routes/integrations/github/install?org=${orgId}&close=true&userId=${userId}`,
       },
       {
         type: 'vscode',

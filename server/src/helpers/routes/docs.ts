@@ -152,3 +152,52 @@ export const createDocsFromConfluencePages = async (pages: ConfluencePage[], org
 
   await Promise.all(addDocPromises);
 };
+
+export type GitHubReadme = {
+  path: string,
+  url: string,
+  content: string
+}
+
+export const createDocsFromGitHubReadmes = async (readmes: GitHubReadme[], org: OrgType, userId: string) => {
+  const addDocPromises = readmes.map((readme) => new Promise<void>(async (resolve) => {
+    try {
+      const orgId = org._id;
+      const url = readme.url;
+      const doc = await Doc.findOneAndUpdate(
+        {
+          org: orgId,
+          url,
+        },
+        {
+          org: orgId,
+          url,
+          method: 'github',
+          content: readme.content,
+          title: readme.path,
+          createdBy: userId,
+          isJustAdded: false,
+        },
+        {
+          upsert: true,
+          new: true,
+        }
+      );
+
+      await createEvent(orgId, doc._id, 'add', {});
+      indexDocForSearch(doc);
+      track(userId, 'Add documentation', {
+        doc: doc._id.toString(),
+        method: 'github',
+        org: orgId.toString(),
+      });
+
+      resolve();
+    }
+    catch {
+      resolve();
+    }
+  }));
+
+  await Promise.all(addDocPromises);
+};
