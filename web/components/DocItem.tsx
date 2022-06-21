@@ -131,7 +131,7 @@ export default function DocItem({ doc, onClick, selectedDoc, docs, setDocs, remo
         <ChevronRightIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
       </div>
       {/* Repo meta info */}
-      <div className="hidden sm:flex flex-col flex-shrink-0 items-end space-y-2">
+      <div className="hidden sm:flex flex-col flex-shrink-0 items-end">
         <span className="flex items-center space-x-4">
           <Menu as="div" className="relative inline-block text-left">
             <div>

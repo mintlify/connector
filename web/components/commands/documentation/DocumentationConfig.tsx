@@ -28,11 +28,7 @@ export default function DocumentationConfig({
   const configOptions: Record<AddDocumentationType, DocConfigSettings> = {
     notion: {
       inputComponent: (
-        <AddNotion
-          onCancel={onCancel}
-          setIsAddDocumentationOpen={setIsAddDocumentationOpen}
-          setIsAddDocLoading={setIsAddDocLoading}
-        />
+        <AddNotion />
       ),
     },
     googledocs: {
