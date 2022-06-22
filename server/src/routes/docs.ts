@@ -1,6 +1,5 @@
 import axios from 'axios';
 import express from 'express';
-import { Types } from 'mongoose';
 import { userMiddleware } from './user';
 import Doc, { DocType } from '../models/Doc';
 import Event from '../models/Event';
@@ -49,7 +48,7 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
   const org = res.locals.user.org;
   const { shouldShowCreatedBySelf } = req.query;
 
-  const matchQuery: { org: Types.ObjectId, createdBy?: Types.ObjectId } = { org: org._id };
+  const matchQuery: any = { org: org._id };
   if (shouldShowCreatedBySelf) {
     matchQuery.createdBy = res.locals.user._id;
   }
