@@ -7,7 +7,7 @@ import DocumentationConfig from './DocumentationConfig'
 import { IntegrationsStatus } from '../../../pages'
 import { RefreshIcon } from '@heroicons/react/outline'
 
-export type AddDocumentationType = 'notion' | 'googledocs' | 'confluence';
+export type AddDocumentationType = 'notion' | 'google' | 'confluence';
 
 type AddDocumentationSelection = {
   type: AddDocumentationType
@@ -29,8 +29,8 @@ export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationS
     description: 'Import Confluence pages',
     installedDescription: 'Re-import Confluence documents',
   },
-  googledocs: {
-    type: 'googledocs',
+  google: {
+    type: 'google',
     title: 'Google Docs',
     description: 'Import Google Docs documents',
     installedDescription: 'Re-import Google Docs documents',
