@@ -1,5 +1,4 @@
-import { PlusSmIcon } from '@heroicons/react/outline';
-import { XCircleIcon } from '@heroicons/react/solid';
+import { ArrowRightIcon, PencilIcon, XCircleIcon } from '@heroicons/react/solid';
 import axios from 'axios';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -14,17 +13,6 @@ import Tooltip from './Tooltip';
 type DocProfileProps = {
   doc: Doc,
 }
-
-const whoToFollow = [
-  {
-    name: 'Leonard Krasner',
-    handle: 'leonardkrasner',
-    href: '#',
-    imageUrl:
-      'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-  },
-  // More people...
-]
 
 function DocProfile({ doc }: DocProfileProps) {
   const { profile } = useProfile();
@@ -149,32 +137,34 @@ export default function ActivityBar({ selectedDoc }: ActivityBarProps) {
            <div className="text-sm text-gray-600 space-y-4 py-2">
             <div className="flow-root">
               <ul role="list" className="-my-4 divide-y divide-gray-200">
-                {whoToFollow.map((user) => (
-                  <li key={user.handle} className="flex items-center py-4 space-x-3">
-                    <div className="flex-shrink-0">
-                      <img className="h-8 w-8 rounded-full" src={user.imageUrl} alt="" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-900">
-                        <a href={user.href}>{user.name}</a>
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        <a href={user.href}>{'@' + user.handle}</a>
-                      </p>
-                    </div>
-                    <div className="flex-shrink-0">
-                      <button
-                        type="button"
-                        className="items-center justify-center py-1 px-2 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 w-full"
-                      >
-                        <span>Resolve</span>
-                      </button>
-                    </div>
-                  </li>
-                ))}
+              <li className="flex items-center py-4 space-x-3">
+                <div className="flex items-center justify-center bg-red-500 border-2 border-red-300 p-1.5 rounded-full">
+                  <PencilIcon className="h-4 w-4 text-white" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-900">
+                    <a>Update Onboarding</a>
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Created 30 min ago
+                  </p>
+                </div>
+                <div className="flex-shrink-0">
+                  <button
+                    type="button"
+                    className="items-center justify-center py-1 px-2 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 w-full"
+                  >
+                    <span>Resolve</span>
+                  </button>
+                </div>
+              </li>
               </ul>
             </div>
             </div>
+        </div>
+        <div className="mt-5 text-sm font-medium text-gray-500 flex items-center">
+          Connect with task management
+          <ArrowRightIcon className="ml-1 h-3" />
         </div>
       </div>
   )
