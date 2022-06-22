@@ -3,12 +3,14 @@ import { OrgType } from '../../models/Org';
 import { ConfluencePage } from '../../routes/integrations/confluence';
 import { GoogleDoc } from '../../routes/integrations/google';
 import { NotionPage } from '../../routes/integrations/notion';
-import { indexDocForSearch } from '../../services/algolia';
+import { clearIndexWithMethod, indexDocForSearch } from '../../services/algolia';
 import { getGoogleDocsPrivateData } from '../../services/googleDocs';
 import { track } from '../../services/segment';
 
 export const importDocsFromNotion = async (pages: NotionPage[], org: OrgType, userId: string) => {
   const orgId = org._id;
+  const method = 'notion-private';
+  await clearIndexWithMethod(orgId.toString(), method);
   const addDocPromises = pages.map((page) => new Promise<void>(async (resolve) => {
     try {
       // Add doc without content
@@ -20,7 +22,7 @@ export const importDocsFromNotion = async (pages: NotionPage[], org: OrgType, us
         {
           org: orgId,
           url: page.url,
-          method: 'notion-private',
+          method,
           notion: {
             pageId: page.id,
           },
@@ -40,7 +42,7 @@ export const importDocsFromNotion = async (pages: NotionPage[], org: OrgType, us
       indexDocForSearch(doc);
       track(userId, 'Add documentation', {
         doc: doc._id.toString(),
-        method: 'notion-private',
+        method,
         org: orgId.toString(),
       });
 
@@ -56,6 +58,8 @@ export const importDocsFromNotion = async (pages: NotionPage[], org: OrgType, us
 
 export const importDocsFromGoogleDocs = async (docs: GoogleDoc[], org: OrgType, userId: string) => {
   const orgId = org._id;
+  const method = 'googledocs-private';
+  await clearIndexWithMethod(orgId.toString(), method);
   const addDocPromises = docs.map((googleDoc) => new Promise<void>(async (resolve) => {
     try {
       if (org.integrations?.google == null) {
@@ -71,7 +75,7 @@ export const importDocsFromGoogleDocs = async (docs: GoogleDoc[], org: OrgType, 
         {
           org: orgId,
           url: `https://docs.google.com/document/d/${googleDoc.id}`,
-          method: 'googledocs-private',
+          method,
           googledocs: {
             id: googleDoc.id,
           },
@@ -90,7 +94,7 @@ export const importDocsFromGoogleDocs = async (docs: GoogleDoc[], org: OrgType, 
       indexDocForSearch(doc);
       track(userId, 'Add documentation', {
         doc: doc._id.toString(),
-        method: 'googledocs-private',
+        method,
         org: orgId.toString(),
       });
 
@@ -105,9 +109,11 @@ export const importDocsFromGoogleDocs = async (docs: GoogleDoc[], org: OrgType, 
 };
 
 export const importDocsFromConfluence = async (pages: ConfluencePage[], org: OrgType, userId: string) => {
+  const orgId = org._id;
+  const method = 'confluence-private';
+  await clearIndexWithMethod(orgId.toString(), method);
   const addDocPromises = pages.map((page) => new Promise<void>(async (resolve) => {
     try {
-      const orgId = org._id;
       const firstSpace = org?.integrations?.confluence?.accessibleResources[0];
       if (org?.integrations?.confluence?.accessibleResources[0] == null) {
         throw 'No organization found with accessible resources';
@@ -121,7 +127,7 @@ export const importDocsFromConfluence = async (pages: ConfluencePage[], org: Org
         {
           org: orgId,
           url,
-          method: 'confluence-private',
+          method,
           confluence: {
             id: page.id,
           },
@@ -140,7 +146,7 @@ export const importDocsFromConfluence = async (pages: ConfluencePage[], org: Org
       indexDocForSearch(doc);
       track(userId, 'Add documentation', {
         doc: doc._id.toString(),
-        method: 'googledocs-private',
+        method,
         org: orgId.toString(),
       });
 
@@ -162,6 +168,9 @@ export type GitHubMarkdown = {
 }
 
 export const importDocsFromGitHub = async (markdowns: GitHubMarkdown[], org: OrgType, userId: string) => {
+  const orgId = org._id;
+  const method = 'github';
+  await clearIndexWithMethod(orgId.toString(), method);
   const addDocPromises = markdowns.map((markdown) => new Promise<void>(async (resolve) => {
     try {
       const orgId = org._id;
@@ -174,7 +183,7 @@ export const importDocsFromGitHub = async (markdowns: GitHubMarkdown[], org: Org
         {
           org: orgId,
           url,
-          method: 'github',
+          method,
           content: markdown.content,
           title: markdown.path,
           createdBy: userId,
@@ -190,7 +199,7 @@ export const importDocsFromGitHub = async (markdowns: GitHubMarkdown[], org: Org
       indexDocForSearch(doc);
       track(userId, 'Add documentation', {
         doc: doc._id.toString(),
-        method: 'github',
+        method,
         org: orgId.toString(),
       });
 
