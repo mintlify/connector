@@ -1,14 +1,16 @@
 import mongoose, { Schema, Types } from 'mongoose';
 
-export type TaskStatus = 'todo' | 'done' 
-export type TaskTypeMeta = 'new' | 'update'
+export type TaskStatus = 'todo' | 'done';
+export type TaskAction = 'new' | 'update';
+export type TaskSource = 'github' | 'mintlify';
 
 export type TaskType = {
     org: Types.ObjectId;
     doc: Types.ObjectId;
     code: Types.ObjectId;
     status: TaskStatus;
-    type: TaskTypeMeta;
+    action: TaskAction;
+    source: TaskSource;
     url?: String;
 };
 
@@ -17,7 +19,8 @@ const TaskSchema = new Schema({
     doc: { type: Schema.Types.ObjectId, required: true },
     code: { type: Schema.Types.ObjectId, required: true },
     status: { type: String, required: true },
-    type: { type: String, required: true },
+    action: { type: String, required: true },
+    source: String,
     createdAt: { type: Date, default: Date.now },
     url: String
 });
