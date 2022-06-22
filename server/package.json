@@ -5,7 +5,7 @@
   "description": "Mintlify GitHub App",
   "author": "Mintlify <hi@mintlify.com>",
   "license": "ISC",
-  "homepage": "https://github.com/mintlify/connect",
+  "homepage": "https://github.com/mintlify/mintlify",
   "keywords": [
     "probot",
     "github",
