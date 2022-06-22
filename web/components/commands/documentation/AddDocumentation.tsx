@@ -97,9 +97,6 @@ export default function AddDocumentation({ isOpen, setIsOpen, setIsAddDocLoading
               <div className="absolute w-full max-h-full bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 z-10 overflow-auto">
               <DocumentationConfig
                 documentationType={selectedRuleType}
-                onCancel={onToPrimarySelection}
-                setIsAddDocumentationOpen={setIsOpen}
-                setIsAddDocLoading={setIsAddDocLoading}
               />
               {selectedRuleType == null && (
                 <Combobox onChange={() => {}} value="">
