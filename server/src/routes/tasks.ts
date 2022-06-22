@@ -43,14 +43,14 @@ tasksRouter.post('/update/:docId', userMiddleware, async (req, res) => {
     return res.status(400).send({error: 'No doc with DocId found'});
   }
 
-  await Task.create({
+  const task = await Task.create({
     org: org._id,
     doc: new Types.ObjectId(docId),
     status: 'todo',
     type: 'update',
     url: doc.url,
   })
-  return res.end();
+  return res.send({ task });
 });
 
 tasksRouter.delete('/:taskId', userMiddleware, async (req, res) => {
