@@ -7,8 +7,8 @@ import 'react-loading-skeleton/dist/skeleton.css'
 import LoadingItem from '../components/LoadingItem'
 import SignIn from '../components/screens/SignIn'
 import Setup from '../components/screens/Setup'
-import { ChevronLeftIcon, DocumentTextIcon } from '@heroicons/react/outline'
-import ActivityBar from '../components/ActivityBar'
+import { ChevronLeftIcon } from '@heroicons/react/outline'
+import ActivityBar, { Task } from '../components/ActivityBar'
 import Onboarding from '../components/screens/Onboarding'
 import DocItem from '../components/DocItem'
 import { useProfile } from '../context/ProfileContext'
@@ -32,7 +32,8 @@ export type Doc = {
   favicon?: string,
   method: string,
   slack?: boolean,
-  email?: boolean
+  email?: boolean,
+  tasks?: Task[],
 }
 
 export type IntegrationsStatus = { [key: string]: boolean };

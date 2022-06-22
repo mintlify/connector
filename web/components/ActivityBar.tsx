@@ -155,7 +155,11 @@ export default function ActivityBar({ selectedDoc }: ActivityBarProps) {
       })
   }, []);
 
-  console.log({tasks});
+  const onCompleteTask = (taskId: string) => {
+    setTasks(tasks.filter((task) => task._id !== taskId));
+    request('DELETE', `routes/tasks/${taskId}`);
+  }
+  
   return (
     <div className="relative pl-6 lg:w-80">
       {selectedDoc && <DocProfile doc={selectedDoc} />}
@@ -185,6 +189,7 @@ export default function ActivityBar({ selectedDoc }: ActivityBarProps) {
                     <button
                       type="button"
                       className="items-center justify-center py-1 px-2 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 w-full"
+                      onClick={() => onCompleteTask(task._id)}
                     >
                       <span><CheckIcon className="h-4 text-green-700" /></span>
                     </button>
