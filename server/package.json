@@ -11,6 +11,7 @@
     "github",
     "probot-app"
   ],
+  "nodemonConfig": { "ignore": ["lib/*"], "delay": "2" },
   "scripts": {
     "build": "tsc",
     "start": "probot run ./lib/index.js",
