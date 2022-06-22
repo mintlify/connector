@@ -150,6 +150,7 @@ export default function Home() {
                   { selectedGroup && <button onClick={() => { setSelectedGroup(undefined); setSelectedDoc(undefined)}} className="p-1 rounded-lg hover:bg-gray-100 text-gray-700 mr-2 z-20"><ChevronLeftIcon className="h-5 w-5" /></button> }
                   { selectedGroup && <span className="mr-2"><DocTitleIcon method={selectedGroup._id} /></span> }
                   {hasDocs && <h1 className="flex-1 text-lg font-medium text-gray-700">{ selectedGroup ? selectedGroup.name : 'Documentation' }</h1>}
+                  { selectedGroup && <span className="text-sm rounded-full bg-slate-400 text-white py-px px-2">{selectedGroup.count} documents</span> }
                 </div>
               </div>
               {!hasDocs && !isLoading && (

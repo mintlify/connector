@@ -5,12 +5,13 @@ import {
 import { DocTitleIcon } from '../helpers/Icons'
 import timeAgo from '../services/timeago'
 import { useProfile } from '../context/ProfileContext';
+import { Doc } from '../pages';
 
 export type Group = {
   _id: string;
   name: string;
   count: number;
-  lastUpdatedAt: string;
+  lastUpdatedDoc: Doc;
 }
 
 type GroupItemProps = {
@@ -48,6 +49,9 @@ export default function GroupItem({ group, setSelectedGroup }: GroupItemProps) {
                     {group.name}
                   </span>
                 </a>
+                <div className="bg-slate-400 text-xs py-px px-2 text-white rounded-full">
+                  {group.count} documents
+                </div>
               </div>
             </h2>
           </span>
@@ -60,7 +64,7 @@ export default function GroupItem({ group, setSelectedGroup }: GroupItemProps) {
               </svg>
             </div>
             <div>
-              Last updated {timeAgo.format(Date.parse(group.lastUpdatedAt))}
+              Last updated {timeAgo.format(Date.parse(group.lastUpdatedDoc.lastUpdatedAt))}
             </div>
           </span>
         </a>

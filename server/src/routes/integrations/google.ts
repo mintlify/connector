@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { google as googleapis } from 'googleapis';
 import { importDocsFromGoogleDocs } from '../../helpers/routes/docs';
-import Doc from '../../models/Doc';
 import Org from '../../models/Org';
 
 export type GoogleDoc = {

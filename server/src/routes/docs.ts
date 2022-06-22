@@ -59,7 +59,7 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
         $match: matchQuery,
       },
       {
-        $sort: { createdAt: -1 },
+        $sort: { lastUpdatedAt: -1 },
       },
       {
         $lookup: {
@@ -89,18 +89,18 @@ docsRouter.get('/groups', userMiddleware, async (_, res) => {
   const groups = await Doc.aggregate([
     { $match: {
       org: org._id
-    }
+    },
+    },
+    {
+      $sort: { lastUpdatedAt: -1 }
     },
     {
       $group: {
         _id: "$method",
         count: { $sum: 1 },
-        lastUpdatedAt: { $max: "$lastUpdatedAt" }
+        lastUpdatedDoc: { $first: "$$ROOT" }
       },
     },
-    {
-      $sort: { lastUpdatedAt: -1 }
-    }
   ]);
 
   const groupsWithNames = groups.map((group: { _id: ScrapingMethod }) => {
