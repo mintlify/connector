@@ -154,18 +154,18 @@ export const importDocsFromConfluence = async (pages: ConfluencePage[], org: Org
   await Promise.all(addDocPromises);
 };
 
-export type GitHubReadme = {
+export type GitHubMarkdown = {
   path: string,
   url: string,
   content: string,
   lastUpdatedAt: string
 }
 
-export const createDocsFromGitHubReadmes = async (readmes: GitHubReadme[], org: OrgType, userId: string) => {
-  const addDocPromises = readmes.map((readme) => new Promise<void>(async (resolve) => {
+export const importDocsFromGitHub = async (markdowns: GitHubMarkdown[], org: OrgType, userId: string) => {
+  const addDocPromises = markdowns.map((markdown) => new Promise<void>(async (resolve) => {
     try {
       const orgId = org._id;
-      const url = readme.url;
+      const url = markdown.url;
       const doc = await Doc.findOneAndUpdate(
         {
           org: orgId,
@@ -175,11 +175,11 @@ export const createDocsFromGitHubReadmes = async (readmes: GitHubReadme[], org: 
           org: orgId,
           url,
           method: 'github',
-          content: readme.content,
-          title: readme.path,
+          content: markdown.content,
+          title: markdown.path,
           createdBy: userId,
           isJustAdded: false,
-          lastUpdatedAt: Date.parse(readme.lastUpdatedAt)
+          lastUpdatedAt: Date.parse(markdown.lastUpdatedAt)
         },
         {
           upsert: true,

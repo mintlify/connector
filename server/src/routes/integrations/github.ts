@@ -3,7 +3,7 @@ import { Router } from 'express';
 import queryString from 'query-string';
 import { ISDEV } from "../../helpers/environment";
 import { ENDPOINT } from "../../helpers/github/octokit"
-import { createDocsFromGitHubReadmes, GitHubReadme } from "../../helpers/routes/docs";
+import { importDocsFromGitHub, GitHubMarkdown } from "../../helpers/routes/docs";
 import Org from '../../models/Org';
 import { track } from "../../services/segment";
 
@@ -65,11 +65,11 @@ const getInstallationRepositories = async (accessToken: string, installations: a
   return installedRepos;
 }
 
-const getReadmesContent = async (accessToken: string, org: string): Promise<GitHubReadme[]> => {
+const getReadmesContent = async (accessToken: string, org: string): Promise<GitHubMarkdown[]> => {
   // Currently does not handle when there are 100+ results
   const { data: readmeResults } = await axios.get(`https://api.github.com/search/code`, {
     params: {
-      q: `org:${org} filename:README.md`
+      q: `org:${org} language:markdown`
     },
     headers: {
       'Authorization': `Bearer ${accessToken}`
@@ -101,7 +101,7 @@ const getReadmesContent = async (accessToken: string, org: string): Promise<GitH
   });
 
   const contentResponse = await Promise.all(contentPromises);
-  const readmesContent: GitHubReadme[] = [];
+  const markdowns: GitHubMarkdown[] = [];
   contentResponse.forEach((response, i) => {
     if (response == null) return;
 
@@ -109,7 +109,7 @@ const getReadmesContent = async (accessToken: string, org: string): Promise<GitH
 
     const contentString = Buffer.from(content.data.content, 'base64').toString();
     const resultFromSearch = readmeResults.items[i];
-    readmesContent.push({
+    markdowns.push({
       url: resultFromSearch.html_url,
       path: `${resultFromSearch.repository.name}/${readmeResults.items[i].path}`, // include repo name
       content: contentString,
@@ -117,7 +117,7 @@ const getReadmesContent = async (accessToken: string, org: string): Promise<GitH
     })
   });
 
-  return readmesContent;
+  return markdowns;
 }
 
 const githubRouter = Router();
@@ -176,7 +176,7 @@ githubRouter.get('/authorization', async (req, res) => {
       return res.status(403).send({error: 'Invalid Organization ID'})
     }
 
-    await createDocsFromGitHubReadmes(readmesContent, org, userId)
+    await importDocsFromGitHub(readmesContent, org, userId)
 
     if (ISDEV) {
       return res.redirect(org.subdomain);
