@@ -6,6 +6,7 @@ export type TaskTypeMeta = 'new' | 'update'
 export type TaskType = {
     org: Types.ObjectId;
     doc: Types.ObjectId;
+    code: Types.ObjectId;
     status: TaskStatus;
     type: TaskTypeMeta;
     url?: String;
