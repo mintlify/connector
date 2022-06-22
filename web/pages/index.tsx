@@ -48,11 +48,12 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
   const [integrationsStatus, setIntegrationsStatus] = useState<IntegrationsStatus>();
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const { user, org } = profile;
 
   useEffect(() => {
-    if (user == null || org == null) {
+    if (user == null || org == null || refreshKey == null) {
       return
     }
 
@@ -76,7 +77,7 @@ export default function Home() {
         setIntegrationsStatus(integrations);
       })
 
-  }, [org, user, selectedDoc, isAddDocLoading]);
+  }, [org, user, selectedDoc, isAddDocLoading, refreshKey]);
 
   if (isLoadingProfile) {
     return null;
@@ -118,14 +119,8 @@ export default function Home() {
     setSelectedDoc(doc)
   }
 
-  const updateDoc = (docId: string, newDoc: Doc) => {
-    setDocs(docs.map((doc) => {
-      if (doc._id === docId) {
-        return newDoc;
-      }
-
-      return doc;
-    }))
+  const refresh = () => {
+    setRefreshKey(Math.random());
   }
 
   const ClearSelectedFrame = () => {
@@ -213,7 +208,8 @@ export default function Home() {
           <div className="relative bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0 z-10">
             <ActivityBar
               selectedDoc={selectedDoc}
-              updateDoc={updateDoc}
+              refresh={refresh}
+              refreshKey={refreshKey}
             />
           </div>
         </div>

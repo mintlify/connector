@@ -49,7 +49,8 @@ tasksRouter.post('/update/:docId', userMiddleware, async (req, res) => {
     status: 'todo',
     type: 'update',
     url: doc.url,
-  })
+  });
+  
   return res.send({ task });
 });
 

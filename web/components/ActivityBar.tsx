@@ -14,10 +14,10 @@ import Tooltip from './Tooltip';
 
 type DocProfileProps = {
   doc: Doc,
-  updateDoc: (docId: string, newDoc: Doc) => void;
+  refresh: () => void;
 }
 
-function DocProfile({ doc, updateDoc }: DocProfileProps) {
+function DocProfile({ doc, refresh }: DocProfileProps) {
   const { profile } = useProfile();
   const [codes, setCodes] = useState(doc.code);
   const [isVSCodeInstalled, setIsVSCodeInstalled] = useState(false);
@@ -58,10 +58,8 @@ function DocProfile({ doc, updateDoc }: DocProfileProps) {
 
   const onCreateUpdateRequest = () => {
     request('POST', `/routes/tasks/update/${doc._id}`)
-      .then(({ data }) => {
-        const { task } = data;
-        const newTotalTasks = doc.tasks || [];
-        updateDoc(doc._id, { ...doc, tasks: [...newTotalTasks, task] })
+      .then(() => {
+        refresh();
       })
     setShouldShowCreateTask(false);
   }
@@ -150,28 +148,35 @@ export type Task = {
 
 type ActivityBarProps = {
   selectedDoc?: Doc;
-  updateDoc: (docId: string, newDoc: Doc) => void;
+  refresh: () => void;
+  refreshKey: number;
 }
 
-export default function ActivityBar({ selectedDoc, updateDoc }: ActivityBarProps) {
+export default function ActivityBar({ selectedDoc, refresh, refreshKey }: ActivityBarProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   
   useEffect(() => {
+    if (refreshKey == null) {
+      return;
+    }
     request('GET', 'routes/tasks')
       .then(({ data }) => {
         const { tasks } = data;
         setTasks(tasks);
       })
-  }, []);
+  }, [refreshKey]);
 
-  const onCompleteTask = (taskId: string) => {
-    setTasks(tasks.filter((task) => task._id !== taskId));
-    request('DELETE', `routes/tasks/${taskId}`);
+  const onCompleteTask = (deletingTask: Task) => {
+    setTasks(tasks.filter((task) => task._id !== deletingTask._id));
+    request('DELETE', `routes/tasks/${deletingTask._id}`)
+      .then(() => {
+        refresh();
+      })
   }
   
   return (
     <div className="relative pl-6 lg:w-80">
-      {selectedDoc && <DocProfile doc={selectedDoc} updateDoc={updateDoc} />}
+      {selectedDoc && <DocProfile doc={selectedDoc} refresh={refresh} />}
         <div className="pt-4 pb-2">
           <h2 className="text-sm font-semibold">Update Requests</h2>
         </div>
@@ -198,7 +203,7 @@ export default function ActivityBar({ selectedDoc, updateDoc }: ActivityBarProps
                     <button
                       type="button"
                       className="items-center justify-center py-1 px-2 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 w-full"
-                      onClick={() => onCompleteTask(task._id)}
+                      onClick={() => onCompleteTask(task)}
                     >
                       <span><CheckIcon className="h-4 text-green-700" /></span>
                     </button>
