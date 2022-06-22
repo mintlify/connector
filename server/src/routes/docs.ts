@@ -48,9 +48,9 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
   const org = res.locals.user.org;
   const { shouldShowCreatedBySelf } = req.query;
 
-  const matchQuery: { org: Types.ObjectId, createdBy?: Types.ObjectId } = { org: org._id };
+  const matchQuery: { org: Types.ObjectId, createdBy?: string } = { org: org._id };
   if (shouldShowCreatedBySelf) {
-    matchQuery.createdBy = res.locals.user._id;
+    matchQuery.createdBy = res.locals.user.userId;
   }
 
   try {

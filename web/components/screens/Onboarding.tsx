@@ -16,6 +16,7 @@ import ProfilePicture from "../ProfilePicture";
 import { getIntegrations, onInstallIntegration, Integration } from "../../helpers/integrations";
 import { Org, useProfile, User } from "../../context/ProfileContext";
 import { request } from "../../helpers/request";
+import { RefreshIcon } from "@heroicons/react/outline";
 
 const onboardStepLocalStateKey = 'onboarding-step';
 
@@ -333,17 +334,20 @@ function IntroStep({ user, onBack, onNext, role, setRole, teamSize, setTeamSize,
   </>;
 }
 
-function AddDocStep({ user, onBack, onNext, step, totalSteps }: { user: User, org: Org, onBack: () => void, onNext: () => void, step: number, totalSteps: number }) {
+function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: User, org: Org, onBack: () => void, onNext: () => void, step: number, totalSteps: number }) {
   const [docs, setDocs] = useState<Doc[]>([]);
   const [isAddingDocOpen, setIsAddingDocOpen] = useState(false);
   const [addDocumentationType, setAddDocumentationType] = useState<AddDocumentationType>();
   const [isAddDocLoading, setIsAddDocLoading] = useState(false);
+  const [integrationsStatus, setIntegrationsStatus] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
-    axios.get(`${API_ENDPOINT}/routes/docs`, {
+    request('GET', `routes/org/${org._id}/integrations`)
+      .then(({ data: { integrations } }) => {
+        setIntegrationsStatus(integrations);
+      })
+    request('GET', 'routes/docs', {
       params: {
-        userId: user.userId,
-        subdomain: getSubdomain(window.location.host),
         shouldShowCreatedBySelf: true,
       }
     })
@@ -351,7 +355,7 @@ function AddDocStep({ user, onBack, onNext, step, totalSteps }: { user: User, or
         const { docs } = docsResponse.data;
         setDocs(docs);
       });
-  }, [user.userId, isAddDocLoading]);
+  }, [user.userId, isAddDocLoading, org]);
 
   const isCompleted = docs.length > 0;
 
@@ -361,7 +365,7 @@ function AddDocStep({ user, onBack, onNext, step, totalSteps }: { user: User, or
       setIsOpen={setIsAddingDocOpen}
       setIsAddDocLoading={setIsAddDocLoading}
       overrideSelectedRuleType={addDocumentationType}
-      integrationsStatus={{}} // TBD: Add integration status
+      integrationsStatus={{}} // intentionally left blank
     />
     <h1 className="text-3xl font-semibold">
       Let&apos;s add some <span className="text-primary">documentation</span> 🗃
@@ -385,26 +389,19 @@ function AddDocStep({ user, onBack, onNext, step, totalSteps }: { user: User, or
               >
                 {({ active }) => (
                   <>
-                    <DocumentationTypeIcon
-                      type={item.type}
-                    />
+                    <DocumentationTypeIcon type={item.type} />
                     <div className="ml-4 flex-auto">
-                      <p
-                        className={classNames(
-                          'text-sm font-medium',
-                          active ? 'text-gray-900' : 'text-gray-700'
-                        )}
-                      >
+                      <span className={classNames('flex items-center text-sm font-medium', active ? 'text-gray-900' : 'text-gray-700')}>
                         {item.title}
-                      </p>
+                        {integrationsStatus[item.type] && <CheckCircleIcon className="ml-1 h-4 w-4 text-green-600" />}
+                      </span>
                       <p className={classNames('text-sm', active ? 'text-gray-700' : 'text-gray-500')}>
-                        {item.description}
+                        {integrationsStatus[item.type] ? item.installedDescription : item.description}
                       </p>
                     </div>
-                    <ChevronRightIcon
-                      className="h-5 w-5 text-gray-400 group-hover:text-gray-700"
-                      aria-hidden="true"
-                    />
+                    {
+                      integrationsStatus[item.type] ? <RefreshIcon className="h-5 w-4 text-gray-400 group-hover:text-gray-700" /> : <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-gray-700" aria-hidden="true" />
+                    }
                   </>
                 )}
               </Combobox.Option>
@@ -415,7 +412,7 @@ function AddDocStep({ user, onBack, onNext, step, totalSteps }: { user: User, or
       {
         docs.length > 0 && <div>
         <h1 className="text-lg text-gray-600">Documents added</h1>
-        <ul className="mt-2 bg-white rounded-md p-3 shadow-md">
+        <ul className="mt-2 bg-white rounded-md px-1 py-3 shadow-md">
           { isAddDocLoading && <LoadingItem /> }
           {docs.map((doc) => (
             <DocItem
