@@ -50,6 +50,7 @@
     "mongoose": "^6.3.1",
     "morgan": "^1.10.0",
     "node-cron": "^3.0.0",
+    "node-html-markdown": "^1.2.0",
     "nodemon": "^2.0.16",
     "notion-to-md": "^2.3.3",
     "npm": "^8.10.0",

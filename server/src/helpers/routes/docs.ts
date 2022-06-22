@@ -1,14 +1,16 @@
 import Doc from '../../models/Doc';
 import { OrgType } from '../../models/Org';
-import { createEvent } from '../../routes/events';
 import { ConfluencePage } from '../../routes/integrations/confluence';
 import { GoogleDoc } from '../../routes/integrations/google';
 import { NotionPage } from '../../routes/integrations/notion';
-import { indexDocForSearch } from '../../services/algolia';
+import { clearIndexWithMethod, indexDocForSearch } from '../../services/algolia';
+import { getGoogleDocsPrivateData } from '../../services/googleDocs';
 import { track } from '../../services/segment';
 
-export const createDocsFromNotionPageId = async (pages: NotionPage[], org: OrgType, userId: string) => {
+export const importDocsFromNotion = async (pages: NotionPage[], org: OrgType, userId: string) => {
   const orgId = org._id;
+  const method = 'notion-private';
+  await clearIndexWithMethod(orgId.toString(), method);
   const addDocPromises = pages.map((page) => new Promise<void>(async (resolve) => {
     try {
       // Add doc without content
@@ -20,7 +22,7 @@ export const createDocsFromNotionPageId = async (pages: NotionPage[], org: OrgTy
         {
           org: orgId,
           url: page.url,
-          method: 'notion-private',
+          method,
           notion: {
             pageId: page.id,
           },
@@ -36,12 +38,11 @@ export const createDocsFromNotionPageId = async (pages: NotionPage[], org: OrgTy
           new: true,
         }
       );
-
-      await createEvent(orgId, doc._id, 'add', {});
+      
       indexDocForSearch(doc);
       track(userId, 'Add documentation', {
         doc: doc._id.toString(),
-        method: 'notion-private',
+        method,
         org: orgId.toString(),
       });
 
@@ -55,11 +56,17 @@ export const createDocsFromNotionPageId = async (pages: NotionPage[], org: OrgTy
   await Promise.all(addDocPromises);
 }
 
-export const createDocsFromGoogleDocs = async (docs: GoogleDoc[], org: OrgType, userId: string) => {
+export const importDocsFromGoogleDocs = async (docs: GoogleDoc[], org: OrgType, userId: string) => {
   const orgId = org._id;
+  const method = 'googledocs-private';
+  await clearIndexWithMethod(orgId.toString(), method);
   const addDocPromises = docs.map((googleDoc) => new Promise<void>(async (resolve) => {
     try {
-      // Add doc without content
+      if (org.integrations?.google == null) {
+        throw 'No Google credentials'
+      };
+      
+      const { content } = await getGoogleDocsPrivateData(googleDoc.id, org.integrations.google);
       const doc = await Doc.findOneAndUpdate(
         {
           org: org._id,
@@ -68,11 +75,11 @@ export const createDocsFromGoogleDocs = async (docs: GoogleDoc[], org: OrgType, 
         {
           org: orgId,
           url: `https://docs.google.com/document/d/${googleDoc.id}`,
-          method: 'googledocs-private',
+          method,
           googledocs: {
             id: googleDoc.id,
           },
-          content: '', // to be scraped
+          content,
           title: googleDoc.name,
           createdBy: userId,
           isJustAdded: true,
@@ -84,11 +91,10 @@ export const createDocsFromGoogleDocs = async (docs: GoogleDoc[], org: OrgType, 
         }
       );
 
-      await createEvent(orgId, doc._id, 'add', {});
       indexDocForSearch(doc);
       track(userId, 'Add documentation', {
         doc: doc._id.toString(),
-        method: 'googledocs-private',
+        method,
         org: orgId.toString(),
       });
 
@@ -102,10 +108,12 @@ export const createDocsFromGoogleDocs = async (docs: GoogleDoc[], org: OrgType, 
   await Promise.all(addDocPromises);
 };
 
-export const createDocsFromConfluencePages = async (pages: ConfluencePage[], org: OrgType, userId: string) => {
+export const importDocsFromConfluence = async (pages: ConfluencePage[], org: OrgType, userId: string) => {
+  const orgId = org._id;
+  const method = 'confluence-private';
+  await clearIndexWithMethod(orgId.toString(), method);
   const addDocPromises = pages.map((page) => new Promise<void>(async (resolve) => {
     try {
-      const orgId = org._id;
       const firstSpace = org?.integrations?.confluence?.accessibleResources[0];
       if (org?.integrations?.confluence?.accessibleResources[0] == null) {
         throw 'No organization found with accessible resources';
@@ -119,7 +127,7 @@ export const createDocsFromConfluencePages = async (pages: ConfluencePage[], org
         {
           org: orgId,
           url,
-          method: 'confluence-private',
+          method,
           confluence: {
             id: page.id,
           },
@@ -135,11 +143,63 @@ export const createDocsFromConfluencePages = async (pages: ConfluencePage[], org
         }
       );
 
-      await createEvent(orgId, doc._id, 'add', {});
       indexDocForSearch(doc);
       track(userId, 'Add documentation', {
         doc: doc._id.toString(),
-        method: 'googledocs-private',
+        method,
+        org: orgId.toString(),
+      });
+
+      resolve();
+    }
+    catch {
+      resolve();
+    }
+  }));
+
+  await Promise.all(addDocPromises);
+};
+
+export type GitHubMarkdown = {
+  path: string,
+  url: string,
+  content: string,
+  lastUpdatedAt: string
+}
+
+export const importDocsFromGitHub = async (markdowns: GitHubMarkdown[], org: OrgType, userId: string) => {
+  const orgId = org._id;
+  const method = 'github';
+  await clearIndexWithMethod(orgId.toString(), method);
+  const addDocPromises = markdowns.map((markdown) => new Promise<void>(async (resolve) => {
+    try {
+      const orgId = org._id;
+      const url = markdown.url;
+      const doc = await Doc.findOneAndUpdate(
+        {
+          org: orgId,
+          url,
+        },
+        {
+          org: orgId,
+          url,
+          method,
+          content: markdown.content,
+          title: markdown.path,
+          createdBy: userId,
+          isJustAdded: false,
+          lastUpdatedAt: Date.parse(markdown.lastUpdatedAt)
+        },
+        {
+          upsert: true,
+          new: true,
+        }
+      );
+
+      indexDocForSearch(doc);
+      track(userId, 'Add documentation', {
+        doc: doc._id.toString(),
+        method,
         org: orgId.toString(),
       });
 
