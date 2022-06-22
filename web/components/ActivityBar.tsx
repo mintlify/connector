@@ -210,6 +210,11 @@ export default function ActivityBar({ selectedDoc, refresh, refreshKey }: Activi
                   </div>
                 </li>)
               }
+              {
+                tasks.length === 0 && <div className="mt-4">
+                  No update requests 🎉
+                </div>
+              }
               </ul>
             </div>
             </div>
