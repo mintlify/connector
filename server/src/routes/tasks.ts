@@ -13,6 +13,7 @@ tasksRouter.get('/', userMiddleware, async (_, res) => {
     {
       $match: {
         org: org._id,
+        status: 'todo'
       }
     },
     {
@@ -51,5 +52,12 @@ tasksRouter.post('/update/:docId', userMiddleware, async (req, res) => {
   })
   return res.end();
 });
+
+tasksRouter.delete('/:taskId', userMiddleware, async (req, res) => {
+  const { taskId } = req.params;
+
+  await Task.findByIdAndUpdate(taskId, { status: 'done' });
+  return res.end();
+})
 
 export default tasksRouter;

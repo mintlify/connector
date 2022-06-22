@@ -71,10 +71,21 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
       },
       {
         $lookup: {
-          from: 'tasks',
-          foreignField: 'doc',
-          localField: '_id',
-          as: 'tasks',
+          from: "tasks",
+          let: { doc: "$_id" },
+          pipeline: [
+             { $match:
+                { $expr:
+                   { $and:
+                      [
+                        { $eq: [ "$doc",  "$$doc" ] },
+                        { $eq: [ "$status", "todo" ] }
+                      ]
+                   }
+                }
+             },
+          ],
+          as: "tasks"
         },
       }
     ]);
