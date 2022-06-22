@@ -151,19 +151,19 @@ export default function Settings() {
                                 { integrationsStatus[integration.type]
                                 ? (integration.type === 'vscode' ?
                                     <CheckCircleIcon className="h-4 w-4 text-green-600" /> :
-                                    <button
-                                      className="text-gray-700 font-medium"
+                                    <span
+                                      className="text-gray-700 font-medium cursor-pointer"
                                       onClick={() => onInstallIntegration(integration, router)}
                                     >
                                       Edit
-                                    </button>
+                                    </span>
                                   )
-                                : <button
-                                    className="text-primary font-medium"
+                                : <span
+                                    className="text-primary font-medium cursor-pointer"
                                     onClick={() => onInstallIntegration(integration, router)}
                                   >
                                     Install
-                                  </button>
+                                  </span>
                                 }
                               </div>
                             </div>

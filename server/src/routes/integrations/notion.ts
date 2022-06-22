@@ -144,4 +144,9 @@ export const getNotionDocs = async (notionAccessToken: string) => {
     return results;
 }
 
+notionRouter.get('/authorization/local', (req, res) => {
+  const { code, state } = req.query;
+  return res.redirect(`http://localhost:5000/routes/integrations/notion/authorization?code=${code}&state=${state}`)
+})
+
 export default notionRouter;
