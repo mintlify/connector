@@ -108,7 +108,7 @@ export default function DocItem({ doc, onClick, selectedDoc, docs, setDocs, remo
                     {
                       doc.tasks && doc.tasks.map((task) => (
                         <span key={task._id} className="text-xs bg-red-500 text-white py-px px-2 rounded-full">
-                          Update requested
+                          update requested
                         </span>
                       ))
                     }
