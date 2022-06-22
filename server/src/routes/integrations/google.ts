@@ -76,14 +76,8 @@ googleRouter.get('/authorization', async (req, res) => {
             fields: 'nextPageToken, files(id, name, modifiedTime, createdTime)',
           }))
       nextPageToken = data.nextPageToken
-      const allFiles: GoogleDoc[] = data.files;
-      const existingDocs = await Doc.find({ org: org._id, method: 'googledocs-private' });
-      const results = allFiles
-        .filter((googleDoc) => {
-          return !existingDocs.some((doc) => doc.googledocs?.id === googleDoc.id);
-        });
-
-      await importDocsFromGoogleDocs(results, org, userId);
+      const googleDocs: GoogleDoc[] = data.files;
+      await importDocsFromGoogleDocs(googleDocs, org, userId);
       
       if (parsedState?.close) {
         return res.send("<script>window.close();</script>");

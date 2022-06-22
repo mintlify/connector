@@ -65,7 +65,7 @@ const getInstallationRepositories = async (accessToken: string, installations: a
   return installedRepos;
 }
 
-const getReadmesContent = async (accessToken: string, org: string): Promise<GitHubMarkdown[]> => {
+const getMarkdowns = async (accessToken: string, org: string): Promise<GitHubMarkdown[]> => {
   // Currently does not handle when there are 100+ results
   const { data: readmeResults } = await axios.get(`https://api.github.com/search/code`, {
     params: {
@@ -160,9 +160,9 @@ githubRouter.get('/authorization', async (req, res) => {
 
     const accountOwner = installations[0].account.login;
 
-    const [repositories, readmesContent] = await Promise.all([
+    const [repositories, markdowns] = await Promise.all([
       getInstallationRepositories(access_token, installations),
-      getReadmesContent(access_token, accountOwner)
+      getMarkdowns(access_token, accountOwner)
     ]);
     const installationsWithRepositories = installations.map((installation, i) => {
       return {
@@ -176,7 +176,7 @@ githubRouter.get('/authorization', async (req, res) => {
       return res.status(403).send({error: 'Invalid Organization ID'})
     }
 
-    await importDocsFromGitHub(readmesContent, org, userId)
+    await importDocsFromGitHub(markdowns, org, userId)
 
     if (ISDEV) {
       return res.redirect(org.subdomain);
