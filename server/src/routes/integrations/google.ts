@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { google as googleapis } from 'googleapis';
+import { importDocsFromGoogleDocs } from '../../helpers/routes/docs';
 import Doc from '../../models/Doc';
 import Org from '../../models/Org';
-import { userMiddleware } from '../user';
 
 export type GoogleDoc = {
   id: string
@@ -26,7 +26,7 @@ const SCOPES = [
 ];
 
 googleRouter.get('/install', async (req, res) => {
-  const { org, close } = req.query;
+  const { org, close, userId } = req.query;
   if (!org) return res.status(404).send('Organization ID is required');
 
   const authUrl = oAuth2Client.generateAuthUrl({
@@ -34,7 +34,7 @@ googleRouter.get('/install', async (req, res) => {
     scope: SCOPES,
   });
 
-  const state = { orgId: org, close };
+  const state = { orgId: org, close, userId };
   const encodedState = encodeURIComponent(JSON.stringify(state));
 
   const fullAuthUrl = `${authUrl}&state=${encodedState}`;
@@ -53,7 +53,7 @@ googleRouter.get('/authorization', async (req, res) => {
       if (state == null) return res.status(403).send('No state provided');
       const parsedState = JSON.parse(decodeURIComponent(state as string));
 
-      const { orgId } = parsedState;
+      const { orgId, userId } = parsedState;
       const org = await Org.findByIdAndUpdate(orgId, {
         'integrations.google': tokens,
       });
@@ -61,6 +61,29 @@ googleRouter.get('/authorization', async (req, res) => {
       if (org == null) {
         return res.status(403).send({ error: 'Invalid organization ID' });
       }
+
+      const googleDrive = googleapis.drive({ version: 'v3', auth: oAuth2Client })
+      let nextPageToken: string | null | undefined = ''
+      const { data }: any = await (nextPageToken !== ''
+        ? googleDrive.files.list({
+            q: 'mimeType="application/vnd.google-apps.document" and trashed=false',
+            fields: 'nextPageToken, files(id, name)',
+            pageToken: nextPageToken,
+            spaces: 'drive',
+          })
+        : googleDrive.files.list({
+            q: 'mimeType="application/vnd.google-apps.document" and trashed=false',
+            fields: 'nextPageToken, files(id, name, modifiedTime, createdTime)',
+          }))
+      nextPageToken = data.nextPageToken
+      const allFiles: GoogleDoc[] = data.files;
+      const existingDocs = await Doc.find({ org: org._id, method: 'googledocs-private' });
+      const results = allFiles
+        .filter((googleDoc) => {
+          return !existingDocs.some((doc) => doc.googledocs?.id === googleDoc.id);
+        });
+
+      await importDocsFromGoogleDocs(results, org, userId);
       
       if (parsedState?.close) {
         return res.send("<script>window.close();</script>");
@@ -70,43 +93,5 @@ googleRouter.get('/authorization', async (req, res) => {
       return res.send("Unable to install Google integration")
     }
 });
-
-googleRouter.post('/sync', userMiddleware, async (_, res) => {
-  const { org } = res.locals.user
-
-  let google = org.integrations?.google;
-  if (google?.access_token == null) {
-    return res.status(403).json({ error: 'No access token found for Google' })
-  }
-
-  oAuth2Client.setCredentials(google)
-  const googleDrive = googleapis.drive({ version: 'v3', auth: oAuth2Client })
-  let nextPageToken: string | null | undefined = ''
-
-  try {
-    const { data }: any = await (nextPageToken !== ''
-      ? googleDrive.files.list({
-          q: 'mimeType="application/vnd.google-apps.document" and trashed=false',
-          fields: 'nextPageToken, files(id, name)',
-          pageToken: nextPageToken,
-          spaces: 'drive',
-        })
-      : googleDrive.files.list({
-          q: 'mimeType="application/vnd.google-apps.document" and trashed=false',
-          fields: 'nextPageToken, files(id, name, modifiedTime, createdTime)',
-        }))
-    nextPageToken = data.nextPageToken
-    const allFiles: GoogleDoc[] = data.files;
-    const existingDocs = await Doc.find({ org: org._id, method: 'googledocs-private' });
-    const results = allFiles
-      .filter((googleDoc) => {
-        return !existingDocs.some((doc) => doc.googledocs?.id === googleDoc.id);
-      });
-
-    return res.status(200).json({ results })
-  } catch (error: any) {
-    return res.status(500).send(error)
-  }
-})
 
 export default googleRouter;

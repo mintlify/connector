@@ -6,7 +6,6 @@ import Doc, { DocType } from '../models/Doc';
 import Event from '../models/Event';
 import { ContentData, ScrapingMethod } from '../services/webscraper';
 import { deleteDocForSearch } from '../services/algolia';
-import { createDocsFromGoogleDocs } from '../helpers/routes/docs';
 import Org from '../models/Org';
 import { getNotionPageDataWithId } from '../services/notion';
 import { getConfluenceContentFromPageById } from './integrations/confluence';
@@ -113,19 +112,6 @@ docsRouter.get('/groups', userMiddleware, async (_, res) => {
 
   return res.send({ groups: groupsWithNames })
 })
-
-docsRouter.post('/googledocs', userMiddleware, async (req, res) => {
-  const { docs } = req.body;
-  const org = res.locals.user.org;
-
-  try {
-    // Initial add is using light mode scan
-    await createDocsFromGoogleDocs(docs, org, res.locals.user._id);
-    return res.end();
-  } catch (error) {
-    return res.status(500).send({ error });
-  }
-});
 
 docsRouter.delete('/:docId', userMiddleware, async (req, res) => {
   const { docId } = req.params;

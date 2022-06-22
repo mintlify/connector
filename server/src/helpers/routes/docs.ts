@@ -4,6 +4,7 @@ import { ConfluencePage } from '../../routes/integrations/confluence';
 import { GoogleDoc } from '../../routes/integrations/google';
 import { NotionPage } from '../../routes/integrations/notion';
 import { indexDocForSearch } from '../../services/algolia';
+import { getGoogleDocsPrivateData } from '../../services/googleDocs';
 import { track } from '../../services/segment';
 
 export const importDocsFromNotion = async (pages: NotionPage[], org: OrgType, userId: string) => {
@@ -53,11 +54,15 @@ export const importDocsFromNotion = async (pages: NotionPage[], org: OrgType, us
   await Promise.all(addDocPromises);
 }
 
-export const createDocsFromGoogleDocs = async (docs: GoogleDoc[], org: OrgType, userId: string) => {
+export const importDocsFromGoogleDocs = async (docs: GoogleDoc[], org: OrgType, userId: string) => {
   const orgId = org._id;
   const addDocPromises = docs.map((googleDoc) => new Promise<void>(async (resolve) => {
     try {
-      // Add doc without content
+      if (org.integrations?.google == null) {
+        throw 'No Google credentials'
+      };
+      
+      const { content } = await getGoogleDocsPrivateData(googleDoc.id, org.integrations.google);
       const doc = await Doc.findOneAndUpdate(
         {
           org: org._id,
@@ -70,7 +75,7 @@ export const createDocsFromGoogleDocs = async (docs: GoogleDoc[], org: OrgType, 
           googledocs: {
             id: googleDoc.id,
           },
-          content: '', // to be scraped
+          content,
           title: googleDoc.name,
           createdBy: userId,
           isJustAdded: true,
