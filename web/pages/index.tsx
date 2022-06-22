@@ -7,13 +7,14 @@ import 'react-loading-skeleton/dist/skeleton.css'
 import LoadingItem from '../components/LoadingItem'
 import SignIn from '../components/screens/SignIn'
 import Setup from '../components/screens/Setup'
-import { DocumentTextIcon } from '@heroicons/react/outline'
-import { Event } from '../components/Event'
+import { ChevronLeftIcon, DocumentTextIcon } from '@heroicons/react/outline'
 import ActivityBar from '../components/ActivityBar'
 import Onboarding from '../components/screens/Onboarding'
 import DocItem from '../components/DocItem'
 import { useProfile } from '../context/ProfileContext'
 import { request } from '../helpers/request'
+import GroupItem, { Group } from '../components/GroupItem'
+import { DocTitleIcon } from '../helpers/Icons'
 
 type Code = {
   _id: string
@@ -34,15 +35,18 @@ export type Doc = {
   email?: boolean
 }
 
+export type IntegrationsStatus = { [key: string]: boolean };
+
 export default function Home() {
   const { profile, isLoadingProfile, session } = useProfile()
   const [docs, setDocs] = useState<Doc[]>([]);
-  const [events, setEvents] = useState<Event[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<Group>();
   const [selectedDoc, setSelectedDoc] = useState<Doc>();
   const [isAddDocLoading, setIsAddDocLoading] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
-  const [integrationsStatus, setIntegrationsStatus] = useState<{ [key: string]: boolean }>();
+  const [integrationsStatus, setIntegrationsStatus] = useState<IntegrationsStatus>();
 
   const { user, org } = profile;
 
@@ -50,6 +54,12 @@ export default function Home() {
     if (user == null || org == null) {
       return
     }
+
+    request('GET', 'routes/docs/groups')
+      .then((groupsResponse) => {
+        const { groups } = groupsResponse.data;
+        setGroups(groups);
+      })
 
     request('GET', 'routes/docs')
       .then((docsResponse) => {
@@ -59,14 +69,6 @@ export default function Home() {
       .finally(() => {
         setIsLoading(false)
       })
-    request('GET', 'routes/events', {
-      params: {
-        doc: selectedDoc ? selectedDoc._id : undefined,
-      }
-    }).then((eventsResponse) => {
-        const { events } = eventsResponse.data
-        setEvents(events)
-      }).catch((err) => console.log(err));
     request('GET', `routes/org/${org._id}/integrations`)
       .then(({ data }) => {
         const { integrations } = data;
@@ -120,7 +122,8 @@ export default function Home() {
     return <div className="absolute inset-0" onClick={() => setSelectedDoc(undefined)}></div>
   }
 
-  const hasDocs = (docs && docs.length > 0) || isAddDocLoading
+  const hasDocs = (docs && docs.length > 0) || isAddDocLoading;
+  const activeDocs = docs.filter((doc) => doc.method === selectedGroup?._id)
 
   return (
     <>
@@ -137,13 +140,17 @@ export default function Home() {
               setIsAddDocLoading={setIsAddDocLoading}
               isAddDocumentOpen={isAddDocumentOpen}
               setIsAddDocumentOpen={setIsAddDocumentOpen}
+              integrationsStatus={integrationsStatus || {}}
             />
             {/* Projects List */}
             <div className="bg-white lg:min-w-0 lg:flex-1">
               <ClearSelectedFrame />
               <div className="pl-4 pr-6 pt-4 pb-4 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
                 <div className="flex items-center">
-                  {hasDocs && <h1 className="flex-1 text-lg font-medium text-gray-800">Documentation</h1>}
+                  { selectedGroup && <button onClick={() => { setSelectedGroup(undefined); setSelectedDoc(undefined)}} className="p-1 rounded-lg hover:bg-gray-100 text-gray-700 mr-2 z-20"><ChevronLeftIcon className="h-5 w-5" /></button> }
+                  { selectedGroup && <span className="mr-2"><DocTitleIcon method={selectedGroup._id} /></span> }
+                  {hasDocs && <h1 className="flex-1 text-lg font-medium text-gray-700">{ selectedGroup ? selectedGroup.name : 'Documentation' }</h1>}
+                  { selectedGroup && <span className="text-sm rounded-full bg-slate-400 text-white py-px px-2">{selectedGroup.count} documents</span> }
                 </div>
               </div>
               {!hasDocs && !isLoading && (
@@ -164,9 +171,10 @@ export default function Home() {
                   </div>
                 </div>
               )}
-              <ul role="list" className="relative z-0">
+              {
+                selectedGroup && <ul role="list" className="relative z-0">
                 {isAddDocLoading && <LoadingItem />}
-                {docs?.map((doc) => (
+                {activeDocs?.map((doc) => (
                   <DocItem
                     key={doc._id}
                     doc={doc}
@@ -179,12 +187,18 @@ export default function Home() {
                   />
                 ))}
               </ul>
+              }
+              {
+                !selectedGroup && <ul role="list" className="relative z-0">
+                {groups.map((group) => <GroupItem group={group} key={group._id} setSelectedGroup={setSelectedGroup} />
+                )}
+              </ul>
+              }
             </div>
           </div>
           {/* Activity feed */}
           <div className="relative bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0 z-10">
             <ActivityBar
-              events={events}
               selectedDoc={selectedDoc}
             />
           </div>

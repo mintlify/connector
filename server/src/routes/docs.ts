@@ -4,9 +4,8 @@ import { Types } from 'mongoose';
 import { userMiddleware } from './user';
 import Doc, { DocType } from '../models/Doc';
 import Event from '../models/Event';
-import { ContentData } from '../services/webscraper';
+import { ContentData, ScrapingMethod } from '../services/webscraper';
 import { deleteDocForSearch } from '../services/algolia';
-import { createDocsFromConfluencePages, createDocsFromGoogleDocs, createDocsFromNotionPageId } from '../helpers/routes/docs';
 import Org from '../models/Org';
 import { getNotionPageDataWithId } from '../services/notion';
 import { getConfluenceContentFromPageById } from './integrations/confluence';
@@ -49,9 +48,9 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
   const org = res.locals.user.org;
   const { shouldShowCreatedBySelf } = req.query;
 
-  const matchQuery: { org: Types.ObjectId, createdBy?: Types.ObjectId } = { org: org._id };
+  const matchQuery: { org: Types.ObjectId, createdBy?: string } = { org: org._id };
   if (shouldShowCreatedBySelf) {
-    matchQuery.createdBy = res.locals.user._id;
+    matchQuery.createdBy = res.locals.user.userId;
   }
 
   try {
@@ -60,7 +59,7 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
         $match: matchQuery,
       },
       {
-        $sort: { createdAt: -1 },
+        $sort: { lastUpdatedAt: -1 },
       },
       {
         $lookup: {
@@ -77,42 +76,41 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
   }
 });
 
-docsRouter.post('/notion', userMiddleware, async (req, res) => {
-  const { pages } = req.body;
-  const org = res.locals.user.org;
+const groupNameMap: Record<ScrapingMethod, string> = {
+  'notion-private': 'Notion',
+  'confluence-private': 'Confluence',
+  'googledocs-private': 'Google Docs',
+  'github': 'GitHub',
+  'web': 'Web Pages',
+}
 
-  try {
-    // Initial add is using light mode scan
-    await createDocsFromNotionPageId(pages, org, res.locals.user._id);
-    return res.end();
-  } catch (error) {
-    return res.status(500).send({ error });
-  }
-});
+docsRouter.get('/groups', userMiddleware, async (_, res) => {
+  const { org } = res.locals.user;
+  const groups = await Doc.aggregate([
+    { $match: {
+      org: org._id
+    },
+    },
+    {
+      $sort: { lastUpdatedAt: -1 }
+    },
+    {
+      $group: {
+        _id: "$method",
+        count: { $sum: 1 },
+        lastUpdatedDoc: { $first: "$$ROOT" }
+      },
+    },
+  ]);
 
-docsRouter.post('/googledocs', userMiddleware, async (req, res) => {
-  const { docs } = req.body;
-  const org = res.locals.user.org;
+  const groupsWithNames = groups.map((group: { _id: ScrapingMethod }) => {
+    return {
+      ...group,
+      name: groupNameMap[group._id],
+    }
+  })
 
-  try {
-    // Initial add is using light mode scan
-    await createDocsFromGoogleDocs(docs, org, res.locals.user._id);
-    return res.end();
-  } catch (error) {
-    return res.status(500).send({ error });
-  }
-});
-
-docsRouter.post('/confluence', userMiddleware, async (req, res) => {
-  const { pages } = req.body;
-  const org = res.locals.user.org;
-
-  try {
-    await createDocsFromConfluencePages(pages, org, res.locals.user._id);
-    return res.end();
-  } catch (error) {
-    return res.status(500).send({ error });
-  }
+  return res.send({ groups: groupsWithNames })
 })
 
 docsRouter.delete('/:docId', userMiddleware, async (req, res) => {

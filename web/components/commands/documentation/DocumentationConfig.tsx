@@ -10,16 +10,10 @@ type DocConfigSettings = {
 
 type DocumentationConfigProps = {
   documentationType?: AddDocumentationType
-  onCancel: () => void
-  setIsAddDocumentationOpen: (isOpen: boolean) => void
-  setIsAddDocLoading: (isAddingAutomation: boolean) => void
 }
 
 export default function DocumentationConfig({
   documentationType,
-  onCancel,
-  setIsAddDocumentationOpen,
-  setIsAddDocLoading,
 }: DocumentationConfigProps) {
   if (documentationType == null) {
     return null
@@ -28,26 +22,14 @@ export default function DocumentationConfig({
   const configOptions: Record<AddDocumentationType, DocConfigSettings> = {
     notion: {
       inputComponent: (
-        <AddNotion
-          onCancel={onCancel}
-          setIsAddDocumentationOpen={setIsAddDocumentationOpen}
-          setIsAddDocLoading={setIsAddDocLoading}
-        />
+        <AddNotion />
       ),
     },
-    googledocs: {
-      inputComponent: <AddGoogleDocs
-      onCancel={onCancel}
-      setIsAddDocumentationOpen={setIsAddDocumentationOpen}
-      setIsAddDocLoading={setIsAddDocLoading}
-    />,
+    google: {
+      inputComponent: <AddGoogleDocs />,
     },
     confluence: {
-      inputComponent: <AddConfluence
-      onCancel={onCancel}
-      setIsAddDocumentationOpen={setIsAddDocumentationOpen}
-      setIsAddDocLoading={setIsAddDocLoading}
-    />,
+      inputComponent: <AddConfluence />,
     },
   }
 

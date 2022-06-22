@@ -1,6 +1,4 @@
-type WebScrapingMethod =  'notion-private' | 'googledocs-private' | 'confluence-private' | 'web';
-
-export type ScrapingMethod = WebScrapingMethod;
+export type ScrapingMethod = 'notion-private' | 'googledocs-private' | 'confluence-private' | 'web' | 'github';
 
 export type ContentData = {
   method: ScrapingMethod;

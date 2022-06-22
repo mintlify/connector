@@ -4,18 +4,21 @@ import { PlusIcon } from '@heroicons/react/solid'
 import Link from 'next/link';
 import AddDocumentation from './commands/documentation/AddDocumentation'
 import ProfilePicture from './ProfilePicture';
-import { Org, useProfile, User } from '../context/ProfileContext';
+import { useProfile } from '../context/ProfileContext';
+import { IntegrationsStatus } from '../pages';
 
 type SidebarProps = {
   setIsAddDocLoading: (isAddingDoc: boolean) => void;
   isAddDocumentOpen: boolean;
   setIsAddDocumentOpen: (isAddingDoc: boolean) => void;
+  integrationsStatus: IntegrationsStatus;
 }
 
 export default function Sidebar({
   setIsAddDocLoading,
   isAddDocumentOpen,
-  setIsAddDocumentOpen
+  setIsAddDocumentOpen,
+  integrationsStatus
 }: SidebarProps) {
   const { boot, show } = useIntercom();
   const { profile } = useProfile();
@@ -37,6 +40,7 @@ export default function Sidebar({
       isOpen={isAddDocumentOpen}
       setIsOpen={setIsAddDocumentOpen}
       setIsAddDocLoading={setIsAddDocLoading}
+      integrationsStatus={integrationsStatus}
     />
     <div className="xl:flex-shrink-0 xl:w-64 xl:border-r xl:border-gray-200">
       <div className="pl-4 pr-6 py-6 sm:pl-6 lg:pl-8 xl:pl-0">

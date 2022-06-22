@@ -22,6 +22,19 @@ export const searchDocs = async (query: string, orgId: string): Promise<SearchRe
     }
 }
 
+export const clearIndexWithMethod = async (orgId: string, method: string) => {
+    try {
+        await docsIndex.clearObjects({
+            queryParameters: {
+                org: orgId,
+                method,
+            }
+        })
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 export const indexDocForSearch = async (doc: DocType) => {
     try {
         const record = {
