@@ -39,6 +39,8 @@ export type Doc = {
 
 export type IntegrationsStatus = { [key: string]: boolean };
 
+const DOCS_PER_PAGE = 10;
+
 export default function Home() {
   const { profile, isLoadingProfile, session } = useProfile()
   const [docs, setDocs] = useState<Doc[]>([]);
@@ -139,8 +141,8 @@ export default function Home() {
   const hasDocs = (docs && docs.length > 0) || isAddDocLoading;
   const docsInGroup = docs.filter((doc) => doc.method === selectedGroup?._id);
 
-  const startIndex = docsPage * 20;
-  const endIndex = startIndex + 20;
+  const startIndex = docsPage * DOCS_PER_PAGE;
+  const endIndex = startIndex + DOCS_PER_PAGE;
   const docsToDisplay = docsInGroup.slice(startIndex, endIndex);
 
   return (
