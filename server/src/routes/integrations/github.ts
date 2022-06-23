@@ -65,7 +65,7 @@ const getInstallationRepositories = async (accessToken: string, installations: a
   return installedRepos;
 }
 
-const getMarkdowns = async (accessToken: string, org: string): Promise<GitHubMarkdown[]> => {
+const getMarkdowns = async (accessToken: string, org: string, repositories: any[]): Promise<GitHubMarkdown[]> => {
   // Currently does not handle when there are 100+ results
   const { data: readmeResults } = await axios.get(`https://api.github.com/search/code`, {
     params: {
@@ -92,8 +92,9 @@ const getMarkdowns = async (accessToken: string, org: string): Promise<GitHubMar
         });
 
         const [content, commit] = await Promise.all([contentPromise, commitPromise]);
-
-        resolve([content, commit]);
+        const flatRepos = repositories.flat();
+        const repo = flatRepos.find((repo) => result.repository.name === repo.name);
+        resolve([content, commit, repo]);
       } catch (error) {
         resolve(null);
       }
@@ -105,14 +106,15 @@ const getMarkdowns = async (accessToken: string, org: string): Promise<GitHubMar
   contentResponse.forEach((response, i) => {
     if (response == null) return;
 
-    const [content, commit] = response;
+    const [content, commit, repo] = response;
 
     const contentString = Buffer.from(content.data.content, 'base64').toString();
     const resultFromSearch = readmeResults.items[i];
     markdowns.push({
       url: resultFromSearch.html_url,
-      path: `${resultFromSearch.repository.name}/${readmeResults.items[i].path}`, // include repo name
+      path: readmeResults.items[i].path, // include repo name
       content: contentString,
+      repo,
       lastUpdatedAt: commit.data[0].commit.author.date
     })
   });
@@ -160,10 +162,8 @@ githubRouter.get('/authorization', async (req, res) => {
 
     const accountOwner = installations[0].account.login;
 
-    const [repositories, markdowns] = await Promise.all([
-      getInstallationRepositories(access_token, installations),
-      getMarkdowns(access_token, accountOwner)
-    ]);
+    const repositories = await getInstallationRepositories(access_token, installations);
+    const markdowns = await getMarkdowns(access_token, accountOwner, repositories);
     const installationsWithRepositories = installations.map((installation, i) => {
       return {
         ...installation,

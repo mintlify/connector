@@ -131,7 +131,7 @@ export const importDocsFromConfluence = async (pages: ConfluencePage[], org: Org
         throw 'No organization found with accessible resources';
       }
       const url = `${firstSpace.url}/wiki${page._links.webui}`;
-      const content = replaceRelativeWithAbsolutePathsInMarkdown(page.content, firstSpace.url);
+      const content = replaceRelativeWithAbsolutePathsInMarkdown(page.content, { img: firstSpace.url, link: firstSpace.url });
       const doc = await Doc.findOneAndUpdate(
         {
           org: orgId,
@@ -177,7 +177,8 @@ export type GitHubMarkdown = {
   path: string,
   url: string,
   content: string,
-  lastUpdatedAt: string
+  lastUpdatedAt: string,
+  repo?: any,
 }
 
 export const importDocsFromGitHub = async (markdowns: GitHubMarkdown[], org: OrgType, userId: string) => {
@@ -188,6 +189,16 @@ export const importDocsFromGitHub = async (markdowns: GitHubMarkdown[], org: Org
     try {
       const orgId = org._id;
       const url = markdown.url;
+      const rootPath = `${markdown.repo?.full_name}/${markdown.repo?.default_branch}`;
+      const path = `${rootPath}/${markdown.path}`;
+      const content = replaceRelativeWithAbsolutePathsInMarkdown(
+        markdown.content,
+        {
+          img: `https://raw.githubusercontent.com/${path}`,
+          link: `https://github.com/${path}`
+        },
+        rootPath
+      )
       const doc = await Doc.findOneAndUpdate(
         {
           org: orgId,
@@ -197,8 +208,8 @@ export const importDocsFromGitHub = async (markdowns: GitHubMarkdown[], org: Org
           org: orgId,
           url,
           method,
-          content: markdown.content,
-          title: markdown.path,
+          content,
+          title: `${markdown.repo?.name}/${markdown.path}`,
           createdBy: userId,
           isJustAdded: false,
           lastUpdatedAt: Date.parse(markdown.lastUpdatedAt)
