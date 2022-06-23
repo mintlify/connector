@@ -7,6 +7,7 @@ import { clearIndexWithMethod, indexDocForSearch } from '../../services/algolia'
 import { getGoogleDocsPrivateData } from '../../services/googleDocs';
 import { getNotionPageDataWithId } from '../../services/notion';
 import { track } from '../../services/segment';
+import { replaceRelativeWithAbsolutePathsInMarkdown } from './markdown';
 
 export const importDocsFromNotion = async (pages: NotionPage[], org: OrgType, userId: string) => {
   const orgId = org._id;
@@ -126,10 +127,11 @@ export const importDocsFromConfluence = async (pages: ConfluencePage[], org: Org
   const addDocPromises = pages.map((page) => new Promise<void>(async (resolve) => {
     try {
       const firstSpace = org?.integrations?.confluence?.accessibleResources[0];
-      if (org?.integrations?.confluence?.accessibleResources[0] == null) {
+      if (firstSpace == null) {
         throw 'No organization found with accessible resources';
       }
-      const url = `${firstSpace?.url}/wiki${page._links.webui}`;
+      const url = `${firstSpace.url}/wiki${page._links.webui}`;
+      const content = replaceRelativeWithAbsolutePathsInMarkdown(page.content, firstSpace.url);
       const doc = await Doc.findOneAndUpdate(
         {
           org: orgId,
@@ -142,7 +144,7 @@ export const importDocsFromConfluence = async (pages: ConfluencePage[], org: Org
           confluence: {
             id: page.id,
           },
-          content: page.content,
+          content,
           title: page.title,
           createdBy: userId,
           isJustAdded: false,
