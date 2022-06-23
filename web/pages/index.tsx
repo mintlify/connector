@@ -113,6 +113,12 @@ export default function Home() {
     return <Onboarding />
   }
 
+  const onClearGroup = () => {
+    setSelectedGroup(undefined);
+    setSelectedDoc(undefined);
+    setDocsPage(0);
+  }
+
   const onClickDoc = (doc: Doc) => {
     if (doc._id === selectedDoc?._id) {
       setSelectedDoc(undefined)
@@ -161,7 +167,7 @@ export default function Home() {
                 <div className="flex items-center">
                   { 
                     selectedGroup ? <>
-                      <button onClick={() => { setSelectedGroup(undefined); setSelectedDoc(undefined)}} className="p-1 rounded-lg hover:bg-gray-100 text-gray-700 mr-2 z-20"><ChevronLeftIcon className="h-5 w-5" /></button>
+                      <button onClick={onClearGroup} className="p-1 rounded-lg hover:bg-gray-100 text-gray-700 mr-2 z-20"><ChevronLeftIcon className="h-5 w-5" /></button>
                       <span className="mr-2"><DocTitleIcon method={selectedGroup._id} /></span>
                       <h1 className="flex-1 text-lg font-medium text-gray-700">{selectedGroup.name}</h1>
                     </>
