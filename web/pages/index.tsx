@@ -7,7 +7,7 @@ import 'react-loading-skeleton/dist/skeleton.css'
 import LoadingItem from '../components/LoadingItem'
 import SignIn from '../components/screens/SignIn'
 import Setup from '../components/screens/Setup'
-import { ChevronLeftIcon } from '@heroicons/react/outline'
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/outline'
 import ActivityBar, { Task } from '../components/ActivityBar'
 import Onboarding from '../components/screens/Onboarding'
 import DocItem from '../components/DocItem'
@@ -50,6 +50,7 @@ export default function Home() {
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
   const [integrationsStatus, setIntegrationsStatus] = useState<IntegrationsStatus>();
   const [refreshKey, setRefreshKey] = useState(0);
+  const [docsPage, setDocsPage] = useState(0);
 
   const { user, org } = profile;
 
@@ -130,7 +131,11 @@ export default function Home() {
   }
 
   const hasDocs = (docs && docs.length > 0) || isAddDocLoading;
-  const activeDocs = docs.filter((doc) => doc.method === selectedGroup?._id)
+  const docsInGroup = docs.filter((doc) => doc.method === selectedGroup?._id);
+
+  const startIndex = docsPage * 20;
+  const endIndex = startIndex + 20;
+  const docsToDisplay = docsInGroup.slice(startIndex, endIndex);
 
   return (
     <>
@@ -154,10 +159,17 @@ export default function Home() {
               <ClearSelectedFrame />
               <div className="pl-4 pr-6 pt-4 pb-4 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
                 <div className="flex items-center">
-                  { selectedGroup && <button onClick={() => { setSelectedGroup(undefined); setSelectedDoc(undefined)}} className="p-1 rounded-lg hover:bg-gray-100 text-gray-700 mr-2 z-20"><ChevronLeftIcon className="h-5 w-5" /></button> }
-                  { selectedGroup && <span className="mr-2"><DocTitleIcon method={selectedGroup._id} /></span> }
-                  {hasDocs && <h1 className="flex-1 text-lg font-medium text-gray-700">{ selectedGroup ? selectedGroup.name : 'Documentation' }</h1>}
-                  { selectedGroup && <span className="text-sm rounded-full bg-slate-400 text-white py-px px-2">{selectedGroup.count} documents</span> }
+                  { 
+                    selectedGroup ? <>
+                      <button onClick={() => { setSelectedGroup(undefined); setSelectedDoc(undefined)}} className="p-1 rounded-lg hover:bg-gray-100 text-gray-700 mr-2 z-20"><ChevronLeftIcon className="h-5 w-5" /></button>
+                      <span className="mr-2"><DocTitleIcon method={selectedGroup._id} /></span>
+                      <h1 className="flex-1 text-lg font-medium text-gray-700">{selectedGroup.name}</h1>
+                    </>
+                    :
+                    <>
+                      <h1 className="flex-1 text-lg font-medium text-gray-700">Documentation</h1>
+                    </>
+                  }
                 </div>
               </div>
               {!hasDocs && !isLoading && (
@@ -183,7 +195,7 @@ export default function Home() {
               {
                 selectedGroup && <ul role="list" className="relative z-0">
                 {isAddDocLoading && <LoadingItem />}
-                {activeDocs?.map((doc) => (
+                {docsToDisplay?.map((doc) => (
                   <DocItem
                     key={doc._id}
                     doc={doc}
@@ -195,6 +207,35 @@ export default function Home() {
                     integrationsStatus={integrationsStatus}
                   />
                 ))}
+                <nav
+                  className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6"
+                  aria-label="Pagination"
+                >
+                  <div className="hidden sm:block">
+                    <p className="text-sm text-gray-700">
+                      Showing <span className="font-medium">{startIndex + 1}</span> to <span className="font-medium">{Math.min(endIndex, selectedGroup.count)}</span> of{' '}
+                      <span className="font-medium">{selectedGroup.count}</span> documents
+                    </p>
+                  </div>
+                  <div className="flex-1 flex justify-between sm:justify-end">
+                    {
+                      docsPage > 0 && <button
+                      className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                      onClick={() => setDocsPage(docsPage - 1)}
+                    >
+                      Previous
+                    </button>
+                    }
+                    {
+                      endIndex < selectedGroup.count && <button
+                      className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                      onClick={() => setDocsPage(docsPage + 1)}
+                    >
+                      Next
+                    </button>
+                    }
+                  </div>
+                </nav>
               </ul>
               }
               {

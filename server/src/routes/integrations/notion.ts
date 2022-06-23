@@ -6,6 +6,7 @@ import Org from '../../models/Org';
 import { track } from '../../services/segment';
 import { getNotionTitle } from '../../services/notion';
 import { importDocsFromNotion } from '../../helpers/routes/docs';
+import { SearchResponse } from '@notionhq/client/build/src/api-endpoints';
 
 export type NotionPage = {
   id: string;
@@ -118,20 +119,37 @@ export const getNotionDocs = async (notionAccessToken: string) => {
   }
 
   const notion = new Client({ auth: notionAccessToken });
-    const searchResults = await notion.search({
-      page_size: 100,
-      filter: {
-        property: 'object',
-        value: 'page',
-      },
-      sort: {
-        direction: 'descending',
-        timestamp: 'last_edited_time',
-      },
-    });
+  let isCompletedScan: boolean = false;
+  let nextCursor: string | null = null;
+  const accumulatedSearchResults: any[] = [];
+  while (!isCompletedScan) {    
+    try {
+      const searchResults: SearchResponse = await notion.search({
+        page_size: 100,
+        filter: {
+          property: 'object',
+          value: 'page',
+        },
+        sort: {
+          direction: 'descending',
+          timestamp: 'last_edited_time',
+        },
+        start_cursor: nextCursor || undefined,
+      });
+      accumulatedSearchResults.push(...searchResults.results);
+      if (searchResults.has_more) {
+        nextCursor = searchResults.next_cursor;
+      }
+      else {
+        isCompletedScan = true;
+      }
+    } catch {
+      isCompletedScan = true;
+    }
+  }
 
-    const results: NotionPage[] = searchResults.results
-      .map((page: any) => {
+    const results: NotionPage[] = accumulatedSearchResults
+      .map((page: any) => { 
         return {
           id: page.id,
           title: getNotionTitle(page),
