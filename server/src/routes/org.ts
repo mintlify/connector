@@ -228,8 +228,6 @@ orgRouter.get('/gitOrg/:gitOrg/details', async (req, res) => {
     const codesPromise = Code.find({ gitOrg, repo });
     const [org, codes] = await Promise.all([orgPromise, codesPromise])
     const formattedOrg = removeUnneededDataFromOrg(org);
-    console.log({formattedOrg})
-    console.log({codes})
     return res.json({ org: formattedOrg, codes });
   } catch (error) {
     return res.status(400).send({ error });

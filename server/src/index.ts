@@ -26,9 +26,6 @@ export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
 
     const { org, codes } = orgResponse.data;
 
-    console.log({org});
-    console.log({codes});
-
     if (codes.length === 0 || org == null) {
       await createSuccessCheck(context);
       return;
@@ -52,6 +49,7 @@ export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
       alerts: newAlerts,
       org
     });
+    console.log({context});
     const reviewCommentsPromise =  createReviewCommentsFromAlerts(context, newAlerts, filesPatchLineRangesMap);
     const checkPromise = createActionRequiredCheck(context, newAlerts[0]?.url);
     await Promise.all([eventPromise, reviewCommentsPromise, checkPromise])
