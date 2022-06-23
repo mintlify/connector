@@ -12,6 +12,7 @@
     "@headlessui/react": "^1.6.1",
     "@heroicons/react": "^1.0.6",
     "@tailwindcss/forms": "^0.5.1",
+    "@tailwindcss/typography": "^0.5.2",
     "axios": "^0.27.2",
     "javascript-time-ago": "^2.3.13",
     "next": "12.1.6",
@@ -21,7 +22,10 @@
     "react-hot-toast": "^2.2.0",
     "react-hotkeys-hook": "^3.4.6",
     "react-loading-skeleton": "^3.1.0",
+    "react-markdown": "^8.0.3",
     "react-use-intercom": "^1.5.2",
+    "rehype-raw": "^6.1.1",
+    "remark-gfm": "^3.0.1",
     "stytch": "^5.1.4"
   },
   "devDependencies": {

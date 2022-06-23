@@ -1,8 +1,11 @@
 import { CheckIcon } from '@heroicons/react/outline';
-import { PencilIcon, XCircleIcon } from '@heroicons/react/solid';
+import { XCircleIcon } from '@heroicons/react/solid';
 import axios from 'axios';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown'
+import rehypeRaw from 'rehype-raw'
+import remarkGfm from 'remark-gfm'
 import { useProfile } from '../context/ProfileContext';
 import { API_ENDPOINT } from '../helpers/api';
 import { ConnectionIcon, DocTitleIcon } from '../helpers/Icons';
@@ -223,6 +226,22 @@ export default function ActivityBar({ selectedDoc, refresh, refreshKey }: Activi
             </div>
             </div>
         </div>
+        {
+          selectedDoc && <div className="pt-4 pb-2">
+          <div className="mt-4 py-2 text-sm border-t border-gray-200"></div>
+          <article className="prose prose-sm space-y-2 py-2">
+          <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]} components={{
+            h1: 'h2',
+            h2: 'h3',
+            h3: 'h4',
+            h4: 'h5',
+            h5: 'h6'
+          }} >
+            { selectedDoc.content }
+          </ReactMarkdown>
+          </article>
+        </div>
+        }
       </div>
   )
 }
