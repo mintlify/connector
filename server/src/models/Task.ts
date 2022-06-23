@@ -11,8 +11,9 @@ export type TaskType = {
     status: TaskStatus;
     type: TaskTypeMeta;
     source: TaskSource;
-    createdAt: Date;
-    url?: String;
+    createdAt?: Date;
+    url?: string;
+    githubCommentId?: string;
 };
 
 const TaskSchema = new Schema({
@@ -24,6 +25,7 @@ const TaskSchema = new Schema({
     source: String,
     createdAt: { type: Date, default: Date.now },
     url: String,
+    githubCommentId: String
 });
 
 const Task = mongoose.model<TaskType>('Task', TaskSchema, 'tasks');

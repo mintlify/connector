@@ -18,6 +18,7 @@ export type Alert = {
     lineRange: LineRange;
     type: string;
     code: CodeType;
+    githubCommentId?: string;
 }
   
 export type Link = {
