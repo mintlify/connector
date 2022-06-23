@@ -7,8 +7,8 @@ import 'react-loading-skeleton/dist/skeleton.css'
 import LoadingItem from '../components/LoadingItem'
 import SignIn from '../components/screens/SignIn'
 import Setup from '../components/screens/Setup'
-import { ChevronLeftIcon, DocumentTextIcon } from '@heroicons/react/outline'
-import ActivityBar from '../components/ActivityBar'
+import { ChevronLeftIcon } from '@heroicons/react/outline'
+import ActivityBar, { Task } from '../components/ActivityBar'
 import Onboarding from '../components/screens/Onboarding'
 import DocItem from '../components/DocItem'
 import { useProfile } from '../context/ProfileContext'
@@ -32,7 +32,8 @@ export type Doc = {
   favicon?: string,
   method: string,
   slack?: boolean,
-  email?: boolean
+  email?: boolean,
+  tasks?: Task[],
 }
 
 export type IntegrationsStatus = { [key: string]: boolean };
@@ -47,11 +48,12 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
   const [integrationsStatus, setIntegrationsStatus] = useState<IntegrationsStatus>();
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const { user, org } = profile;
 
   useEffect(() => {
-    if (user == null || org == null) {
+    if (user == null || org == null || refreshKey == null) {
       return
     }
 
@@ -75,7 +77,7 @@ export default function Home() {
         setIntegrationsStatus(integrations);
       })
 
-  }, [org, user, selectedDoc, isAddDocLoading]);
+  }, [org, user, selectedDoc, isAddDocLoading, refreshKey]);
 
   if (isLoadingProfile) {
     return null;
@@ -115,6 +117,10 @@ export default function Home() {
       return
     }
     setSelectedDoc(doc)
+  }
+
+  const refresh = () => {
+    setRefreshKey(Math.random());
   }
 
   const ClearSelectedFrame = () => {
@@ -165,7 +171,9 @@ export default function Home() {
                       className="inline-flex items-center justify-center text-sm bg-primary text-white rounded-md shadow-sm py-2 font-medium px-8 hover:bg-hover"
                       onClick={() => setIsAddDocumentOpen(true)}
                     >
-                      <DocumentTextIcon className="h-4 w-4 mr-1" />
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 512 512" fill="currentColor">
+                        <path d="M384 0v128h128L384 0zM352 128L352 0H176C149.5 0 128 21.49 128 48V288h174.1l-39.03-39.03c-9.375-9.375-9.375-24.56 0-33.94s24.56-9.375 33.94 0l80 80c9.375 9.375 9.375 24.56 0 33.94l-80 80c-9.375 9.375-24.56 9.375-33.94 0C258.3 404.3 256 398.2 256 392s2.344-12.28 7.031-16.97L302.1 336H128v128C128 490.5 149.5 512 176 512h288c26.51 0 48-21.49 48-48V160h-127.1C366.3 160 352 145.7 352 128zM24 288C10.75 288 0 298.7 0 312c0 13.25 10.75 24 24 24H128V288H24z"/>
+                      </svg>
                       Import Documentation
                     </button>
                   </div>
@@ -200,6 +208,8 @@ export default function Home() {
           <div className="relative bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0 z-10">
             <ActivityBar
               selectedDoc={selectedDoc}
+              refresh={refresh}
+              refreshKey={refreshKey}
             />
           </div>
         </div>

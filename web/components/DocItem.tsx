@@ -84,8 +84,6 @@ export default function DocItem({ doc, onClick, selectedDoc, docs, setDocs, remo
     setListMenu(menu);
   }, [doc, integrationsStatus, docs, setDocs, setSelectedDoc, profile]);
 
-
-
   return <div key={doc._id}>
   {!removeSeparators && <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div> }
   <li
@@ -107,6 +105,13 @@ export default function DocItem({ doc, onClick, selectedDoc, docs, setDocs, remo
                     <span>
                       {doc.title}
                     </span>
+                    {
+                      doc.tasks && doc.tasks.map((task) => (
+                        <span key={task._id} className="text-xs bg-red-500 text-white py-px px-2 rounded-full">
+                          update requested
+                        </span>
+                      ))
+                    }
                     <ExternalLinkIcon className="w-4 h-4 text-gray-400 invisible group-hover:visible" />
                   </a>
                 </Link>

@@ -67,6 +67,25 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
           localField: '_id',
           as: 'code',
         },
+      },
+      {
+        $lookup: {
+          from: "tasks",
+          let: { doc: "$_id" },
+          pipeline: [
+             { $match:
+                { $expr:
+                   { $and:
+                      [
+                        { $eq: [ "$doc",  "$$doc" ] },
+                        { $eq: [ "$status", "todo" ] }
+                      ]
+                   }
+                }
+             },
+          ],
+          as: "tasks"
+        },
       }
     ]);
     return res.status(200).send({ docs });
@@ -94,9 +113,34 @@ docsRouter.get('/groups', userMiddleware, async (_, res) => {
       $sort: { lastUpdatedAt: -1 }
     },
     {
+      $lookup: {
+        from: "tasks",
+        let: { doc: "$_id" },
+        pipeline: [
+           { $match:
+              { $expr:
+                 { $and:
+                    [
+                      { $eq: [ "$doc",  "$$doc" ] },
+                      { $eq: [ "$status", "todo" ] }
+                    ]
+                 }
+              }
+           },
+        ],
+        as: "tasks"
+      },
+    },
+    {
+      $set: {
+        tasksCount: { $size: '$tasks' }
+      }
+    },
+    {
       $group: {
         _id: "$method",
         count: { $sum: 1 },
+        tasksCount: { $sum: '$tasksCount' },
         lastUpdatedDoc: { $first: "$$ROOT" }
       },
     },

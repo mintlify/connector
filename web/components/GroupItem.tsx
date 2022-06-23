@@ -12,6 +12,7 @@ export type Group = {
   name: string;
   count: number;
   lastUpdatedDoc: Doc;
+  tasksCount: number;
 }
 
 type GroupItemProps = {
@@ -52,6 +53,11 @@ export default function GroupItem({ group, setSelectedGroup }: GroupItemProps) {
                 <div className="bg-slate-400 text-xs py-px px-2 text-white rounded-full">
                   {group.count} documents
                 </div>
+                {
+                  group.tasksCount > 0 && <div className="bg-red-500 text-xs py-px px-2 text-white rounded-full">
+                  {group.tasksCount} {group.tasksCount > 1 ? 'requests' : 'request'}
+                </div>
+                }
               </div>
             </h2>
           </span>
