@@ -5,6 +5,7 @@ import { GoogleDoc } from '../../routes/integrations/google';
 import { NotionPage } from '../../routes/integrations/notion';
 import { clearIndexWithMethod, indexDocForSearch } from '../../services/algolia';
 import { getGoogleDocsPrivateData } from '../../services/googleDocs';
+import { getNotionPageDataWithId } from '../../services/notion';
 import { track } from '../../services/segment';
 
 export const importDocsFromNotion = async (pages: NotionPage[], org: OrgType, userId: string) => {
@@ -13,7 +14,17 @@ export const importDocsFromNotion = async (pages: NotionPage[], org: OrgType, us
   await clearIndexWithMethod(orgId.toString(), method);
   const addDocPromises = pages.map((page) => new Promise<void>(async (resolve) => {
     try {
-      // Add doc without content
+      if (org.integrations?.notion?.access_token == null) {
+        throw 'No Notion credentials'
+      };
+      let content;
+      try {
+        const contentResponse = await getNotionPageDataWithId(page.id, org.integrations.notion.access_token);
+        content = contentResponse.content;
+      } catch {
+        // TBD: find ways to detect contect async or mark docs that still need scraping
+        content = ''
+      }
       const doc = await Doc.findOneAndUpdate(
         {
           org: orgId,
@@ -26,7 +37,7 @@ export const importDocsFromNotion = async (pages: NotionPage[], org: OrgType, us
           notion: {
             pageId: page.id,
           },
-          content: '', // to be scraped
+          content,
           title: `${page.icon?.emoji ? `${page.icon?.emoji} ` : ''}${page.title}`,
           favicon: page.icon?.file,
           createdBy: userId,
