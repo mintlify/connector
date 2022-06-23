@@ -2,7 +2,7 @@ import { ApplicationFunctionOptions, Context, Probot } from "probot";
 import axios from "axios";
 import { getReviewComments, checkIfAllAlertsAreResolve, createSuccessCheck, createActionRequiredCheck, createInProgressCheck, ENDPOINT } from "./helpers/github/octokit";
 import headRouter from "./routes";
-import { createReviewCommentsFromAlerts, filterNewAlerts, getAlerts, getAllFilesAndMap } from "./helpers/github/app";
+import { createReviewCommentsFromAlerts, filterNewAlerts, getAlerts, getAllFilesAndMap, associateReviewCommentsToAlerts, formatReviewComments } from "./helpers/github/app";
 import './services/mongoose';
 
 export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
@@ -45,17 +45,13 @@ export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
       return;
     };
 
-    const eventPromise = axios.post(`${ENDPOINT}/routes/events/alerts`, {
-      alerts: newAlerts,
-      org
-    });
-    console.log({context});
     const reviewCommentsPromise =  createReviewCommentsFromAlerts(context, newAlerts, filesPatchLineRangesMap);
     const checkPromise = createActionRequiredCheck(context, newAlerts[0]?.url);
-    await Promise.all([eventPromise, reviewCommentsPromise, checkPromise])
-
-    // Create tasks using review comments
-    // const taskRequests = reviewComments.map(())
+    const [reviewComments, _] = await Promise.all([reviewCommentsPromise, checkPromise]);
+    const alerts = associateReviewCommentsToAlerts(newAlerts, reviewComments);
+    await axios.post(`${ENDPOINT}/routes/tasks/github`, {
+      alerts
+    });
     return;
   });
 
@@ -63,12 +59,15 @@ export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
     await createInProgressCheck(context);
     const previousAlerts = await getReviewComments(context);
     const isAllPreviousAlertsResolved = checkIfAllAlertsAreResolve(previousAlerts);
-
     if (isAllPreviousAlertsResolved) {
       await createSuccessCheck(context);
     } else {
       await createActionRequiredCheck(context);
     }
+    const formattedComments = formatReviewComments(previousAlerts);
+    await axios.post(`${ENDPOINT}/routes/tasks/github/update`, {
+      alertStatuses: formattedComments
+    });
   });
 
   const router = getRouter!("/routes");

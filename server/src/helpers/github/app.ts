@@ -115,3 +115,28 @@ export const createReviewCommentsFromAlerts = async (context: Context, alerts: A
   const reviewComments = await Promise.all(reviewCommentPromises);
   return reviewComments;
 }
+
+export const associateReviewCommentsToAlerts = (alerts : Alert[], reviewComments: any[]): Alert[] => {
+  return alerts.map((alert) => {
+    let comment: null|any = null;
+    reviewComments.forEach((reviewComment) => {
+      if (reviewComment.data.body === alert.message) {
+        comment = reviewComment;
+      }
+    })
+    if (comment != null) {
+      alert.githubCommentId = comment?.data?.node_id;
+      alert.url = comment?.data?.html_url
+    } 
+    return alert;
+  })
+}
+
+export const formatReviewComments = (previousAlerts: any[]): any[] => {
+  return previousAlerts.map((prevAlert) => {
+    return {
+      isResolved: prevAlert?.isResolved,
+      id: prevAlert?.comments?.edges[0]?.node?.id
+    }
+  })
+}
