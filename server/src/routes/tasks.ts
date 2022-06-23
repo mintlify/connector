@@ -3,7 +3,7 @@ import { Types } from 'mongoose';
 import Doc from '../models/Doc';
 import Task, { TaskType } from '../models/Task';
 import { userMiddleware } from './user';
-import { Alert } from '../helpers/github/types';
+import { Alert, AlertStatus } from '../helpers/github/types';
 
 const tasksRouter = Router();
 
@@ -84,37 +84,22 @@ tasksRouter.post('/github', async (req, res) => {
   return res.status(200);
 });
 
-type AlertStatus = {
-  isResolved: boolean;
-  id: string;
-}
-
 tasksRouter.post('/github/update', async (req, res) => {
-  const { alertStatuses }: { alertStatuses: AlertStatus[] } = req.body;
-  const ids: string[] = alertStatuses.map((alert: AlertStatus) => alert.id);
-  const tasks = await Task.find({
-    type: 'review',
-    source: 'github',
-    $expr: {
-      $in: ['$githubCommentId', ids]
+  const {alertStatus}: { alertStatus: AlertStatus } = req.body;
+  const status = alertStatus.isResolved ? 'done' : 'todo';
+  await Task.findOneAndUpdate(
+    {
+      githubCommentId: alertStatus.id,
+      source: 'github',
+      type: 'review'
+    },
+    {
+      status
+    },
+    {
+      new: true
     }
-  });
-  const taskUpdatePromises = tasks.map((task) => {
-    const relatedAlert = alertStatuses.find((alert) => alert.id === task.githubCommentId);
-    const status = relatedAlert?.isResolved ? 'done' : 'todo';
-    return Task.findOneAndUpdate(
-      {
-        _id: task._id
-      },
-      {
-        status
-      },
-      {
-        new: true
-      }
-    );
-  });
-  const resp = await Promise.all(taskUpdatePromises);
+  );
   return res.status(200);
 });
 

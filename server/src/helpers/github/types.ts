@@ -33,3 +33,8 @@ export type TaskRequest = {
     pullNumber: number,
     installationId?: number,
 }
+
+export type AlertStatus = {
+    isResolved: boolean;
+    id: string;
+}

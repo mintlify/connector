@@ -1,6 +1,6 @@
 import { Context } from "probot";
 import { FileInfo, getEncompassingRangeAndSideForAlert, parsePatch, PatchLineRange } from "./patch";
-import { Alert } from "./types";
+import { Alert, AlertStatus } from "./types";
 import { getReviewComments, ENDPOINT } from "./octokit";
 import { CodeType } from '../../models/Code';
 import axios from 'axios';
@@ -132,11 +132,10 @@ export const associateReviewCommentsToAlerts = (alerts : Alert[], reviewComments
   })
 }
 
-export const formatReviewComments = (previousAlerts: any[]): any[] => {
-  return previousAlerts.map((prevAlert) => {
-    return {
-      isResolved: prevAlert?.isResolved,
-      id: prevAlert?.comments?.edges[0]?.node?.id
-    }
-  })
+export const formatReviewComments = (previousAlerts: any[], id: string): AlertStatus => {
+  const affectedAlert = previousAlerts.find((prevAlert) => prevAlert?.comments?.edges[0]?.node?.id === id);
+  return {
+    isResolved: affectedAlert?.isResolved,
+    id
+  };
 }

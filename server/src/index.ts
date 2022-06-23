@@ -64,9 +64,9 @@ export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
     } else {
       await createActionRequiredCheck(context);
     }
-    const formattedComments = formatReviewComments(previousAlerts);
+    const alertStatus = formatReviewComments(previousAlerts, context.payload.thread.comments[0]?.node_id);
     await axios.post(`${ENDPOINT}/routes/tasks/github/update`, {
-      alertStatuses: formattedComments
+      alertStatus
     });
   });
 
