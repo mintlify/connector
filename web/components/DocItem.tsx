@@ -52,19 +52,20 @@ export default function DocItem({ doc, onClick, selectedDoc, docs, setDocs, remo
     
     const menu = [];
 
-    if (integrationsStatus != null && integrationsStatus['slack']) {
-      const slack = doc?.slack ?? true;
-      menu.push({
-        name: slack ? 'Disable Slack alerts' : 'Enable Slack alerts',
-        isGreen: !slack,
-        isRed: false,
-        onClick: () => {
-          axios.put(`${API_ENDPOINT}/routes/docs/${doc._id}/slack`, {
-            slack: !slack
-          });
-        }
-      })
-    }
+    // Temporarily remove slack alerts disabling
+    // if (integrationsStatus != null && integrationsStatus['slack']) {
+    //   const slack = doc?.slack ?? true;
+    //   menu.push({
+    //     name: slack ? 'Disable Slack alerts' : 'Enable Slack alerts',
+    //     isGreen: !slack,
+    //     isRed: false,
+    //     onClick: () => {
+    //       axios.put(`${API_ENDPOINT}/routes/docs/${doc._id}/slack`, {
+    //         slack: !slack
+    //       });
+    //     }
+    //   })
+    // }
 
     menu.push({
       name: 'Delete',

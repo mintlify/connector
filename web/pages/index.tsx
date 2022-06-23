@@ -28,6 +28,7 @@ export type Doc = {
   lastUpdatedAt: string,
   createdAt: string,
   url: string,
+  content: string,
   code: Code[],
   favicon?: string,
   method: string,
