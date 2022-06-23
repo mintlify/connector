@@ -121,6 +121,7 @@ const App = () => {
 
   useEffect(() => {
     if (!user?.userId || dashboardUrl == null) {
+      vscode.postMessage({ command: 'error', message: 'Could not fetch documents. Please log in again.' });
       return;
     }
     try {
