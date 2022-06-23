@@ -9,8 +9,8 @@ export type TaskType = {
     doc: Types.ObjectId;
     code: Types.ObjectId;
     status: TaskStatus;
-    source: TaskSource;
     type: TaskTypeMeta;
+    source: TaskSource;
     createdAt: Date;
     url?: String;
 };

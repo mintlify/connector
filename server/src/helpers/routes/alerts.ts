@@ -33,6 +33,7 @@ export const codeToAlert = async (code: CodeType, file: FileInfo): Promise<Alert
         filename: file.filename,
         type: code.type,
         lineRange,
+        code
     }
 };
 

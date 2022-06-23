@@ -17,7 +17,7 @@ export type Alert = {
     filename: string;
     lineRange: LineRange;
     type: string;
-    code?: CodeType;
+    code: CodeType;
 }
   
 export type Link = {
