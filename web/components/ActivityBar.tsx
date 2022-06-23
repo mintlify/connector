@@ -1,10 +1,15 @@
+import { CheckIcon } from '@heroicons/react/outline';
 import { XCircleIcon } from '@heroicons/react/solid';
 import axios from 'axios';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown'
+import rehypeRaw from 'rehype-raw'
+import remarkGfm from 'remark-gfm'
 import { useProfile } from '../context/ProfileContext';
 import { API_ENDPOINT } from '../helpers/api';
 import { ConnectionIcon, DocTitleIcon } from '../helpers/Icons';
+import { request } from '../helpers/request';
 import { getSubdomain } from '../helpers/user';
 import { Doc } from '../pages';
 import timeAgo from '../services/timeago';
@@ -12,17 +17,20 @@ import Tooltip from './Tooltip';
 
 type DocProfileProps = {
   doc: Doc,
+  refresh: () => void;
 }
 
-function DocProfile({ doc }: DocProfileProps) {
+function DocProfile({ doc, refresh }: DocProfileProps) {
   const { profile } = useProfile();
   const [codes, setCodes] = useState(doc.code);
   const [isVSCodeInstalled, setIsVSCodeInstalled] = useState(false);
+  const [shouldShowCreateTask, setShouldShowCreateTask] = useState(false);
 
   const { user } = profile;
 
   useEffect(() => {
     setCodes(doc.code);
+    setShouldShowCreateTask(Boolean(doc.tasks?.length === 0));
   }, [doc]);
 
   useEffect(() => {
@@ -50,6 +58,14 @@ function DocProfile({ doc }: DocProfileProps) {
       }
     });
   };
+
+  const onCreateUpdateRequest = () => {
+    request('POST', `/routes/tasks/update/${doc._id}`)
+      .then(() => {
+        refresh();
+      })
+    setShouldShowCreateTask(false);
+  }
 
   const vscodeUrl = isVSCodeInstalled ? `vscode://mintlify.connector/prefill-doc?docId=${doc._id}` : 'vscode:extension/mintlify.connector';
 
@@ -102,6 +118,18 @@ function DocProfile({ doc }: DocProfileProps) {
               </button>
             </Link>
           </div>
+          {
+            shouldShowCreateTask && <div>
+              <button
+              type="button"
+              className="inline-flex items-center justify-center py-1 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 w-full"
+              onClick={onCreateUpdateRequest}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 mr-1.5" viewBox="0 0 512 512"><path d="M490.3 40.4C512.2 62.27 512.2 97.73 490.3 119.6L460.3 149.7L362.3 51.72L392.4 21.66C414.3-.2135 449.7-.2135 471.6 21.66L490.3 40.4zM172.4 241.7L339.7 74.34L437.7 172.3L270.3 339.6C264.2 345.8 256.7 350.4 248.4 353.2L159.6 382.8C150.1 385.6 141.5 383.4 135 376.1C128.6 370.5 126.4 361 129.2 352.4L158.8 263.6C161.6 255.3 166.2 247.8 172.4 241.7V241.7zM192 63.1C209.7 63.1 224 78.33 224 95.1C224 113.7 209.7 127.1 192 127.1H96C78.33 127.1 64 142.3 64 159.1V416C64 433.7 78.33 448 96 448H352C369.7 448 384 433.7 384 416V319.1C384 302.3 398.3 287.1 416 287.1C433.7 287.1 448 302.3 448 319.1V416C448 469 405 512 352 512H96C42.98 512 0 469 0 416V159.1C0 106.1 42.98 63.1 96 63.1H192z"/></svg>
+              Create Update Request
+            </button>
+          </div>
+          }
           <div>
           </div>
         </div>
@@ -110,23 +138,111 @@ function DocProfile({ doc }: DocProfileProps) {
   </div>
 }
 
-type ActivityBarProps = {
-  selectedDoc?: Doc;
+export type Task = {
+  _id: string
+  org: string
+  doc: Doc
+  code: string
+  status: 'todo' | 'done'
+  type: 'new' | 'update' | 'review'
+  url?: string
+  createdAt: string
 }
 
-export default function ActivityBar({ selectedDoc }: ActivityBarProps) {
+type ActivityBarProps = {
+  selectedDoc?: Doc;
+  refresh: () => void;
+  refreshKey: number;
+}
+
+export default function ActivityBar({ selectedDoc, refresh, refreshKey }: ActivityBarProps) {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  
+  useEffect(() => {
+    if (refreshKey == null) {
+      return;
+    }
+    request('GET', 'routes/tasks')
+      .then(({ data }) => {
+        const { tasks } = data;
+        setTasks(tasks);
+      })
+  }, [refreshKey]);
+
+  const onCompleteTask = (deletingTask: Task) => {
+    setTasks(tasks.filter((task) => task._id !== deletingTask._id));
+    request('DELETE', `routes/tasks/${deletingTask._id}`)
+      .then(() => {
+        refresh();
+      })
+  }
+
+  const relevantTasks = selectedDoc ? tasks.filter((task) => task.doc._id === selectedDoc._id) : tasks;
+  
   return (
     <div className="relative pl-6 lg:w-80">
-      {selectedDoc && <DocProfile doc={selectedDoc} />}
+      {selectedDoc && <DocProfile doc={selectedDoc} refresh={refresh} />}
         <div className="pt-4 pb-2">
           <h2 className="text-sm font-semibold">Update Requests</h2>
         </div>
         <div>
           <div className="py-1 text-sm border-t border-gray-200"></div>
-           <div className="text-sm text-gray-600">
-            🚧 Under construction
+           <div className="text-sm text-gray-600 space-y-4 py-2">
+            <div className="flow-root">
+              <ul role="list" className="-my-4 divide-y divide-gray-200">
+              {
+                relevantTasks.map((task) => 
+                  <li key={task._id} className="flex items-center py-4 space-x-3">
+                  <div className="flex items-center justify-center bg-red-500 border-2 border-red-300 p-1.5 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 text-white" viewBox="0 0 512 512" fill="currentColor"><path d="M490.3 40.4C512.2 62.27 512.2 97.73 490.3 119.6L460.3 149.7L362.3 51.72L392.4 21.66C414.3-.2135 449.7-.2135 471.6 21.66L490.3 40.4zM172.4 241.7L339.7 74.34L437.7 172.3L270.3 339.6C264.2 345.8 256.7 350.4 248.4 353.2L159.6 382.8C150.1 385.6 141.5 383.4 135 376.1C128.6 370.5 126.4 361 129.2 352.4L158.8 263.6C161.6 255.3 166.2 247.8 172.4 241.7V241.7zM192 63.1C209.7 63.1 224 78.33 224 95.1C224 113.7 209.7 127.1 192 127.1H96C78.33 127.1 64 142.3 64 159.1V416C64 433.7 78.33 448 96 448H352C369.7 448 384 433.7 384 416V319.1C384 302.3 398.3 287.1 416 287.1C433.7 287.1 448 302.3 448 319.1V416C448 469 405 512 352 512H96C42.98 512 0 469 0 416V159.1C0 106.1 42.98 63.1 96 63.1H192z"/></svg>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <Link href={task.url || ''}>
+                      <a target="_blank" className="text-sm font-medium text-gray-700 hover:underline cursor-pointer">
+                        <span>Update {task.doc.title}</span>
+                      </a>
+                    </Link>
+                    <p className="text-sm text-gray-500">
+                      Created {timeAgo.format(Date.parse(task.createdAt))}
+                    </p>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <button
+                      type="button"
+                      className="items-center justify-center py-1 px-2 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 w-full"
+                      onClick={() => onCompleteTask(task)}
+                    >
+                      <span><CheckIcon className="h-4 text-green-700" /></span>
+                    </button>
+                  </div>
+                </li>)
+              }
+              {
+                relevantTasks.length === 0 && <div className="mt-4">
+                  No update requests 🎉
+                </div>
+              }
+              </ul>
+            </div>
             </div>
         </div>
+        {
+          selectedDoc && <div className="mt-4 py-2">
+          <div className="text-sm border-t border-gray-200"></div>
+          <article className="prose prose-sm space-y-2 py-4">
+          <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]} components={{
+            h1: 'h2',
+            h2: 'h3',
+            h3: 'h4',
+            h4: 'h5',
+            h5: 'h6',
+            img: ({node, ...props}) => <img style={{maxWidth: '100%'}} {...props} />
+          }} >
+            { selectedDoc.content }
+          </ReactMarkdown>
+          </article>
+        </div>
+        }
       </div>
   )
 }

@@ -9,6 +9,7 @@ import userRouter from "./user";
 import orgRouter from "./org";
 import searchRouter from "./search";
 import stripeRouter from "./stripe";
+import tasksRouter from "./tasks";
 
 const headRouter = express.Router();
 
@@ -29,6 +30,7 @@ headRouter.use("/docs", docsRouter);
 headRouter.use("/alerts", alertsRouter);
 headRouter.use("/links", linksRouter);
 headRouter.use("/search", searchRouter);
+headRouter.use("/tasks", tasksRouter);
 headRouter.use("/stripe", stripeRouter);
 // Integrations
 headRouter.use("/integrations", integrationsRouter);

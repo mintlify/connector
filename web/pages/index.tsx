@@ -7,8 +7,8 @@ import 'react-loading-skeleton/dist/skeleton.css'
 import LoadingItem from '../components/LoadingItem'
 import SignIn from '../components/screens/SignIn'
 import Setup from '../components/screens/Setup'
-import { ChevronLeftIcon, DocumentTextIcon } from '@heroicons/react/outline'
-import ActivityBar from '../components/ActivityBar'
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/outline'
+import ActivityBar, { Task } from '../components/ActivityBar'
 import Onboarding from '../components/screens/Onboarding'
 import DocItem from '../components/DocItem'
 import { useProfile } from '../context/ProfileContext'
@@ -28,11 +28,13 @@ export type Doc = {
   lastUpdatedAt: string,
   createdAt: string,
   url: string,
+  content: string,
   code: Code[],
   favicon?: string,
   method: string,
   slack?: boolean,
-  email?: boolean
+  email?: boolean,
+  tasks?: Task[],
 }
 
 export type IntegrationsStatus = { [key: string]: boolean };
@@ -47,11 +49,13 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
   const [integrationsStatus, setIntegrationsStatus] = useState<IntegrationsStatus>();
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [docsPage, setDocsPage] = useState(0);
 
   const { user, org } = profile;
 
   useEffect(() => {
-    if (user == null || org == null) {
+    if (user == null || org == null || refreshKey == null) {
       return
     }
 
@@ -75,7 +79,7 @@ export default function Home() {
         setIntegrationsStatus(integrations);
       })
 
-  }, [org, user, selectedDoc, isAddDocLoading]);
+  }, [org, user, selectedDoc, isAddDocLoading, refreshKey]);
 
   if (isLoadingProfile) {
     return null;
@@ -117,13 +121,21 @@ export default function Home() {
     setSelectedDoc(doc)
   }
 
+  const refresh = () => {
+    setRefreshKey(Math.random());
+  }
+
   const ClearSelectedFrame = () => {
     if (!selectedDoc) return null
     return <div className="absolute inset-0" onClick={() => setSelectedDoc(undefined)}></div>
   }
 
   const hasDocs = (docs && docs.length > 0) || isAddDocLoading;
-  const activeDocs = docs.filter((doc) => doc.method === selectedGroup?._id)
+  const docsInGroup = docs.filter((doc) => doc.method === selectedGroup?._id);
+
+  const startIndex = docsPage * 20;
+  const endIndex = startIndex + 20;
+  const docsToDisplay = docsInGroup.slice(startIndex, endIndex);
 
   return (
     <>
@@ -147,10 +159,17 @@ export default function Home() {
               <ClearSelectedFrame />
               <div className="pl-4 pr-6 pt-4 pb-4 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
                 <div className="flex items-center">
-                  { selectedGroup && <button onClick={() => { setSelectedGroup(undefined); setSelectedDoc(undefined)}} className="p-1 rounded-lg hover:bg-gray-100 text-gray-700 mr-2 z-20"><ChevronLeftIcon className="h-5 w-5" /></button> }
-                  { selectedGroup && <span className="mr-2"><DocTitleIcon method={selectedGroup._id} /></span> }
-                  {hasDocs && <h1 className="flex-1 text-lg font-medium text-gray-700">{ selectedGroup ? selectedGroup.name : 'Documentation' }</h1>}
-                  { selectedGroup && <span className="text-sm rounded-full bg-slate-400 text-white py-px px-2">{selectedGroup.count} documents</span> }
+                  { 
+                    selectedGroup ? <>
+                      <button onClick={() => { setSelectedGroup(undefined); setSelectedDoc(undefined)}} className="p-1 rounded-lg hover:bg-gray-100 text-gray-700 mr-2 z-20"><ChevronLeftIcon className="h-5 w-5" /></button>
+                      <span className="mr-2"><DocTitleIcon method={selectedGroup._id} /></span>
+                      <h1 className="flex-1 text-lg font-medium text-gray-700">{selectedGroup.name}</h1>
+                    </>
+                    :
+                    <>
+                      <h1 className="flex-1 text-lg font-medium text-gray-700">Documentation</h1>
+                    </>
+                  }
                 </div>
               </div>
               {!hasDocs && !isLoading && (
@@ -165,7 +184,9 @@ export default function Home() {
                       className="inline-flex items-center justify-center text-sm bg-primary text-white rounded-md shadow-sm py-2 font-medium px-8 hover:bg-hover"
                       onClick={() => setIsAddDocumentOpen(true)}
                     >
-                      <DocumentTextIcon className="h-4 w-4 mr-1" />
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 512 512" fill="currentColor">
+                        <path d="M384 0v128h128L384 0zM352 128L352 0H176C149.5 0 128 21.49 128 48V288h174.1l-39.03-39.03c-9.375-9.375-9.375-24.56 0-33.94s24.56-9.375 33.94 0l80 80c9.375 9.375 9.375 24.56 0 33.94l-80 80c-9.375 9.375-24.56 9.375-33.94 0C258.3 404.3 256 398.2 256 392s2.344-12.28 7.031-16.97L302.1 336H128v128C128 490.5 149.5 512 176 512h288c26.51 0 48-21.49 48-48V160h-127.1C366.3 160 352 145.7 352 128zM24 288C10.75 288 0 298.7 0 312c0 13.25 10.75 24 24 24H128V288H24z"/>
+                      </svg>
                       Import Documentation
                     </button>
                   </div>
@@ -174,7 +195,7 @@ export default function Home() {
               {
                 selectedGroup && <ul role="list" className="relative z-0">
                 {isAddDocLoading && <LoadingItem />}
-                {activeDocs?.map((doc) => (
+                {docsToDisplay?.map((doc) => (
                   <DocItem
                     key={doc._id}
                     doc={doc}
@@ -186,6 +207,35 @@ export default function Home() {
                     integrationsStatus={integrationsStatus}
                   />
                 ))}
+                <nav
+                  className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6"
+                  aria-label="Pagination"
+                >
+                  <div className="hidden sm:block">
+                    <p className="text-sm text-gray-700">
+                      Showing <span className="font-medium">{startIndex + 1}</span> to <span className="font-medium">{Math.min(endIndex, selectedGroup.count)}</span> of{' '}
+                      <span className="font-medium">{selectedGroup.count}</span> documents
+                    </p>
+                  </div>
+                  <div className="flex-1 flex justify-between sm:justify-end">
+                    {
+                      docsPage > 0 && <button
+                      className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                      onClick={() => setDocsPage(docsPage - 1)}
+                    >
+                      Previous
+                    </button>
+                    }
+                    {
+                      endIndex < selectedGroup.count && <button
+                      className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                      onClick={() => setDocsPage(docsPage + 1)}
+                    >
+                      Next
+                    </button>
+                    }
+                  </div>
+                </nav>
               </ul>
               }
               {
@@ -200,6 +250,8 @@ export default function Home() {
           <div className="relative bg-gray-50 pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 lg:border-l lg:border-gray-200 xl:pr-0 z-10">
             <ActivityBar
               selectedDoc={selectedDoc}
+              refresh={refresh}
+              refreshKey={refreshKey}
             />
           </div>
         </div>
