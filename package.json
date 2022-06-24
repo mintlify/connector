@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "Automations for continuous up-to-date documentation",
   "main": "server/index.ts",
-  "engines": {
-    "node": "16.x"
-  },
   "scripts": {
     "dev": "npm run dev --workspace=server & npm run dev --workspace=web"
   },

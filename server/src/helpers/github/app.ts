@@ -1,8 +1,9 @@
-import axios from "axios";
 import { Context } from "probot";
 import { FileInfo, getEncompassingRangeAndSideForAlert, parsePatch, PatchLineRange } from "./patch";
-import { AlertsRequest, Alert } from "./types";
-import { ENDPOINT, getReviewComments } from "./octokit";
+import { Alert, AlertStatus } from "./types";
+import { getReviewComments, ENDPOINT } from "./octokit";
+import { CodeType } from '../../models/Code';
+import axios from 'axios';
 
 type FilesPatchLineRangesMap = Record<string, PatchLineRange[]>;
 
@@ -63,15 +64,13 @@ type AlertsResponse = {
   previousAlerts: Alert[],
 }
 
-export const getAlerts = async (context: Context, files: FileInfo[]): Promise<AlertsResponse> => {
-  const owner = context.payload.repository.owner.login;
-  const repo = context.payload.pull_request.head.repo.name;
-  const alertsRequest: AlertsRequest = { files, owner, repo }
+export const getAlerts = async (context: Context, files: FileInfo[], codes: CodeType[]): Promise<AlertsResponse> => {
+  const incomingAlertsPromise = axios.post(`${ENDPOINT}/routes/alerts/`, { files, codes });;
   const previousAlertsPromise = getReviewComments(context);
-  const alertsPromise = axios.post(`${ENDPOINT}/routes/alerts/`, alertsRequest);
-  const [alertsResponse, previousAlerts] = await Promise.all([alertsPromise, previousAlertsPromise]);
+  
+  const [incomingAlerts, previousAlerts] = await Promise.all([incomingAlertsPromise, previousAlertsPromise]);
   return {
-    incomingAlerts: alertsResponse.data.alerts,
+    incomingAlerts: incomingAlerts.data.alerts,
     previousAlerts,
   }
 }
@@ -115,4 +114,28 @@ export const createReviewCommentsFromAlerts = async (context: Context, alerts: A
   });
   const reviewComments = await Promise.all(reviewCommentPromises);
   return reviewComments;
+}
+
+export const associateReviewCommentsToAlerts = (alerts : Alert[], reviewComments: any[]): Alert[] => {
+  return alerts.map((alert) => {
+    let comment: null|any = null;
+    reviewComments.forEach((reviewComment) => {
+      if (reviewComment.data.body === alert.message) {
+        comment = reviewComment;
+      }
+    })
+    if (comment != null) {
+      alert.githubCommentId = comment?.data?.node_id;
+      alert.url = comment?.data?.html_url
+    } 
+    return alert;
+  })
+}
+
+export const formatReviewComments = (previousAlerts: any[], id: string): AlertStatus => {
+  const affectedAlert = previousAlerts.find((prevAlert) => prevAlert?.comments?.edges[0]?.node?.id === id);
+  return {
+    isResolved: affectedAlert?.isResolved,
+    id
+  };
 }

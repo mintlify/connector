@@ -1,17 +1,40 @@
 import { ApplicationFunctionOptions, Context, Probot } from "probot";
-import './services/mongoose';
-import { getReviewComments, checkIfAllAlertsAreResolve, createSuccessCheck, createActionRequiredCheck, createInProgressCheck } from "./helpers/github/octokit";
+import axios from "axios";
+import { getReviewComments, checkIfAllAlertsAreResolve, createSuccessCheck, createActionRequiredCheck, createInProgressCheck, ENDPOINT } from "./helpers/github/octokit";
 import headRouter from "./routes";
-import { createReviewCommentsFromAlerts, filterNewAlerts, getAlerts, getAllFilesAndMap } from "./helpers/github/app";
+import { createReviewCommentsFromAlerts, filterNewAlerts, getAlerts, getAllFilesAndMap, associateReviewCommentsToAlerts, formatReviewComments } from "./helpers/github/app";
+import './services/mongoose';
 
 export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
   app.on(["pull_request.opened", "pull_request.reopened", "pull_request.synchronize"], async (context) => {
     await createInProgressCheck(context);
 
     const { files, filesPatchLineRangesMap } = await getAllFilesAndMap(context);
-    const { incomingAlerts, previousAlerts } = await getAlerts(context, files);
+    const owner = context.payload.repository.owner.login;
+    const repo = context.payload.pull_request.head.repo.name;
+
+    if (files == null || owner == null || repo == null) {
+      await createSuccessCheck(context);
+      return;
+    }
+
+    const orgResponse = await axios.get(`${ENDPOINT}/routes/org/gitOrg/${owner}/details`, {
+      params: {
+        repo
+      }
+    });
+
+    const { org, codes } = orgResponse.data;
+
+    if (codes.length === 0 || org == null) {
+      await createSuccessCheck(context);
+      return;
+    }
+
+    const { incomingAlerts, previousAlerts } = await getAlerts(context, files, codes);
 
     if (incomingAlerts == null) {
+      await createSuccessCheck(context);
       return;
     }
 
@@ -22,10 +45,13 @@ export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
       return;
     };
 
-    await createReviewCommentsFromAlerts(context, newAlerts, filesPatchLineRangesMap);
-    // Create tasks using review comments
-    // const taskRequests = reviewComments.map(())
-    await createActionRequiredCheck(context, newAlerts[0]?.url);
+    const reviewCommentsPromise =  createReviewCommentsFromAlerts(context, newAlerts, filesPatchLineRangesMap);
+    const checkPromise = createActionRequiredCheck(context, newAlerts[0]?.url);
+    const [reviewComments, _] = await Promise.all([reviewCommentsPromise, checkPromise]);
+    const alerts = associateReviewCommentsToAlerts(newAlerts, reviewComments);
+    await axios.post(`${ENDPOINT}/routes/tasks/github`, {
+      alerts
+    });
     return;
   });
 
@@ -33,12 +59,19 @@ export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
     await createInProgressCheck(context);
     const previousAlerts = await getReviewComments(context);
     const isAllPreviousAlertsResolved = checkIfAllAlertsAreResolve(previousAlerts);
-
     if (isAllPreviousAlertsResolved) {
       await createSuccessCheck(context);
     } else {
       await createActionRequiredCheck(context);
     }
+    const alertStatus = formatReviewComments(previousAlerts, context.payload.thread.comments[0]?.node_id);
+    const owner = context.payload.repository.owner.login;
+    const repo = context.payload.pull_request.head.repo.name;
+    await axios.post(`${ENDPOINT}/routes/tasks/github/update`, {
+      alertStatus,
+      gitOrg: owner,
+      repo
+    });
   });
 
   const router = getRouter!("/routes");
