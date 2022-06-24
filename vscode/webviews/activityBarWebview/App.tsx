@@ -123,7 +123,6 @@ const App = () => {
 
   useEffect(() => {
     if (!user?.userId || dashboardUrl == null) {
-      vscode.postMessage({ command: 'error', message: 'Could not fetch documents. Please log in again.' });
       return;
     }
     try {
@@ -191,6 +190,10 @@ const App = () => {
     vscode.setState({ ...initialState, user: undefined });
   };
 
+  const onClickSignUp = () => {
+    vscode.postMessage({ command: 'sign-up' });
+  };
+
   const hasDocSelected = selectedDoc?.isDefault !== true;
 
   return (
@@ -200,8 +203,15 @@ const App = () => {
       </h1>
       {
         user == null && <>
-        <p className="mt-1">
-          Sign in to your account to continue
+         <button
+          type="submit"
+          className={classNames("flex items-center justify-center submit mt-2 opacity-100 hover:cursor-pointer")}
+          onClick={onClickSignUp}
+        >
+          Create an account
+        </button>
+        <p className="text-center">
+          OR
         </p>
         <p className="mt-1 font-medium">Dashboard URL</p>
         <input

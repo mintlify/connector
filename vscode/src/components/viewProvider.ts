@@ -51,6 +51,9 @@ export class ViewProvider implements WebviewViewProvider {
 			webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 			webviewView.webview.onDidReceiveMessage(async message => {
 				switch (message.command) {
+					case 'sign-up':
+						vscode.env.openExternal(vscode.Uri.parse('https://www.mintlify.com/create'));
+						break;
 					case 'login':
 						openLogin(message.args);
 						break;
