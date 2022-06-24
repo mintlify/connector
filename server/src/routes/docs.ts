@@ -58,9 +58,6 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
         $match: matchQuery,
       },
       {
-        $sort: { lastUpdatedAt: -1 },
-      },
-      {
         $lookup: {
           from: 'code',
           foreignField: 'doc',
@@ -86,8 +83,17 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
           ],
           as: "tasks"
         },
-      }
+      },
+      {
+        $set: {
+          tasksCount: { $size: "$tasks" }
+        }
+      },
+      {
+        $sort: { tasksCount: -1, lastUpdatedAt: -1 },
+      },
     ]);
+    console.log(docs);
     return res.status(200).send({ docs });
   } catch (error) {
     return res.status(500).send({ error, docs: [] });

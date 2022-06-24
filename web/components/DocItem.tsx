@@ -107,11 +107,15 @@ export default function DocItem({ doc, onClick, selectedDoc, docs, setDocs, remo
                       {doc.title}
                     </span>
                     {
-                      doc.tasks && doc.tasks.map((task) => (
+                      doc.tasks && doc.tasks.map((task) => 
+                      task.type === 'update' ?
                         <span key={task._id} className="text-xs bg-red-500 text-white py-px px-2 rounded-full">
                           update requested
                         </span>
-                      ))
+                        : <span key={task._id} className="text-xs bg-slate-500 text-white py-px px-2 rounded-full">
+                        review requested
+                      </span>
+                      )
                     }
                     <ExternalLinkIcon className="w-4 h-4 text-gray-400 invisible group-hover:visible" />
                   </a>

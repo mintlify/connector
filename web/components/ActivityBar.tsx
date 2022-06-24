@@ -205,7 +205,7 @@ export default function ActivityBar({ selectedDoc, refresh, refreshKey }: Activi
             </div>
         </div>
         {
-          selectedDoc && <div className="mt-4 py-2">
+          selectedDoc && <div className="mt-2 py-2">
           <div className="text-sm border-t border-gray-200"></div>
           <article className="prose prose-sm space-y-2 py-4">
           <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]} components={{
