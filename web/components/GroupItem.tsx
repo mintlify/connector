@@ -51,7 +51,10 @@ export default function GroupItem({ group, setSelectedGroup }: GroupItemProps) {
                   </span>
                 </a>
                 {
-                  group.tasksCount > 0 && <div className="bg-red-500 text-xs py-px px-2 text-white rounded-full">
+                  group.tasksCount > 0 && <div className="flex items-center bg-red-100 text-red-800 text-xs py-px px-2 rounded-full">
+                    <svg className="mr-1.5 h-2 w-2 text-red-400" fill="currentColor" viewBox="0 0 8 8">
+                    <circle cx={4} cy={4} r={3} />
+                  </svg>
                   {group.tasksCount} {group.tasksCount > 1 ? 'requests' : 'request'}
                 </div>
                 }

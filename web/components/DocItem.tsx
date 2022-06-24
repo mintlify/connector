@@ -109,12 +109,18 @@ export default function DocItem({ doc, onClick, selectedDoc, docs, setDocs, remo
                     {
                       doc.tasks && doc.tasks.map((task) => 
                       task.type === 'update' ?
-                        <span key={task._id} className="text-xs bg-red-500 text-white py-px px-2 rounded-full">
-                          update requested
-                        </span>
-                        : <span key={task._id} className="text-xs bg-slate-500 text-white py-px px-2 rounded-full">
-                        review requested
-                      </span>
+                          <div key={task._id} className="flex items-center bg-red-100 text-red-800 text-xs py-px px-2 rounded-full">
+                          <svg className="mr-1.5 h-2 w-2 text-red-400" fill="currentColor" viewBox="0 0 8 8">
+                          <circle cx={4} cy={4} r={3} />
+                        </svg>
+                        update requested
+                      </div>
+                        : <div key={task._id} className="flex items-center bg-slate-100 text-slate-800 text-xs py-px px-2 rounded-full">
+                            <svg className="mr-1.5 h-2 w-2 text-slate-400" fill="currentColor" viewBox="0 0 8 8">
+                            <circle cx={4} cy={4} r={3} />
+                          </svg>
+                          review requested
+                        </div>
                       )
                     }
                     <ExternalLinkIcon className="w-4 h-4 text-gray-400 invisible group-hover:visible" />
