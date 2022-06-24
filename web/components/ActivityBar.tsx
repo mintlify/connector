@@ -196,7 +196,7 @@ export default function ActivityBar({ selectedDoc, refresh, refreshKey }: Activi
                 )
               }
               {
-                relevantTasks.length === 0 && <div className="mt-4">
+                relevantTasks.length === 0 && <div className="my-4">
                   No update requests 🎉
                 </div>
               }
