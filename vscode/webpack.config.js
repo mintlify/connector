@@ -14,7 +14,7 @@ const { parse } = JSON5;
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const TerserPlugin = require('terser-webpack-plugin');
 const webpack = require('webpack');
-const { ProvidePlugin } = webpack;
+const { DefinePlugin } = webpack;
 
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
@@ -163,7 +163,7 @@ async function getExtensionConfig(target, mode, env) {
 	];
 
   if (target === 'webworker') {
-		plugins.push(new ProvidePlugin({
+		plugins.push(new DefinePlugin({
 			'process.env.NODE_ENV': JSON.stringify('production'),
 			process: join(
 				__dirname,
