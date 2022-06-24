@@ -4,17 +4,15 @@
 
 const execFile = require('child_process').execFile;
 const path = require('path');
-const { join } = path;
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const { ESBuildMinifyPlugin } = require('esbuild-loader');
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const ForkTsCheckerPlugin = require('fork-ts-checker-webpack-plugin');
 const JSON5 = require('json5');
-const { parse } = JSON5;
+const { parse } = JSON5; //
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const TerserPlugin = require('terser-webpack-plugin');
 const webpack = require('webpack');
-const { DefinePlugin } = webpack;
 
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
@@ -48,7 +46,7 @@ async function resolveTSConfig(configFile) {
  * @returns { Promise<WebpackConfig> }
  */
  async function getWebviewConfig(mode, env, entry) {
-	const basePath = join(__dirname, 'webviews');
+	const basePath = path.join(__dirname, 'webviews');
 
 	/**
 	 * @type WebpackConfig['plugins'] | any
@@ -58,7 +56,7 @@ async function resolveTSConfig(configFile) {
 			async: false,
 			formatter: 'basic',
 			typescript: {
-				configFile: join(__dirname, 'tsconfig.webviews.json'),
+				configFile: path.join(__dirname, 'tsconfig.webviews.json'),
 			},
 		}),
 	];
@@ -83,13 +81,13 @@ async function resolveTSConfig(configFile) {
 						treeShaking: true,
 						// Keep the class names
 						keepNames: true,
-						target: 'es2019',
+						target: 'es2020',
 					})
 					: new TerserPlugin({
 						extractComments: false,
 						parallel: true,
 						terserOptions: {
-							ecma: 2019,
+							ecma: 2020,
 							// eslint-disable-next-line @typescript-eslint/naming-convention
 							keep_classnames: /^AbortSignal$/,
 							module: true,
@@ -101,21 +99,21 @@ async function resolveTSConfig(configFile) {
 			rules: [
 				{
 					exclude: /node_modules/,
-					include: [basePath, join(__dirname, 'src')],
+					include: [basePath, path.join(__dirname, 'src')],
 					test: /\.tsx?$/,
 					use: env.esbuild
 						? {
 							loader: 'esbuild-loader',
 							options: {
 								loader: 'tsx',
-								target: 'es2019',
-								tsconfigRaw: await resolveTSConfig(join(__dirname, 'tsconfig.webviews.json')),
+								target: 'es2020',
+								tsconfigRaw: await resolveTSConfig(path.join(__dirname, 'tsconfig.webviews.json')),
 							},
 						}
 						: {
 							loader: 'ts-loader',
 							options: {
-								configFile: join(__dirname, 'tsconfig.webviews.json'),
+								configFile: path.join(__dirname, 'tsconfig.webviews.json'),
 								experimentalWatchApi: true,
 								transpileOnly: true,
 							},
@@ -131,23 +129,21 @@ async function resolveTSConfig(configFile) {
 				},
 			],
 		},
-    resolveLoader: {
-      modules: [
-          path.join(__dirname, 'node_modules')
-      ]
-    },
 		resolve: {
-			extensions: ['.ts', '.tsx', '.js', '.jsx', '.json', '.svg'],
-      modules: [
-        path.join(__dirname, 'node_modules')
-      ]
+			extensions: ['.ts', '.tsx', '.js', '.jsx', '.json', '.svg']
 		},
 		plugins: plugins,
 	};
 }
 
+/**
+ * @param { 'node' | 'webworker' } target
+ * @param { 'production' | 'development' | 'none' } mode
+ * @param {{ esbuild?: boolean; }} env
+ * @returns { Promise<WebpackConfig> }
+ */
 async function getExtensionConfig(target, mode, env) {
-  const basePath = join(__dirname, 'src');
+  const basePath = path.join(__dirname, 'src');
 
 	/**
 	 * @type WebpackConfig['plugins'] | any
@@ -157,15 +153,14 @@ async function getExtensionConfig(target, mode, env) {
 			async: false,
 			formatter: 'basic',
 			typescript: {
-				configFile: join(__dirname, target === 'webworker' ? 'tsconfig.browser.json' : 'tsconfig.json'),
+				configFile: path.join(__dirname, target === 'webworker' ? 'tsconfig.browser.json' : 'tsconfig.json'),
 			},
 		})
 	];
 
   if (target === 'webworker') {
-		plugins.push(new DefinePlugin({
-			'process.env.NODE_ENV': JSON.stringify('production'),
-			process: join(
+		plugins.push(new webpack.ProvidePlugin({
+			process: path.join(
 				__dirname,
 				'node_modules',
 				'process',
@@ -179,36 +174,79 @@ async function getExtensionConfig(target, mode, env) {
   return {
     name: `extension:${target}`,
     entry,
-    mode,
-    target,
+    mode: mode,
+    target: target,
     devtool: mode !== 'production' ? 'source-map' : undefined,
     output: {
-			path: target === 'webworker' ? join(__dirname, 'dist', 'browser') : join(__dirname, 'dist'),
-			libraryTarget: 'commonjs2',
-			filename: '[name].js',
-			chunkFilename: 'feature-[name].js',
-		},
+		path: target === 'webworker' ? path.join(__dirname, 'dist', 'browser') : path.join(__dirname, 'dist'),
+		libraryTarget: 'commonjs2',
+		filename: '[name].js',
+		chunkFilename: 'feature-[name].js',
+	},
+	optimization: {
+		minimizer: [
+			// @ts-ignore
+			env.esbuild
+				? new ESBuildMinifyPlugin({
+					format: 'cjs',
+					minify: true,
+					treeShaking: true,
+					// // Keep the class names
+					// keepNames: true,
+					target: 'es2020',
+				})
+				: new TerserPlugin({
+					extractComments: false,
+					parallel: true,
+					terserOptions: {
+						ecma: 2020,
+						// // Keep the class names
+						// keep_classnames: true,
+						module: true,
+					},
+				}),
+		],
+	},
+	module: {
+		rules: [
+		  {
+			exclude: /node_modules/,
+			include: path.join(__dirname, 'src'),
+			test: /\.tsx?$/,
+			use: {
+				loader: 'ts-loader',
+				options: {
+					configFile: path.join(
+						__dirname,
+						target === 'webworker' ? 'tsconfig.browser.json' : 'tsconfig.json',
+					),
+					experimentalWatchApi: true,
+					transpileOnly: true,
+				},
+			}
+		  }
+		]
+	},
+	resolve: {
+		// support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
+		extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
+		symlinks: false,
+	},
     externals: {
-      vscode: 'commonjs vscode' // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
+      vscode: 'commonjs vscode', // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
       // modules added here also need to be added in the .vscodeignore file
+	  'fs': 'fs'
     },
-    resolve: {
-      // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
-      extensions: ['.ts', '.js']
-    },
-    module: {
-      rules: [
-        {
-          test: /\.ts$/,
-          exclude: /node_modules/,
-          use: [
-            {
-              loader: 'ts-loader'
-            }
-          ]
-        }
-      ]
-    },
+    plugins: plugins,
+    stats: {
+		preset: 'errors-warnings',
+		assets: true,
+		colors: true,
+		env: true,
+		errorsCount: true,
+		warningsCount: true,
+		timings: true,
+	},
     infrastructureLogging: {
       level: "log", // enables logging required for problem matchers
     }
