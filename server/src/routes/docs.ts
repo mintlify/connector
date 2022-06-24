@@ -86,11 +86,12 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
       },
       {
         $set: {
-          tasksCount: { $size: "$tasks" }
+          tasksCount: { $size: "$tasks" },
+          codesCount: { $size: "$code" }
         }
       },
       {
-        $sort: { tasksCount: -1, lastUpdatedAt: -1 },
+        $sort: { tasksCount: -1, codesCount: -1, lastUpdatedAt: -1 },
       },
     ]);
     console.log(docs);
