@@ -150,7 +150,6 @@ const App = () => {
       code: code,
     };
     vscode.postMessage({ command: 'link-submit', args });
-    setCode(undefined);
   };
 
   const updateSelectedDoc = (doc: Doc) => {
