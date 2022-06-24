@@ -1,4 +1,3 @@
-import { XCircleIcon } from '@heroicons/react/solid';
 import axios from 'axios';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -7,14 +6,13 @@ import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
 import { useProfile } from '../context/ProfileContext';
 import { API_ENDPOINT } from '../helpers/api';
-import { ConnectionIcon, DocTitleIcon } from '../helpers/Icons';
+import { DocTitleIcon } from '../helpers/Icons';
 import { request } from '../helpers/request';
 import { getSubdomain } from '../helpers/user';
 import { Code, Doc } from '../pages';
 import timeAgo from '../services/timeago';
 import CodeItem from './CodeItem';
 import TaskItem from './TaskItem';
-import Tooltip from './Tooltip';
 
 type DocProfileProps = {
   doc: Doc,
@@ -81,6 +79,10 @@ export default function ActivityBar({ selectedDoc, refresh, refreshKey }: Activi
   }
 
   const onCompleteTask = (deletingTask: Task) => {
+    if (deletingTask.type === 'review' && deletingTask.url) {
+      window.open(deletingTask.url, '_blank');
+      return;
+    }
     setTasks(tasks.filter((task) => task._id !== deletingTask._id));
     request('DELETE', `routes/tasks/${deletingTask._id}`)
       .then(() => {
