@@ -2,10 +2,9 @@ import axios from 'axios';
 import prependHttp from 'prepend-http';
 import { Listbox } from '@headlessui/react';
 import React, { useEffect, useState } from 'react';
-import ReactTooltip from 'react-tooltip';
 import { CheckIcon, LockClosedIcon, SelectorIcon } from '@heroicons/react/solid';
 import { vscode } from '../common/message';
-import { InfoCircleIcon, CodeSymbolIcon, CodeFileIcon } from '../common/svgs';
+import { CodeSymbolIcon, CodeFileIcon } from '../common/svgs';
 
 export type Doc = {
   _id: string;
@@ -295,28 +294,6 @@ const App = () => {
           </div>
           <div className='flex flex-row mt-3'>
             Select Relevant Code<span className='text-red-500'>*</span>
-            <div className='ml-1 flex flex-col justify-center' data-tip data-for="registerTip">
-              <InfoCircleIcon />
-            </div>
-            <ReactTooltip
-              id="registerTip"
-              place="bottom"
-              effect="solid"
-              className='tool-tip shadow-sm'
-              arrowColor={style.getPropertyValue('--vscode-editor-background')}
-            >
-              <div className='text-left'>
-                <div className='font-bold'>Code Snippets</div>
-                <p>
-                  Highlight code in the editor <br/>
-                </p>
-                <div className='font-bold mt-1'>Folder/File</div>
-                <p>
-                  1. Right click on a folder or file in the explorer <br/>
-                  2. Select “Link folder/file to doc”
-                </p>
-              </div>
-            </ReactTooltip>
           </div>
           <div className='code'>
             <CodesContent code={code} />
