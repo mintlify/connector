@@ -1,6 +1,7 @@
 import { DocumentationTypeIcon } from '../../../helpers/Icons'
 import AddConfluence from './AddConfluence'
 import { addDocumentationMap, AddDocumentationType } from './AddDocumentation'
+import AddGitHub from './AddGitHub'
 import AddGoogleDocs from './AddGoogleDocs'
 import AddNotion from './AddNotion'
 
@@ -21,9 +22,7 @@ export default function DocumentationConfig({
 
   const configOptions: Record<AddDocumentationType, DocConfigSettings> = {
     notion: {
-      inputComponent: (
-        <AddNotion />
-      ),
+      inputComponent: <AddNotion />,
     },
     google: {
       inputComponent: <AddGoogleDocs />,
@@ -31,6 +30,9 @@ export default function DocumentationConfig({
     confluence: {
       inputComponent: <AddConfluence />,
     },
+    github: {
+      inputComponent: <AddGitHub />
+    }
   }
 
   const ruleData = addDocumentationMap[documentationType]

@@ -7,7 +7,7 @@ import DocumentationConfig from './DocumentationConfig'
 import { IntegrationsStatus } from '../../../pages'
 import { RefreshIcon } from '@heroicons/react/outline'
 
-export type AddDocumentationType = 'notion' | 'google' | 'confluence';
+export type AddDocumentationType = 'notion' | 'google' | 'confluence' | 'github';
 
 type AddDocumentationSelection = {
   type: AddDocumentationType
@@ -35,17 +35,22 @@ export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationS
     description: 'Import Google Docs documents',
     installedDescription: 'Re-import Google Docs documents',
   },
+  github: {
+    type: 'github',
+    title: 'GitHub',
+    description: 'Import Markdowns from GitHub',
+    installedDescription: 'Re-import GitHub markdowns',
+  },
 }
 
 type AddDocumentationProps = {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  setIsAddDocLoading: (isAddingAutomation: boolean) => void;
   overrideSelectedRuleType?: AddDocumentationType;
   integrationsStatus: IntegrationsStatus;
 }
 
-export default function AddDocumentation({ isOpen, setIsOpen, setIsAddDocLoading, overrideSelectedRuleType, integrationsStatus }: AddDocumentationProps) {
+export default function AddDocumentation({ isOpen, setIsOpen, overrideSelectedRuleType, integrationsStatus }: AddDocumentationProps) {
   const [selectedRuleType, setSelectedRuleType] = useState<AddDocumentationType>();
 
   useEffect(() => {

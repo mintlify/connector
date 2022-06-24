@@ -50,8 +50,12 @@ export const DocumentationTypeIcon = ({ type, outerSize = 10, innerSize = 6, isA
       </div>
     case 'google':
       return <div className={`h-${outerSize} w-${outerSize} rounded-lg bg-gray-100 flex items-center justify-center`}>
-        <img className={`h-${innerSize - 1} w-${innerSize - 1} bg-gray-100 flex items-center justify-center`} src="assets/integrations/google-docs.svg" alt="Google Docs" />
+        <img className={`h-${innerSize - 1} w-${innerSize - 1} flex items-center justify-center`} src="assets/integrations/google-docs.svg" alt="Google Docs" />
       </div>
+    case 'github':
+      return <div className={`h-${outerSize} w-${outerSize} rounded-lg bg-gray-100 flex items-center justify-center`}>
+      <img className={`h-${innerSize - 1} w-${innerSize - 1} flex items-center justify-center`} src="assets/integrations/github.svg" alt="Google Docs" />
+    </div>
     default:
       return null
   }

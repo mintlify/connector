@@ -157,7 +157,6 @@ export default function Home() {
           {/* Left sidebar & main wrapper */}
           <div className="flex-1 min-w-0 xl:flex">
             <Sidebar
-              setIsAddDocLoading={setIsAddDocLoading}
               isAddDocumentOpen={isAddDocumentOpen}
               setIsAddDocumentOpen={setIsAddDocumentOpen}
               integrationsStatus={integrationsStatus || {}}

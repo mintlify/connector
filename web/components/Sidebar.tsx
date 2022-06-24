@@ -8,14 +8,12 @@ import { useProfile } from '../context/ProfileContext';
 import { IntegrationsStatus } from '../pages';
 
 type SidebarProps = {
-  setIsAddDocLoading: (isAddingDoc: boolean) => void;
   isAddDocumentOpen: boolean;
   setIsAddDocumentOpen: (isAddingDoc: boolean) => void;
   integrationsStatus: IntegrationsStatus;
 }
 
 export default function Sidebar({
-  setIsAddDocLoading,
   isAddDocumentOpen,
   setIsAddDocumentOpen,
   integrationsStatus
@@ -39,7 +37,6 @@ export default function Sidebar({
     <AddDocumentation
       isOpen={isAddDocumentOpen}
       setIsOpen={setIsAddDocumentOpen}
-      setIsAddDocLoading={setIsAddDocLoading}
       integrationsStatus={integrationsStatus}
     />
     <div className="xl:flex-shrink-0 xl:w-64 xl:border-r xl:border-gray-200">
