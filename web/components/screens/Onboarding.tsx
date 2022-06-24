@@ -363,7 +363,6 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
     <AddDocumentation
       isOpen={isAddingDocOpen}
       setIsOpen={setIsAddingDocOpen}
-      setIsAddDocLoading={setIsAddDocLoading}
       overrideSelectedRuleType={addDocumentationType}
       integrationsStatus={{}} // intentionally left blank
     />
