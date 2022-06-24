@@ -1,7 +1,7 @@
 import axios from 'axios';
 import vscode, {
-	WebviewViewProvider, 
-	WebviewView, 
+	WebviewViewProvider,
+	WebviewView,
 	Uri,
 	Webview } from "vscode";
 import { Code } from "../utils/git";
@@ -16,7 +16,7 @@ export type Doc = {
 	lastUpdatedAt?: Date;
 	createdAt?: Date;
 };
-  
+
 export type Link = {
 	doc: Doc;
 	codes: Code[];
@@ -28,26 +28,24 @@ export class ViewProvider implements WebviewViewProvider {
 
     constructor(private readonly _extensionUri: Uri) { }
 
-		public authenticate(user: any): void {
-			this._view?.webview.postMessage({ command: 'auth', args: user });
-		}
+	public authenticate(user: any): void {
+		this._view?.webview.postMessage({ command: 'auth', args: user });
+	}
 
-		public prefillDoc(docId: string): void {
-			this.show();
-			this._view?.webview.postMessage({ command: 'prefill-doc', args: docId });
-		}
+	public prefillDoc(docId: string): void {
+		this.show();
+		this._view?.webview.postMessage({ command: 'prefill-doc', args: docId });
+	}
 
-		public logout(): void {
-			this._view?.webview.postMessage({ command: 'logout' });
-		}
-		
+	public logout(): void {
+		this._view?.webview.postMessage({ command: 'logout' });
+	}
+
     public resolveWebviewView(webviewView: WebviewView): void | Thenable<void> {
 			webviewView.webview.options = {
 					// Allow scripts in the webview
 					enableScripts: true,
-					localResourceRoots: [
-							this._extensionUri
-					]
+					localResourceRoots: [this._extensionUri]
 			};
 
 			webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
@@ -117,7 +115,7 @@ export class ViewProvider implements WebviewViewProvider {
 			<body>
 				<noscript>You need to enable JavaScript to run this app.</noscript>
 				<div id="root"></div>
-				
+
 				<script nonce="${nonce}" src="${webview.asWebviewUri(uri).toString()}"></script>
 			</body>
 			</html>`;
