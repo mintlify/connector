@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { Types } from 'mongoose';
 import Doc from '../models/Doc';
 import Task, { TaskType } from '../models/Task';
 import { userMiddleware, removeUnneededDataFromOrg } from './user';
@@ -48,7 +47,7 @@ tasksRouter.post('/update/:docId', userMiddleware, async (req, res) => {
 
   const task = await Task.create({
     org: org._id,
-    doc: new Types.ObjectId(docId),
+    doc: docId,
     status: 'todo',
     type: 'update',
     url: doc.url,
@@ -56,7 +55,7 @@ tasksRouter.post('/update/:docId', userMiddleware, async (req, res) => {
 
   track(res.locals.user.userId, 'Task Created', {
     id: task._id.toString(),
-    org: org._id,
+    org: org._id.toString(),
     doc: docId,
     type: 'update'
   })
@@ -95,7 +94,7 @@ tasksRouter.post('/github', async (req, res) => {
   });
   const tasksResponse = await Task.insertMany(tasks);
   const trackPromises = tasksResponse.map((task:any) => {
-    return track(org.toString(), 'Task Created', task);
+    return track(org.toString(), 'Task Created', {...task, isOrg: true});
   });
   await Promise.all(trackPromises);
 
@@ -124,7 +123,7 @@ tasksRouter.post('/github/update', async (req, res) => {
         }
       }});
       const formattedOrg = removeUnneededDataFromOrg(org);
-      track(formattedOrg._id, 'Task Completed', task);
+      track(formattedOrg._id, 'Task Completed', {...task, isOrg: true});
     } catch (error) {
       return res.status(200);
     }
