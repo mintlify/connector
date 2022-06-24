@@ -54,6 +54,19 @@ export class ViewProvider implements WebviewViewProvider {
 					case 'login':
 						openLogin(message.args);
 						break;
+					case 'get-docs':
+						const { userId, subdomain } = message;
+						axios.get(`${API_ENDPOINT}/docs`, {
+							params: {
+								userId,
+								subdomain
+							}
+						})
+							.then((res) => {
+								const { data: { docs } } = res;
+								this._view?.webview.postMessage({ command: 'display-docs', docs });
+							});
+						break;
 					case 'link-submit':
 						{
 							const { userId, docId, title, code, subdomain } = message.args;

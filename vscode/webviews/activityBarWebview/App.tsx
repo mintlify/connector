@@ -79,6 +79,9 @@ const App = () => {
           vscode.setState({ ...initialState, API_ENDPOINT });
           setAPI_ENDPOINT(API_ENDPOINT);
           break;
+        case 'display-docs':
+          setDocs(message.docs || []);
+          break;
         case 'auth':
           const user = message?.args;
           const newDashboardUrl = formatSignInUrl(signInUrl);
@@ -124,16 +127,7 @@ const App = () => {
       return;
     }
     try {
-      axios.get(`${API_ENDPOINT}/docs`, {
-        params: {
-          userId: user?.userId,
-          subdomain: getSubdomain(dashboardUrl)
-        }
-      })
-        .then((res) => {
-          const { data: { docs: docsResult } } = res;
-          setDocs(docsResult);
-        });
+      vscode.postMessage({ command: 'get-docs', userId: user.userId, subdomain: getSubdomain(dashboardUrl) });
     } catch (e) {
       vscode.postMessage({ command: 'error', message: 'Could not fetch documents. Please log in again or re-install the extension.' });
     }
@@ -196,8 +190,6 @@ const App = () => {
     setUser(undefined);
     vscode.setState({ ...initialState, user: undefined });
   };
-
-  const style = getComputedStyle(document.body);
 
   const hasDocSelected = selectedDoc?.isDefault !== true;
 
