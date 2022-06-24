@@ -65,8 +65,12 @@ export = (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
       await createActionRequiredCheck(context);
     }
     const alertStatus = formatReviewComments(previousAlerts, context.payload.thread.comments[0]?.node_id);
+    const owner = context.payload.repository.owner.login;
+    const repo = context.payload.pull_request.head.repo.name;
     await axios.post(`${ENDPOINT}/routes/tasks/github/update`, {
-      alertStatus
+      alertStatus,
+      gitOrg: owner,
+      repo
     });
   });
 
