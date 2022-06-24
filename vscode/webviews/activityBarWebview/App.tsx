@@ -69,6 +69,7 @@ const App = () => {
   const [docs, setDocs] = useState<Doc[]>([initialDoc]);
   const [selectedDoc, setSelectedDoc] = useState<Doc>(initialState?.selectedDoc || initialDoc);
   const [code, setCode] = useState<Code | undefined>(initialState?.code);
+  const [displayPage, setDisplayPage] = useState(1);
 
   useEffect(() => {
     window.addEventListener('message', event => {
@@ -81,6 +82,7 @@ const App = () => {
           break;
         case 'display-docs':
           setDocs(message.docs || []);
+          setDisplayPage(1);
           break;
         case 'auth':
           const user = message?.args;
@@ -191,6 +193,14 @@ const App = () => {
     vscode.setState({ ...initialState, user: undefined });
   };
 
+  const onScrollOptionsHandler = (e) => {
+    const bottom = e.target.scrollHeight - e.target.scrollTop <= e.target.clientHeight + 100;
+    if (bottom) {
+      setDisplayPage(displayPage + 1);
+    }
+  };
+
+  const displayDocs = docs.slice(0, displayPage * 50);
   const hasDocSelected = selectedDoc?.isDefault !== true;
 
   return (
@@ -245,8 +255,8 @@ const App = () => {
                       <SelectorIcon className="h-5 w-5" aria-hidden="true" />
                     </span>
                   </Listbox.Button>
-                    <Listbox.Options className="absolute mt-1 max-h-60 z-10 w-full shadow-lg code py-1 overflow-auto">
-                      {docs.map((doc) => (
+                    <Listbox.Options className="absolute mt-1 max-h-60 z-10 w-full shadow-lg code py-1 overflow-auto" onScroll={onScrollOptionsHandler}>
+                      {displayDocs.map((doc) => (
                         <Listbox.Option
                           key={doc._id}
                           className={({ active }) =>
