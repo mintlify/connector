@@ -29,13 +29,15 @@ export default function TaskItem({ task, onCompleteTask }: { task: Task, onCompl
   {taskIcon}
   <div className="min-w-0 flex-1">
     <Link href={task.url || ''}>
-      <a target="_blank" className="text-sm font-medium text-gray-700 hover:underline cursor-pointer">
+      <div className="group cursor-pointer">
+      <a target="_blank" className="text-sm font-medium text-gray-700 group-hover:underline">
         <span>{actionLabel} {task.doc.title}</span>
       </a>
+      <p className="text-sm text-gray-500 group-hover:underline">
+        Created {timeAgo.format(Date.parse(task.createdAt))}
+      </p>
+      </div>
     </Link>
-    <p className="text-sm text-gray-500">
-      Created {timeAgo.format(Date.parse(task.createdAt))}
-    </p>
   </div>
   <div className="flex-shrink-0">
     <button

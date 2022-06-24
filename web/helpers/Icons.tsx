@@ -86,7 +86,7 @@ export const SilencedDocIcon = ({ outerSize = 10, innerSize = 6 }: { outerSize?:
 
 export const ConnectionIcon = ({ outerSize = 10, innerSize = 6 }: { outerSize?: number; innerSize?: number }) => {
   return (
-    <div className={`h-${outerSize} w-${outerSize} rounded-lg bg-green-100 flex items-center justify-center`}>
+    <div className={`h-${outerSize} aspect-square rounded-lg bg-green-100 flex items-center justify-center`}>
       <svg
         className={`h-${innerSize - 1} text-green-700`}
         xmlns="http://www.w3.org/2000/svg"
