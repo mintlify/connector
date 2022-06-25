@@ -31,7 +31,10 @@ export default function DocumentationConfig({
       inputComponent: <AddConfluence />,
     },
     github: {
-      inputComponent: <AddGitHub />
+      inputComponent: <AddGitHub />,
+    },
+    webpage: {
+      inputComponent: null,
     }
   }
 

@@ -7,13 +7,13 @@ import DocumentationConfig from './DocumentationConfig'
 import { IntegrationsStatus } from '../../../pages'
 import { RefreshIcon } from '@heroicons/react/outline'
 
-export type AddDocumentationType = 'notion' | 'google' | 'confluence' | 'github';
+export type AddDocumentationType = 'notion' | 'google' | 'confluence' | 'github' | 'webpage';
 
 type AddDocumentationSelection = {
   type: AddDocumentationType
   title: string
   description: string
-  installedDescription: string
+  installedDescription?: string
 }
 
 export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationSelection> = {
@@ -40,6 +40,11 @@ export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationS
     title: 'GitHub',
     description: 'Import Markdowns from GitHub',
     installedDescription: 'Re-import GitHub markdowns',
+  },
+  webpage: {
+    type: 'webpage',
+    title: 'Web Page',
+    description: 'Add document with URL',
   },
 }
 
