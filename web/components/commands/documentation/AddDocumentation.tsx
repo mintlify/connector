@@ -44,7 +44,7 @@ export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationS
   webpage: {
     type: 'webpage',
     title: 'Web Page',
-    description: 'Add document with URL',
+    description: 'Add web page at URL',
   },
 }
 
@@ -107,6 +107,8 @@ export default function AddDocumentation({ isOpen, setIsOpen, overrideSelectedRu
               <div className="absolute w-full max-h-full bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 z-10 overflow-auto">
               <DocumentationConfig
                 documentationType={selectedRuleType}
+                onBack={onToPrimarySelection}
+                onClose={onClose}
               />
               {selectedRuleType == null && (
                 <Combobox onChange={() => {}} value="">
