@@ -5,7 +5,7 @@ import { Code } from "../pages";
 
 export default function CodeItem({ code, onDeleteCode }: { code: Code, onDeleteCode: (code: Code) => void }) {
   return <li className="flex items-center py-4 space-x-3">
-  <ConnectionIcon outerSize={7} innerSize={4} />
+  <ConnectionIcon outerSize={6} innerSize={4} />
   <div className="min-w-0 flex-1">
     <Link href={code.url}>
       <div className="group cursor-pointer">
