@@ -7,13 +7,13 @@ import DocumentationConfig from './DocumentationConfig'
 import { IntegrationsStatus } from '../../../pages'
 import { RefreshIcon } from '@heroicons/react/outline'
 
-export type AddDocumentationType = 'notion' | 'google' | 'confluence' | 'github';
+export type AddDocumentationType = 'notion' | 'google' | 'confluence' | 'github' | 'webpage';
 
 type AddDocumentationSelection = {
   type: AddDocumentationType
   title: string
   description: string
-  installedDescription: string
+  installedDescription?: string
 }
 
 export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationSelection> = {
@@ -41,6 +41,11 @@ export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationS
     description: 'Import Markdowns from GitHub',
     installedDescription: 'Re-import GitHub markdowns',
   },
+  webpage: {
+    type: 'webpage',
+    title: 'Web Page',
+    description: 'Add web page at URL',
+  },
 }
 
 type AddDocumentationProps = {
@@ -48,9 +53,10 @@ type AddDocumentationProps = {
   setIsOpen: (isOpen: boolean) => void;
   overrideSelectedRuleType?: AddDocumentationType;
   integrationsStatus: IntegrationsStatus;
+  refresh: () => void,
 }
 
-export default function AddDocumentation({ isOpen, setIsOpen, overrideSelectedRuleType, integrationsStatus }: AddDocumentationProps) {
+export default function AddDocumentation({ isOpen, setIsOpen, overrideSelectedRuleType, integrationsStatus, refresh }: AddDocumentationProps) {
   const [selectedRuleType, setSelectedRuleType] = useState<AddDocumentationType>();
 
   useEffect(() => {
@@ -70,7 +76,8 @@ export default function AddDocumentation({ isOpen, setIsOpen, overrideSelectedRu
   }
 
   const onClose = () => {
-    setIsOpen(false)
+    setIsOpen(false);
+    refresh();
   }
 
   return (
@@ -102,6 +109,8 @@ export default function AddDocumentation({ isOpen, setIsOpen, overrideSelectedRu
               <div className="absolute w-full max-h-full bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 z-10 overflow-auto">
               <DocumentationConfig
                 documentationType={selectedRuleType}
+                onBack={onToPrimarySelection}
+                onClose={onClose}
               />
               {selectedRuleType == null && (
                 <Combobox onChange={() => {}} value="">

@@ -34,7 +34,7 @@ export default function GroupItem({ group, setSelectedGroup }: GroupItemProps) {
   return <div key={group._id}>
     <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div>
   <li
-    className="relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:pl-6 lg:pl-8 xl:pl-6 cursor-pointer"
+    className="relative pl-4 pr-6 py-4 hover:bg-gray-50 sm:pl-6 lg:pl-8 xl:pl-6 cursor-pointer"
     onClick={() => setSelectedGroup(group)}
   >
     <div className="flex items-center justify-between space-x-4">
@@ -51,7 +51,10 @@ export default function GroupItem({ group, setSelectedGroup }: GroupItemProps) {
                   </span>
                 </a>
                 {
-                  group.tasksCount > 0 && <div className="bg-red-500 text-xs py-px px-2 text-white rounded-full">
+                  group.tasksCount > 0 && <div className="flex items-center bg-red-100 text-red-800 text-xs py-px px-2 rounded-full">
+                    <svg className="mr-1.5 h-2 w-2 text-red-400" fill="currentColor" viewBox="0 0 8 8">
+                    <circle cx={4} cy={4} r={3} />
+                  </svg>
                   {group.tasksCount} {group.tasksCount > 1 ? 'requests' : 'request'}
                 </div>
                 }

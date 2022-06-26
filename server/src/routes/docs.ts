@@ -9,6 +9,7 @@ import Org from '../models/Org';
 import { getNotionPageDataWithId } from '../services/notion';
 import { getConfluenceContentFromPageById } from './integrations/confluence';
 import { getGoogleDocsPrivateData } from '../services/googleDocs';
+import * as cheerio from 'cheerio';
 
 const docsRouter = express.Router();
 
@@ -43,6 +44,48 @@ export const extractFromDoc = async (doc: DocType, orgId: string): Promise<Conte
   return null;
 }
 
+const getDataFromUrl = async (urlInput: string) => {
+  let url = urlInput;
+  if (!url.startsWith('https://')) {
+    url = `https://${url}`;
+  }
+
+  const { data: html } = await axios.get(url);
+  const $ = cheerio.load(html);
+  const title = $('title').first().text().trim();
+  let favicon = $('link[rel="shortcut icon"]').attr('href') || $('link[rel="icon"]').attr('href');
+  if (favicon?.startsWith('//')) {
+    favicon = `https:${favicon}`;
+  } else if (favicon?.startsWith('/')) {
+    const urlParsed = new URL(url);
+    favicon = `${urlParsed.origin}${favicon}`;
+  }
+  if (!favicon) {
+    try {
+      const faviconRes = await axios.get(`https://s2.googleusercontent.com/s2/favicons?sz=128&domain_url=${url}`);
+      favicon = faviconRes.request.res.responseUrl;
+    } catch {
+      favicon = undefined;
+    }
+  }
+
+  return {title, favicon};
+}
+
+docsRouter.get('/preview', async (req, res) => {
+  let url = req.query.url as string;
+  if (!url) {
+    return res.end();
+  }
+
+  try {
+    const { title, favicon } = await getDataFromUrl(url);
+    return res.send({title, favicon});
+  } catch {
+    return res.status(400).send({error: 'Unable to fetch content from URL'});
+  }
+});
+
 docsRouter.get('/', userMiddleware, async (req, res) => {
   const org = res.locals.user.org;
   const { shouldShowCreatedBySelf } = req.query;
@@ -56,9 +99,6 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
     const docs = await Doc.aggregate([
       {
         $match: matchQuery,
-      },
-      {
-        $sort: { lastUpdatedAt: -1 },
       },
       {
         $lookup: {
@@ -86,7 +126,16 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
           ],
           as: "tasks"
         },
-      }
+      },
+      {
+        $set: {
+          tasksCount: { $size: "$tasks" },
+          codesCount: { $size: "$code" }
+        }
+      },
+      {
+        $sort: { tasksCount: -1, codesCount: -1, lastUpdatedAt: -1 },
+      },
     ]);
     return res.status(200).send({ docs });
   } catch (error) {
@@ -157,6 +206,26 @@ docsRouter.get('/groups', userMiddleware, async (_, res) => {
   })
 
   return res.send({ groups: groupsWithNames })
+});
+
+docsRouter.post('/webpage', userMiddleware, async (req, res) => {
+  const { org } = res.locals.user;
+  const { url } = req.body;
+
+  try {
+    const { title, favicon } = await getDataFromUrl(url);
+    const doc = await Doc.create({
+      org: org._id,
+      url,
+      method: 'web',
+      favicon,
+      title,
+      isJustAdded: true
+    });
+    res.send({doc})
+  } catch (error) {
+    res.status(500).send({error});
+  }
 })
 
 docsRouter.delete('/:docId', userMiddleware, async (req, res) => {

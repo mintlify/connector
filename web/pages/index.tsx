@@ -16,7 +16,7 @@ import { request } from '../helpers/request'
 import GroupItem, { Group } from '../components/GroupItem'
 import { DocTitleIcon } from '../helpers/Icons'
 
-type Code = {
+export type Code = {
   _id: string
   file: string
   url: string
@@ -160,6 +160,7 @@ export default function Home() {
               isAddDocumentOpen={isAddDocumentOpen}
               setIsAddDocumentOpen={setIsAddDocumentOpen}
               integrationsStatus={integrationsStatus || {}}
+              refresh={refresh}
             />
             {/* Projects List */}
             <div className="bg-white lg:min-w-0 lg:flex-1">

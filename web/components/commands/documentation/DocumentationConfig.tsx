@@ -4,17 +4,22 @@ import { addDocumentationMap, AddDocumentationType } from './AddDocumentation'
 import AddGitHub from './AddGitHub'
 import AddGoogleDocs from './AddGoogleDocs'
 import AddNotion from './AddNotion'
+import AddWebpage from './AddWebpage'
 
 type DocConfigSettings = {
   inputComponent: JSX.Element | null
 }
 
 type DocumentationConfigProps = {
-  documentationType?: AddDocumentationType
+  documentationType?: AddDocumentationType,
+  onBack: () => void,
+  onClose: () => void,
 }
 
 export default function DocumentationConfig({
   documentationType,
+  onClose,
+  onBack
 }: DocumentationConfigProps) {
   if (documentationType == null) {
     return null
@@ -31,7 +36,10 @@ export default function DocumentationConfig({
       inputComponent: <AddConfluence />,
     },
     github: {
-      inputComponent: <AddGitHub />
+      inputComponent: <AddGitHub />,
+    },
+    webpage: {
+      inputComponent: <AddWebpage onClose={onClose} onBack={onBack} />,
     }
   }
 

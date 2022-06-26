@@ -88,7 +88,7 @@ export default function DocItem({ doc, onClick, selectedDoc, docs, setDocs, remo
   return <div key={doc._id}>
   {!removeSeparators && <div className="ml-4 mr-6 h-px bg-gray-200 sm:ml-6 lg:ml-8 xl:ml-6 xl:border-t-0"></div> }
   <li
-    className={classNames("relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:pl-6 lg:pl-8 xl:pl-6 cursor-pointer", doc._id === selectedDoc?._id ? 'bg-gray-50' : '')}
+    className={classNames("relative pl-4 pr-6 py-4 hover:bg-gray-50 sm:pl-6 lg:pl-8 xl:pl-6 cursor-pointer", doc._id === selectedDoc?._id ? 'bg-gray-50' : '')}
     onClick={() => onClick(doc)}
   >
     <div className="flex items-center justify-between space-x-4">
@@ -107,11 +107,21 @@ export default function DocItem({ doc, onClick, selectedDoc, docs, setDocs, remo
                       {doc.title}
                     </span>
                     {
-                      doc.tasks && doc.tasks.map((task) => (
-                        <span key={task._id} className="text-xs bg-red-500 text-white py-px px-2 rounded-full">
-                          update requested
-                        </span>
-                      ))
+                      doc.tasks && doc.tasks.map((task) => 
+                      task.type === 'update' ?
+                          <div key={task._id} className="flex items-center bg-red-100 text-red-800 text-xs py-px px-2 rounded-full">
+                          <svg className="mr-1.5 h-2 w-2 text-red-400" fill="currentColor" viewBox="0 0 8 8">
+                          <circle cx={4} cy={4} r={3} />
+                        </svg>
+                        update requested
+                      </div>
+                        : <div key={task._id} className="flex items-center bg-slate-100 text-slate-800 text-xs py-px px-2 rounded-full">
+                            <svg className="mr-1.5 h-2 w-2 text-slate-400" fill="currentColor" viewBox="0 0 8 8">
+                            <circle cx={4} cy={4} r={3} />
+                          </svg>
+                          review requested
+                        </div>
+                      )
                     }
                     <ExternalLinkIcon className="w-4 h-4 text-gray-400 invisible group-hover:visible" />
                   </a>
