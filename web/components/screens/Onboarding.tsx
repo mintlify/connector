@@ -11,7 +11,6 @@ import { getSubdomain } from "../../helpers/user";
 import { Doc } from "../../pages";
 import AddDocumentation, { addDocumentationMap, AddDocumentationType } from "../commands/documentation/AddDocumentation";
 import DocItem from "../DocItem";
-import LoadingItem from "../LoadingItem";
 import ProfilePicture from "../ProfilePicture";
 import { getIntegrations, onInstallIntegration, Integration } from "../../helpers/integrations";
 import { Org, useProfile, User } from "../../context/ProfileContext";
