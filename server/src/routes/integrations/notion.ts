@@ -81,7 +81,6 @@ notionRouter.get('/install', (req, res) => {
 notionRouter.get('/authorization', async (req, res) => {
   const { code, state } = req.query;
   if (code == null) return res.status(403).send('Invalid or missing grant code');
-
   const { response, error } = await getNotionAccessTokenFromCode(code as string);
   if (error) return res.status(403).send('Invalid grant code');
   if (state == null) return res.status(403).send('No state provided');
@@ -93,23 +92,29 @@ notionRouter.get('/authorization', async (req, res) => {
     return res.status(403).send({ error: 'Invalid organization ID' });
   }
 
-  if (!response?.access_token) {
-    return res.status(403).send({ error: 'No access token' });
-  }
+  const redirectUrl = `https://${org.subdomain}.mintlify.com`;
 
-  const notionPages = await getNotionDocs(response?.access_token);
-  await importDocsFromNotion(notionPages, org, userId);
-  track(org._id.toString(), 'Install Notion Integration', {
-    isOrg: true,
-  });
-
-  if (parsedState?.close) {
-    return res.send("<script>window.close();</script>");
+  try {
+    if (!response?.access_token) {
+      return res.status(403).send({ error: 'No access token' });
+    }
+  
+    const notionPages = await getNotionDocs(response?.access_token);
+    importDocsFromNotion(notionPages, org, userId);
+    track(org._id.toString(), 'Install Notion Integration', {
+      isOrg: true,
+    });
+  
+    if (parsedState?.close) {
+      return res.send("<script>window.close();</script>");
+    }
+    if (ISDEV) {
+      return res.redirect(org.subdomain);
+    }
+    return res.redirect(redirectUrl);
+  } catch {
+    return res.redirect(redirectUrl);
   }
-  if (ISDEV) {
-    return res.redirect(org.subdomain);
-  }
-  return res.redirect(`https://${org.subdomain}.mintlify.com`);
 });
 
 
