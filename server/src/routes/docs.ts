@@ -45,31 +45,31 @@ export const extractFromDoc = async (doc: DocType, orgId: string): Promise<Conte
 }
 
 const getDataFromUrl = async (urlInput: string) => {
-  let url = urlInput;
-  if (!url.startsWith('https://')) {
-    url = `https://${url}`;
+  let urlWithProtocol = urlInput;
+  if (!urlWithProtocol.startsWith('https://')) {
+    urlWithProtocol = `https://${urlWithProtocol}`;
   }
 
-  const { data: html } = await axios.get(url);
+  const { data: html } = await axios.get(urlWithProtocol);
   const $ = cheerio.load(html);
   const title = $('title').first().text().trim();
   let favicon = $('link[rel="shortcut icon"]').attr('href') || $('link[rel="icon"]').attr('href');
   if (favicon?.startsWith('//')) {
     favicon = `https:${favicon}`;
   } else if (favicon?.startsWith('/')) {
-    const urlParsed = new URL(url);
+    const urlParsed = new URL(urlWithProtocol);
     favicon = `${urlParsed.origin}${favicon}`;
   }
   if (!favicon) {
     try {
-      const faviconRes = await axios.get(`https://s2.googleusercontent.com/s2/favicons?sz=128&domain_url=${url}`);
+      const faviconRes = await axios.get(`https://s2.googleusercontent.com/s2/favicons?sz=128&domain_url=${urlWithProtocol}`);
       favicon = faviconRes.request.res.responseUrl;
     } catch {
       favicon = undefined;
     }
   }
 
-  return {title, favicon};
+  return {title, favicon, urlWithProtocol};
 }
 
 docsRouter.get('/preview', async (req, res) => {
@@ -213,10 +213,10 @@ docsRouter.post('/webpage', userMiddleware, async (req, res) => {
   const { url } = req.body;
 
   try {
-    const { title, favicon } = await getDataFromUrl(url);
+    const { title, favicon, urlWithProtocol } = await getDataFromUrl(url);
     const doc = await Doc.create({
       org: org._id,
-      url,
+      url: urlWithProtocol,
       method: 'web',
       favicon,
       title,
