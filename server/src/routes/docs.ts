@@ -209,7 +209,7 @@ docsRouter.get('/groups', userMiddleware, async (_, res) => {
 });
 
 docsRouter.post('/webpage', userMiddleware, async (req, res) => {
-  const { org } = res.locals.user;
+  const { org, userId } = res.locals.user;
   const { url } = req.body;
 
   try {
@@ -220,7 +220,8 @@ docsRouter.post('/webpage', userMiddleware, async (req, res) => {
       method: 'web',
       favicon,
       title,
-      isJustAdded: true
+      isJustAdded: true,
+      createdBy: userId
     });
     res.send({doc})
   } catch (error) {

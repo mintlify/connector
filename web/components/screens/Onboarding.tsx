@@ -338,9 +338,9 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
   const [docs, setDocs] = useState<Doc[]>([]);
   const [isAddingDocOpen, setIsAddingDocOpen] = useState(false);
   const [addDocumentationType, setAddDocumentationType] = useState<AddDocumentationType>();
-  const [isAddDocLoading, setIsAddDocLoading] = useState(false);
   const [integrationsStatus, setIntegrationsStatus] = useState<Record<string, boolean>>({});
   const [docsPage, setDocsPage] = useState(1);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     request('GET', `routes/org/${org._id}/integrations`)
@@ -356,7 +356,7 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
         const { docs } = docsResponse.data;
         setDocs(docs);
       });
-  }, [user.userId, isAddDocLoading, org]);
+  }, [user.userId, org, refreshKey]);
 
   const docsOnDisplay = docs.slice(0, docsPage * 10);
   const isCompleted = docs.length > 0;
@@ -367,7 +367,7 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
       setIsOpen={setIsAddingDocOpen}
       overrideSelectedRuleType={addDocumentationType}
       integrationsStatus={{}} // intentionally left blank
-      refresh={() => {}}
+      refresh={() => setRefreshKey(Math.random())}
     />
     <h1 className="text-3xl font-semibold">
       Let&apos;s add some <span className="text-primary">documentation</span> 🗃
@@ -415,7 +415,6 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
         docs.length > 0 && <div>
         <h1 className="text-gray-600">{docs.length} documents added</h1>
         <ul className="mt-2 bg-white rounded-md px-1 py-3 shadow-md">
-          { isAddDocLoading && <LoadingItem /> }
           {docsOnDisplay.map((doc) => (
             <DocItem
               key={doc._id}
