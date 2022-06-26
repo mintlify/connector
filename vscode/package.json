@@ -1,8 +1,8 @@
 {
   "name": "connector",
   "publisher": "mintlify",
-  "displayName": "Mintlify",
-  "version": "0.3.15",
+  "displayName": "Mintlify Connect",
+  "version": "0.3.16",
   "icon": "assets/logo.png",
   "galleryBanner": {
     "color": "#041811",
@@ -68,7 +68,7 @@
       "activitybar": [
         {
           "id": "primary",
-          "title": "Mintlify",
+          "title": "Mintlify Connect",
           "icon": "assets/icon.png"
         }
       ]

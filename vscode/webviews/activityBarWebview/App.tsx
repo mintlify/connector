@@ -206,7 +206,7 @@ const App = () => {
   return (
     <div className="space-y-1">
       <h1 className="text-lg font-bold">
-        Mintlify
+        Mintlify Connect
       </h1>
       {
         user == null && <>
