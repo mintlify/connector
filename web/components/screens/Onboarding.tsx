@@ -365,6 +365,7 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
       setIsOpen={setIsAddingDocOpen}
       overrideSelectedRuleType={addDocumentationType}
       integrationsStatus={{}} // intentionally left blank
+      refresh={() => {}}
     />
     <h1 className="text-3xl font-semibold">
       Let&apos;s add some <span className="text-primary">documentation</span> 🗃

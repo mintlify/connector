@@ -53,9 +53,10 @@ type AddDocumentationProps = {
   setIsOpen: (isOpen: boolean) => void;
   overrideSelectedRuleType?: AddDocumentationType;
   integrationsStatus: IntegrationsStatus;
+  refresh: () => void,
 }
 
-export default function AddDocumentation({ isOpen, setIsOpen, overrideSelectedRuleType, integrationsStatus }: AddDocumentationProps) {
+export default function AddDocumentation({ isOpen, setIsOpen, overrideSelectedRuleType, integrationsStatus, refresh }: AddDocumentationProps) {
   const [selectedRuleType, setSelectedRuleType] = useState<AddDocumentationType>();
 
   useEffect(() => {
@@ -75,7 +76,8 @@ export default function AddDocumentation({ isOpen, setIsOpen, overrideSelectedRu
   }
 
   const onClose = () => {
-    setIsOpen(false)
+    setIsOpen(false);
+    refresh();
   }
 
   return (
