@@ -4,7 +4,7 @@ import { addDocumentationMap, AddDocumentationType } from './AddDocumentation'
 import AddGitHub from './AddGitHub'
 import AddGoogleDocs from './AddGoogleDocs'
 import AddNotion from './AddNotion'
-import AddWebpage from './AddWebPage'
+import AddWebpage from './AddWebpage'
 
 type DocConfigSettings = {
   inputComponent: JSX.Element | null
