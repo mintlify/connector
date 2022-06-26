@@ -160,6 +160,7 @@ export default function Home() {
               isAddDocumentOpen={isAddDocumentOpen}
               setIsAddDocumentOpen={setIsAddDocumentOpen}
               integrationsStatus={integrationsStatus || {}}
+              refresh={refresh}
             />
             {/* Projects List */}
             <div className="bg-white lg:min-w-0 lg:flex-1">

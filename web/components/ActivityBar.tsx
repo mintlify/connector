@@ -1,3 +1,4 @@
+import { ExternalLinkIcon } from '@heroicons/react/outline';
 import axios from 'axios';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -23,7 +24,12 @@ function DocProfile({ doc }: DocProfileProps) {
     <div className="flex space-x-3">
       <DocTitleIcon method={doc.method} favicon={doc.favicon} />
       <div className="flex-1">
-        <h1 className="text-sm font-medium">{doc.title}</h1>
+        <Link href={doc.url}>
+          <a className="text-sm font-medium flex items-center cursor-pointer decoration-gray-300 hover:underline" target="_blank">
+            {doc.title}
+            <ExternalLinkIcon className="h-4 text-gray-500 ml-1" />
+          </a>
+        </Link>
         <h2 className="mt-px text-sm text-gray-500">Last Updated {timeAgo.format(Date.parse(doc.lastUpdatedAt))}</h2>
       </div>
     </div>
@@ -113,7 +119,7 @@ export default function ActivityBar({ selectedDoc, refresh, refreshKey }: Activi
   const relevantTasks = selectedDoc ? tasks.filter((task) => task.doc._id === selectedDoc._id) : tasks;
   
   return (
-    <div className="relative pl-6 lg:w-80">
+    <div className="relative pl-6 lg:w-80 text-gray-700">
       {selectedDoc && <DocProfile doc={selectedDoc} />}
         <div className="pt-4 pb-2 flex items-center">
           <h2 className="text-sm font-semibold flex-1">Update Requests</h2>

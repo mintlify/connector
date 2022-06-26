@@ -11,12 +11,14 @@ type SidebarProps = {
   isAddDocumentOpen: boolean;
   setIsAddDocumentOpen: (isAddingDoc: boolean) => void;
   integrationsStatus: IntegrationsStatus;
+  refresh: () => void,
 }
 
 export default function Sidebar({
   isAddDocumentOpen,
   setIsAddDocumentOpen,
-  integrationsStatus
+  integrationsStatus,
+  refresh
 }: SidebarProps) {
   const { boot, show } = useIntercom();
   const { profile } = useProfile();
@@ -38,6 +40,7 @@ export default function Sidebar({
       isOpen={isAddDocumentOpen}
       setIsOpen={setIsAddDocumentOpen}
       integrationsStatus={integrationsStatus}
+      refresh={refresh}
     />
     <div className="xl:flex-shrink-0 xl:w-64 xl:border-r xl:border-gray-200">
       <div className="pl-4 pr-6 py-6 md:pl-6 lg:pl-8 xl:pl-0">
