@@ -339,7 +339,8 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
   const [isAddingDocOpen, setIsAddingDocOpen] = useState(false);
   const [addDocumentationType, setAddDocumentationType] = useState<AddDocumentationType>();
   const [isAddDocLoading, setIsAddDocLoading] = useState(false);
-  const [integrationsStatus, setIntegrationsStatus] = useState<Record<string, boolean>>({})
+  const [integrationsStatus, setIntegrationsStatus] = useState<Record<string, boolean>>({});
+  const [docsPage, setDocsPage] = useState(1);
 
   useEffect(() => {
     request('GET', `routes/org/${org._id}/integrations`)
@@ -357,6 +358,7 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
       });
   }, [user.userId, isAddDocLoading, org]);
 
+  const docsOnDisplay = docs.slice(0, docsPage * 10);
   const isCompleted = docs.length > 0;
 
   return <>
@@ -411,10 +413,10 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
       </div>
       {
         docs.length > 0 && <div>
-        <h1 className="text-lg text-gray-600">Documents added</h1>
+        <h1 className="text-gray-600">{docs.length} documents added</h1>
         <ul className="mt-2 bg-white rounded-md px-1 py-3 shadow-md">
           { isAddDocLoading && <LoadingItem /> }
-          {docs.map((doc) => (
+          {docsOnDisplay.map((doc) => (
             <DocItem
               key={doc._id}
               doc={doc}
@@ -423,8 +425,14 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
               onClick={() => {}}
               setSelectedDoc={() => {}}
               removeSeparators
+              removeTasks
             />
           ))}
+          {
+            docs.length > 10 && docsOnDisplay.length !== docs.length && <li className="mt-2 text-center font-medium text-sm text-gray-500">
+            <button onClick={() => setDocsPage(docsPage + 1)}>Show more</button>
+          </li>
+          }
           </ul>
         </div>
       }

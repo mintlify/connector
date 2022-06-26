@@ -23,7 +23,8 @@ type DocItemProps = {
   selectedDoc?: Doc,
   removeSeparators?: boolean,
   setSelectedDoc: (doc: Doc | undefined) => void,
-  integrationsStatus?: { [key: string]: boolean }
+  integrationsStatus?: { [key: string]: boolean },
+  removeTasks?: boolean,
 }
 
 type MenuItem = {
@@ -33,7 +34,7 @@ type MenuItem = {
   onClick: () => void,
 }
 
-export default function DocItem({ doc, onClick, selectedDoc, docs, setDocs, removeSeparators, setSelectedDoc, integrationsStatus }: DocItemProps) {
+export default function DocItem({ doc, onClick, selectedDoc, docs, setDocs, removeSeparators, setSelectedDoc, integrationsStatus, removeTasks }: DocItemProps) {
   const { profile } = useProfile();
   const [silenced, setSilenced] = useState(false);
   const [listMenu, setListMenu] = useState<MenuItem[]>([]);
@@ -107,7 +108,7 @@ export default function DocItem({ doc, onClick, selectedDoc, docs, setDocs, remo
                       {doc.title}
                     </span>
                     {
-                      doc.tasks && doc.tasks.map((task) => 
+                      !removeTasks && doc.tasks && doc.tasks.map((task) => 
                       task.type === 'update' ?
                           <div key={task._id} className="flex items-center bg-red-100 text-red-800 text-xs py-px px-2 rounded-full">
                           <svg className="mr-1.5 h-2 w-2 text-red-400" fill="currentColor" viewBox="0 0 8 8">
