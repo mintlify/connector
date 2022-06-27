@@ -5,7 +5,7 @@ import { ISDEV } from '../../helpers/environment';
 import Org from '../../models/Org';
 import { track } from '../../services/segment';
 import { getNotionTitle } from '../../services/notion';
-import { importDocsFromNotion } from '../../helpers/routes/docs';
+import { importDocsFromNotion, updateImportStatus } from '../../helpers/routes/docs';
 import { SearchResponse } from '@notionhq/client/build/src/api-endpoints';
 
 export type NotionPage = {
@@ -113,7 +113,7 @@ notionRouter.get('/authorization', async (req, res) => {
     }
     return res.redirect(redirectUrl);
   } catch {
-    await Org.findByIdAndUpdate(orgId, { 'importStatus.notion': false })
+    await updateImportStatus(orgId, 'notion', false);
     return res.redirect(redirectUrl);
   }
 });

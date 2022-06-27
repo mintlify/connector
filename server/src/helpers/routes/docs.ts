@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import Doc from '../../models/Doc';
 import Org, { OrgType } from '../../models/Org';
 import { ConfluencePage } from '../../routes/integrations/confluence';
@@ -8,6 +9,12 @@ import { getGoogleDocsPrivateData } from '../../services/googleDocs';
 import { getNotionPageDataWithId } from '../../services/notion';
 import { track } from '../../services/segment';
 import { replaceRelativeWithAbsolutePathsInMarkdown } from './markdown';
+
+export const updateImportStatus = (orgId: Types.ObjectId, app: 'notion' | 'github' | 'confluence' | 'googledocs', isLoading: boolean) => {
+  const query: Record<string, boolean> = {};
+  query[`importStatus.${app}`] = isLoading;
+  return Org.findByIdAndUpdate(orgId, query)
+}
 
 export const importDocsFromNotion = async (pages: NotionPage[], org: OrgType, userId: string) => {
   const orgId = org._id;
@@ -66,7 +73,7 @@ export const importDocsFromNotion = async (pages: NotionPage[], org: OrgType, us
   }));
 
   await Promise.all(addDocPromises);
-  await Org.findByIdAndUpdate(orgId, { 'importStatus.notion': false })
+  await updateImportStatus(orgId, 'notion', false);
 }
 
 export const importDocsFromGoogleDocs = async (docs: GoogleDoc[], org: OrgType, userId: string) => {
@@ -172,6 +179,7 @@ export const importDocsFromConfluence = async (pages: ConfluencePage[], org: Org
   }));
 
   await Promise.all(addDocPromises);
+  await updateImportStatus(orgId, 'confluence', false);
 };
 
 export type GitHubMarkdown = {
