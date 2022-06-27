@@ -150,7 +150,7 @@ export default function Search({ isOpen, setIsOpen }: SearchProps) {
                                   <span className="ml-2 flex-auto truncate" dangerouslySetInnerHTML={{ __html: docResult._highlightResult.name.value }}></span>
                                   </div>
                                   {
-                                    docResult._snippetResult.content.value && <div>
+                                    docResult._snippetResult.content?.value && <div>
                                     <span className={classNames("text-sm truncate pl-8", active ? 'text-white' : 'text-gray-500')} dangerouslySetInnerHTML={{ __html: docResult._snippetResult.content.value }}></span>
                                   </div>
                                   }

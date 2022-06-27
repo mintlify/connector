@@ -4,7 +4,7 @@ import { userMiddleware } from './user';
 import Doc, { DocType } from '../models/Doc';
 import Event from '../models/Event';
 import { ContentData, ScrapingMethod } from '../services/webscraper';
-import { deleteDocForSearch } from '../services/algolia';
+import { deleteDocForSearch, indexDocForSearch } from '../services/algolia';
 import Org from '../models/Org';
 import { getNotionPageDataWithId } from '../services/notion';
 import { getConfluenceContentFromPageById } from './integrations/confluence';
@@ -225,6 +225,7 @@ docsRouter.post('/webpage', userMiddleware, async (req, res) => {
       isJustAdded: true,
       createdBy: userId
     });
+    indexDocForSearch(doc);
     res.send({doc})
   } catch (error) {
     res.status(500).send({error});
