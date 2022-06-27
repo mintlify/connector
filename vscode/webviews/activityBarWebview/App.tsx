@@ -64,6 +64,7 @@ export const getSubdomain = (url: string) => {
 
 const App = () => {
   const initialState: State = vscode.getState();
+  console.log({initialState});
   const [user, setUser] = useState<any>(initialState?.user);
   const [dashboardUrl, setDashboardUrl] = useState<string>(initialState?.dashboardUrl);
   const [API_ENDPOINT, setAPI_ENDPOINT] = useState<string>(initialState?.API_ENDPOINT);
@@ -132,7 +133,6 @@ const App = () => {
       return;
     }
     vscode.postMessage({ command: 'get-docs', userId: user.userId, subdomain: getSubdomain(dashboardUrl) });
-    updateSelectedDoc(initialDoc);
   }, [user, dashboardUrl, API_ENDPOINT]);
 
   const handleSubmit = event => {
@@ -144,13 +144,15 @@ const App = () => {
       title: selectedDoc.title,
       org: code?.org,
       code: code,
+      url: selectedDoc.url
     };
     vscode.postMessage({ command: 'link-submit', args });
   };
 
   const updateSelectedDoc = (doc: Doc) => {
     setSelectedDoc(doc);
-    vscode.setState({ ...initialState, selectedDoc: doc });
+    setQuery('');
+    vscode.setState({ ...initialState, selectedDoc: doc, query: '' });
   };
 
   const checkIsURL = (str: string) => {
@@ -161,7 +163,31 @@ const App = () => {
     setQuery(newQuery);
     const urlStatus = checkIsURL(newQuery);
     setIsURL(urlStatus);
-    vscode.setState({ ...initialState, query: newQuery, isURL: urlStatus });
+    if (isURL) {
+      const newDoc = {
+        _id: 'create',
+        title: query,
+        url: query
+      };
+      setSelectedDoc(newDoc);
+      vscode.setState({
+        ...initialState,
+        query: newQuery,
+        isURL: urlStatus,
+        selectedDoc: newDoc
+      });
+    } else {
+      const newDoc = {
+        ...initialDoc,
+        title: query
+      };
+      vscode.setState({
+        ...initialState,
+        query: newQuery,
+        isURL: urlStatus,
+        selectedDoc: newDoc
+      });
+    }
   };
 
   const CodeContent = ({ code }: { code: Code }) => {
@@ -215,13 +241,12 @@ const App = () => {
     vscode.postMessage({ command: 'sign-up' });
   };
 
-  const displayDocs = docs.slice(0, displayPage * 50);
+  const limitedDocs = docs.slice(0, displayPage * 50);
   const hasDocSelected = !selectedDoc?.isDefault;
-  const filteredDocs = query === ''
-    ? displayDocs
-    : docs.filter((doc) => {
-      return doc.title.toLowerCase().includes(query.toLowerCase());
-    });
+  const filteredDocs = docs.filter((doc) => {
+    return doc.title.toLowerCase().includes(query.toLowerCase());
+  });
+  const displayDocs = query === '' ? limitedDocs : filteredDocs;
 
   return (
     <div className="space-y-1">
@@ -282,7 +307,7 @@ const App = () => {
                         displayValue={(doc: Doc) => doc.title}
                         onChange={(event) => updateQuery(event.target.value)}
                       />
-                      <Combobox.Button className="z-10 w-full absolute inset-y-0 right-0 flex items-center pr-2 flex-row justify-end">
+                      <Combobox.Button className="z-10 w-full absolute inset-y-0 right-0 flex items-center pr-2 flex-row justify-end dropdown-button">
                         <SelectorIcon
                           className="h-5 w-5"
                           aria-hidden="true"
@@ -292,12 +317,17 @@ const App = () => {
                     <Combobox.Options className="absolute mt-1 max-h-60 z-10 w-full shadow-lg code py-1 overflow-auto" onScroll={onScrollOptionsHandler}>
                       {query.length > 0 && (isURL ? (
                         <Combobox.Option
-                          value={{ id: 'create', title: query, url: query }}
+                          value={{ _id: 'create', title: query, url: query }}
                           className="cursor-pointer relative py-2 pl-3 pr-9"
                         >
                           <span className="font-normal block truncate">
                             Create "{query}"
                           </span>
+                          {selectedDoc._id === 'create' ? (
+                            <span className='absolute inset-y-0 right-0 flex items-center pr-4'>
+                              <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                            </span>
+                          ) : null}
                         </Combobox.Option>
                       ) : (
                         <Combobox.Option
@@ -306,11 +336,11 @@ const App = () => {
                           className="relative py-2 pl-3 pr-9"
                         >
                           <span className="font-normal block truncate opacity-75">
-                            Paste a URL to create a doc
+                            Search again or paste a URL to create a doc
                           </span>
                         </Combobox.Option>
                       ))}
-                      {filteredDocs.map((doc) => (
+                      {displayDocs.map((doc) => (
                         <Combobox.Option
                           key={doc._id}
                           className={({ active }) =>

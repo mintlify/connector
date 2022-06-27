@@ -110,3 +110,7 @@ textarea::placeholder {
 .svg {
 	fill: var(--vscode-foreground);
 }
+
+.dropdown-button:hover {
+	background-color: transparent;
+}

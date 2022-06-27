@@ -30,6 +30,7 @@ const CodeSchema = new Schema({
     line: { type: Number },
     endLine: { type: Number },
     createdBy: { type: Schema.Types.ObjectId },
+    createdAt: { type: Date, default: Date.now },
 });
 
 const Code = mongoose.model<CodeType>('Code', CodeSchema, 'code');

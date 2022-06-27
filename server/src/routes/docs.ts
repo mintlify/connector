@@ -44,7 +44,7 @@ export const extractFromDoc = async (doc: DocType, orgId: string): Promise<Conte
   return null;
 }
 
-const getDataFromUrl = async (urlInput: string) => {
+export const getDataFromUrl = async (urlInput: string) => {
   let urlWithProtocol = urlInput;
   if (!urlWithProtocol.startsWith('https://')) {
     urlWithProtocol = `https://${urlWithProtocol}`;

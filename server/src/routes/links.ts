@@ -1,37 +1,56 @@
 import express from 'express';
-import Code, { CodeType } from '../models/Code';
+import Code from '../models/Code';
 import Doc from '../models/Doc';
 import { track } from '../services/segment';
 import { userMiddleware } from './user';
+import { getDataFromUrl } from './docs';
+import { indexDocsForSearch } from '../services/algolia';
 
 const linksRouter = express.Router();
 
 linksRouter.put('/', userMiddleware, async (req, res) => {
   try {
-    const { docId, codes } = req.body;
-    const org = res.locals.user.org;
+    const { docId, code, url } = req.body;
+    const { org, userId } = res.locals.user;
+    let doc = null;
+    if ( docId === 'create') {
+      const { title, favicon, urlWithProtocol } = await getDataFromUrl(url);
+      doc = await Doc.findOneAndUpdate({
+        org: org._id,
+        url: urlWithProtocol,
+      }, {
+        org: org._id,
+        url: urlWithProtocol,
+        method: 'web',
+        favicon,
+        title,
+        isJustAdded: true,
+        createdBy: userId
+      }, { upsert: true, new: true });
+      indexDocsForSearch([doc]);
+    } else {
+      doc = await Doc.findById(docId);
 
-    const doc = await Doc.findById(docId);
-
-    if (doc == null) {
-        return res.status(400).send({error: 'Invalid docId'});
+      if (doc == null) {
+          return res.status(400).send({error: 'Invalid docId'});
+      }
     }
 
-    const codePromises: Promise<CodeType>[] = codes.map((code: CodeType) => {
-        code.doc = doc._id;
-        return Code.findOneAndUpdate(
-          {
-            org: org._id,
-            doc: doc._id,
-            url: code.url
-          },
-          code,
-          {
-            upsert: true
-          }
-        );
-    });
-    await Promise.all(codePromises);
+    if (doc == null) {
+      return res.status(400).send({error: "Could not create document"});
+    }
+
+    await Code.findOneAndUpdate(
+      {
+        org: org._id,
+        doc: doc._id,
+        url: code.url
+      },
+      code,
+      {
+        upsert: true
+      }
+    );
 
     track(res.locals.user.userId, 'Add code link', {
       doc: docId.toString(),
@@ -40,7 +59,6 @@ linksRouter.put('/', userMiddleware, async (req, res) => {
     return res.end();
   }
   catch (error) {
-    console.log(error);
     return res.status(400).send({error})
   }
 });

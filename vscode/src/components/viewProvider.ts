@@ -72,13 +72,13 @@ export class ViewProvider implements WebviewViewProvider {
 						break;
 					case 'link-submit':
 						{
-							const { userId, docId, title, code, subdomain } = message.args;
+							const { userId, docId, title, code, subdomain, url } = message.args;
 							vscode.window.withProgress({
 								location: vscode.ProgressLocation.Notification,
 								title: 'Connecting documentation with code',
 							}, () => new Promise(async (resolve) => {
 								try {
-									await axios.put(`${API_ENDPOINT}/links`, { docId, codes: [code] }, {
+									await axios.put(`${API_ENDPOINT}/links`, { docId, code, url }, {
 										params: {
 											userId,
 											subdomain
