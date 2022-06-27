@@ -126,6 +126,7 @@ export const importDocsFromGoogleDocs = async (docs: GoogleDoc[], org: OrgType, 
   }));
 
   await Promise.all(addDocPromises);
+  await updateImportStatus(orgId, 'googledocs', false);
 };
 
 export const importDocsFromConfluence = async (pages: ConfluencePage[], org: OrgType, userId: string) => {

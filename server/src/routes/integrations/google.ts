@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { google as googleapis } from 'googleapis';
-import { importDocsFromGoogleDocs } from '../../helpers/routes/docs';
+import { ISDEV } from '../../helpers/environment';
+import { importDocsFromGoogleDocs, updateImportStatus } from '../../helpers/routes/docs';
 import Org from '../../models/Org';
 
 export type GoogleDoc = {
@@ -55,33 +56,44 @@ googleRouter.get('/authorization', async (req, res) => {
       const { orgId, userId } = parsedState;
       const org = await Org.findByIdAndUpdate(orgId, {
         'integrations.google': tokens,
+        'importStatus.googledocs': true,
       });
 
       if (org == null) {
         return res.status(403).send({ error: 'Invalid organization ID' });
       }
 
-      const googleDrive = googleapis.drive({ version: 'v3', auth: oAuth2Client })
-      let nextPageToken: string | null | undefined = ''
-      const { data }: any = await (nextPageToken !== ''
-        ? googleDrive.files.list({
-            q: 'mimeType="application/vnd.google-apps.document" and trashed=false',
-            fields: 'nextPageToken, files(id, name)',
-            pageToken: nextPageToken,
-            spaces: 'drive',
-          })
-        : googleDrive.files.list({
-            q: 'mimeType="application/vnd.google-apps.document" and trashed=false',
-            fields: 'nextPageToken, files(id, name, modifiedTime, createdTime)',
-          }))
-      nextPageToken = data.nextPageToken
-      const googleDocs: GoogleDoc[] = data.files;
-      await importDocsFromGoogleDocs(googleDocs, org, userId);
-      
-      if (parsedState?.close) {
-        return res.send("<script>window.close();</script>");
+      const redirectUrl = `https://${org.subdomain}.mintlify.com`;
+      try {
+        const googleDrive = googleapis.drive({ version: 'v3', auth: oAuth2Client })
+        let nextPageToken: string | null | undefined = ''
+        const { data }: any = await (nextPageToken !== ''
+          ? googleDrive.files.list({
+              q: 'mimeType="application/vnd.google-apps.document" and trashed=false',
+              fields: 'nextPageToken, files(id, name)',
+              pageToken: nextPageToken,
+              spaces: 'drive',
+            })
+          : googleDrive.files.list({
+              q: 'mimeType="application/vnd.google-apps.document" and trashed=false',
+              fields: 'nextPageToken, files(id, name, modifiedTime, createdTime)',
+            }))
+        nextPageToken = data.nextPageToken
+        const googleDocs: GoogleDoc[] = data.files;
+        importDocsFromGoogleDocs(googleDocs, org, userId);
+        
+        if (parsedState?.close) {
+          return res.send("<script>window.close();</script>");
+        }
+        if (ISDEV) {
+          return res.redirect('http://localhost:3000');
+        }
+        return res.redirect(redirectUrl);
+      } catch {
+        await updateImportStatus(orgId, 'googledocs', false);
+        return res.redirect(redirectUrl);
       }
-      return res.redirect(`https://${org.subdomain}.mintlify.com`);
+
     } catch (error) {
       return res.send("Unable to install Google integration")
     }
