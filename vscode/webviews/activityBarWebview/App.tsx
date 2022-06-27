@@ -64,7 +64,6 @@ export const getSubdomain = (url: string) => {
 
 const App = () => {
   const initialState: State = vscode.getState();
-  console.log({initialState});
   const [user, setUser] = useState<any>(initialState?.user);
   const [dashboardUrl, setDashboardUrl] = useState<string>(initialState?.dashboardUrl);
   const [API_ENDPOINT, setAPI_ENDPOINT] = useState<string>(initialState?.API_ENDPOINT);
@@ -179,8 +178,10 @@ const App = () => {
     } else {
       const newDoc = {
         ...initialDoc,
-        title: query
+        title: query,
+        url: query
       };
+      setSelectedDoc(newDoc);
       vscode.setState({
         ...initialState,
         query: newQuery,
@@ -247,6 +248,7 @@ const App = () => {
     return doc.title.toLowerCase().includes(query.toLowerCase());
   });
   const displayDocs = query === '' ? limitedDocs : filteredDocs;
+  const isNoDocs = docs.length === 0 || docs[0] === initialDoc;
 
   return (
     <div className="space-y-1">
@@ -297,6 +299,22 @@ const App = () => {
             Documentation<span className='text-red-500'>*</span>
           </label>
           <div className="mt-1">
+            {isNoDocs ? (
+              <>
+                <input
+                  type="text"
+                  name="url"
+                  id="url"
+                  className="block w-full text-sm"
+                  placeholder="www.example.com"
+                  value={query}
+                  onChange={(event) => updateQuery(event.target.value)}
+                />
+                {!isURL && query !== '' && (
+                  <span className="text-red-500">Input valid URL</span>
+                )}
+              </>
+            ) : (
             <Combobox value={selectedDoc} onChange={updateSelectedDoc}>
               {() => (
                 <>
@@ -376,6 +394,7 @@ const App = () => {
                 </>
               )}
             </Combobox>
+            )}
           </div>
           <div className='flex flex-row mt-3'>
             Select Relevant Code<span className='text-red-500'>*</span>
