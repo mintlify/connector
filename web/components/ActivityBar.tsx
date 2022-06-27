@@ -131,7 +131,7 @@ export default function ActivityBar({ selectedDoc, refresh, refreshKey }: Activi
               <ul role="list" className="-my-4 divide-y divide-gray-200">
               {
                 relevantTasks.map((task) => 
-                  <TaskItem key={task._id} task={task} onCompleteTask={onCompleteTask} />
+                  <TaskItem key={task._id} task={task} onCompleteTask={onCompleteTask} selectedDoc={selectedDoc} />
                 )
               }
               </ul>

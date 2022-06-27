@@ -1,40 +1,43 @@
 import { CheckIcon } from "@heroicons/react/solid";
 import Link from "next/link";
-import timeAgo from "../services/timeago";
+import { DocTitleIcon } from "../helpers/Icons";
+import { Doc } from "../pages";
 import { Task } from "./ActivityBar";
 
-export default function TaskItem({ task, onCompleteTask }: { task: Task, onCompleteTask: (task: Task) => void }) {
-  let taskIcon;
+type TaskItemProps = {
+  task: Task,
+  onCompleteTask: (task: Task) => void,
+  selectedDoc?: Doc
+}
+
+export default function TaskItem({ task, onCompleteTask, selectedDoc }: TaskItemProps) {
   let actionLabel;
+  let subtitle;
   switch (task.type) {
     case 'update':
-      taskIcon = <div className="flex items-center justify-center bg-red-100 h-6 w-6 rounded-lg">
-          <span className="h-2 w-2 rounded-full bg-red-400"></span>
-      </div>
       actionLabel = 'Update';
+      subtitle = 'View document'
       break;
     case 'review':
-      taskIcon = <div className="flex items-center justify-center">
-        <img src="assets/integrations/github.svg" className="h-6" alt="GitHub" />
-      </div>
       actionLabel = 'Review';
+      subtitle = 'View on GitHub'
       break;
     default:
-      taskIcon = null;
+      break;
   }
 
   return <li key={task._id} className="flex items-center py-4 space-x-3">
-  {taskIcon}
+  { selectedDoc == null && <DocTitleIcon method={task.doc.method} favicon={task.doc.favicon} /> }
   <div className="min-w-0 flex-1">
     <Link href={task.url || ''}>
-      <div className="group cursor-pointer">
-      <a target="_blank" className="text-sm font-medium text-gray-700 group-hover:underline">
+      <a target="_blank" className="group cursor-pointer">
+      <span className="text-sm font-medium text-gray-700 group-hover:underline">
         <span>{actionLabel} {task.doc.title}</span>
-      </a>
+      </span>
       <p className="text-sm text-gray-500 group-hover:underline">
-        Created {timeAgo.format(Date.parse(task.createdAt))}
+        {subtitle}
       </p>
-      </div>
+      </a>
     </Link>
   </div>
   <div className="flex-shrink-0">
