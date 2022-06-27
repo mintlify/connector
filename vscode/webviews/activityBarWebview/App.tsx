@@ -327,7 +327,7 @@ const App = () => {
                           className="relative py-2 pl-3 pr-9"
                         >
                           <span className="font-normal block truncate opacity-75">
-                            Search again or paste a URL to create a doc
+                            Search again or paste a URL
                           </span>
                         </Combobox.Option>
                       ))}
