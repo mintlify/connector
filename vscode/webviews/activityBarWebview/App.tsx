@@ -1,6 +1,6 @@
 import axios from 'axios';
 import prependHttp from 'prepend-http';
-import { Listbox } from '@headlessui/react';
+import { Combobox } from '@headlessui/react';
 import React, { useEffect, useState } from 'react';
 import { CheckIcon, LockClosedIcon, SelectorIcon } from '@heroicons/react/solid';
 import { vscode } from '../common/message';
@@ -32,11 +32,13 @@ type State = {
   API_ENDPOINT: string;
   selectedDoc?: Doc;
   code?: Code;
+  query: string;
+  isURL: boolean;
 };
 
 const initialDoc: Doc = {
   _id: 'initial',
-  title: 'Select documentation',
+  title: '',
   url: '',
   isDefault: true,
 };
@@ -70,6 +72,8 @@ const App = () => {
   const [selectedDoc, setSelectedDoc] = useState<Doc>(initialState?.selectedDoc || initialDoc);
   const [code, setCode] = useState<Code | undefined>(initialState?.code);
   const [displayPage, setDisplayPage] = useState(1);
+  const [query, setQuery] = useState<string>(initialState?.query || '');
+  const [isURL, setIsURL] = useState<boolean>(initialState?.isURL || false);
 
   useEffect(() => {
     window.addEventListener('message', event => {
@@ -127,11 +131,8 @@ const App = () => {
     if (!user?.userId || dashboardUrl == null) {
       return;
     }
-    try {
-      vscode.postMessage({ command: 'get-docs', userId: user.userId, subdomain: getSubdomain(dashboardUrl) });
-    } catch (e) {
-      vscode.postMessage({ command: 'error', message: 'Could not fetch documents. Please log in again or re-install the extension.' });
-    }
+    vscode.postMessage({ command: 'get-docs', userId: user.userId, subdomain: getSubdomain(dashboardUrl) });
+    updateSelectedDoc(initialDoc);
   }, [user, dashboardUrl, API_ENDPOINT]);
 
   const handleSubmit = event => {
@@ -150,6 +151,17 @@ const App = () => {
   const updateSelectedDoc = (doc: Doc) => {
     setSelectedDoc(doc);
     vscode.setState({ ...initialState, selectedDoc: doc });
+  };
+
+  const checkIsURL = (str: string) => {
+    return /(([a-z]+:\/\/)?(([a-z0-9-]+\.)+([a-z]{2}|aero|arpa|biz|com|coop|edu|gov|info|int|jobs|mil|museum|name|nato|net|org|pro|travel|local|internal))(:[0-9]{1,5})?(\/[a-z0-9_\-.~]+)*(\/([a-z0-9_\-.]*)(\?[a-z0-9+_\-.%=&amp;]*)?)?(#[a-zA-Z0-9!$&'()*+.=-_~:@/?]*)?)(\s+|$)/gi.test(str.trim());
+  };
+
+  const updateQuery = (newQuery: string) => {
+    setQuery(newQuery);
+    const urlStatus = checkIsURL(newQuery);
+    setIsURL(urlStatus);
+    vscode.setState({ ...initialState, query: newQuery, isURL: urlStatus });
   };
 
   const CodeContent = ({ code }: { code: Code }) => {
@@ -204,7 +216,12 @@ const App = () => {
   };
 
   const displayDocs = docs.slice(0, displayPage * 50);
-  const hasDocSelected = selectedDoc?.isDefault !== true;
+  const hasDocSelected = !selectedDoc?.isDefault;
+  const filteredDocs = query === ''
+    ? displayDocs
+    : docs.filter((doc) => {
+      return doc.title.toLowerCase().includes(query.toLowerCase());
+    });
 
   return (
     <div className="space-y-1">
@@ -255,53 +272,80 @@ const App = () => {
             Documentation<span className='text-red-500'>*</span>
           </label>
           <div className="mt-1">
-          <Listbox value={selectedDoc} onChange={updateSelectedDoc}>
+          <Combobox value={selectedDoc} onChange={updateSelectedDoc}>
             {() => (
               <>
                 <div className="mt-1 relative">
-                  <Listbox.Button className="relative w-full pl-3 pr-10 py-2 text-left code">
-                    <span className="block truncate">{selectedDoc.title}</span>
-                    <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                      <SelectorIcon className="h-5 w-5" aria-hidden="true" />
-                    </span>
-                  </Listbox.Button>
-                    <Listbox.Options className="absolute mt-1 max-h-60 z-10 w-full shadow-lg code py-1 overflow-auto" onScroll={onScrollOptionsHandler}>
-                      {displayDocs.map((doc) => (
-                        <Listbox.Option
-                          key={doc._id}
-                          className={({ active }) =>
-                            classNames(
-                              active ? 'text-vscode active' : '',
-                              'cursor-pointer relative py-2 pl-3 pr-9'
-                            )
-                          }
-                          value={doc}
-                        >
-                          {({ selected, active }) => (
-                            <>
-                              <span className='font-normal block truncate'>
-                                {doc.title}
-                              </span>
+                  <div className="relative w-full cursor-default overflow-hidden text-left sm:text-sm">
+                    <Combobox.Input
+                      className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 code"
+                      displayValue={(doc: Doc) => doc.title}
+                      onChange={(event) => updateQuery(event.target.value)}
+                    />
+                    <Combobox.Button className="z-10 w-full absolute inset-y-0 right-0 flex items-center pr-2 flex-row justify-end">
+                      <SelectorIcon
+                        className="h-5 w-5"
+                        aria-hidden="true"
+                      />
+                    </Combobox.Button>
+                  </div>
+                  <Combobox.Options className="absolute mt-1 max-h-60 z-10 w-full shadow-lg code py-1 overflow-auto" onScroll={onScrollOptionsHandler}>
+                    {query.length > 0 && (isURL ? (
+                      <Combobox.Option
+                        value={{ id: 'create', title: query, url: query }}
+                        className="cursor-pointer relative py-2 pl-3 pr-9"
+                      >
+                        <span className="font-normal block truncate">
+                          Create "{query}"
+                        </span>
+                      </Combobox.Option>
+                    ) : (
+                      <Combobox.Option
+                        value={{ id: 'create', title: query, url: query }}
+                        disabled={true}
+                        className="relative py-2 pl-3 pr-9"
+                      >
+                        <span className="font-normal block truncate opacity-75">
+                          Paste a URL to create a doc
+                        </span>
+                      </Combobox.Option>
+                    ))}
+                    {filteredDocs.map((doc) => (
+                      <Combobox.Option
+                        key={doc._id}
+                        className={({ active }) =>
+                          classNames(
+                            active ? 'text-vscode active' : '',
+                            'cursor-pointer relative py-2 pl-3 pr-9'
+                          )
+                        }
+                        value={doc}
+                      >
+                        {({ selected, active }) => (
+                          <>
+                            <span className='font-normal block truncate'>
+                              {doc.title}
+                            </span>
 
-                              {selected ? (
-                                <span
-                                  className={classNames(
-                                    active ? 'text-white' : '',
-                                    'absolute inset-y-0 right-0 flex items-center pr-4'
-                                  )}
-                                >
-                                  <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                                </span>
-                              ) : null}
-                            </>
-                          )}
-                        </Listbox.Option>
-                      ))}
-                    </Listbox.Options>
+                            {selected ? (
+                              <span
+                                className={classNames(
+                                  active ? 'text-white' : '',
+                                  'absolute inset-y-0 right-0 flex items-center pr-4'
+                                )}
+                              >
+                                <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                              </span>
+                            ) : null}
+                          </>
+                        )}
+                      </Combobox.Option>
+                    ))}
+                  </Combobox.Options>
                 </div>
               </>
             )}
-          </Listbox>
+          </Combobox>
           </div>
           <div className='flex flex-row mt-3'>
             Select Relevant Code<span className='text-red-500'>*</span>
