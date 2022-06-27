@@ -272,80 +272,80 @@ const App = () => {
             Documentation<span className='text-red-500'>*</span>
           </label>
           <div className="mt-1">
-          <Combobox value={selectedDoc} onChange={updateSelectedDoc}>
-            {() => (
-              <>
-                <div className="mt-1 relative">
-                  <div className="relative w-full cursor-default overflow-hidden text-left sm:text-sm">
-                    <Combobox.Input
-                      className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 code"
-                      displayValue={(doc: Doc) => doc.title}
-                      onChange={(event) => updateQuery(event.target.value)}
-                    />
-                    <Combobox.Button className="z-10 w-full absolute inset-y-0 right-0 flex items-center pr-2 flex-row justify-end">
-                      <SelectorIcon
-                        className="h-5 w-5"
-                        aria-hidden="true"
+            <Combobox value={selectedDoc} onChange={updateSelectedDoc}>
+              {() => (
+                <>
+                  <div className="mt-1 relative">
+                    <div className="relative w-full cursor-default overflow-hidden text-left sm:text-sm">
+                      <Combobox.Input
+                        className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 code"
+                        displayValue={(doc: Doc) => doc.title}
+                        onChange={(event) => updateQuery(event.target.value)}
                       />
-                    </Combobox.Button>
-                  </div>
-                  <Combobox.Options className="absolute mt-1 max-h-60 z-10 w-full shadow-lg code py-1 overflow-auto" onScroll={onScrollOptionsHandler}>
-                    {query.length > 0 && (isURL ? (
-                      <Combobox.Option
-                        value={{ id: 'create', title: query, url: query }}
-                        className="cursor-pointer relative py-2 pl-3 pr-9"
-                      >
-                        <span className="font-normal block truncate">
-                          Create "{query}"
-                        </span>
-                      </Combobox.Option>
-                    ) : (
-                      <Combobox.Option
-                        value={{ id: 'create', title: query, url: query }}
-                        disabled={true}
-                        className="relative py-2 pl-3 pr-9"
-                      >
-                        <span className="font-normal block truncate opacity-75">
-                          Paste a URL to create a doc
-                        </span>
-                      </Combobox.Option>
-                    ))}
-                    {filteredDocs.map((doc) => (
-                      <Combobox.Option
-                        key={doc._id}
-                        className={({ active }) =>
-                          classNames(
-                            active ? 'text-vscode active' : '',
-                            'cursor-pointer relative py-2 pl-3 pr-9'
-                          )
-                        }
-                        value={doc}
-                      >
-                        {({ selected, active }) => (
-                          <>
-                            <span className='font-normal block truncate'>
-                              {doc.title}
-                            </span>
-
-                            {selected ? (
-                              <span
-                                className={classNames(
-                                  active ? 'text-white' : '',
-                                  'absolute inset-y-0 right-0 flex items-center pr-4'
-                                )}
-                              >
-                                <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                      <Combobox.Button className="z-10 w-full absolute inset-y-0 right-0 flex items-center pr-2 flex-row justify-end">
+                        <SelectorIcon
+                          className="h-5 w-5"
+                          aria-hidden="true"
+                        />
+                      </Combobox.Button>
+                    </div>
+                    <Combobox.Options className="absolute mt-1 max-h-60 z-10 w-full shadow-lg code py-1 overflow-auto" onScroll={onScrollOptionsHandler}>
+                      {query.length > 0 && (isURL ? (
+                        <Combobox.Option
+                          value={{ id: 'create', title: query, url: query }}
+                          className="cursor-pointer relative py-2 pl-3 pr-9"
+                        >
+                          <span className="font-normal block truncate">
+                            Create "{query}"
+                          </span>
+                        </Combobox.Option>
+                      ) : (
+                        <Combobox.Option
+                          value={{ id: 'create', title: query, url: query }}
+                          disabled={true}
+                          className="relative py-2 pl-3 pr-9"
+                        >
+                          <span className="font-normal block truncate opacity-75">
+                            Paste a URL to create a doc
+                          </span>
+                        </Combobox.Option>
+                      ))}
+                      {filteredDocs.map((doc) => (
+                        <Combobox.Option
+                          key={doc._id}
+                          className={({ active }) =>
+                            classNames(
+                              active ? 'text-vscode active' : '',
+                              'cursor-pointer relative py-2 pl-3 pr-9'
+                            )
+                          }
+                          value={doc}
+                        >
+                          {({ selected, active }) => (
+                            <>
+                              <span className='font-normal block truncate'>
+                                {doc.title}
                               </span>
-                            ) : null}
-                          </>
-                        )}
-                      </Combobox.Option>
-                    ))}
-                  </Combobox.Options>
-                </div>
-              </>
-            )}
-          </Combobox>
+
+                              {selected ? (
+                                <span
+                                  className={classNames(
+                                    active ? 'text-white' : '',
+                                    'absolute inset-y-0 right-0 flex items-center pr-4'
+                                  )}
+                                >
+                                  <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                </span>
+                              ) : null}
+                            </>
+                          )}
+                        </Combobox.Option>
+                      ))}
+                    </Combobox.Options>
+                  </div>
+                </>
+              )}
+            </Combobox>
           </div>
           <div className='flex flex-row mt-3'>
             Select Relevant Code<span className='text-red-500'>*</span>
