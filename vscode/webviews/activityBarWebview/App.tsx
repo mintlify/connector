@@ -150,9 +150,7 @@ const App = () => {
 
   const updateSelectedDoc = (doc: Doc) => {
     setSelectedDoc(doc);
-    if (doc._id !== 'create') {
-      setQuery('');
-    }
+    setQuery('');
     vscode.setState({ ...initialState, selectedDoc: doc, query: '' });
   };
 
@@ -164,33 +162,6 @@ const App = () => {
     setQuery(newQuery);
     const urlStatus = checkIsURL(newQuery);
     setIsURL(urlStatus);
-    if (isURL) {
-      const newDoc = {
-        _id: 'create',
-        title: query,
-        url: query
-      };
-      setSelectedDoc(newDoc);
-      vscode.setState({
-        ...initialState,
-        query: newQuery,
-        isURL: urlStatus,
-        selectedDoc: newDoc
-      });
-    } else {
-      const newDoc = {
-        ...initialDoc,
-        title: query,
-        url: query
-      };
-      setSelectedDoc(newDoc);
-      vscode.setState({
-        ...initialState,
-        query: newQuery,
-        isURL: urlStatus,
-        selectedDoc: newDoc
-      });
-    }
   };
 
   const CodeContent = ({ code }: { code: Code }) => {
