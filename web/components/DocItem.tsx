@@ -7,7 +7,7 @@ import {
   ChevronRightIcon,
   DotsVerticalIcon,
 } from '@heroicons/react/solid'
-import { ConnectionIcon, DocTitleIcon, SilencedDocIcon } from '../helpers/Icons'
+import { ConnectionIcon, DocTitleIcon } from '../helpers/Icons'
 import timeAgo from '../services/timeago'
 import { getSubdomain } from "../helpers/user";
 import axios from "axios";
@@ -36,7 +36,6 @@ type MenuItem = {
 
 export default function DocItem({ doc, onClick, selectedDoc, docs, setDocs, removeSeparators, setSelectedDoc, integrationsStatus, removeTasks }: DocItemProps) {
   const { profile } = useProfile();
-  const [silenced, setSilenced] = useState(false);
   const [listMenu, setListMenu] = useState<MenuItem[]>([]);
 
   useEffect(() => {
@@ -46,27 +45,7 @@ export default function DocItem({ doc, onClick, selectedDoc, docs, setDocs, remo
       return;
     }
     
-    let slack = doc?.slack ?? true;
-    if (integrationsStatus == null || !integrationsStatus['slack']) { slack = false }
-    const email = doc?.email ?? true;
-    setSilenced(!slack && !email);
-    
     const menu = [];
-
-    // Temporarily remove slack alerts disabling
-    // if (integrationsStatus != null && integrationsStatus['slack']) {
-    //   const slack = doc?.slack ?? true;
-    //   menu.push({
-    //     name: slack ? 'Disable Slack alerts' : 'Enable Slack alerts',
-    //     isGreen: !slack,
-    //     isRed: false,
-    //     onClick: () => {
-    //       axios.put(`${API_ENDPOINT}/routes/docs/${doc._id}/slack`, {
-    //         slack: !slack
-    //       });
-    //     }
-    //   })
-    // }
 
     menu.push({
       name: 'Delete',
@@ -196,12 +175,6 @@ export default function DocItem({ doc, onClick, selectedDoc, docs, setDocs, remo
                 />
               </a>
             ))}
-            {silenced && (
-              <SilencedDocIcon
-                outerSize={6}
-                innerSize={4} 
-              />
-            )}  
           </div>
         </div>
       </div>
