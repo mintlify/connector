@@ -27,6 +27,11 @@ linksRouter.put('/', userMiddleware, async (req, res) => {
         isJustAdded: true,
         createdBy: userId
       }, { upsert: true, new: true });
+
+      if (doc == null) {
+        return res.status(400).send({error: "Could not create document"});
+      }
+
       indexDocsForSearch([doc]);
     } else {
       doc = await Doc.findById(docId);
@@ -36,9 +41,7 @@ linksRouter.put('/', userMiddleware, async (req, res) => {
       }
     }
 
-    if (doc == null) {
-      return res.status(400).send({error: "Could not create document"});
-    }
+    
 
     await Code.findOneAndUpdate(
       {
