@@ -8,14 +8,14 @@ export default function CodeItem({ code, onDeleteCode }: { code: Code, onDeleteC
   <ConnectionIcon outerSize={6} innerSize={4} />
   <div className="min-w-0 flex-1">
     <Link href={code.url}>
-      <div className="group cursor-pointer">
-        <a target="_blank" className="text-sm font-medium text-gray-700 group-hover:underline">
+      <a target="_blank" className="group cursor-pointer">
+        <span className="text-sm font-medium text-gray-700 group-hover:underline">
           <span>{code.file}</span>
-        </a>
+        </span>
         <p className="text-sm text-gray-500 group-hover:underline">
           View on GitHub
         </p>
-      </div>
+      </a>
     </Link>
   </div>
   <div className="flex-shrink-0">

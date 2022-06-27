@@ -143,12 +143,12 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
   }
 });
 
-const groupMap: Record<ScrapingMethod, { name: string, importStatusId: string }> = {
-  'notion-private': { name: 'Notion Workspace', importStatusId: 'notion' },
-  'confluence-private': { name: 'Confluence Space', importStatusId: 'confluence' },
-  'googledocs-private': { name: 'Google Docs', importStatusId: 'googledocs' },
-  'github': { name: 'GitHub Markdown', importStatusId: 'github' },
-  'web': { name: 'Web Pages', importStatusId: '' },
+const groupMap: Record<ScrapingMethod, { name: string, importStatusId: string, id:  ScrapingMethod }> = {
+  'notion-private': { name: 'Notion Workspace', importStatusId: 'notion', id: 'notion-private' },
+  'confluence-private': { name: 'Confluence Space', importStatusId: 'confluence', id: 'confluence-private' },
+  'googledocs-private': { name: 'Google Docs', importStatusId: 'googledocs', id: 'googledocs-private' },
+  'github': { name: 'GitHub Markdown', importStatusId: 'github', id: 'github' },
+  'web': { name: 'Web Pages', importStatusId: '', id: 'web' },
 }
 
 docsRouter.get('/groups', userMiddleware, async (_, res) => {
@@ -198,7 +198,7 @@ docsRouter.get('/groups', userMiddleware, async (_, res) => {
     },
   ]);
 
-  const groupsWithNames: any[] = []
+  const groupsWithNames: any[] = [];
   
   groups.forEach((group: { _id: ScrapingMethod }) => {
     const groupData = groupMap[group._id];
@@ -221,7 +221,7 @@ docsRouter.get('/groups', userMiddleware, async (_, res) => {
         return groupData.importStatusId === importingApp;
       })
       groupsWithNames.unshift({
-        id: group?.importStatusId,
+        _id: group?.id,
         name: group?.name || '',
         isLoading: true,
       })
