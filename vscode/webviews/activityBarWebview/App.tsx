@@ -150,7 +150,9 @@ const App = () => {
 
   const updateSelectedDoc = (doc: Doc) => {
     setSelectedDoc(doc);
-    setQuery('');
+    if (doc._id !== 'create') {
+      setQuery('');
+    }
     vscode.setState({ ...initialState, selectedDoc: doc, query: '' });
   };
 
