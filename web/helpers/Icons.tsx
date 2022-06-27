@@ -98,7 +98,7 @@ export const ConnectIcon = ({ className}: { className: string}) => {
 
 export const ConnectionIcon = ({ outerSize = 10, innerSize = 6 }: { outerSize?: number; innerSize?: number }) => {
   return (
-    <div className={`h-${outerSize} aspect-square rounded-lg bg-secondary flex items-center justify-center`}>
+    <div className={`h-${outerSize} aspect-square rounded-lg bg-green-100 flex items-center justify-center`}>
       <ConnectIcon
         className={`h-${innerSize - 1} text-hover`}
       />
