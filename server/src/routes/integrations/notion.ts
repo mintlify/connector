@@ -109,11 +109,11 @@ notionRouter.get('/authorization', async (req, res) => {
       return res.send("<script>window.close();</script>");
     }
     if (ISDEV) {
-      return res.redirect(org.subdomain);
+      return res.redirect('http://localhost:3000');
     }
     return res.redirect(redirectUrl);
   } catch {
-    await Org.findById(orgId, { 'importStatus.notion': false })
+    await Org.findByIdAndUpdate(orgId, { 'importStatus.notion': false })
     return res.redirect(redirectUrl);
   }
 });
@@ -163,7 +163,7 @@ export const getNotionDocs = async (notionAccessToken: string) => {
           icon: page.icon?.url,
           url: page.url,
         };
-      })
+      });
 
     return results;
 }

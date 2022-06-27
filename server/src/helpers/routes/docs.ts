@@ -66,7 +66,7 @@ export const importDocsFromNotion = async (pages: NotionPage[], org: OrgType, us
   }));
 
   await Promise.all(addDocPromises);
-  await Org.findById(orgId, { 'importStatus.notion': false })
+  await Org.findByIdAndUpdate(orgId, { 'importStatus.notion': false })
 }
 
 export const importDocsFromGoogleDocs = async (docs: GoogleDoc[], org: OrgType, userId: string) => {
