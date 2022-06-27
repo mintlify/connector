@@ -3,7 +3,7 @@ import { Router } from 'express';
 import queryString from 'query-string';
 import { ISDEV } from "../../helpers/environment";
 import { ENDPOINT } from "../../helpers/github/octokit"
-import { importDocsFromGitHub, GitHubMarkdown } from "../../helpers/routes/docs";
+import { importDocsFromGitHub, GitHubMarkdown, updateImportStatus } from "../../helpers/routes/docs";
 import Org from '../../models/Org';
 import { track } from "../../services/segment";
 
@@ -171,28 +171,39 @@ githubRouter.get('/authorization', async (req, res) => {
       }
     });
   
-    const org = await Org.findByIdAndUpdate(orgId, { "integrations.github": { ...response, installations: installationsWithRepositories }})
+    const org = await Org.findByIdAndUpdate(orgId, { "integrations.github": {
+      ...response,
+      installations: installationsWithRepositories,
+      'importStatus.github': true
+    }})
     if (org == null) {
       return res.status(403).send({error: 'Invalid Organization ID'})
     }
 
-    await importDocsFromGitHub(markdowns, org, userId)
+    const redirectUrl = `https://${org.subdomain}.mintlify.com`;
 
-    if (ISDEV) {
-      return res.redirect(org.subdomain);
+    try {
+      importDocsFromGitHub(markdowns, org, userId)
+      if (ISDEV) {
+        return res.redirect(org.subdomain);
+      }
+
+      track(org._id.toString(), 'Install GitHub App', {
+        isOrg: true,
+      });
+
+      if (parsedState?.close) {
+        return res.send("<script>window.close();</script>");
+      }
+      if (ISDEV) {
+        return res.redirect('http://localhost:3000');
+      }
+      return res.redirect(redirectUrl);
+    } catch {
+      await updateImportStatus(orgId, 'github', false);
+      return res.redirect(redirectUrl);
     }
-
-    track(org._id.toString(), 'Install GitHub App', {
-      isOrg: true,
-    });
-
-    if (parsedState?.close) {
-      return res.send("<script>window.close();</script>");
-    }
-    return res.redirect(`https://${org.subdomain}.mintlify.com`);
-
   } catch (error: any) {
-    console.log(error);
     return res.status(500).send(error?.data);
   }
 });

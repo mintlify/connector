@@ -92,6 +92,7 @@ confluenceRouter.get('/authorization', async (req, res) => {
           scope,
           accessibleResources
         },
+        'importStatus.confluence': true
       });
 
       if (org == null) {

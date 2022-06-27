@@ -244,4 +244,5 @@ export const importDocsFromGitHub = async (markdowns: GitHubMarkdown[], org: Org
   }));
 
   await Promise.all(addDocPromises);
+  await updateImportStatus(orgId, 'github', false);
 };
