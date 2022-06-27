@@ -78,13 +78,23 @@ export class ViewProvider implements WebviewViewProvider {
 								title: 'Connecting documentation with code',
 							}, () => new Promise(async (resolve) => {
 								try {
-									await axios.put(`${API_ENDPOINT}/links`, { docId, code, url }, {
+									const response = await axios.put(`${API_ENDPOINT}/links`, { docId, code, url }, {
 										params: {
 											userId,
 											subdomain
 										}
 									});
-									vscode.window.showInformationMessage(`Successfully connected code with ${title}`);
+									await axios.get(`${API_ENDPOINT}/docs`, {
+										params: {
+											userId,
+											subdomain
+										}
+									})
+									.then((res) => {
+										const { data: { docs } } = res;
+										this._view?.webview.postMessage({ command: 'update-selected-doc', newDocs: docs, newDoc: response.data.doc });
+									});
+									vscode.window.showInformationMessage(`Successfully connected code with ${response.data.doc.title}`);
 								} catch (err) {
 									const errMessage = err?.response?.data?.error ?? `Error connecting code. Please log back in, re-install the extension, or report bug to hi@mintlify.com`;
 									vscode.window.showInformationMessage(errMessage);

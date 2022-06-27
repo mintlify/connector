@@ -41,8 +41,6 @@ linksRouter.put('/', userMiddleware, async (req, res) => {
       }
     }
 
-    
-
     await Code.findOneAndUpdate(
       {
         org: org._id,
@@ -59,7 +57,7 @@ linksRouter.put('/', userMiddleware, async (req, res) => {
       doc: docId.toString(),
     })
 
-    return res.end();
+    return res.send({doc});
   }
   catch (error) {
     return res.status(400).send({error})
