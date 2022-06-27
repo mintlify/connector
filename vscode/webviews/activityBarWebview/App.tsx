@@ -284,7 +284,7 @@ const App = () => {
                   onChange={(event) => updateQuery(event.target.value)}
                 />
                 {!isURL && query !== '' && (
-                  <span className="text-red-500">Input valid URL</span>
+                  <span className="text-red-500">Invalid URL</span>
                 )}
               </>
             ) : (
