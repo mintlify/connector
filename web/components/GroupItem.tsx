@@ -45,7 +45,7 @@ export default function GroupItem({ group, setSelectedGroup }: GroupItemProps) {
           <span className="block">
             <h2 className="text-sm font-medium text-gray-700">
               <div className="flex items-center space-x-2">
-                <DocTitleIcon method={group._id} />
+                <DocTitleIcon method={group._id} favicon={group.lastUpdatedDoc?.favicon} />
                 <a target="_blank" className="space-x-1 group flex items-center decoration-gray-300">
                   <span>
                     {group.name}
