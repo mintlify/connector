@@ -1,5 +1,5 @@
 import Doc from '../../models/Doc';
-import { OrgType } from '../../models/Org';
+import Org, { OrgType } from '../../models/Org';
 import { ConfluencePage } from '../../routes/integrations/confluence';
 import { GoogleDoc } from '../../routes/integrations/google';
 import { NotionPage } from '../../routes/integrations/notion';
@@ -66,6 +66,7 @@ export const importDocsFromNotion = async (pages: NotionPage[], org: OrgType, us
   }));
 
   await Promise.all(addDocPromises);
+  await Org.findById(orgId, { 'importStatus.notion': false })
 }
 
 export const importDocsFromGoogleDocs = async (docs: GoogleDoc[], org: OrgType, userId: string) => {

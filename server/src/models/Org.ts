@@ -34,6 +34,12 @@ export type OrgType = {
     google?: GoogleDocsCredentials;
     confluence?: ConfluenceCredentials;
   };
+  importStatus?: {
+    notion?: boolean,
+    github?: boolean,
+    confluence?: boolean,
+    googledocs?: boolean,
+  },
   users: string[];
   invitedEmails?: string[];
   notifications: {
@@ -105,6 +111,12 @@ const OrgSchema = new Schema({
         avatarUrl: String
       }]
     }
+  },
+  importStatus: {
+    notion: Boolean,
+    confluence: Boolean,
+    googledocs: Boolean,
+    github: Boolean,
   },
   notifications: {
     monthlyDigest: { type: Boolean, default: true },

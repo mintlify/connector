@@ -86,7 +86,7 @@ notionRouter.get('/authorization', async (req, res) => {
   if (state == null) return res.status(403).send('No state provided');
   const parsedState = JSON.parse(decodeURIComponent(state as string));
   const { org: orgId, userId } = parsedState;
-  const org = await Org.findByIdAndUpdate(orgId, { 'integrations.notion': { ...response } });
+  const org = await Org.findByIdAndUpdate(orgId, { 'integrations.notion': { ...response }, 'importStatus.notion': true });
 
   if (org == null) {
     return res.status(403).send({ error: 'Invalid organization ID' });
@@ -113,6 +113,7 @@ notionRouter.get('/authorization', async (req, res) => {
     }
     return res.redirect(redirectUrl);
   } catch {
+    await Org.findById(orgId, { 'importStatus.notion': false })
     return res.redirect(redirectUrl);
   }
 });

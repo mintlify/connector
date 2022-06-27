@@ -143,12 +143,12 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
   }
 });
 
-const groupNameMap: Record<ScrapingMethod, string> = {
-  'notion-private': 'Notion Workspace',
-  'confluence-private': 'Confluence Space',
-  'googledocs-private': 'Google Docs',
-  'github': 'GitHub Markdown',
-  'web': 'Web Pages',
+const groupMap: Record<ScrapingMethod, { name: string, importStatusId: string }> = {
+  'notion-private': { name: 'Notion Workspace', importStatusId: 'notion' },
+  'confluence-private': { name: 'Confluence Space', importStatusId: 'confluence' },
+  'googledocs-private': { name: 'Google Docs', importStatusId: 'googledocs' },
+  'github': { name: 'GitHub Markdown', importStatusId: 'github' },
+  'web': { name: 'Web Pages', importStatusId: '' },
 }
 
 docsRouter.get('/groups', userMiddleware, async (_, res) => {
@@ -198,12 +198,14 @@ docsRouter.get('/groups', userMiddleware, async (_, res) => {
     },
   ]);
 
-  const groupsWithNames = groups.map((group: { _id: ScrapingMethod }) => {
+  const groupsWithNames: any[] = groups.map((group: { _id: ScrapingMethod }) => {
+    const groupData = groupMap[group._id];
     return {
       ...group,
-      name: groupNameMap[group._id],
+      name: groupData.name,
+      isLoading: Boolean(org.importStatus[groupData.importStatusId])
     }
-  })
+  });
 
   return res.send({ groups: groupsWithNames })
 });
