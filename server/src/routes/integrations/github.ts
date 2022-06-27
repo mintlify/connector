@@ -108,6 +108,8 @@ const getMarkdowns = async (accessToken: string, org: string, repositories: any[
 
     const [content, commit, repo] = response;
 
+    if (repo == null) return;
+
     const contentString = Buffer.from(content.data.content, 'base64').toString();
     const resultFromSearch = readmeResults.items[i];
     markdowns.push({

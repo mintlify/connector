@@ -13,7 +13,7 @@ export default function CodeItem({ code, onDeleteCode }: { code: Code, onDeleteC
           <span>{code.file}</span>
         </a>
         <p className="text-sm text-gray-500 group-hover:underline">
-          View on GItHub
+          View on GitHub
         </p>
       </div>
     </Link>

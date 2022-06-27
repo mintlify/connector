@@ -198,12 +198,33 @@ docsRouter.get('/groups', userMiddleware, async (_, res) => {
     },
   ]);
 
-  const groupsWithNames: any[] = groups.map((group: { _id: ScrapingMethod }) => {
+  const groupsWithNames: any[] = []
+  
+  groups.forEach((group: { _id: ScrapingMethod }) => {
     const groupData = groupMap[group._id];
-    return {
+    if (groupData == null) {
+      return;
+    }
+
+    groupsWithNames.push({
       ...group,
       name: groupData.name,
       isLoading: Boolean(org.importStatus[groupData.importStatusId])
+    })
+  });
+
+  // Add currently importing apps to display
+  Object.entries(org.importStatus).forEach(([importingApp, isImporting]) => {
+    const isAlreadyInList = groupsWithNames.some((group: { _id: ScrapingMethod }) => groupMap[group._id]?.importStatusId === importingApp);
+    if (isImporting && !isAlreadyInList) {
+      const group = Object.values(groupMap).find((groupData) => {
+        return groupData.importStatusId === importingApp;
+      })
+      groupsWithNames.unshift({
+        id: group?.importStatusId,
+        name: group?.name || '',
+        isLoading: true,
+      })
     }
   });
 
