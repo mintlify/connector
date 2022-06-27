@@ -306,21 +306,22 @@ const App = () => {
                       </Combobox.Button>
                     </div>
                     <Combobox.Options className="absolute mt-1 max-h-60 z-10 w-full shadow-lg code py-1 overflow-auto" onScroll={onScrollOptionsHandler}>
-                      {query.length > 0 && (isURL ? (
+                      {query.length > 0 && isURL && (
                         <Combobox.Option
-                          value={{ _id: 'create', title: query, url: query }}
-                          className="cursor-pointer relative py-2 pl-3 pr-9"
-                        >
-                          <span className="font-normal block truncate">
-                            Create "{query}"
+                        value={{ _id: 'create', title: query, url: query }}
+                        className="cursor-pointer relative py-2 pl-3 pr-9"
+                      >
+                        <span className="font-normal block truncate">
+                          Create "{query}"
+                        </span>
+                        {selectedDoc._id === 'create' ? (
+                          <span className='absolute inset-y-0 right-0 flex items-center pr-4'>
+                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
                           </span>
-                          {selectedDoc._id === 'create' ? (
-                            <span className='absolute inset-y-0 right-0 flex items-center pr-4'>
-                              <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                            </span>
-                          ) : null}
-                        </Combobox.Option>
-                      ) : (
+                        ) : null}
+                      </Combobox.Option>
+                      )}
+                      {filteredDocs.length === 0 && query.length > 0 && !isURL ? (
                         <Combobox.Option
                           value={{ id: 'create', title: query, url: query }}
                           disabled={true}
@@ -330,38 +331,39 @@ const App = () => {
                             Search again or paste a URL
                           </span>
                         </Combobox.Option>
-                      ))}
-                      {displayDocs.map((doc) => (
-                        <Combobox.Option
-                          key={doc._id}
-                          className={({ active }) =>
-                            classNames(
-                              active ? 'text-vscode active' : '',
-                              'cursor-pointer relative py-2 pl-3 pr-9'
-                            )
-                          }
-                          value={doc}
-                        >
-                          {({ selected, active }) => (
-                            <>
-                              <span className='font-normal block truncate'>
-                                {doc.title}
-                              </span>
-
-                              {selected ? (
-                                <span
-                                  className={classNames(
-                                    active ? 'text-white' : '',
-                                    'absolute inset-y-0 right-0 flex items-center pr-4'
-                                  )}
-                                >
-                                  <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                      ) : (
+                        displayDocs.map((doc) => (
+                          <Combobox.Option
+                            key={doc._id}
+                            className={({ active }) =>
+                              classNames(
+                                active ? 'text-vscode active' : '',
+                                'cursor-pointer relative py-2 pl-3 pr-9'
+                              )
+                            }
+                            value={doc}
+                          >
+                            {({ selected, active }) => (
+                              <>
+                                <span className='font-normal block truncate'>
+                                  {doc.title}
                                 </span>
-                              ) : null}
-                            </>
-                          )}
-                        </Combobox.Option>
-                      ))}
+
+                                {selected ? (
+                                  <span
+                                    className={classNames(
+                                      active ? 'text-white' : '',
+                                      'absolute inset-y-0 right-0 flex items-center pr-4'
+                                    )}
+                                  >
+                                    <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                  </span>
+                                ) : null}
+                              </>
+                            )}
+                          </Combobox.Option>
+                        ))
+                      )}
                     </Combobox.Options>
                   </div>
                 </>
