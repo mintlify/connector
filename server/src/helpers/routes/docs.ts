@@ -17,8 +17,59 @@ export const updateImportStatus = (orgId: Types.ObjectId, app: 'notion' | 'githu
   return Org.findByIdAndUpdate(orgId, query)
 }
 
+const deleteDocsWithoutTasksOrCode = (orgId: Types.ObjectId, method: ScrapingMethod) => {
+  return new Promise<void>(async (resolve) => {
+    const docs = await Doc.aggregate([
+      {
+        $match: {
+          org: orgId,
+          method,
+        }
+      },
+      {
+        $lookup: {
+          from: 'code',
+          foreignField: 'doc',
+          localField: '_id',
+          as: 'code',
+        },
+      },
+      {
+        $lookup: {
+          from: "tasks",
+          let: { doc: "$_id" },
+          pipeline: [
+             { $match:
+                { $expr:
+                   { $and:
+                      [
+                        { $eq: [ "$doc",  "$$doc" ] },
+                        { $eq: [ "$status", "todo" ] }
+                      ]
+                   }
+                }
+             },
+          ],
+          as: "tasks"
+        },
+      },
+      {
+        $match: {
+          'tasks.0': { $exists: false },
+          'code.0': { $exists: false }
+        }
+      }
+    ]);
+
+    const docIds = docs.map((doc) => doc._id);
+    await Doc.deleteMany({ _id: { $in: docIds } });
+
+    resolve();
+  })
+}
+
 const clearDocsWithMethod = (orgId: Types.ObjectId, method: ScrapingMethod) => {
-  return Promise.all([clearIndexWithMethod(orgId.toString(), method), Doc.deleteMany({ org: orgId, method })])
+  return Promise.all([clearIndexWithMethod(orgId.toString(), method), deleteDocsWithoutTasksOrCode(orgId, method)])
 }
 
 const addTrackEventForAddingDoc = (userId: string, orgId: Types.ObjectId, doc: DocType): void => {
