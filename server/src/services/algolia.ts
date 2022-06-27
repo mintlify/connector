@@ -24,48 +24,28 @@ export const searchDocs = async (query: string, orgId: string): Promise<SearchRe
 
 export const clearIndexWithMethod = async (orgId: string, method: string) => {
     try {
-        await docsIndex.clearObjects({
-            queryParameters: {
-                org: orgId,
-                method,
-            }
+        await docsIndex.deleteBy({
+            filters: `org:${orgId} AND method:${method}`
         })
     } catch (error) {
         console.log(error)
     }
 }
 
-export const indexDocForSearch = async (doc: DocType) => {
+export const indexDocsForSearch = async (docs: DocType[]) => {
     try {
-        const record = {
-            objectID: doc._id,
-            name: doc.title,
-            content: doc.content,
-            url: doc.url,
-            org: doc.org,
-            favicon: doc.favicon,
-            method: doc.method,
-        };
-        await docsIndex.saveObject(record);
-    }
-    catch (error) {
-        // Todo: manage oversize
-        console.log(error);
-    }
-}
-
-export const updateDocContentForSearch = async (doc: DocType, newContent: string) => {
-    try {
-        const record = {
-            objectID: doc._id,
-            name: doc.title,
-            content: newContent,
-            url: doc.url,
-            org: doc.org,
-            favicon: doc.favicon,
-            method: doc.method,
-        };
-        await docsIndex.saveObject(record);
+        const records = docs.map((doc) => {
+            return {
+                objectID: doc._id,
+                name: doc.title,
+                content: doc.content,
+                url: doc.url,
+                org: doc.org,
+                favicon: doc.favicon,
+                method: doc.method,
+            };
+        })
+        await docsIndex.partialUpdateObjects(records, { createIfNotExists: true });
     }
     catch (error) {
         // Todo: manage oversize

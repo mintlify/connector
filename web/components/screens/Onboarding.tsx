@@ -11,7 +11,6 @@ import { getSubdomain } from "../../helpers/user";
 import { Doc } from "../../pages";
 import AddDocumentation, { addDocumentationMap, AddDocumentationType } from "../commands/documentation/AddDocumentation";
 import DocItem from "../DocItem";
-import LoadingItem from "../LoadingItem";
 import ProfilePicture from "../ProfilePicture";
 import { getIntegrations, onInstallIntegration, Integration } from "../../helpers/integrations";
 import { Org, useProfile, User } from "../../context/ProfileContext";
@@ -338,8 +337,9 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
   const [docs, setDocs] = useState<Doc[]>([]);
   const [isAddingDocOpen, setIsAddingDocOpen] = useState(false);
   const [addDocumentationType, setAddDocumentationType] = useState<AddDocumentationType>();
-  const [isAddDocLoading, setIsAddDocLoading] = useState(false);
-  const [integrationsStatus, setIntegrationsStatus] = useState<Record<string, boolean>>({})
+  const [integrationsStatus, setIntegrationsStatus] = useState<Record<string, boolean>>({});
+  const [docsPage, setDocsPage] = useState(1);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     request('GET', `routes/org/${org._id}/integrations`)
@@ -355,8 +355,9 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
         const { docs } = docsResponse.data;
         setDocs(docs);
       });
-  }, [user.userId, isAddDocLoading, org]);
+  }, [user.userId, org, refreshKey]);
 
+  const docsOnDisplay = docs.slice(0, docsPage * 10);
   const isCompleted = docs.length > 0;
 
   return <>
@@ -365,7 +366,7 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
       setIsOpen={setIsAddingDocOpen}
       overrideSelectedRuleType={addDocumentationType}
       integrationsStatus={{}} // intentionally left blank
-      refresh={() => {}}
+      refresh={() => setRefreshKey(Math.random())}
     />
     <h1 className="text-3xl font-semibold">
       Let&apos;s add some <span className="text-primary">documentation</span> 🗃
@@ -411,10 +412,9 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
       </div>
       {
         docs.length > 0 && <div>
-        <h1 className="text-lg text-gray-600">Documents added</h1>
+        <h1 className="text-gray-600">{docs.length} documents added</h1>
         <ul className="mt-2 bg-white rounded-md px-1 py-3 shadow-md">
-          { isAddDocLoading && <LoadingItem /> }
-          {docs.map((doc) => (
+          {docsOnDisplay.map((doc) => (
             <DocItem
               key={doc._id}
               doc={doc}
@@ -423,8 +423,14 @@ function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: Use
               onClick={() => {}}
               setSelectedDoc={() => {}}
               removeSeparators
+              removeTasks
             />
           ))}
+          {
+            docs.length > 10 && docsOnDisplay.length !== docs.length && <li className="mt-2 text-center font-medium text-sm text-gray-500">
+            <button onClick={() => setDocsPage(docsPage + 1)}>Show more</button>
+          </li>
+          }
           </ul>
         </div>
       }

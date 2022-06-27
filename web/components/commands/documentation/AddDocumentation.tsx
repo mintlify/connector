@@ -44,7 +44,7 @@ export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationS
   webpage: {
     type: 'webpage',
     title: 'Web Page',
-    description: 'Add web page at URL',
+    description: 'Add web page with URL',
   },
 }
 

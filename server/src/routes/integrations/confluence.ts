@@ -5,7 +5,7 @@ import { ISDEV } from '../../helpers/environment';
 import { removeHtmlTagsAndGetText } from '../../helpers/routes/domparsing';
 import Org from '../../models/Org';
 import { ContentData } from '../../services/webscraper';
-import { importDocsFromConfluence } from '../../helpers/routes/docs';
+import { importDocsFromConfluence, updateImportStatus } from '../../helpers/routes/docs';
 
 export type ConfluencePage = {
   id: string;
@@ -92,38 +92,49 @@ confluenceRouter.get('/authorization', async (req, res) => {
           scope,
           accessibleResources
         },
+        'importStatus.confluence': true
       });
 
       if (org == null) {
         return res.status(403).send({ error: 'Invalid organization ID' });
       }
 
-      const cloudId = accessibleResources[0].id;
-      const { data: response } = await axios.get(`https://api.atlassian.com/ex/confluence/${cloudId}/wiki/rest/api/content`, {
-        headers: { 
-          'Authorization': `Bearer ${access_token}`,
-          'Accept': 'application/json'
-        },
-        params: {
-          expand: ['body.view', 'history.lastUpdated'].join(','),
-        },
-      });
+      const redirectUrl: string = `https://${org.subdomain}.mintlify.com`;
 
-      const results = response.results.map((result: ConfluencePage) => {
-        return {
-          ...result,
-          content: NodeHtmlMarkdown.translate(result.body.view.value)
+      try {
+        const cloudId = accessibleResources[0].id;
+        const { data: response } = await axios.get(`https://api.atlassian.com/ex/confluence/${cloudId}/wiki/rest/api/content`, {
+          headers: { 
+            'Authorization': `Bearer ${access_token}`,
+            'Accept': 'application/json'
+          },
+          params: {
+            expand: ['body.view', 'history.lastUpdated'].join(','),
+          },
+        });
+
+        const results = response.results.map((result: ConfluencePage) => {
+          return {
+            ...result,
+            content: NodeHtmlMarkdown.translate(result.body.view.value)
+          }
+        });
+
+        importDocsFromConfluence(results, org, userId)
+      
+        if (parsedState?.close) {
+          return res.send("<script>window.close();</script>");
         }
-      });
-
-      await importDocsFromConfluence(results, org, userId)
-    
-      if (parsedState?.close) {
-        return res.send("<script>window.close();</script>");
+        if (ISDEV) {
+          return res.redirect('http://localhost:3000');
+        }
+        return res.redirect(redirectUrl);
+      } catch {
+        // When getting content fails
+        await updateImportStatus(orgId, 'confluence', false);
+        return res.redirect(redirectUrl);
       }
-      return res.redirect(`https://${org.subdomain}.mintlify.com`);
-    } catch (error) {
-      console.log(error);
+    } catch {
       return res.status(500).send("Unable to install Confluence integration. Refresh to try again")
     }
 });

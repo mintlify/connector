@@ -4,7 +4,7 @@ import { userMiddleware } from './user';
 import Doc, { DocType } from '../models/Doc';
 import Event from '../models/Event';
 import { ContentData, ScrapingMethod } from '../services/webscraper';
-import { deleteDocForSearch } from '../services/algolia';
+import { deleteDocForSearch, indexDocsForSearch } from '../services/algolia';
 import Org from '../models/Org';
 import { getNotionPageDataWithId } from '../services/notion';
 import { getConfluenceContentFromPageById } from './integrations/confluence';
@@ -45,31 +45,31 @@ export const extractFromDoc = async (doc: DocType, orgId: string): Promise<Conte
 }
 
 const getDataFromUrl = async (urlInput: string) => {
-  let url = urlInput;
-  if (!url.startsWith('https://')) {
-    url = `https://${url}`;
+  let urlWithProtocol = urlInput;
+  if (!urlWithProtocol.startsWith('https://')) {
+    urlWithProtocol = `https://${urlWithProtocol}`;
   }
 
-  const { data: html } = await axios.get(url);
+  const { data: html } = await axios.get(urlWithProtocol);
   const $ = cheerio.load(html);
   const title = $('title').first().text().trim();
   let favicon = $('link[rel="shortcut icon"]').attr('href') || $('link[rel="icon"]').attr('href');
   if (favicon?.startsWith('//')) {
     favicon = `https:${favicon}`;
   } else if (favicon?.startsWith('/')) {
-    const urlParsed = new URL(url);
+    const urlParsed = new URL(urlWithProtocol);
     favicon = `${urlParsed.origin}${favicon}`;
   }
   if (!favicon) {
     try {
-      const faviconRes = await axios.get(`https://s2.googleusercontent.com/s2/favicons?sz=128&domain_url=${url}`);
+      const faviconRes = await axios.get(`https://s2.googleusercontent.com/s2/favicons?sz=128&domain_url=${urlWithProtocol}`);
       favicon = faviconRes.request.res.responseUrl;
     } catch {
       favicon = undefined;
     }
   }
 
-  return {title, favicon};
+  return {title, favicon, urlWithProtocol};
 }
 
 docsRouter.get('/preview', async (req, res) => {
@@ -143,12 +143,12 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
   }
 });
 
-const groupNameMap: Record<ScrapingMethod, string> = {
-  'notion-private': 'Notion Workspace',
-  'confluence-private': 'Confluence Space',
-  'googledocs-private': 'Google Docs',
-  'github': 'GitHub Markdown',
-  'web': 'Web Pages',
+const groupMap: Record<ScrapingMethod, { name: string, importStatusId: string }> = {
+  'notion-private': { name: 'Notion Workspace', importStatusId: 'notion' },
+  'confluence-private': { name: 'Confluence Space', importStatusId: 'confluence' },
+  'googledocs-private': { name: 'Google Docs', importStatusId: 'googledocs' },
+  'github': { name: 'GitHub Markdown', importStatusId: 'github' },
+  'web': { name: 'Web Pages', importStatusId: '' },
 }
 
 docsRouter.get('/groups', userMiddleware, async (_, res) => {
@@ -198,30 +198,37 @@ docsRouter.get('/groups', userMiddleware, async (_, res) => {
     },
   ]);
 
-  const groupsWithNames = groups.map((group: { _id: ScrapingMethod }) => {
+  const groupsWithNames: any[] = groups.map((group: { _id: ScrapingMethod }) => {
+    const groupData = groupMap[group._id];
     return {
       ...group,
-      name: groupNameMap[group._id],
+      name: groupData.name,
+      isLoading: Boolean(org.importStatus[groupData.importStatusId])
     }
-  })
+  });
 
   return res.send({ groups: groupsWithNames })
 });
 
 docsRouter.post('/webpage', userMiddleware, async (req, res) => {
-  const { org } = res.locals.user;
+  const { org, userId } = res.locals.user;
   const { url } = req.body;
 
   try {
-    const { title, favicon } = await getDataFromUrl(url);
-    const doc = await Doc.create({
+    const { title, favicon, urlWithProtocol } = await getDataFromUrl(url);
+    const doc = await Doc.findOneAndUpdate({
       org: org._id,
-      url,
+      url: urlWithProtocol,
+    }, {
+      org: org._id,
+      url: urlWithProtocol,
       method: 'web',
       favicon,
       title,
-      isJustAdded: true
-    });
+      isJustAdded: true,
+      createdBy: userId
+    }, { upsert: true, new: true });
+    indexDocsForSearch([doc]);
     res.send({doc})
   } catch (error) {
     res.status(500).send({error});

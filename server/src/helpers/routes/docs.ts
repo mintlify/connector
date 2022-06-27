@@ -1,19 +1,26 @@
-import Doc from '../../models/Doc';
-import { OrgType } from '../../models/Org';
+import { Types } from 'mongoose';
+import Doc, { DocType } from '../../models/Doc';
+import Org, { OrgType } from '../../models/Org';
 import { ConfluencePage } from '../../routes/integrations/confluence';
 import { GoogleDoc } from '../../routes/integrations/google';
 import { NotionPage } from '../../routes/integrations/notion';
-import { clearIndexWithMethod, indexDocForSearch } from '../../services/algolia';
+import { clearIndexWithMethod, indexDocsForSearch } from '../../services/algolia';
 import { getGoogleDocsPrivateData } from '../../services/googleDocs';
 import { getNotionPageDataWithId } from '../../services/notion';
 import { track } from '../../services/segment';
 import { replaceRelativeWithAbsolutePathsInMarkdown } from './markdown';
 
+export const updateImportStatus = (orgId: Types.ObjectId, app: 'notion' | 'github' | 'confluence' | 'googledocs', isLoading: boolean) => {
+  const query: Record<string, boolean> = {};
+  query[`importStatus.${app}`] = isLoading;
+  return Org.findByIdAndUpdate(orgId, query)
+}
+
 export const importDocsFromNotion = async (pages: NotionPage[], org: OrgType, userId: string) => {
   const orgId = org._id;
   const method = 'notion-private';
   await clearIndexWithMethod(orgId.toString(), method);
-  const addDocPromises = pages.map((page) => new Promise<void>(async (resolve) => {
+  const addDocPromises = pages.map((page) => new Promise<DocType | null>(async (resolve) => {
     try {
       if (org.integrations?.notion?.access_token == null) {
         throw 'No Notion credentials'
@@ -51,28 +58,30 @@ export const importDocsFromNotion = async (pages: NotionPage[], org: OrgType, us
         }
       );
       
-      indexDocForSearch(doc);
       track(userId, 'Add documentation', {
         doc: doc._id.toString(),
         method,
         org: orgId.toString(),
       });
 
-      resolve();
+      resolve(doc);
     }
     catch {
-      resolve();
+      resolve(null);
     }
   }));
 
-  await Promise.all(addDocPromises);
+  const docsResponses = await Promise.all(addDocPromises);
+  const docs = docsResponses.filter((doc) => doc != null) as DocType[];
+  indexDocsForSearch(docs);
+  await updateImportStatus(orgId, 'notion', false);
 }
 
-export const importDocsFromGoogleDocs = async (docs: GoogleDoc[], org: OrgType, userId: string) => {
+export const importDocsFromGoogleDocs = async (googleDocs: GoogleDoc[], org: OrgType, userId: string) => {
   const orgId = org._id;
   const method = 'googledocs-private';
   await clearIndexWithMethod(orgId.toString(), method);
-  const addDocPromises = docs.map((googleDoc) => new Promise<void>(async (resolve) => {
+  const addDocPromises = googleDocs.map((googleDoc) => new Promise<DocType | null>(async (resolve) => {
     try {
       if (org.integrations?.google == null) {
         throw 'No Google credentials'
@@ -103,28 +112,30 @@ export const importDocsFromGoogleDocs = async (docs: GoogleDoc[], org: OrgType, 
         }
       );
 
-      indexDocForSearch(doc);
       track(userId, 'Add documentation', {
         doc: doc._id.toString(),
         method,
         org: orgId.toString(),
       });
 
-      resolve();
+      resolve(doc);
     }
     catch {
-      resolve();
+      resolve(null);
     }
   }));
 
-  await Promise.all(addDocPromises);
+  const docsResponses = await Promise.all(addDocPromises);
+  const docs = docsResponses.filter((doc) => doc != null) as DocType[];
+  indexDocsForSearch(docs);
+  await updateImportStatus(orgId, 'googledocs', false);
 };
 
 export const importDocsFromConfluence = async (pages: ConfluencePage[], org: OrgType, userId: string) => {
   const orgId = org._id;
   const method = 'confluence-private';
   await clearIndexWithMethod(orgId.toString(), method);
-  const addDocPromises = pages.map((page) => new Promise<void>(async (resolve) => {
+  const addDocPromises = pages.map((page) => new Promise<DocType | null>(async (resolve) => {
     try {
       const firstSpace = org?.integrations?.confluence?.accessibleResources[0];
       if (firstSpace == null) {
@@ -156,21 +167,23 @@ export const importDocsFromConfluence = async (pages: ConfluencePage[], org: Org
         }
       );
 
-      indexDocForSearch(doc);
       track(userId, 'Add documentation', {
         doc: doc._id.toString(),
         method,
         org: orgId.toString(),
       });
 
-      resolve();
+      resolve(doc);
     }
     catch {
-      resolve();
+      resolve(null);
     }
   }));
 
-  await Promise.all(addDocPromises);
+  const docsResponses = await Promise.all(addDocPromises);
+  const docs = docsResponses.filter((doc) => doc != null) as DocType[];
+  indexDocsForSearch(docs);
+  await updateImportStatus(orgId, 'confluence', false);
 };
 
 export type GitHubMarkdown = {
@@ -185,7 +198,7 @@ export const importDocsFromGitHub = async (markdowns: GitHubMarkdown[], org: Org
   const orgId = org._id;
   const method = 'github';
   await clearIndexWithMethod(orgId.toString(), method);
-  const addDocPromises = markdowns.map((markdown) => new Promise<void>(async (resolve) => {
+  const addDocPromises = markdowns.map((markdown) => new Promise<DocType | null>(async (resolve) => {
     try {
       const orgId = org._id;
       const url = markdown.url;
@@ -220,19 +233,21 @@ export const importDocsFromGitHub = async (markdowns: GitHubMarkdown[], org: Org
         }
       );
 
-      indexDocForSearch(doc);
       track(userId, 'Add documentation', {
         doc: doc._id.toString(),
         method,
         org: orgId.toString(),
       });
 
-      resolve();
+      resolve(doc);
     }
     catch {
-      resolve();
+      resolve(null);
     }
   }));
 
-  await Promise.all(addDocPromises);
+  const docsResponses = await Promise.all(addDocPromises);
+  const docs = docsResponses.filter((doc) => doc != null) as DocType[];
+  indexDocsForSearch(docs);
+  await updateImportStatus(orgId, 'github', false);
 };

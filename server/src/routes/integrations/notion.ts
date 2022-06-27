@@ -5,7 +5,7 @@ import { ISDEV } from '../../helpers/environment';
 import Org from '../../models/Org';
 import { track } from '../../services/segment';
 import { getNotionTitle } from '../../services/notion';
-import { importDocsFromNotion } from '../../helpers/routes/docs';
+import { importDocsFromNotion, updateImportStatus } from '../../helpers/routes/docs';
 import { SearchResponse } from '@notionhq/client/build/src/api-endpoints';
 
 export type NotionPage = {
@@ -81,35 +81,41 @@ notionRouter.get('/install', (req, res) => {
 notionRouter.get('/authorization', async (req, res) => {
   const { code, state } = req.query;
   if (code == null) return res.status(403).send('Invalid or missing grant code');
-
   const { response, error } = await getNotionAccessTokenFromCode(code as string);
   if (error) return res.status(403).send('Invalid grant code');
   if (state == null) return res.status(403).send('No state provided');
   const parsedState = JSON.parse(decodeURIComponent(state as string));
   const { org: orgId, userId } = parsedState;
-  const org = await Org.findByIdAndUpdate(orgId, { 'integrations.notion': { ...response } });
+  const org = await Org.findByIdAndUpdate(orgId, { 'integrations.notion': { ...response }, 'importStatus.notion': true });
 
   if (org == null) {
     return res.status(403).send({ error: 'Invalid organization ID' });
   }
 
-  if (!response?.access_token) {
-    return res.status(403).send({ error: 'No access token' });
-  }
+  const redirectUrl = `https://${org.subdomain}.mintlify.com`;
 
-  const notionPages = await getNotionDocs(response?.access_token);
-  await importDocsFromNotion(notionPages, org, userId);
-  track(org._id.toString(), 'Install Notion Integration', {
-    isOrg: true,
-  });
-
-  if (parsedState?.close) {
-    return res.send("<script>window.close();</script>");
+  try {
+    if (!response?.access_token) {
+      return res.status(403).send({ error: 'No access token' });
+    }
+  
+    const notionPages = await getNotionDocs(response?.access_token);
+    importDocsFromNotion(notionPages, org, userId);
+    track(org._id.toString(), 'Install Notion Integration', {
+      isOrg: true,
+    });
+  
+    if (parsedState?.close) {
+      return res.send("<script>window.close();</script>");
+    }
+    if (ISDEV) {
+      return res.redirect('http://localhost:3000');
+    }
+    return res.redirect(redirectUrl);
+  } catch {
+    await updateImportStatus(orgId, 'notion', false);
+    return res.redirect(redirectUrl);
   }
-  if (ISDEV) {
-    return res.redirect(org.subdomain);
-  }
-  return res.redirect(`https://${org.subdomain}.mintlify.com`);
 });
 
 
@@ -157,7 +163,7 @@ export const getNotionDocs = async (notionAccessToken: string) => {
           icon: page.icon?.url,
           url: page.url,
         };
-      })
+      });
 
     return results;
 }

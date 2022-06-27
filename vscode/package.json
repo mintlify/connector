@@ -2,10 +2,10 @@
   "name": "connector",
   "publisher": "mintlify",
   "displayName": "Mintlify Connect",
-  "version": "0.3.17",
+  "version": "0.3.18",
   "icon": "assets/logo.png",
   "galleryBanner": {
-    "color": "#041811",
+    "color": "#18E299",
     "theme": "dark"
   },
   "repository": {
