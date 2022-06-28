@@ -1,11 +1,10 @@
 import axios from 'axios';
 import prependHttp from 'prepend-http';
-import { Listbox } from '@headlessui/react';
+import { Combobox } from '@headlessui/react';
 import React, { useEffect, useState } from 'react';
-import ReactTooltip from 'react-tooltip';
 import { CheckIcon, LockClosedIcon, SelectorIcon } from '@heroicons/react/solid';
 import { vscode } from '../common/message';
-import { InfoCircleIcon, CodeSymbolIcon, CodeFileIcon } from '../common/svgs';
+import { CodeSymbolIcon, CodeFileIcon } from '../common/svgs';
 
 export type Doc = {
   _id: string;
@@ -33,11 +32,13 @@ type State = {
   API_ENDPOINT: string;
   selectedDoc?: Doc;
   code?: Code;
+  query: string;
+  isURL: boolean;
 };
 
 const initialDoc: Doc = {
   _id: 'initial',
-  title: 'Select documentation',
+  title: '',
   url: '',
   isDefault: true,
 };
@@ -70,6 +71,9 @@ const App = () => {
   const [docs, setDocs] = useState<Doc[]>([initialDoc]);
   const [selectedDoc, setSelectedDoc] = useState<Doc>(initialState?.selectedDoc || initialDoc);
   const [code, setCode] = useState<Code | undefined>(initialState?.code);
+  const [displayPage, setDisplayPage] = useState(1);
+  const [query, setQuery] = useState<string>(initialState?.query || '');
+  const [isURL, setIsURL] = useState<boolean>(initialState?.isURL || false);
 
   useEffect(() => {
     window.addEventListener('message', event => {
@@ -79,6 +83,10 @@ const App = () => {
           const API_ENDPOINT = message?.args;
           vscode.setState({ ...initialState, API_ENDPOINT });
           setAPI_ENDPOINT(API_ENDPOINT);
+          break;
+        case 'display-docs':
+          setDocs(message.docs || []);
+          setDisplayPage(1);
           break;
         case 'auth':
           const user = message?.args;
@@ -115,29 +123,21 @@ const App = () => {
         case 'logout':
           onLogout();
           break;
+        case 'update-selected-doc':
+          const { newDoc, newDocs }: { newDoc: Doc, newDocs: Doc[] } = message;
+          setSelectedDoc(newDoc);
+          setDocs(newDocs);
+          vscode.setState({...initialState, selectedDoc: newDoc, docs: newDocs });
+          break;
       }
     });
   }, [signInUrl, user, dashboardUrl, API_ENDPOINT]);
 
   useEffect(() => {
     if (!user?.userId || dashboardUrl == null) {
-      vscode.postMessage({ command: 'error', message: 'Could not fetch documents. Please log in again.' });
       return;
     }
-    try {
-      axios.get(`${API_ENDPOINT}/docs`, {
-        params: {
-          userId: user?.userId,
-          subdomain: getSubdomain(dashboardUrl)
-        }
-      })
-        .then((res) => {
-          const { data: { docs: docsResult } } = res;
-          setDocs(docsResult);
-        });
-    } catch (e) {
-      vscode.postMessage({ command: 'error', message: 'Could not fetch documents. Please log in again or re-install the extension.' });
-    }
+    vscode.postMessage({ command: 'get-docs', userId: user.userId, subdomain: getSubdomain(dashboardUrl) });
   }, [user, dashboardUrl, API_ENDPOINT]);
 
   const handleSubmit = event => {
@@ -149,14 +149,25 @@ const App = () => {
       title: selectedDoc.title,
       org: code?.org,
       code: code,
+      url: selectedDoc.url
     };
     vscode.postMessage({ command: 'link-submit', args });
-    setCode(undefined);
   };
 
   const updateSelectedDoc = (doc: Doc) => {
     setSelectedDoc(doc);
-    vscode.setState({ ...initialState, selectedDoc: doc });
+    setQuery('');
+    vscode.setState({ ...initialState, selectedDoc: doc, query: '' });
+  };
+
+  const checkIsURL = (str: string) => {
+    return /(([a-z]+:\/\/)?(([a-z0-9-]+\.)+([a-z]{2}|aero|arpa|biz|com|coop|edu|gov|info|int|jobs|mil|museum|name|nato|net|org|pro|travel|local|internal|dev))(:[0-9]{1,5})?(\/[a-z0-9_\-.~]+)*(\/([a-z0-9_\-.]*)(\?[a-z0-9+_\-.%=&amp;]*)?)?(#[a-zA-Z0-9!$&'()*+.=-_~:@/?]*)?)(\s+|$)/gi.test(str.trim());
+  };
+
+  const updateQuery = (newQuery: string) => {
+    setQuery(newQuery);
+    const urlStatus = checkIsURL(newQuery);
+    setIsURL(urlStatus);
   };
 
   const CodeContent = ({ code }: { code: Code }) => {
@@ -199,9 +210,24 @@ const App = () => {
     vscode.setState({ ...initialState, user: undefined });
   };
 
-  const style = getComputedStyle(document.body);
+  const onScrollOptionsHandler = (e) => {
+    const bottom = e.target.scrollHeight - e.target.scrollTop <= e.target.clientHeight + 100;
+    if (bottom) {
+      setDisplayPage(displayPage + 1);
+    }
+  };
 
-  const hasDocSelected = selectedDoc?.isDefault !== true;
+  const onClickSignUp = () => {
+    vscode.postMessage({ command: 'sign-up' });
+  };
+
+  const limitedDocs = docs.slice(0, displayPage * 50);
+  const hasDocSelected = !selectedDoc?.isDefault;
+  const filteredDocs = docs.filter((doc) => {
+    return doc.title.toLowerCase().includes(query.toLowerCase());
+  });
+  const displayDocs = query === '' ? limitedDocs : filteredDocs;
+  const isNoDocs = docs.length === 0 || docs[0] === initialDoc;
 
   return (
     <div className="space-y-1">
@@ -210,8 +236,15 @@ const App = () => {
       </h1>
       {
         user == null && <>
-        <p className="mt-1">
-          Sign in to your account to continue
+         <button
+          type="submit"
+          className={classNames("flex items-center justify-center submit mt-2 opacity-100 hover:cursor-pointer")}
+          onClick={onClickSignUp}
+        >
+          Create an account
+        </button>
+        <p className="text-center">
+          OR
         </p>
         <p className="mt-1 font-medium">Dashboard URL</p>
         <input
@@ -245,78 +278,107 @@ const App = () => {
             Documentation<span className='text-red-500'>*</span>
           </label>
           <div className="mt-1">
-          <Listbox value={selectedDoc} onChange={updateSelectedDoc}>
-            {() => (
+            {isNoDocs ? (
               <>
-                <div className="mt-1 relative">
-                  <Listbox.Button className="relative w-full pl-3 pr-10 py-2 text-left code">
-                    <span className="block truncate">{selectedDoc.title}</span>
-                    <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                      <SelectorIcon className="h-5 w-5" aria-hidden="true" />
-                    </span>
-                  </Listbox.Button>
-                    <Listbox.Options className="absolute mt-1 max-h-60 z-10 w-full shadow-lg code py-1 overflow-auto">
-                      {docs.map((doc) => (
-                        <Listbox.Option
-                          key={doc._id}
-                          className={({ active }) =>
-                            classNames(
-                              active ? 'text-vscode active' : '',
-                              'cursor-pointer relative py-2 pl-3 pr-9'
-                            )
-                          }
-                          value={doc}
-                        >
-                          {({ selected, active }) => (
-                            <>
-                              <span className='font-normal block truncate'>
-                                {doc.title}
-                              </span>
-
-                              {selected ? (
-                                <span
-                                  className={classNames(
-                                    active ? 'text-white' : '',
-                                    'absolute inset-y-0 right-0 flex items-center pr-4'
-                                  )}
-                                >
-                                  <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                                </span>
-                              ) : null}
-                            </>
-                          )}
-                        </Listbox.Option>
-                      ))}
-                    </Listbox.Options>
-                </div>
+                <input
+                  type="text"
+                  name="url"
+                  id="url"
+                  className="block w-full text-sm"
+                  placeholder="www.example.com"
+                  value={query}
+                  onChange={(event) => updateQuery(event.target.value)}
+                />
+                {!isURL && query !== '' && (
+                  <span className="text-red-500">Invalid URL</span>
+                )}
               </>
+            ) : (
+            <Combobox value={selectedDoc} onChange={updateSelectedDoc}>
+              {() => (
+                <>
+                  <div className="mt-1 relative">
+                    <div className="relative w-full cursor-default overflow-hidden text-left sm:text-sm">
+                      <Combobox.Input
+                        className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 code"
+                        displayValue={(doc: Doc) => doc.title}
+                        onChange={(event) => updateQuery(event.target.value)}
+                      />
+                      <Combobox.Button className="z-10 w-full absolute inset-y-0 right-0 flex items-center pr-2 flex-row justify-end dropdown-button">
+                        <SelectorIcon
+                          className="h-5 w-5"
+                          aria-hidden="true"
+                        />
+                      </Combobox.Button>
+                    </div>
+                    <Combobox.Options className="absolute mt-1 max-h-60 z-10 w-full shadow-lg code py-1 overflow-auto" onScroll={onScrollOptionsHandler}>
+                      {query.length > 0 && isURL && (
+                        <Combobox.Option
+                        value={{ _id: 'create', title: query, url: query }}
+                        className="cursor-pointer relative py-2 pl-3 pr-9"
+                      >
+                        <span className="font-normal block truncate">
+                          Create "{query}"
+                        </span>
+                        {selectedDoc._id === 'create' ? (
+                          <span className='absolute inset-y-0 right-0 flex items-center pr-4'>
+                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                          </span>
+                        ) : null}
+                      </Combobox.Option>
+                      )}
+                      {filteredDocs.length === 0 && query.length > 0 && !isURL ? (
+                        <Combobox.Option
+                          value={{ id: 'create', title: query, url: query }}
+                          disabled={true}
+                          className="relative py-2 pl-3 pr-9"
+                        >
+                          <span className="font-normal block truncate opacity-75">
+                            Search again or paste a URL
+                          </span>
+                        </Combobox.Option>
+                      ) : (
+                        displayDocs.map((doc) => (
+                          <Combobox.Option
+                            key={doc._id}
+                            className={({ active }) =>
+                              classNames(
+                                active ? 'text-vscode active' : '',
+                                'cursor-pointer relative py-2 pl-3 pr-9'
+                              )
+                            }
+                            value={doc}
+                          >
+                            {({ selected, active }) => (
+                              <>
+                                <span className='font-normal block truncate'>
+                                  {doc.title}
+                                </span>
+
+                                {selected ? (
+                                  <span
+                                    className={classNames(
+                                      active ? 'text-white' : '',
+                                      'absolute inset-y-0 right-0 flex items-center pr-4'
+                                    )}
+                                  >
+                                    <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                  </span>
+                                ) : null}
+                              </>
+                            )}
+                          </Combobox.Option>
+                        ))
+                      )}
+                    </Combobox.Options>
+                  </div>
+                </>
+              )}
+            </Combobox>
             )}
-          </Listbox>
           </div>
           <div className='flex flex-row mt-3'>
             Select Relevant Code<span className='text-red-500'>*</span>
-            <div className='ml-1 flex flex-col justify-center' data-tip data-for="registerTip">
-              <InfoCircleIcon />
-            </div>
-            <ReactTooltip
-              id="registerTip"
-              place="bottom"
-              effect="solid"
-              className='tool-tip shadow-sm'
-              arrowColor={style.getPropertyValue('--vscode-editor-background')}
-            >
-              <div className='text-left'>
-                <div className='font-bold'>Code Snippets</div>
-                <p>
-                  Highlight code in the editor <br/>
-                </p>
-                <div className='font-bold mt-1'>Folder/File</div>
-                <p>
-                  1. Right click on a folder or file in the explorer <br/>
-                  2. Select “Link folder/file to doc”
-                </p>
-              </div>
-            </ReactTooltip>
           </div>
           <div className='code'>
             <CodesContent code={code} />

@@ -1,9 +1,13 @@
 import * as React from 'react';
-import { render } from 'react-dom';
+import{ createRoot } from 'react-dom/client';
 import App from './App';
 import '../styles/index.css';
 import '../styles/vscode.css';
 
 export function main() {
-  render(<App/>, document.getElementById('root'));
+  const rootElement = document.getElementById('root') as HTMLElement;
+  const root = createRoot(rootElement);
+  root.render(<React.StrictMode>
+    <App />
+  </React.StrictMode>);
 }

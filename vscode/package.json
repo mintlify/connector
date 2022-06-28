@@ -2,7 +2,7 @@
   "name": "connector",
   "publisher": "mintlify",
   "displayName": "Mintlify Connect",
-  "version": "0.3.18",
+  "version": "0.3.19",
   "icon": "assets/logo.png",
   "galleryBanner": {
     "color": "#18E299",
@@ -14,7 +14,7 @@
   "engines": {
     "vscode": "^1.66.0"
   },
-  "module": "es2015",
+  "module": "es2020",
   "categories": [
     "Other"
   ],
@@ -75,15 +75,11 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run package",
-    "watch": "webpack --watch",
-    "package": "webpack --mode production --devtool hidden-source-map --config-name extension:node --config-name webviews",
-    "compile-tests": "tsc -p . --outDir out",
-    "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "npm run compile-tests && npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
+    "vscode:prepublish": "npm run bundle",
+    "bundle": "webpack --mode production --config-name extension:node --config-name webviews",
     "compile": "webpack --mode development --config-name extension:node --config-name webviews",
-    "publish": "vsce publish"
+    "publish": "vsce publish",
+    "watch": "webpack --watch --mode development --env esbuild"
   },
   "devDependencies": {
     "@types/find-parent-dir": "^0.3.0",
@@ -128,7 +124,6 @@
     "postcss-preset-env": "^7.5.0",
     "prepend-http": "^4.0.0",
     "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-tooltip": "^4.2.21"
+    "react-dom": "^18.0.0"
   }
 }
