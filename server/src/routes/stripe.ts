@@ -39,7 +39,6 @@ stripeRouter.get('/checkout', async (req, res) => {
       metadata: {
         orgId: org._id.toString()
       },
-      trial_period_days: 14
     },
   });
 

@@ -47,10 +47,12 @@ export default function Navbar() {
               <p className="font-medium text-white text-sm">
                 <span className="inline">14 days left on the trial</span>
                 <span className="block sm:ml-2 sm:inline-block">
-                  <a href="#" className="text-white font-bold underline">
-                    {' '}
-                    Upgrade now <span aria-hidden="true">&rarr;</span>
-                  </a>
+                  <Link href="/settings/billing">
+                    <a className="text-white font-bold underline">
+                      {' '}
+                      Upgrade now <span aria-hidden="true">&rarr;</span>
+                    </a>
+                  </Link>
                 </span>
               </p>
             </div>

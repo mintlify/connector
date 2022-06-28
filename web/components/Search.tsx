@@ -90,7 +90,7 @@ export default function Search({ isOpen, setIsOpen }: SearchProps) {
 
   return (
     <Transition.Root show={isOpen} as={Fragment} appear>
-      <Dialog as="div" className="relative z-10" onClose={onClose}>
+      <Dialog as="div" className="relative z-20" onClose={onClose}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
