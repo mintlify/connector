@@ -41,6 +41,30 @@ export default function Navbar() {
     <Disclosure as="nav" className="bg-background z-20">
       {({ open }) => (
         <>
+        <div className="relative bg-primary">
+          <div className="max-w-7xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
+            <div className="pr-16 sm:text-center sm:px-16">
+              <p className="font-medium text-white text-sm">
+                <span className="inline">14 days left on the trial</span>
+                <span className="block sm:ml-2 sm:inline-block">
+                  <a href="#" className="text-white font-bold underline">
+                    {' '}
+                    Upgrade now <span aria-hidden="true">&rarr;</span>
+                  </a>
+                </span>
+              </p>
+            </div>
+            <div className="absolute inset-y-0 right-0 pt-1 pr-1 flex items-start sm:pt-1 sm:pr-2 sm:items-start">
+              <button
+                type="button"
+                className="flex p-2 rounded-md hover:bg-hover focus:outline-none focus:ring-2 focus:ring-white"
+              >
+                <span className="sr-only">Dismiss</span>
+                <XIcon className="h-5 w-5 text-white" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        </div>
           <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
             <div className="relative flex items-center justify-between h-16 flex-row">
               <div className="flex items-center px-2 lg:px-0">

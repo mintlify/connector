@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from 'react'
 import { Combobox, Dialog, Transition } from '@headlessui/react'
 import { SearchIcon } from '@heroicons/react/solid'
-import { DocumentTextIcon, ExclamationIcon } from '@heroicons/react/outline'
+import { ExclamationIcon } from '@heroicons/react/outline'
 import { classNames } from '../helpers/functions'
 import axios from 'axios'
 import { API_ENDPOINT } from '../helpers/api'
