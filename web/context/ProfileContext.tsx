@@ -38,6 +38,7 @@ export type Org = {
   },
   plan?: {
     name: 'free' | 'pro',
+    isHidingModel: boolean;
   }
 }
 

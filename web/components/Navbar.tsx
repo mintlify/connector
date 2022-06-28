@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
 import {
@@ -11,6 +11,7 @@ import Link from 'next/link'
 import ProfilePicture from './ProfilePicture'
 import Search from './Search'
 import { useProfile } from '../context/ProfileContext'
+import { request } from '../helpers/request'
 
 const userNavigation = [
   { name: 'Account', href: '/settings/account' },
@@ -22,15 +23,26 @@ const userNavigation = [
 export default function Navbar() {
   const { profile } = useProfile();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isShowingTrialModel, setIsShowingTrialModel] = useState(false);
 
   useHotkeys('cmd+k', () => setIsSearchOpen(true));
 
   const { user, org } = profile;
+
+  useEffect(() => {
+    setIsShowingTrialModel(!Boolean(org?.plan?.isHidingModel))
+  }, [org])
+
   if (user == null || org == null) {
     return null;
   }
 
   const fullName = `${user.firstName} ${user.lastName}`;
+
+  const onHideTrialAlert = () => {
+    request('DELETE', 'routes/org/trial/model');
+    setIsShowingTrialModel(false);
+  }
   
   return (
     <>
@@ -41,7 +53,8 @@ export default function Navbar() {
     <Disclosure as="nav" className="bg-background z-20">
       {({ open }) => (
         <>
-        <div className="relative bg-primary">
+        {
+          isShowingTrialModel && <div className="relative bg-primary">
           <div className="max-w-7xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
             <div className="pr-16 sm:text-center sm:px-16">
               <p className="font-medium text-white text-sm">
@@ -60,6 +73,7 @@ export default function Navbar() {
               <button
                 type="button"
                 className="flex p-2 rounded-md hover:bg-hover focus:outline-none focus:ring-2 focus:ring-white"
+                onClick={onHideTrialAlert}
               >
                 <span className="sr-only">Dismiss</span>
                 <XIcon className="h-5 w-5 text-white" aria-hidden="true" />
@@ -67,6 +81,7 @@ export default function Navbar() {
             </div>
           </div>
         </div>
+        }
           <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
             <div className="relative flex items-center justify-between h-16 flex-row">
               <div className="flex items-center px-2 lg:px-0">

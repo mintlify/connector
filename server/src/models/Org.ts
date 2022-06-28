@@ -59,6 +59,7 @@ export type OrgType = {
     name: 'free' | 'pro',
     subscribedAt: Date,
     customerId: string
+    isHidingModel: boolean
   }
 };
 
@@ -135,6 +136,7 @@ const OrgSchema = new Schema({
     name: { type: String, default: 'free' },
     subscribedAt: { type: Date, default: Date.now },
     customerId: String,
+    isHidingModel: Boolean,
   }
 });
 
