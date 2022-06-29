@@ -245,6 +245,12 @@ function InstallGitHubStep({ user, org, onBack, onNext, step }: { user: User, or
   const [isGitHubInstalled, setIsGitHubInstalled] = useState<boolean>(false);
 
   useEffect(() => {
+    request('GET', `routes/org/${org._id}/integrations`)
+        .then(({ data: { integrations } }) => {
+          if (integrations.github) {
+            setIsGitHubInstalled(integrations.github || false);
+          }
+        });
     const statusInterval = setInterval(() => {  
       request('GET', `routes/org/${org._id}/integrations`)
         .then(({ data: { integrations } }) => {
@@ -315,6 +321,11 @@ function ConnectStep({ user, org, onBack, step }: { user: User, org: Org, onBack
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    request('GET', `routes/org/${org._id}/integrations`)
+        .then(({ data: { integrations } }) => {
+          setIsVScodeInstalled(integrations.vscode || false);
+        });
+        
     const statusInterval = setInterval(() => {  
       request('GET', `routes/org/${org._id}/integrations`)
         .then(({ data: { integrations } }) => {
