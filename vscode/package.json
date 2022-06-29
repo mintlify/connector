@@ -2,12 +2,8 @@
   "name": "connector",
   "publisher": "mintlify",
   "displayName": "Mintlify Connect",
-  "version": "0.3.21",
+  "version": "0.3.22",
   "icon": "assets/logo.png",
-  "galleryBanner": {
-    "color": "#DCFCE7",
-    "theme": "light"
-  },
   "repository": {
     "url": "https://github.com/mintlify/connect"
   },
