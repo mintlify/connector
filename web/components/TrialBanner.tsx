@@ -30,7 +30,7 @@ export default function TrialBanner() {
   const trialDays = 14;
   const daysLeftOfTrial = trialDays - daysSinceCreated;
 
-  if (!isShowingTrialModel && daysLeftOfTrial > 3) {
+  if (org?.plan?.name !== 'free' || (!isShowingTrialModel && daysLeftOfTrial > 3)) {
     return null;
   }
 
