@@ -1,4 +1,3 @@
-import { Combobox } from "@headlessui/react";
 import { CheckCircleIcon,  ChevronRightIcon } from "@heroicons/react/solid";
 import axios from "axios";
 import Head from "next/head";
@@ -6,16 +5,14 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { API_ENDPOINT } from "../../helpers/api";
 import { classNames } from "../../helpers/functions";
-import { DocumentationTypeIcon } from "../../helpers/Icons";
+import { ConnectLinkIcon, DocumentationTypeIcon } from "../../helpers/Icons";
 import { getSubdomain } from "../../helpers/user";
-import { Doc } from "../../pages";
-import AddDocumentation, { addDocumentationMap, AddDocumentationType } from "../commands/documentation/AddDocumentation";
-import DocItem from "../DocItem";
-import ProfilePicture from "../ProfilePicture";
-import { getIntegrations, onInstallIntegration, Integration } from "../../helpers/integrations";
 import { Org, useProfile, User } from "../../context/ProfileContext";
 import { request } from "../../helpers/request";
-import { RefreshIcon } from "@heroicons/react/outline";
+import Link from "next/link";
+import { Code } from "../../pages";
+import { onInstallIntegration } from "../../helpers/integrations";
+import { GitHubIntegration, VSCodeIntegration } from "../../pages/settings/integrations";
 
 const onboardStepLocalStateKey = 'onboarding-step';
 
@@ -42,12 +39,14 @@ const sizeOptions: Option[] = [
   { id: '200+', title: '200+' },
 ]
 
-const appsOptions: Option[] = [
-  { id: 'github', title: 'GitHub' },
-  { id: 'vscode', title: 'VS Code' },
-  { id: 'slack', title: 'Slack' },
-  { id: 'none', title: 'None of the above' },
-]
+const ProgressBar = ({ step }: { step: number }) => {
+  return <div className="mt-4 flex space-x-1">
+  {Array.from(Array(3).keys()).map((i) => (
+      <span key={i} className={classNames(`h-1 w-8 rounded-sm`, i > step ? 'bg-slate-200' : 'bg-primary')}></span>
+    ))
+  }
+</div>
+}
 
 type NavButtonsProps = {
   onBack: () => void,
@@ -55,20 +54,10 @@ type NavButtonsProps = {
   isCompleted: boolean,
   isFirst?: boolean,
   isLast?: boolean,
-  onSkip?: () => void,
   isSubmitting?: boolean,
 }
 
-const ProgressBar = ({ step, totalSteps }: { step: number, totalSteps: number }) => {
-  return <div className="mt-4 flex space-x-2">
-  {Array.from(Array(totalSteps).keys()).map((i) => (
-      <span key={i} className={classNames(`h-1 w-14 rounded-sm`, i > step ? 'bg-slate-200' : 'bg-primary')}></span>
-    ))
-  }
-</div>
-}
-
-const NavButtons = ({ onBack, onNext, isFirst, isLast, isCompleted, onSkip, isSubmitting }: NavButtonsProps) => {
+const NavButtons = ({ onBack, onNext, isFirst, isLast, isCompleted, isSubmitting }: NavButtonsProps) => {
   return <div className="flex mt-8 space-x-2">
     {
       !isFirst && <button
@@ -83,30 +72,7 @@ const NavButtons = ({ onBack, onNext, isFirst, isLast, isCompleted, onSkip, isSu
     >{isSubmitting? <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white animate-spin" viewBox="0 0 512 512" fill="currentColor">
     <path d="M304 48C304 74.51 282.5 96 256 96C229.5 96 208 74.51 208 48C208 21.49 229.5 0 256 0C282.5 0 304 21.49 304 48zM304 464C304 490.5 282.5 512 256 512C229.5 512 208 490.5 208 464C208 437.5 229.5 416 256 416C282.5 416 304 437.5 304 464zM0 256C0 229.5 21.49 208 48 208C74.51 208 96 229.5 96 256C96 282.5 74.51 304 48 304C21.49 304 0 282.5 0 256zM512 256C512 282.5 490.5 304 464 304C437.5 304 416 282.5 416 256C416 229.5 437.5 208 464 208C490.5 208 512 229.5 512 256zM74.98 437C56.23 418.3 56.23 387.9 74.98 369.1C93.73 350.4 124.1 350.4 142.9 369.1C161.6 387.9 161.6 418.3 142.9 437C124.1 455.8 93.73 455.8 74.98 437V437zM142.9 142.9C124.1 161.6 93.73 161.6 74.98 142.9C56.24 124.1 56.24 93.73 74.98 74.98C93.73 56.23 124.1 56.23 142.9 74.98C161.6 93.73 161.6 124.1 142.9 142.9zM369.1 369.1C387.9 350.4 418.3 350.4 437 369.1C455.8 387.9 455.8 418.3 437 437C418.3 455.8 387.9 455.8 369.1 437C350.4 418.3 350.4 387.9 369.1 369.1V369.1z"/>
   </svg> : isLast ? 'Complete' : 'Next'}</button>
-    {
-      onSkip && <button
-      className="py-1 px-3 rounded-sm text-sm text-gray-400 hover:text-gray-500"
-      onClick={onSkip}
-    >Skip</button>
-    }
   </div>
-}
-
-const buildAppsUsing = (user: User, org: Org) => {
-  const apps = [];
-  if (user.onboarding?.usingVSCode) {
-    apps.push('vscode');
-  }
-  if (org.onboarding?.usingGitHub) {
-    apps.push('github');
-  }
-  if (org.onboarding?.usingSlack) {
-    apps.push('slack');
-  }
-  if (org.onboarding?.usingNone) {
-    apps.push('none');
-  }
-  return apps;
 }
 
 export default function Onboarding() {
@@ -114,7 +80,6 @@ export default function Onboarding() {
   const [step, setStep] = useState(0);
   const [role, setRole] = useState<string>();
   const [teamSize, setTeamSize] = useState<string>();
-  const [appsUsing, setAppsUsing] = useState<string[]>([]);
 
   const { user, org } = profile;
 
@@ -126,7 +91,6 @@ export default function Onboarding() {
 
     setRole(user.onboarding?.role);
     setTeamSize(org.onboarding?.teamSize);
-    setAppsUsing(buildAppsUsing(user, org));
 
     if (step) {
       setStep(parseInt(step));
@@ -155,9 +119,6 @@ export default function Onboarding() {
     setStep(step + 1);
   }
 
-  const hasApps = appsUsing.filter((app) => app !== 'none').length > 0;
-  const totalSteps = hasApps ? 4 : 3;
-
   const CurrentStep = () => {
     switch (step) {
       case 0:
@@ -169,44 +130,23 @@ export default function Onboarding() {
           setRole={setRole}
           teamSize={teamSize}
           setTeamSize={setTeamSize}
-          appsUsing={appsUsing}
-          setAppsUsing={setAppsUsing}
           step={step}
-          totalSteps={totalSteps}
         />;
       case 1:
-        return <AddDocStep
+        return <InstallGitHubStep
           user={user}
           org={org}
           onBack={onBack}
           onNext={onNext}
           step={step}
-          totalSteps={totalSteps}
         />;
       case 2:
-        if (!hasApps) {
-          return <InviteStep
-            user={user}
-            onBack={onBack}
-            step={step}
-            totalSteps={totalSteps}
-            />;
-        }
-        return <IntegrateStep
+        return <ConnectStep
           user={user}
           org={org}
           onBack={onBack}
-          onNext={onNext}
-          appsUsing={appsUsing}
           step={step}
-          totalSteps={totalSteps}
         />;
-      case 3:
-        return <InviteStep
-          user={user}
-          onBack={onBack}
-          step={step}
-          totalSteps={totalSteps} />;
       default:
         return null;
     }
@@ -219,7 +159,7 @@ export default function Onboarding() {
     </Head>
     <div className="bg-slate-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-8">
-        <div className="w-96 max-w-full mx-auto py-12">
+        <div className="w-96 lg:w-2/5 max-w-full mx-auto py-12">
           <CurrentStep />
         </div>
       </div>
@@ -228,22 +168,12 @@ export default function Onboarding() {
   )
 }
 
-function IntroStep({ user, onBack, onNext, role, setRole, teamSize, setTeamSize, appsUsing, setAppsUsing, step, totalSteps }:
-  { user: User, onBack: () => void, onNext: () => void, role: string | undefined, setRole: (role: string) => void, teamSize: string | undefined, setTeamSize: (teamSize: string) => void, appsUsing: string[], setAppsUsing: (appsUsing: string[]) => void, step: number, totalSteps: number }) {
-  const onClickAppOptions = (appOptionId: string) => {
-    if (appsUsing.includes(appOptionId)) {
-      setAppsUsing(appsUsing.filter((app) => app !== appOptionId));
-      return;
-    }
-
-    setAppsUsing([...appsUsing, appOptionId]);
-  }
-
+function IntroStep({ user, onBack, onNext, role, setRole, teamSize, setTeamSize, step }:
+  { user: User, onBack: () => void, onNext: () => void, role: string | undefined, setRole: (role: string) => void, teamSize: string | undefined, setTeamSize: (teamSize: string) => void, step: number }) {
   const onNextFirstPage = async () => {
     axios.post(`${API_ENDPOINT}/routes/user/onboarding`, {
       role,
       teamSize,
-      appsUsing
     }, {
       params: {
         userId: user.userId,
@@ -253,18 +183,18 @@ function IntroStep({ user, onBack, onNext, role, setRole, teamSize, setTeamSize,
     onNext();
   }
 
-  const isCompleted = role != null && teamSize != null && appsUsing.length > 0;
+  const isCompleted = role != null && teamSize != null;
   return <>
     <h1 className="text-3xl font-semibold">Welcome <span className="text-primary">{user.firstName}</span> 👋</h1>
     <p className="mt-1 text-gray-600">
       First things first, tell us about yourself
     </p>
-    <ProgressBar step={step} totalSteps={totalSteps} /> 
+    <ProgressBar step={step} /> 
     <div className="mt-6 space-y-8">
       <div>
         <label className="text-base font-medium text-gray-900">What best describes what you do?</label>
         <fieldset className="mt-4">
-          <div className="w-96 max-w-full grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {rolesOptions.map((roleOption) => (
               <div key={roleOption.id} className="flex items-center">
                 <input
@@ -305,395 +235,214 @@ function IntroStep({ user, onBack, onNext, role, setRole, teamSize, setTeamSize,
           </div>
         </fieldset>
       </div>
-      <div>
-        <label className="text-base font-medium text-gray-900">Which of the following do you or your team use?</label>
-        <p className="text-sm leading-5 text-gray-500">Check all that apply</p>
-        <fieldset className="mt-4">
-          <div className="grid grid-cols-2 gap-4">
-            {appsOptions.map((appOption) => (
-              <div key={appOption.id} className="flex items-center">
-                <input
-                  id={appOption.id}
-                  name="role-option"
-                  type="checkbox"
-                  defaultChecked={appsUsing.includes(appOption.id)}
-                  className="focus:ring-0 h-4 w-4 text-primary border-gray-300"
-                  onClick={() => onClickAppOptions(appOption.id)}
-                />
-                <label htmlFor={appOption.id} className="ml-3 block text-sm text-gray-700">
-                  {appOption.title}
-                </label>
-              </div>
-            ))}
-          </div>
-        </fieldset>
-      </div>
       </div>
     <NavButtons onBack={onBack} onNext={onNextFirstPage} isFirst isCompleted={isCompleted} />
   </>;
 }
 
-function AddDocStep({ user, org, onBack, onNext, step, totalSteps }: { user: User, org: Org, onBack: () => void, onNext: () => void, step: number, totalSteps: number }) {
-  const [docs, setDocs] = useState<Doc[]>([]);
-  const [isAddingDocOpen, setIsAddingDocOpen] = useState(false);
-  const [addDocumentationType, setAddDocumentationType] = useState<AddDocumentationType>();
-  const [integrationsStatus, setIntegrationsStatus] = useState<Record<string, boolean>>({});
-  const [docsPage, setDocsPage] = useState(1);
-  const [refreshKey, setRefreshKey] = useState(0);
+function InstallGitHubStep({ user, org, onBack, onNext, step }: { user: User, org: Org, onBack: () => void, onNext: () => void, step: number }) {
+  const router = useRouter();
+  const [isGitHubInstalled, setIsGitHubInstalled] = useState<boolean>(false);
 
   useEffect(() => {
     request('GET', `routes/org/${org._id}/integrations`)
-      .then(({ data: { integrations } }) => {
-        setIntegrationsStatus(integrations);
-      })
-    request('GET', 'routes/docs', {
-      params: {
-        shouldShowCreatedBySelf: true,
-      }
-    })
-      .then((docsResponse) => {
-        const { docs } = docsResponse.data;
-        setDocs(docs);
-      });
-  }, [user.userId, org, refreshKey]);
+        .then(({ data: { integrations } }) => {
+          if (integrations.github) {
+            setIsGitHubInstalled(integrations.github || false);
+          }
+        });
+    const statusInterval = setInterval(() => {  
+      request('GET', `routes/org/${org._id}/integrations`)
+        .then(({ data: { integrations } }) => {
+          if (integrations.github) {
+            setIsGitHubInstalled(integrations.github || false);
+          }
+        });
+      }, 1000);
+    return () => clearInterval(statusInterval);
+  }, [user.userId, org]);
 
-  const docsOnDisplay = docs.slice(0, docsPage * 10);
-  const isCompleted = docs.length > 0;
+  const onInstallGitHub = () => {
+    onInstallIntegration(GitHubIntegration(org._id, user.userId), router);
+  }
 
   return <>
-    <AddDocumentation
-      isOpen={isAddingDocOpen}
-      setIsOpen={setIsAddingDocOpen}
-      overrideSelectedRuleType={addDocumentationType}
-      integrationsStatus={{}} // intentionally left blank
-      refresh={() => setRefreshKey(Math.random())}
-    />
-    <h1 className="text-3xl font-semibold">
-      Let&apos;s add some <span className="text-primary">documentation</span> 🗃
+    <h1 className="text-3xl font-semibold flex items-center space-x-2">
+      <div className="inline">
+        Integrate with GitHub
+      </div>
+      <img src="assets/integrations/github.svg" className="h-6" />
     </h1>
     <p className="mt-1 text-gray-600">
-      You can import or link your existing pages
+      Enable documentation review in the workflow
     </p>
-    <ProgressBar step={step} totalSteps={totalSteps} /> 
-    <div className="mt-6 space-y-8">
-      <div className="bg-white rounded-md shadow-md">
-        <Combobox onChange={() => {}} value="">
-          <Combobox.Options static className="max-h-96 scroll-py-3 overflow-y-auto p-3">
-            {Object.values(addDocumentationMap).map((item) => (
-              <Combobox.Option
-                key={item.type}
-                value={item}
-                className={({ active }) =>
-                  classNames('flex items-center cursor-default select-none rounded-xl p-3 hover:cursor-pointer', active ? 'bg-gray-50' : '')
-                }
-                onClick={() => { setIsAddingDocOpen(true); setAddDocumentationType(item.type) }}
-              >
-                {({ active }) => (
-                  <>
-                    <DocumentationTypeIcon type={item.type} />
-                    <div className="ml-4 flex-auto">
-                      <span className={classNames('flex items-center text-sm font-medium', active ? 'text-gray-900' : 'text-gray-700')}>
-                        {item.title}
-                        {integrationsStatus[item.type] && <CheckCircleIcon className="ml-1 h-4 w-4 text-green-600" />}
-                      </span>
-                      <p className={classNames('text-sm', active ? 'text-gray-700' : 'text-gray-500')}>
-                        {integrationsStatus[item.type] ? item.installedDescription : item.description}
-                      </p>
-                    </div>
-                    {
-                      integrationsStatus[item.type] ? <RefreshIcon className="h-5 w-4 text-gray-400 group-hover:text-gray-700" /> : <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-gray-700" aria-hidden="true" />
-                    }
-                  </>
-                )}
-              </Combobox.Option>
-            ))}
-          </Combobox.Options>
-      </Combobox>
+    <ProgressBar step={step} /> 
+    <div className="mt-6">
+      <div className="shadow-md">
+      <video className="w-full rounded-sm" autoPlay controls muted>
+        <source src="assets/videos/workflow.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      <div className="rounded-b-sm">
+          <button
+            className="flex items-center w-full max-h-96 scroll-py-3 overflow-y-auto p-3 bg-white hover:bg-gray-50 cursor-pointer rounded-sm"
+            onClick={onInstallGitHub}
+          >
+            <DocumentationTypeIcon type='github' />
+            <div className="ml-4 flex-auto">
+              <span className='flex items-center text-sm font-medium text-gray-900 hover:text-gray-700'>
+                GitHub App
+                { isGitHubInstalled && <CheckCircleIcon className="ml-1 h-4 w-4 text-green-600" /> }
+              </span>
+              <p className='text-sm text-gray-700 text-left'>
+                { isGitHubInstalled ? 'Installed' : 'Click to install' }
+              </p>
+            </div>
+            <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-gray-700" aria-hidden="true" />
+          </button>
       </div>
-      {
-        docs.length > 0 && <div>
-        <h1 className="text-gray-600">{docs.length} documents added</h1>
-        <ul className="mt-2 bg-white rounded-md px-1 py-3 shadow-md">
-          {docsOnDisplay.map((doc) => (
-            <DocItem
-              key={doc._id}
-              doc={doc}
-              docs={docs}
-              setDocs={setDocs}
-              onClick={() => {}}
-              setSelectedDoc={() => {}}
-              removeSeparators
-              removeTasks
-            />
-          ))}
-          {
-            docs.length > 10 && docsOnDisplay.length !== docs.length && <li className="mt-2 text-center font-medium text-sm text-gray-500">
-            <button onClick={() => setDocsPage(docsPage + 1)}>Show more</button>
-          </li>
-          }
-          </ul>
-        </div>
-      }
       </div>
-    <NavButtons onBack={onBack} onNext={onNext} isCompleted={isCompleted} />
+      <div className="mt-2">
+        <Link href="mailto:hi@mintlify.com?subject=I don't use GitHub, can you support [app]">
+          <a target="_blank" className="text-gray-500 hover:text-gray-700 text-sm">
+            Not using GitHub?
+          </a>
+        </Link>
+      </div>
+    </div>
+    <NavButtons onBack={onBack} onNext={onNext} isCompleted={isGitHubInstalled} />
   </>;
 }
 
-function IntegrateStep({ user, org, onBack, onNext, appsUsing, step, totalSteps }: { user: User, org: Org, onBack: () => void, onNext: () => void, appsUsing: string[], step: number, totalSteps: number }) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [installedIntegrations, setInstalledIntegrations] = useState<Record<string, boolean>>({});
+function ConnectStep({ user, org, onBack, step }: { user: User, org: Org, onBack: () => void, step: number }) {
   const router = useRouter();
-
-  const integrations: Integration[] = getIntegrations(org._id, user.userId);
+  const [isVSCodeInstalled, setIsVScodeInstalled] = useState(false);
+  const [codes, setCodes] = useState<Code[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true);
+    request('GET', `routes/org/${org._id}/integrations`)
+        .then(({ data: { integrations } }) => {
+          setIsVScodeInstalled(integrations.vscode || false);
+        });
+
     const statusInterval = setInterval(() => {  
-      axios.get(`${API_ENDPOINT}/routes/org/${org._id}/integrations`, {
-        params: {
-          userId: user.userId,
-          subdomain: getSubdomain(window.location.host)
-        }
-      }).then(({ data: { integrations } }) => {
-          setIsLoading(false);
-          setInstalledIntegrations(integrations);
-        })
+      request('GET', `routes/org/${org._id}/integrations`)
+        .then(({ data: { integrations } }) => {
+          setIsVScodeInstalled(integrations.vscode || false);
+        });
+      
+      request('GET', `routes/links`)
+        .then(({ data: { codes } }) => {
+          setCodes(codes);
+        });
       }, 1000);
     
     return () => clearInterval(statusInterval);
-  }, [user, org._id])
+  }, [user, org._id]);
 
-  const requiredIntegrations = integrations.filter(({ type }) => appsUsing.includes(type));
-  const isAllIntegrationsInstalled = requiredIntegrations.every(({ type }) => installedIntegrations[type]);
-
-  return <>
-    <h1 className="text-3xl font-semibold">
-      Let&apos;s get you{' '}<span className="text-primary">integrated</span> 🔌
-    </h1>
-    <p className="mt-1 text-gray-600">
-      Connect with the apps that you use
-    </p>
-    <ProgressBar step={step} totalSteps={totalSteps} /> 
-    <div className="mt-6 space-y-8">
-      <div>
-        <div className="mt-2 bg-white rounded-md p-3 shadow-md">
-          { isLoading && <span className="w-full flex justify-center"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500 animate-spin" viewBox="0 0 512 512" fill="currentColor">
-              <path d="M304 48C304 74.51 282.5 96 256 96C229.5 96 208 74.51 208 48C208 21.49 229.5 0 256 0C282.5 0 304 21.49 304 48zM304 464C304 490.5 282.5 512 256 512C229.5 512 208 490.5 208 464C208 437.5 229.5 416 256 416C282.5 416 304 437.5 304 464zM0 256C0 229.5 21.49 208 48 208C74.51 208 96 229.5 96 256C96 282.5 74.51 304 48 304C21.49 304 0 282.5 0 256zM512 256C512 282.5 490.5 304 464 304C437.5 304 416 282.5 416 256C416 229.5 437.5 208 464 208C490.5 208 512 229.5 512 256zM74.98 437C56.23 418.3 56.23 387.9 74.98 369.1C93.73 350.4 124.1 350.4 142.9 369.1C161.6 387.9 161.6 418.3 142.9 437C124.1 455.8 93.73 455.8 74.98 437V437zM142.9 142.9C124.1 161.6 93.73 161.6 74.98 142.9C56.24 124.1 56.24 93.73 74.98 74.98C93.73 56.23 124.1 56.23 142.9 74.98C161.6 93.73 161.6 124.1 142.9 142.9zM369.1 369.1C387.9 350.4 418.3 350.4 437 369.1C455.8 387.9 455.8 418.3 437 437C418.3 455.8 387.9 455.8 369.1 437C350.4 418.3 350.4 387.9 369.1 369.1V369.1z"/>
-            </svg></span>
-          }
-          {
-            !isLoading && <Combobox onChange={() => {}} value="">
-          <Combobox.Options static className="scroll-py-3 overflow-y-auto">
-            {requiredIntegrations.map((integration) => (
-                <Combobox.Option
-                  value={integration}
-                  key={integration.type}
-                  className={({ active }) =>
-                    classNames('flex items-center cursor-default select-none rounded-xl p-3 hover:cursor-pointer', active ? 'bg-gray-50' : '')
-                  }
-                  onClick={() => onInstallIntegration(integration, router)}
-                >
-                  {({ active }) => (
-                    <>
-                      <img className="h-5 w-5" src={integration.iconSrc} alt={integration.title} />
-                      <div className="ml-4 flex-auto">
-                        <div className="flex items-center gap-x-1">
-                          <p
-                            className={classNames(
-                              'text-sm font-medium',
-                              active ? 'text-gray-900' : 'text-gray-700'
-                            )}
-                          >
-                            {integration.title}
-                          </p>
-                          {
-                            installedIntegrations[integration.type] && <CheckCircleIcon className="w-4 h-4 text-green-600" />
-                          }
-                        </div>
-                        <p className={classNames('text-sm', active ? 'text-gray-700' : 'text-gray-500')}>
-                          {integration.description}
-                        </p>
-                      </div>
-                      {
-                        !installedIntegrations[integration.type] && <ChevronRightIcon
-                        className="h-5 w-5 text-gray-400 group-hover:text-gray-700"
-                        aria-hidden="true"
-                      />
-                      }
-                    </>
-                  )}
-                </Combobox.Option>
-            ))}
-          </Combobox.Options>
-      </Combobox>
-        }
-        </div>
-      </div>
-      </div>
-    <NavButtons onBack={onBack} onNext={onNext} isCompleted={isAllIntegrationsInstalled} onSkip={onNext} />
-  </>;
-}
-
-function InviteStep({ user, onBack, step, totalSteps }: { user: User, onBack: () => void, step: number, totalSteps: number }) {
-  const [invitedEmail, setInvitedEmail] = useState('');
-  const [inviteErrorMessage, setInviteErrorMessage] = useState<string>();
-  const [members, setMembers] = useState<User[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const router = useRouter();
-
-  const inviteMember = async (email: string) => {
-    if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email.trim()) || email.trim() === "") {
-      setInviteErrorMessage("Please enter a valid email address.")
-      return
-    }
-
-    setInvitedEmail("")
-    // create a pending account by calling the invitation API
-    const emails = [email];
-    request('POST', 'routes/user/invite', {
-        data: {
-          emails,
-        }
-      })
-      .then(() => {
-        const invitedMembers: any = emails.map((email) => {
-          return {
-            email,
-            pending: true
-          }
-        })
-        setMembers(members.concat(invitedMembers))
-      })
+  const onInstallVSCode = () => {
+    onInstallIntegration(VSCodeIntegration(), router);
   }
 
-  const onSubmit = async () => {
+  const onComplete = async () => {
     setIsSubmitting(true);
-    await axios.put(`${API_ENDPOINT}/routes/user/onboarding/complete`, null, {
-      params: {
-        userId: user.userId,
-        subdomain: getSubdomain(window.location.host)
-      }
-    });
+    await request('PUT', `routes/user/onboarding/complete`)
+    setIsSubmitting(false);
     // Remove onboarding saved step
     window.localStorage.removeItem(onboardStepLocalStateKey);
     router.reload();
   }
 
-  const isCompleted = true;
+  const isConnectionMade = codes.length > 0;
 
   return <>
-    <h1 className="text-3xl font-semibold">
-      Invite other{' '}<span className="text-primary">members</span> ✉️
+    <h1 className="text-3xl font-semibold flex items-center space-x-2">
+      <div className="inline">
+        Connect code to docs
+      </div>
+      <ConnectLinkIcon className="h-6 w-6" />
     </h1>
     <p className="mt-1 text-gray-600">
-      You can also do this later in the app
+      Bring documentation to where it&apos;s relevant
     </p>
-    <ProgressBar step={step} totalSteps={totalSteps} /> 
-    <div className="mt-6 space-y-8">
-      <div>
-      <div className="space-y-5 bg-white rounded-md p-3 shadow-md">
-        <div className="flex">
-          <div className="flex-grow">
-            <input
-              type="email"
-              name="add-team-members"
-              id="add-team-members"
-              className="block w-full shadow-sm focus:ring-primary focus:border-primary sm:text-sm border-gray-300 rounded-md"
-              placeholder="Email address"
-              aria-describedby="add-team-members-helper"
-              value={invitedEmail}
-              onKeyDown={e => e.key === 'Enter' && inviteMember(invitedEmail)}
-              onChange={(e) => {
-                setInviteErrorMessage(undefined);
-                setInvitedEmail(e.target.value);
-              }}
-              required
-            />
-            {inviteErrorMessage && <div className="text-red-500 pt-2 pl-2">{inviteErrorMessage}</div>}
+    <ProgressBar step={step} /> 
+    <div className="mt-6">
+      <div className="shadow-md">
+      <video className="w-full rounded-sm" autoPlay controls muted>
+        <source src="assets/videos/connect.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      <div className="rounded-b-sm">
+        <button onClick={onInstallVSCode} className="flex items-center max-h-96 scroll-py-3 overflow-y-auto w-full p-3 bg-white hover:bg-gray-50 cursor-pointer rounded-sm">
+          <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center">
+            <img src="assets/integrations/vscode.svg" alt="VSCode" className="h-6" />
           </div>
-          <span className="ml-3">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault()
-                inviteMember(invitedEmail)
-              }}
-              className="inline-flex items-center justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-hover focus:outline-none focus:ring-0 focus:ring-offset-2 sm:w-auto hover:cursor-pointer"
-            >
-              Invite member
-            </button>
-          </span>
-        </div>
-        {
-          members.length > 0 && <div className="mt-8 flex flex-col">
-          <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-              <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                <table className="min-w-full divide-y divide-gray-300">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th
-                        scope="col"
-                        className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
-                      >
-                        Name
-                      </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                        Role
-                      </th>
-                      {/* the column for the Edit button- this should be implement later. */}
-                      {/* <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                        <span className="sr-only">Edit</span>
-                      </th> */}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200 bg-white">
-                    {members.map((member) => (
-                      <tr key={member.email}>
-                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
-                          <div className="flex items-center">
-                            {member.pending ? (
-                              <span className="inline-block h-10 w-10 rounded-full bg-gray-100 overflow-hidden">
-                                <svg
-                                  className="h-full w-full text-gray-300"
-                                  fill="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-                                </svg>
-                              </span>
-                            ) : (
-                              <ProfilePicture size={10} />
-                            )}
-                            <div className="ml-4">
-                              <div
-                                className={classNames(
-                                  "font-medium text-gray-900",
-                                  member.pending ? "italic" : ""
-                                )}
-                              >
-                                {member.pending ? "Pending User" : `${member.firstName} ${member.lastName}`}
-                              </div>
-                              <div className="text-gray-500">{member.email}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {member.pending ? "Pending" : "Member"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+          <div className="ml-4 flex-auto">
+            <div className='flex items-center text-sm font-medium text-gray-900 hover:text-gray-700'>
+              Install VS Code Extension
+              { isVSCodeInstalled && <CheckCircleIcon className="ml-1 h-4 w-4 text-green-600" /> }
+            </div>
+            <div className='text-sm text-gray-700 text-left'>
+              { isVSCodeInstalled ? 'Installed' : 'Click to install' }
             </div>
           </div>
-        </div>
-        }
+          {
+            !isVSCodeInstalled && <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-gray-700" aria-hidden="true" />
+          }
+        </button>
+          {
+            codes.map((code) => (
+              <Link href={code.url} key={code._id}>
+                <a target="_blank" className="flex items-center max-h-96 scroll-py-3 overflow-y-auto p-3 bg-white hover:bg-gray-50 cursor-pointer rounded-sm">
+                  <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
+                    <ConnectLinkIcon className="h-5" />
+                  </div>
+                  <div className="ml-4 flex-auto">
+                    <span className='flex items-center text-sm font-medium text-gray-900 hover:text-gray-700'>
+                      {code.file}
+                    </span>
+                    <p className='text-sm text-gray-500'>
+                      {code.doc?.title}
+                    </p>
+                  </div>
+                </a>
+              </Link>
+            ))
+          }
+          {
+            isVSCodeInstalled &&
+          <div className="flex items-center max-h-96 scroll-py-3 overflow-y-auto p-3 bg-white rounded-sm">
+            <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-gray-500 animate-spin"
+                viewBox="0 0 512 512"
+                fill="currentColor"
+              >
+                <path d="M304 48C304 74.51 282.5 96 256 96C229.5 96 208 74.51 208 48C208 21.49 229.5 0 256 0C282.5 0 304 21.49 304 48zM304 464C304 490.5 282.5 512 256 512C229.5 512 208 490.5 208 464C208 437.5 229.5 416 256 416C282.5 416 304 437.5 304 464zM0 256C0 229.5 21.49 208 48 208C74.51 208 96 229.5 96 256C96 282.5 74.51 304 48 304C21.49 304 0 282.5 0 256zM512 256C512 282.5 490.5 304 464 304C437.5 304 416 282.5 416 256C416 229.5 437.5 208 464 208C490.5 208 512 229.5 512 256zM74.98 437C56.23 418.3 56.23 387.9 74.98 369.1C93.73 350.4 124.1 350.4 142.9 369.1C161.6 387.9 161.6 418.3 142.9 437C124.1 455.8 93.73 455.8 74.98 437V437zM142.9 142.9C124.1 161.6 93.73 161.6 74.98 142.9C56.24 124.1 56.24 93.73 74.98 74.98C93.73 56.23 124.1 56.23 142.9 74.98C161.6 93.73 161.6 124.1 142.9 142.9zM369.1 369.1C387.9 350.4 418.3 350.4 437 369.1C455.8 387.9 455.8 418.3 437 437C418.3 455.8 387.9 455.8 369.1 437C350.4 418.3 350.4 387.9 369.1 369.1V369.1z" />
+              </svg>
+            </div>
+            <div className="ml-4 flex-auto">
+              <span className='flex items-center text-sm font-medium text-gray-900 hover:text-gray-700'>
+               {isConnectionMade ? 'Listening for more connections' : 'Create a connection to continue' }
+              </span>
+              <p className='text-sm text-gray-700'>
+                Listening for changes
+              </p>
+            </div>
+          </div>
+          }
       </div>
       </div>
-    </div>
-    <NavButtons onBack={onBack} onNext={onSubmit} isLast isCompleted={isCompleted} isSubmitting={isSubmitting} />
+      <div className="mt-2">
+        <Link href="mailto:hi@mintlify.com?subject=I don't use VS Code, can you support [app]">
+          <a target="_blank" className="text-gray-500 hover:text-gray-700 text-sm">
+            Not using VS Code?
+          </a>
+        </Link>
+      </div>
+      </div>
+    <NavButtons onBack={onBack} onNext={onComplete} isLast isSubmitting={isSubmitting} isCompleted={isConnectionMade} />
   </>;
 }

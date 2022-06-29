@@ -59,7 +59,7 @@ const deleteDocsWithoutTasksOrCode = (orgId: Types.ObjectId, method: ScrapingMet
           'code.0': { $exists: false }
         }
       }
-    ]);
+    ] as any);
 
     const docIds = docs.map((doc) => doc._id);
     await Doc.deleteMany({ _id: { $in: docIds } });
