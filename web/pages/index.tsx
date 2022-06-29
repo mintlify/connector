@@ -20,6 +20,7 @@ export type Code = {
   _id: string
   file: string
   url: string
+  doc?: Doc,
 }
 
 export type Doc = {

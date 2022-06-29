@@ -7,9 +7,10 @@ import { API_ENDPOINT } from "../../helpers/api";
 import { classNames } from "../../helpers/functions";
 import { ConnectLinkIcon, DocumentationTypeIcon } from "../../helpers/Icons";
 import { getSubdomain } from "../../helpers/user";
-import AddDocumentation, { AddDocumentationType } from "../commands/documentation/AddDocumentation";
 import { Org, useProfile, User } from "../../context/ProfileContext";
 import { request } from "../../helpers/request";
+import Link from "next/link";
+import { Code } from "../../pages";
 
 const onboardStepLocalStateKey = 'onboarding-step';
 
@@ -142,7 +143,6 @@ export default function Onboarding() {
           user={user}
           org={org}
           onBack={onBack}
-          onNext={onNext}
           step={step}
         />;
       default:
@@ -239,28 +239,21 @@ function IntroStep({ user, onBack, onNext, role, setRole, teamSize, setTeamSize,
 }
 
 function InstallGitHubStep({ user, org, onBack, onNext, step }: { user: User, org: Org, onBack: () => void, onNext: () => void, step: number }) {
-  const [isAddingDocOpen, setIsAddingDocOpen] = useState(false);
-  const [addDocumentationType, setAddDocumentationType] = useState<AddDocumentationType>();
-  const [integrationsStatus, setIntegrationsStatus] = useState<Record<string, boolean>>({});
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [isGitHubInstalled, setIsGitHubInstalled] = useState<boolean>(false);
 
   useEffect(() => {
-    request('GET', `routes/org/${org._id}/integrations`)
-      .then(({ data: { integrations } }) => {
-        setIntegrationsStatus(integrations);
-      })
-  }, [user.userId, org, refreshKey]);
-
-  const isGitHubInstalled = true;
+    const statusInterval = setInterval(() => {  
+      request('GET', `routes/org/${org._id}/integrations`)
+        .then(({ data: { integrations } }) => {
+          if (integrations.github) {
+            setIsGitHubInstalled(integrations.github || false);
+          }
+        });
+      }, 1000);
+    return () => clearInterval(statusInterval);
+  }, [user.userId, org]);
 
   return <>
-    <AddDocumentation
-      isOpen={isAddingDocOpen}
-      setIsOpen={setIsAddingDocOpen}
-      overrideSelectedRuleType={addDocumentationType}
-      integrationsStatus={{}} // intentionally left blank
-      refresh={() => setRefreshKey(Math.random())}
-    />
     <h1 className="text-3xl font-semibold flex items-center space-x-2">
       <div className="inline">
         Integrate with GitHub
@@ -272,7 +265,7 @@ function InstallGitHubStep({ user, org, onBack, onNext, step }: { user: User, or
     </p>
     <ProgressBar step={step} /> 
     <div className="mt-6">
-      <video className="w-full rounded-sm" autoPlay controls>
+      <video className="w-full rounded-sm" autoPlay controls muted>
         <source src="assets/videos/demo.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
@@ -291,25 +284,50 @@ function InstallGitHubStep({ user, org, onBack, onNext, step }: { user: User, or
             <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-gray-700" aria-hidden="true" />
           </div>
       </div>
-      <button className="mt-3 text-gray-500 hover:text-gray-700 text-sm">
-        Not using GitHub?
-      </button>
+      <div className="mt-2">
+        <Link href="mailto:hi@mintlify.com?subject=I don't use GitHub, can you support [app]">
+          <a target="_blank" className="text-gray-500 hover:text-gray-700 text-sm">
+            Not using GitHub?
+          </a>
+        </Link>
       </div>
+    </div>
     <NavButtons onBack={onBack} onNext={onNext} isCompleted={isGitHubInstalled} />
   </>;
 }
 
-function ConnectStep({ user, org, onBack, onNext, step }: { user: User, org: Org, onBack: () => void, onNext: () => void, step: number }) {
+function ConnectStep({ user, org, onBack, step }: { user: User, org: Org, onBack: () => void, step: number }) {
+  const router = useRouter();
+  const [isVSCodeInstalled, setIsVScodeInstalled] = useState(false);
+  const [codes, setCodes] = useState<Code[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     const statusInterval = setInterval(() => {  
-      console.log('Hello');
+      request('GET', `routes/org/${org._id}/integrations`)
+        .then(({ data: { integrations } }) => {
+          setIsVScodeInstalled(integrations.vscode || false);
+        });
+      
+      request('GET', `routes/links`)
+        .then(({ data: { codes } }) => {
+          setCodes(codes);
+        });
       }, 1000);
     
     return () => clearInterval(statusInterval);
   }, [user, org._id]);
 
-  const isVSCodeInstalled = true;
-  const isConnectionMade = true;
+  const onComplete = async () => {
+    setIsSubmitting(true);
+    await request('PUT', `routes/user/onboarding/complete`)
+    setIsSubmitting(false);
+    // Remove onboarding saved step
+    window.localStorage.removeItem(onboardStepLocalStateKey);
+    router.reload();
+  }
+
+  const isConnectionMade = codes.length > 0;
 
   return <>
     <h1 className="text-3xl font-semibold flex items-center space-x-2">
@@ -323,7 +341,7 @@ function ConnectStep({ user, org, onBack, onNext, step }: { user: User, org: Org
     </p>
     <ProgressBar step={step} /> 
     <div className="mt-6">
-      <video className="w-full rounded-sm" autoPlay controls>
+      <video className="w-full rounded-sm" autoPlay controls muted>
         <source src="assets/videos/demo.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
@@ -346,7 +364,24 @@ function ConnectStep({ user, org, onBack, onNext, step }: { user: User, org: Org
             }
           </div>
           {
-            isVSCodeInstalled && 
+            codes.map((code) => (
+              <div key={code._id} className="flex items-center max-h-96 scroll-py-3 overflow-y-auto p-3 bg-white hover:bg-gray-50 cursor-pointer rounded-sm">
+            <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
+              <ConnectLinkIcon className="h-5" />
+            </div>
+            <div className="ml-4 flex-auto">
+              <span className='flex items-center text-sm font-medium text-gray-900 hover:text-gray-700'>
+                {code.file}
+              </span>
+              <p className='text-sm text-gray-500'>
+                {code.doc?.title}
+              </p>
+            </div>
+          </div>
+            ))
+          }
+          {
+            isVSCodeInstalled && !isConnectionMade &&
           <div className="flex items-center max-h-96 scroll-py-3 overflow-y-auto p-3 bg-white rounded-sm">
             <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center">
             <svg
@@ -369,10 +404,14 @@ function ConnectStep({ user, org, onBack, onNext, step }: { user: User, org: Org
           </div>
           }
       </div>
-      <button className="mt-3 text-gray-500 hover:text-gray-700 text-sm">
-        Not using VS Code?
-      </button>
+      <div className="mt-2">
+        <Link href="mailto:hi@mintlify.com?subject=I don't use VS Code, can you support [app]">
+          <a target="_blank" className="text-gray-500 hover:text-gray-700 text-sm">
+            Not using VS Code?
+          </a>
+        </Link>
       </div>
-    <NavButtons onBack={onBack} onNext={onNext} isCompleted={isConnectionMade} />
+      </div>
+    <NavButtons onBack={onBack} onNext={onComplete} isLast isSubmitting={isSubmitting} isCompleted={isConnectionMade} />
   </>;
 }

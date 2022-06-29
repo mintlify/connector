@@ -8,6 +8,34 @@ import { indexDocsForSearch } from '../services/algolia';
 
 const linksRouter = express.Router();
 
+linksRouter.get('/', userMiddleware, async (_, res) => {
+  const { org } = res.locals.user;
+  try {
+    const codes = await Code.aggregate([
+      {
+        $match: { org: org._id }
+      },
+      {
+        $lookup: {
+          from: 'docs',
+          foreignField: '_id',
+          localField: 'doc',
+          as: 'doc',
+        },
+      },
+      {
+        $set: {
+          doc: { $first: "$doc" },
+        },
+      },
+    ]);
+    res.send({codes});
+  }
+  catch (error: any) {
+    res.status(400).send({ error });
+  }
+})
+
 linksRouter.put('/', userMiddleware, async (req, res) => {
   try {
     const { docId, code, url } = req.body;
