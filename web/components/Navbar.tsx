@@ -11,6 +11,7 @@ import Link from 'next/link'
 import ProfilePicture from './ProfilePicture'
 import Search from './Search'
 import { useProfile } from '../context/ProfileContext'
+import TrialBanner from './TrialBanner'
 
 const userNavigation = [
   { name: 'Account', href: '/settings/account' },
@@ -26,6 +27,7 @@ export default function Navbar() {
   useHotkeys('cmd+k', () => setIsSearchOpen(true));
 
   const { user, org } = profile;
+
   if (user == null || org == null) {
     return null;
   }
@@ -41,6 +43,7 @@ export default function Navbar() {
     <Disclosure as="nav" className="bg-background z-20">
       {({ open }) => (
         <>
+          <TrialBanner />
           <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
             <div className="relative flex items-center justify-between h-16 flex-row">
               <div className="flex items-center px-2 lg:px-0">

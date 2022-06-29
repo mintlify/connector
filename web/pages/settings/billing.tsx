@@ -7,6 +7,7 @@ import { navigation } from './account'
 import { useProfile } from '../../context/ProfileContext'
 import { classNames } from '../../helpers/functions'
 import { API_ENDPOINT, ISDEV } from '../../helpers/api'
+import Link from 'next/link'
 
 type Tier = {
   id: string,
@@ -18,24 +19,13 @@ type Tier = {
   yearly: {
     price: number,
     priceId?: string,
-  }
+  },
+  featuresLabel: string,
   description: string,
   includedFeatures: string[],
 }
 
 const tiers: Tier[] = [
-  {
-    id: 'free',
-    name: 'Free',
-    monthly: {
-      price: 0,
-    },
-    yearly: {
-      price: 0,
-    },
-    description: 'All the basics for better documentation',
-    includedFeatures: ['One integration with a documentation platform', 'Track documentation from Notion, Google Docs, and Confluence', 'Workflow automations', 'Max 1 member per organization'],
-  },
   {
     id: 'pro',
     name: 'Pro',
@@ -47,16 +37,29 @@ const tiers: Tier[] = [
       price: 40,
       priceId: ISDEV ? 'price_1LC85UIslOV3ufr23xDxmChm' : 'price_1L7apaIslOV3ufr2k7zGiTds',
     },
+    featuresLabel: 'What\'s included',
     description: 'Automating world class documentation',
     includedFeatures: [
-      'Unlimited integrations',
-      'Track documentation from any platform',
-      'Private hosted documentation management',
-      'Unlimited members, teams and ownership assignments',
+      'Unlimited documents',
+      'Track documents from any platform',
+      'Workflow automations',
+      'Unlimited members and ownership assignments',
       'Integrating with task management systems',
-      'Custom domain',
-      'Priority on-call support',
+      'On-call support',
     ],
+  },
+  {
+    id: 'enterprise',
+    name: 'Enterprise',
+    monthly: {
+      price: -1,
+    },
+    yearly: {
+      price: -1,
+    },
+    featuresLabel: 'Includes Pro, plus',
+    description: 'Built for your enterprises at scale',
+    includedFeatures: ['SSO and custom authentication', 'Enterprise-grade security and governance', 'Custom domain', 'API access', 'Premium support', 'Tailored onboarding'],
   },
 ]
 
@@ -69,14 +72,34 @@ function PurchaseButton({ tier, currentPlan }: { tier: Tier, currentPlan: string
     </span>
   }
 
-  const isFree = tier.id === 'free';
+  if (tier.id === 'enterprise') {
+    return <Link href="mailto:hi@mintlify.com?subject=Upgrading to Enterprise">
+      <a
+        className="mt-8 block w-full bg-gray-700 border border-gray-800 rounded-md py-2 text-sm font-semibold text-white text-center hover:bg-gray-800"
+        id="checkout-and-portal-button"
+        target="_blank"
+      >
+        Contact us
+      </a>
+    </Link>
+  }
+
+  if (tier.id === 'pro' && currentPlan === 'free') {
+    return <button
+    className="mt-8 block w-full bg-gray-700 border border-gray-800 rounded-md py-2 text-sm font-semibold text-white text-center hover:bg-gray-800"
+    id="checkout-and-portal-button"
+    type="submit"
+  >
+    Upgrade now
+  </button>
+  }
 
   return <button
     className="mt-8 block w-full bg-gray-700 border border-gray-800 rounded-md py-2 text-sm font-semibold text-white text-center hover:bg-gray-800"
     id="checkout-and-portal-button"
     type="submit"
   >
-    { isFree ? 'Downgrade' : 'Try for 14 days' }
+    Downgrade
   </button>
 }
 
@@ -162,8 +185,15 @@ export default function Settings() {
                         <h2 className="text-lg leading-6 font-medium text-gray-900">{tier.name}</h2>
                         <p className="mt-4 text-sm text-gray-500">{tier.description}</p>
                         <p className="mt-8">
-                          <span className="text-4xl font-extrabold text-gray-900">${isMonthly ? tier.monthly.price : tier.yearly.price}</span>{' '}
-                          <span className="text-base font-medium text-gray-500">/mo</span>
+                          {
+                            tier.monthly.price >= 0 && <>
+                            <span className="text-4xl font-medium text-gray-900">${isMonthly ? tier.monthly.price : tier.yearly.price}</span>{' '}
+                            <span className="text-base font-medium text-gray-500">/mo</span>
+                            </>
+                          }
+                          {
+                            tier.monthly.price < 0 && <span className="text-3xl font-medium text-gray-900">Contact us</span>
+                          }
                         </p>
                         <form action={`${API_ENDPOINT}/routes/stripe/${tier.id === 'free' ? 'portal' : 'checkout'}`} method="GET">
                           <input type="hidden" name="priceId" value={isMonthly ? tier.monthly.priceId : tier.yearly.priceId} /> 
@@ -176,12 +206,11 @@ export default function Settings() {
                         </form>
                       </div>
                       <div className="pt-6 pb-8 px-6">
-                        <h3 className="text-xs font-medium text-gray-900 tracking-wide uppercase">What&apos;s included</h3>
+                        <h3 className="text-sm font-semibold text-slate-800 tracking-wide uppercase">{tier.featuresLabel}</h3>
                         <ul role="list" className="mt-6 space-y-4">
                           {tier.includedFeatures.map((feature) => (
                             <li key={feature} className="flex space-x-2">
-                              <CheckIcon className="flex-shrink-0 h-5 w-5 text-green-500" aria-hidden="true" />
-                              <span className="text-sm text-gray-500">{feature}</span>
+                              <span className="text-sm text-slate-600">{feature}</span>
                             </li>
                           ))}
                         </ul>

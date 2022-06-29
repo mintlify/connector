@@ -181,7 +181,7 @@ orgRouter.post('/', async (req, res) => {
       users: [user.userId],
     });
 
-    const redirectUrl = `https://${org.subdomain}.mintlify.com/api/auth/landing?sessionToken=${newSessionToken}`;
+    const redirectUrl: string = `https://${org.subdomain}.mintlify.com/api/auth/landing?sessionToken=${newSessionToken}`;
 
     track(user.userId, 'Create Organization', {
       name: orgName,
@@ -232,7 +232,13 @@ orgRouter.get('/gitOrg/:gitOrg/details', async (req, res) => {
   } catch (error) {
     return res.status(400).send({ error });
   }
-  
+});
+
+orgRouter.delete('/trial/model', userMiddleware, async (_, res) => {
+  const { org } = res.locals.user;
+
+  await Org.findByIdAndUpdate(org._id, {'plan.isHidingModel': true});
+  res.end();
 })
 
 export default orgRouter;
