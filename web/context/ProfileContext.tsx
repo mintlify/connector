@@ -26,7 +26,8 @@ export type Org = {
   notifications: {
     monthlyDigest: boolean
     newsletter: boolean
-  }
+  },
+  createdAt: string
   access?: {
     mode: AccessMode
   },
