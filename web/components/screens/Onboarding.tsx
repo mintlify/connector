@@ -325,7 +325,7 @@ function ConnectStep({ user, org, onBack, step }: { user: User, org: Org, onBack
         .then(({ data: { integrations } }) => {
           setIsVScodeInstalled(integrations.vscode || false);
         });
-        
+
     const statusInterval = setInterval(() => {  
       request('GET', `routes/org/${org._id}/integrations`)
         .then(({ data: { integrations } }) => {
@@ -395,7 +395,7 @@ function ConnectStep({ user, org, onBack, step }: { user: User, org: Org, onBack
             codes.map((code) => (
               <Link href={code.url} key={code._id}>
                 <a target="_blank" className="flex items-center max-h-96 scroll-py-3 overflow-y-auto p-3 bg-white hover:bg-gray-50 cursor-pointer rounded-sm">
-                  <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center border-green-200 border-2">
+                  <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
                     <ConnectLinkIcon className="h-5" />
                   </div>
                   <div className="ml-4 flex-auto">
