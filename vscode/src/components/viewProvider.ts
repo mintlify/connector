@@ -6,7 +6,7 @@ import vscode, {
 	Webview } from "vscode";
 import { Code } from "../utils/git";
 import { API_ENDPOINT } from '../utils/api';
-import { openLogin } from './authentication';
+import { AuthService, openLogin } from './authentication';
 
 export type Doc = {
 	org: string;
@@ -25,10 +25,17 @@ export type Link = {
 export class ViewProvider implements WebviewViewProvider {
     public static readonly viewType = 'primary';
     private _view?: WebviewView;
+	private authService: AuthService;
 
-    constructor(private readonly _extensionUri: Uri) { }
+    constructor(
+		private readonly _extensionUri: Uri,
+		authService: AuthService
+	) {
+		this.authService = authService;
+	}
 
 	public authenticate(user: any): void {
+		this.authService.setUserId(user.userId);
 		this._view?.webview.postMessage({ command: 'auth', args: user });
 	}
 
@@ -39,6 +46,8 @@ export class ViewProvider implements WebviewViewProvider {
 
 	public logout(): void {
 		this._view?.webview.postMessage({ command: 'logout' });
+		this.authService.deleteSubdomain();
+		this.authService.deleteUserId();
 	}
 
     public resolveWebviewView(webviewView: WebviewView): void | Thenable<void> {
@@ -52,24 +61,32 @@ export class ViewProvider implements WebviewViewProvider {
 			webviewView.webview.onDidReceiveMessage(async message => {
 				switch (message.command) {
 					case 'sign-up':
-						vscode.env.openExternal(vscode.Uri.parse('https://www.mintlify.com/create'));
-						break;
+						{
+							vscode.env.openExternal(vscode.Uri.parse('https://www.mintlify.com/create'));
+							break;
+						}
 					case 'login':
-						openLogin(message.args);
-						break;
+						{
+							const { signInWithProtocol, subdomain } = message.args;
+							openLogin(signInWithProtocol);
+							this.authService.setSubdomain(subdomain);
+							break;
+						}
 					case 'get-docs':
-						const { userId, subdomain } = message;
-						axios.get(`${API_ENDPOINT}/docs`, {
-							params: {
-								userId,
-								subdomain
-							}
-						})
-							.then((res) => {
-								const { data: { docs } } = res;
-								this._view?.webview.postMessage({ command: 'display-docs', docs });
-							});
-						break;
+						{
+							const { userId, subdomain } = message;
+							axios.get(`${API_ENDPOINT}/docs`, {
+								params: {
+									userId,
+									subdomain
+								}
+							})
+								.then((res) => {
+									const { data: { docs } } = res;
+									this._view?.webview.postMessage({ command: 'display-docs', docs });
+								});
+							break;
+						}
 					case 'link-submit':
 						{
 							const { userId, docId, title, code, subdomain, url } = message.args;
@@ -103,10 +120,11 @@ export class ViewProvider implements WebviewViewProvider {
 							}));
 							break;
 						}
-					case 'error': {
-						const errMessage = message?.message;
-						vscode.window.showInformationMessage(errMessage);
-					}
+					case 'error':
+						{
+							const errMessage = message?.message;
+							vscode.window.showInformationMessage(errMessage);
+						}
 				}
 			});
 

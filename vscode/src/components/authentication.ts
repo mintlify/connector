@@ -18,7 +18,7 @@ export const registerAuthRoute = (provider: ViewProvider) => {
             vscode.window.showErrorMessage('User has insufficient credentials. Try again later');
             return;
           }
-          
+
           provider.authenticate(user);
           vscode.window.showInformationMessage(`🙌 Successfully signed in with ${user.email}`);
         } catch (err) {
@@ -45,3 +45,29 @@ export const registerAuthRoute = (provider: ViewProvider) => {
 export const openLogin = (endpoint: string) => {
   return vscode.env.openExternal(vscode.Uri.parse(`${endpoint}/api/login/vscode`));
 };
+
+export class AuthService {
+  constructor(private storage: vscode.Memento) {}
+  public getUserId(): string | undefined {
+    return this.storage.get('userId', undefined);
+  }
+
+  public setUserId(userId: string) {
+    this.storage.update('userId', userId);
+  }
+
+  public deleteUserId() {
+    this.storage.update('userId', undefined);
+  }
+  public getSubdomain(): string | undefined {
+    return this.storage.get('subdomain', undefined);
+  }
+
+  public setSubdomain(subdomain: string) {
+    this.storage.update('subdomain', subdomain);
+  }
+
+  public deleteSubdomain() {
+    this.storage.update('subdomain', undefined);
+  }
+}

@@ -202,7 +202,8 @@ const App = () => {
 
   const onClickSignIn = () => {
     let signInWithProtocol = formatSignInUrl(signInUrl);
-    vscode.postMessage({ command: 'login', args: signInWithProtocol });
+    const subdomain = getSubdomain(signInUrl);
+    vscode.postMessage({ command: 'login', args: {signInWithProtocol, subdomain} });
   };
 
   const onLogout = () => {
