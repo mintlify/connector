@@ -433,7 +433,7 @@ function ConnectStep({ user, org, onBack, step }: { user: User, org: Org, onBack
             </div>
           </div>
           }
-      </div>
+        </div>
       </div>
       <div className="mt-2">
         <Link href="mailto:hi@mintlify.com?subject=I don't use VS Code, can you support [app]">
