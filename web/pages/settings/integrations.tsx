@@ -15,56 +15,68 @@ type IntegrationSection = {
   integrations: Integration[]
 }
 
+export const SlackIntegration = (orgId: string, userId: string) => {
+  return {
+    type: 'slack',
+    title: 'Slack',
+    iconSrc: '/assets/integrations/slack.svg',
+    installUrl: `${API_ENDPOINT}/routes/integrations/slack/install?org=${orgId}&close=true`
+  }
+};
+
+export const GoogleIntegration = (orgId: string, userId: string) => {
+  return {
+    type: 'google',
+    title: 'Google Docs',
+    iconSrc: '/assets/integrations/google-docs.svg',
+    installUrl: `${API_ENDPOINT}/routes/integrations/google/install?org=${orgId}&close=true`
+  }
+}
+
+export const NotionIntegration = (orgId: string, userId: string) => {
+  return {
+    type: 'notion',
+    title: 'Notion',
+    iconSrc: '/assets/integrations/notion.svg',
+    installUrl: `${API_ENDPOINT}/routes/integrations/notion/install?org=${orgId}&close=true&userId=${userId}`
+  }
+}
+
+export const GitHubIntegration = (orgId: string, userId: string) => {
+  return {
+    type: 'github',
+    title: 'GitHub',
+    iconSrc: '/assets/integrations/github.svg',
+    installUrl: `${API_ENDPOINT}/routes/integrations/github/install?org=${orgId}&close=true&userId=${userId}`
+  }
+}
+
+export const VSCodeIntegration = () => {
+  return {
+    type: 'vscode',
+    title: 'VS Code',
+    iconSrc: '/assets/integrations/vscode.svg',
+    installUrl: 'vscode:extension/mintlify.connector',
+    useRouter: true
+  }
+}
+
 const getIntegrationSections = (orgId: string, userId: string): IntegrationSection[] => {
   return [
     {
       title: 'Alerts',
       subtitle: 'Receive alerts about your documentation',
-      integrations: [
-        {
-          type: 'slack',
-          title: 'Slack',
-          iconSrc: '/assets/integrations/slack.svg',
-          installUrl: `${API_ENDPOINT}/routes/integrations/slack/install?org=${orgId}&close=true`
-        },
-      ],
+      integrations: [SlackIntegration(orgId, userId)],
     },
     {
       title: 'Documentation',
       subtitle: 'Integration with documentation platforms',
-      integrations: [
-        {
-          type: 'google',
-          title: 'Google Docs',
-          iconSrc: '/assets/integrations/google-docs.svg',
-          installUrl: `${API_ENDPOINT}/routes/integrations/google/install?org=${orgId}&close=true`
-        },
-        {
-          type: 'notion',
-          title: 'Notion',
-          iconSrc: '/assets/integrations/notion.svg',
-          installUrl: `${API_ENDPOINT}/routes/integrations/notion/install?org=${orgId}&close=true&userId=${userId}`
-        },
-      ],
+      integrations: [GoogleIntegration(orgId, userId), NotionIntegration(orgId, userId)],
     },
     {
       title: 'Code',
       subtitle: 'Connect documentation with your code',
-      integrations: [
-        {
-          type: 'github',
-          title: 'GitHub',
-          iconSrc: '/assets/integrations/github.svg',
-          installUrl: `${API_ENDPOINT}/routes/integrations/github/install?org=${orgId}&close=true&userId=${userId}`
-        },
-        {
-          type: 'vscode',
-          title: 'VS Code',
-          iconSrc: '/assets/integrations/vscode.svg',
-          installUrl: 'vscode:extension/mintlify.connector',
-          useRouter: true
-        },
-      ],
+      integrations: [GitHubIntegration(orgId, userId), VSCodeIntegration()],
     },
   ];
 };

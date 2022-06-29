@@ -11,6 +11,8 @@ import { Org, useProfile, User } from "../../context/ProfileContext";
 import { request } from "../../helpers/request";
 import Link from "next/link";
 import { Code } from "../../pages";
+import { onInstallIntegration } from "../../helpers/integrations";
+import { GitHubIntegration, VSCodeIntegration } from "../../pages/settings/integrations";
 
 const onboardStepLocalStateKey = 'onboarding-step';
 
@@ -239,6 +241,7 @@ function IntroStep({ user, onBack, onNext, role, setRole, teamSize, setTeamSize,
 }
 
 function InstallGitHubStep({ user, org, onBack, onNext, step }: { user: User, org: Org, onBack: () => void, onNext: () => void, step: number }) {
+  const router = useRouter();
   const [isGitHubInstalled, setIsGitHubInstalled] = useState<boolean>(false);
 
   useEffect(() => {
@@ -252,6 +255,10 @@ function InstallGitHubStep({ user, org, onBack, onNext, step }: { user: User, or
       }, 1000);
     return () => clearInterval(statusInterval);
   }, [user.userId, org]);
+
+  const onInstallGitHub = () => {
+    onInstallIntegration(GitHubIntegration(org._id, user.userId), router);
+  }
 
   return <>
     <h1 className="text-3xl font-semibold flex items-center space-x-2">
@@ -271,19 +278,22 @@ function InstallGitHubStep({ user, org, onBack, onNext, step }: { user: User, or
         Your browser does not support the video tag.
       </video>
       <div className="rounded-b-sm">
-          <div className="flex items-center max-h-96 scroll-py-3 overflow-y-auto p-3 bg-white hover:bg-gray-50 cursor-pointer rounded-sm">
+          <button
+            className="flex items-center w-full max-h-96 scroll-py-3 overflow-y-auto p-3 bg-white hover:bg-gray-50 cursor-pointer rounded-sm"
+            onClick={onInstallGitHub}
+          >
             <DocumentationTypeIcon type='github' />
             <div className="ml-4 flex-auto">
               <span className='flex items-center text-sm font-medium text-gray-900 hover:text-gray-700'>
                 GitHub App
                 { isGitHubInstalled && <CheckCircleIcon className="ml-1 h-4 w-4 text-green-600" /> }
               </span>
-              <p className='text-sm text-gray-700'>
+              <p className='text-sm text-gray-700 text-left'>
                 { isGitHubInstalled ? 'Installed' : 'Click to install' }
               </p>
             </div>
             <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-gray-700" aria-hidden="true" />
-          </div>
+          </button>
       </div>
       </div>
       <div className="mt-2">
@@ -320,6 +330,10 @@ function ConnectStep({ user, org, onBack, step }: { user: User, org: Org, onBack
     return () => clearInterval(statusInterval);
   }, [user, org._id]);
 
+  const onInstallVSCode = () => {
+    onInstallIntegration(VSCodeIntegration(), router);
+  }
+
   const onComplete = async () => {
     setIsSubmitting(true);
     await request('PUT', `routes/user/onboarding/complete`)
@@ -349,42 +363,44 @@ function ConnectStep({ user, org, onBack, step }: { user: User, org: Org, onBack
         Your browser does not support the video tag.
       </video>
       <div className="rounded-b-sm">
-          <div className="flex items-center max-h-96 scroll-py-3 overflow-y-auto p-3 bg-white hover:bg-gray-50 cursor-pointer rounded-sm">
-            <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center">
-              <img src="assets/integrations/vscode.svg" alt="VSCode" className="h-6" />
+        <button onClick={onInstallVSCode} className="flex items-center max-h-96 scroll-py-3 overflow-y-auto w-full p-3 bg-white hover:bg-gray-50 cursor-pointer rounded-sm">
+          <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center">
+            <img src="assets/integrations/vscode.svg" alt="VSCode" className="h-6" />
+          </div>
+          <div className="ml-4 flex-auto">
+            <div className='flex items-center text-sm font-medium text-gray-900 hover:text-gray-700'>
+              Install VS Code Extension
+              { isVSCodeInstalled && <CheckCircleIcon className="ml-1 h-4 w-4 text-green-600" /> }
             </div>
-            <div className="ml-4 flex-auto">
-              <span className='flex items-center text-sm font-medium text-gray-900 hover:text-gray-700'>
-                Install VS Code Extension
-                { isVSCodeInstalled && <CheckCircleIcon className="ml-1 h-4 w-4 text-green-600" /> }
-              </span>
-              <p className='text-sm text-gray-700'>
-                { isVSCodeInstalled ? 'Installed' : 'Click to install' }
-              </p>
+            <div className='text-sm text-gray-700 text-left'>
+              { isVSCodeInstalled ? 'Installed' : 'Click to install' }
             </div>
-            {
-              !isVSCodeInstalled && <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-gray-700" aria-hidden="true" />
-            }
           </div>
           {
+            !isVSCodeInstalled && <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-gray-700" aria-hidden="true" />
+          }
+        </button>
+          {
             codes.map((code) => (
-              <div key={code._id} className="flex items-center max-h-96 scroll-py-3 overflow-y-auto p-3 bg-white hover:bg-gray-50 cursor-pointer rounded-sm">
-            <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
-              <ConnectLinkIcon className="h-5" />
-            </div>
-            <div className="ml-4 flex-auto">
-              <span className='flex items-center text-sm font-medium text-gray-900 hover:text-gray-700'>
-                {code.file}
-              </span>
-              <p className='text-sm text-gray-500'>
-                {code.doc?.title}
-              </p>
-            </div>
-          </div>
+              <Link href={code.url} key={code._id}>
+                <a target="_blank" className="flex items-center max-h-96 scroll-py-3 overflow-y-auto p-3 bg-white hover:bg-gray-50 cursor-pointer rounded-sm">
+                  <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center border-green-200 border-2">
+                    <ConnectLinkIcon className="h-5" />
+                  </div>
+                  <div className="ml-4 flex-auto">
+                    <span className='flex items-center text-sm font-medium text-gray-900 hover:text-gray-700'>
+                      {code.file}
+                    </span>
+                    <p className='text-sm text-gray-500'>
+                      {code.doc?.title}
+                    </p>
+                  </div>
+                </a>
+              </Link>
             ))
           }
           {
-            isVSCodeInstalled && !isConnectionMade &&
+            isVSCodeInstalled &&
           <div className="flex items-center max-h-96 scroll-py-3 overflow-y-auto p-3 bg-white rounded-sm">
             <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center">
             <svg
@@ -398,7 +414,7 @@ function ConnectStep({ user, org, onBack, step }: { user: User, org: Org, onBack
             </div>
             <div className="ml-4 flex-auto">
               <span className='flex items-center text-sm font-medium text-gray-900 hover:text-gray-700'>
-                Create a connection to continue
+               {isConnectionMade ? 'Listening for more connections' : 'Create a connection to continue' }
               </span>
               <p className='text-sm text-gray-700'>
                 Listening for changes
