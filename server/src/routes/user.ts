@@ -284,15 +284,15 @@ userRouter.put('/:userId/install-vscode', async (req, res) => {
 });
 
 userRouter.post('/onboarding', userMiddleware, async (req, res) => {
-  const { role, teamSize, appsUsing } = req.body;
+  const { role, teamSize } = req.body;
 
-  if (!role || !teamSize || appsUsing == null) {
+  if (!role || !teamSize) {
     return res.status(400).send({ error: 'No data provided' });
   }
 
   try {
-    const userUpdateQuery = { onboarding: { role, usingVSCode: appsUsing.includes('vscode') } };
-    const orgUpdateQuery = { onboarding: { teamSize, usingGitHub: appsUsing.includes('github'), usingSlack: appsUsing.includes('slack'), usingNone: appsUsing.includes('none') } }
+    const userUpdateQuery = { onboarding: { role } };
+    const orgUpdateQuery = { onboarding: { teamSize } }
     const updateUserPromise = User.findByIdAndUpdate(res.locals.user._id, userUpdateQuery);
     const updateOrgPromise = Org.findByIdAndUpdate(res.locals.user.org._id, orgUpdateQuery);
     await Promise.all([updateUserPromise, updateOrgPromise]);
