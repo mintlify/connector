@@ -157,7 +157,7 @@ export default function Onboarding() {
     </Head>
     <div className="bg-slate-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-8">
-        <div className="w-96 max-w-full mx-auto py-12">
+        <div className="w-96 lg:w-2/5 max-w-full mx-auto py-12">
           <CurrentStep />
         </div>
       </div>
@@ -192,7 +192,7 @@ function IntroStep({ user, onBack, onNext, role, setRole, teamSize, setTeamSize,
       <div>
         <label className="text-base font-medium text-gray-900">What best describes what you do?</label>
         <fieldset className="mt-4">
-          <div className="w-96 max-w-full grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {rolesOptions.map((roleOption) => (
               <div key={roleOption.id} className="flex items-center">
                 <input
@@ -265,11 +265,12 @@ function InstallGitHubStep({ user, org, onBack, onNext, step }: { user: User, or
     </p>
     <ProgressBar step={step} /> 
     <div className="mt-6">
+      <div className="shadow-md">
       <video className="w-full rounded-sm" autoPlay controls muted>
         <source src="assets/videos/workflow.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
-      <div className="mt-4 rounded-sm shadow-md">
+      <div className="rounded-b-sm">
           <div className="flex items-center max-h-96 scroll-py-3 overflow-y-auto p-3 bg-white hover:bg-gray-50 cursor-pointer rounded-sm">
             <DocumentationTypeIcon type='github' />
             <div className="ml-4 flex-auto">
@@ -283,6 +284,7 @@ function InstallGitHubStep({ user, org, onBack, onNext, step }: { user: User, or
             </div>
             <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-gray-700" aria-hidden="true" />
           </div>
+      </div>
       </div>
       <div className="mt-2">
         <Link href="mailto:hi@mintlify.com?subject=I don't use GitHub, can you support [app]">
@@ -341,11 +343,12 @@ function ConnectStep({ user, org, onBack, step }: { user: User, org: Org, onBack
     </p>
     <ProgressBar step={step} /> 
     <div className="mt-6">
+      <div className="shadow-md">
       <video className="w-full rounded-sm" autoPlay controls muted>
-        <source src="assets/videos/demo.mp4" type="video/mp4" />
+        <source src="assets/videos/connect.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
-      <div className="mt-4 rounded-sm shadow-md">
+      <div className="rounded-b-sm">
           <div className="flex items-center max-h-96 scroll-py-3 overflow-y-auto p-3 bg-white hover:bg-gray-50 cursor-pointer rounded-sm">
             <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center">
               <img src="assets/integrations/vscode.svg" alt="VSCode" className="h-6" />
@@ -403,6 +406,7 @@ function ConnectStep({ user, org, onBack, step }: { user: User, org: Org, onBack
             </div>
           </div>
           }
+      </div>
       </div>
       <div className="mt-2">
         <Link href="mailto:hi@mintlify.com?subject=I don't use VS Code, can you support [app]">
