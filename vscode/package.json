@@ -2,7 +2,7 @@
   "name": "connector",
   "publisher": "mintlify",
   "displayName": "Mintlify Connect",
-  "version": "0.3.22",
+  "version": "0.3.23",
   "icon": "assets/logo.png",
   "repository": {
     "url": "https://github.com/mintlify/connect"
