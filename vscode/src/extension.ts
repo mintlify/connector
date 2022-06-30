@@ -4,7 +4,7 @@ import { linkCodeCommand, linkDirCommand } from './components/linkCommands';
 import { registerAuthRoute } from './components/authentication';
 import FileCodeLensProvider from './components/codeLensProvider';
 import GlobalState from './utils/globalState';
-import { refreshLinkCommand } from './components/links';
+import { refreshLinksCommand } from './components/links';
 
 export async function activate(context: vscode.ExtensionContext) {
 	const globalState = new GlobalState(context.globalState);
@@ -17,7 +17,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.languages.registerCodeLensProvider(allLanguages, codeLensProvider),
 		linkCodeCommand(viewProvider),
 		linkDirCommand(viewProvider),
-		refreshLinkCommand(globalState)
+		refreshLinksCommand(globalState)
 	);
 	registerAuthRoute(viewProvider);
 

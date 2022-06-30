@@ -38,4 +38,28 @@ export default class GlobalState {
     public deleteLinks() {
       this.storage.update('links', undefined);
     }
+
+    public getRepo(): string | undefined {
+      return this.storage.get('repo', undefined);
+    }
+
+    public setRepo(repo: string) {
+      this.storage.update('repo', repo);
+    }
+
+    public deleteRepo() {
+      this.storage.update('repo', undefined);
+    }
+
+    public getGitOrg(): string | undefined {
+      return this.storage.get('gitOrg', undefined);
+    }
+
+    public setGitOrg(gitOrg: string) {
+      this.storage.update('gitOrg', gitOrg);
+    }
+
+    public deleteGitOrg() {
+      this.storage.update('gitOrg', undefined);
+    }
   }
