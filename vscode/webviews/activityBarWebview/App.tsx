@@ -140,6 +140,22 @@ const App = () => {
     vscode.postMessage({ command: 'get-docs', userId: user.userId, subdomain: getSubdomain(dashboardUrl) });
   }, [user, dashboardUrl, API_ENDPOINT]);
 
+  useEffect(() => {
+    if (isNoDocs) {
+      const urlStatus = checkIsURL(query);
+      setIsURL(urlStatus);
+      if (urlStatus) {
+        const newDoc = {
+          _id: 'create',
+          title: query,
+          url: query
+        };
+        setSelectedDoc(newDoc);
+        vscode.setState({...initialState, selectedDoc: newDoc});
+      }
+    }
+  }, [query]);
+
   const handleSubmit = event => {
     event.preventDefault();
     const args = {
