@@ -26,7 +26,8 @@ export type Org = {
   notifications: {
     monthlyDigest: boolean
     newsletter: boolean
-  }
+  },
+  createdAt: string
   access?: {
     mode: AccessMode
   },
@@ -38,6 +39,7 @@ export type Org = {
   },
   plan?: {
     name: 'free' | 'pro',
+    isHidingModel: boolean;
   }
 }
 

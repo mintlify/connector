@@ -20,6 +20,7 @@ export type Code = {
   _id: string
   file: string
   url: string
+  doc?: Doc,
 }
 
 export type Doc = {
@@ -111,7 +112,7 @@ export default function Home() {
     )
   }
 
-  if (!user?.onboarding?.isCompleted) {
+  if (!user?.onboarding?.isCompleted || (integrationsStatus != null && !integrationsStatus.github)) {
     return <Onboarding />
   }
 
