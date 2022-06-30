@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { ViewProvider } from './viewProvider';
+import { Link } from './links';
 
 export const registerAuthRoute = (provider: ViewProvider) => {
   vscode.window.registerUriHandler({
@@ -45,29 +46,3 @@ export const registerAuthRoute = (provider: ViewProvider) => {
 export const openLogin = (endpoint: string) => {
   return vscode.env.openExternal(vscode.Uri.parse(`${endpoint}/api/login/vscode`));
 };
-
-export class AuthService {
-  constructor(private storage: vscode.Memento) {}
-  public getUserId(): string | undefined {
-    return this.storage.get('userId', undefined);
-  }
-
-  public setUserId(userId: string) {
-    this.storage.update('userId', userId);
-  }
-
-  public deleteUserId() {
-    this.storage.update('userId', undefined);
-  }
-  public getSubdomain(): string | undefined {
-    return this.storage.get('subdomain', undefined);
-  }
-
-  public setSubdomain(subdomain: string) {
-    this.storage.update('subdomain', subdomain);
-  }
-
-  public deleteSubdomain() {
-    this.storage.update('subdomain', undefined);
-  }
-}

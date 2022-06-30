@@ -1,13 +1,13 @@
 import { CodeLensProvider, TextDocument, CancellationToken, ProviderResult, CodeLens } from 'vscode';
-import { AuthService } from './authentication';
+import GlobalState from '../utils/globalState';
 
 export default class FileCodeLensProvider implements CodeLensProvider {
-    private authService: AuthService;
+    private globalState: GlobalState;
 
     constructor(
-		authService: AuthService
+		globalState: GlobalState
 	) {
-		this.authService = authService;
+		this.globalState = globalState;
 	}
     public provideCodeLenses(document: TextDocument, token: CancellationToken): ProviderResult<CodeLens[]> {
         return;

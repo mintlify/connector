@@ -35,6 +35,10 @@
       {
         "command": "mintlify.logout",
         "title": "Logout of Mintlify"
+      },
+      {
+        "command": "mintlify.refresh-links",
+        "title": "Refresh links"
       }
     ],
     "menus": {

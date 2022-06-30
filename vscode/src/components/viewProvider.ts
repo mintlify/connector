@@ -6,7 +6,8 @@ import vscode, {
 	Webview } from "vscode";
 import { Code } from "../utils/git";
 import { API_ENDPOINT } from '../utils/api';
-import { AuthService, openLogin } from './authentication';
+import { openLogin } from './authentication';
+import GlobalState from '../utils/globalState';
 
 export type Doc = {
 	org: string;
@@ -25,17 +26,17 @@ export type Link = {
 export class ViewProvider implements WebviewViewProvider {
     public static readonly viewType = 'primary';
     private _view?: WebviewView;
-	private authService: AuthService;
+	private globalState: GlobalState;
 
     constructor(
 		private readonly _extensionUri: Uri,
-		authService: AuthService
+		globalState: GlobalState
 	) {
-		this.authService = authService;
+		this.globalState = globalState;
 	}
 
 	public authenticate(user: any): void {
-		this.authService.setUserId(user.userId);
+		this.globalState.setUserId(user.userId);
 		this._view?.webview.postMessage({ command: 'auth', args: user });
 	}
 
@@ -46,8 +47,8 @@ export class ViewProvider implements WebviewViewProvider {
 
 	public logout(): void {
 		this._view?.webview.postMessage({ command: 'logout' });
-		this.authService.deleteSubdomain();
-		this.authService.deleteUserId();
+		this.globalState.deleteSubdomain();
+		this.globalState.deleteUserId();
 	}
 
     public resolveWebviewView(webviewView: WebviewView): void | Thenable<void> {
@@ -69,7 +70,7 @@ export class ViewProvider implements WebviewViewProvider {
 						{
 							const { signInWithProtocol, subdomain } = message.args;
 							openLogin(signInWithProtocol);
-							this.authService.setSubdomain(subdomain);
+							this.globalState.setSubdomain(subdomain);
 							break;
 						}
 					case 'get-docs':
