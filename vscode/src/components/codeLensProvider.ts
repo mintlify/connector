@@ -1,7 +1,7 @@
-import { CodeLensProvider, TextDocument, CancellationToken, ProviderResult, CodeLens, Range, Position, TextLine, Command } from 'vscode';
+import { CodeLensProvider, TextDocument, CancellationToken, ProviderResult, CodeLens, Range, Command } from 'vscode';
 import GlobalState from '../utils/globalState';
 import { getFilePath } from '../utils/git';
-import { Link } from './links';
+import { Link } from '../utils/links';
 
 export default class FileCodeLensProvider implements CodeLensProvider {
     private globalState: GlobalState;
@@ -20,7 +20,6 @@ export default class FileCodeLensProvider implements CodeLensProvider {
         const relatedLinks = links.filter((link) => {
             return (link.type === 'file' || link.type === 'folder') && link.file === fileName || fileName.includes(link.file);
         });
-        console.log({relatedLinks});
         if (relatedLinks.length > 0) {
             const firstLine = document.lineAt(0);
             const lastLine = document.lineAt(document.lineCount - 1);
@@ -28,7 +27,7 @@ export default class FileCodeLensProvider implements CodeLensProvider {
             const command: Command = {
                 command: 'mintlify.open-doc',
                 title: relatedLinks[0].doc?.title || 'Go to document',
-                arguments: [relatedLinks[0]]
+                arguments: [relatedLinks[0].doc.url]
             };
             const lens: CodeLens = new CodeLens(range, command);
             return [lens];

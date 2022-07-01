@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { ViewProvider } from './viewProvider';
-import { Link } from './links';
 
 export const registerAuthRoute = (provider: ViewProvider) => {
   vscode.window.registerUriHandler({

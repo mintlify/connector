@@ -1,5 +1,5 @@
 import { Memento } from "vscode";
-import { Link } from '../components/links';
+import { Link } from './links';
 
 export default class GlobalState {
     constructor(private storage: Memento) {}

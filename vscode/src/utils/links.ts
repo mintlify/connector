@@ -1,8 +1,6 @@
-import vscode from 'vscode';
 import axios from 'axios';
-import { API_ENDPOINT } from '../utils/api';
-import GlobalState from '../utils/globalState';
-import { getRepoInfo } from '../utils/git';
+import { API_ENDPOINT } from './api';
+import GlobalState from './globalState';
 
 type Doc = {
     _id: string;
@@ -65,20 +63,4 @@ export const getLinks = async (globalState: GlobalState): Promise<Link[]> => {
         return [];
     }
 
-};
-
-export const refreshLinksCommand = (globalState: GlobalState) => {
-    return vscode.commands.registerCommand('mintlify.refresh-links', async (args) => {
-        const window = vscode.window;
-        const editor = args?.editor || window.activeTextEditor;
-        const fileFsPath: string = editor.document.uri.fsPath;
-        const { gitOrg, repo } = await getRepoInfo(fileFsPath);
-        globalState.setGitOrg(gitOrg);
-        globalState.setRepo(repo);
-        console.log({gitOrg});
-        console.log({repo});
-        const links = await getLinks(globalState);
-        globalState.setLinks(links);
-        console.log({links});
-    });
 };

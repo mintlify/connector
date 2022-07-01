@@ -39,6 +39,10 @@
       {
         "command": "mintlify.refresh-links",
         "title": "Refresh links"
+      },
+      {
+        "command": "mintlify.open-doc",
+        "title": "Open document"
       }
     ],
     "menus": {

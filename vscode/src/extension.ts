@@ -1,10 +1,9 @@
 import * as vscode from 'vscode';
 import { ViewProvider } from './components/viewProvider';
-import { linkCodeCommand, linkDirCommand } from './components/linkCommands';
+import { linkCodeCommand, linkDirCommand, refreshLinksCommand, openDocsCommand } from './components/commands';
 import { registerAuthRoute } from './components/authentication';
 import FileCodeLensProvider from './components/codeLensProvider';
 import GlobalState from './utils/globalState';
-import { refreshLinksCommand } from './components/links';
 
 export async function activate(context: vscode.ExtensionContext) {
 	const globalState = new GlobalState(context.globalState);
@@ -17,7 +16,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.languages.registerCodeLensProvider(allLanguages, codeLensProvider),
 		linkCodeCommand(viewProvider),
 		linkDirCommand(viewProvider),
-		refreshLinksCommand(globalState)
+		refreshLinksCommand(globalState),
+		openDocsCommand()
 	);
 	registerAuthRoute(viewProvider);
 
