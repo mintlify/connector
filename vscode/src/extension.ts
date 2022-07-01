@@ -25,4 +25,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		const editor = event.textEditor;
 		vscode.commands.executeCommand('mintlify.link-code', { editor, scheme: 'file' });
 	});
+
+	vscode.commands.executeCommand('mintlify.refresh-links', context);
 }
