@@ -21,9 +21,9 @@ export const linkCodeCommand = (provider: ViewProvider) => {
             const { selection, highlighted } = getHighlightedText(editor);
             if (highlighted) {
                 const selectedLines: number[] = [selection.start.line, selection.end.line];
-                await getGitData(fileFsPath, provider, 'lines', selectedLines);
+                await getGitData(fileFsPath, provider, 'lines', 'code', selectedLines);
             } else {
-                await getGitData(fileFsPath, provider, 'file');
+                await getGitData(fileFsPath, provider, 'file', 'code');
             }
         }
     });
@@ -47,13 +47,13 @@ export const linkDirCommand = (provider: ViewProvider) => {
         if (isFolder) {
             // git stuff for folder
             const fileFsPath: string = uri.fsPath;
-            await getGitData(fileFsPath, provider, 'folder');
+            await getGitData(fileFsPath, provider, 'folder', 'dir');
         }
         const isFile = getIsFile(fileStat);
         if (isFile) {
             // git stuff for file
             const fileFsPath: string = uri.fsPath;
-            await getGitData(fileFsPath, provider, 'file');
+            await getGitData(fileFsPath, provider, 'file', 'dir');
         }
     });
 };
@@ -66,11 +66,8 @@ export const refreshLinksCommand = (globalState: GlobalState) => {
         const { gitOrg, repo } = await getRepoInfo(fileFsPath);
         globalState.setGitOrg(gitOrg);
         globalState.setRepo(repo);
-        console.log({gitOrg});
-        console.log({repo});
         const links = await getLinks(globalState);
         globalState.setLinks(links);
-        console.log('links refreshed: ', links);
     });
 };
 

@@ -76,7 +76,7 @@ export type Code = {
     endLine?: number;
 };
 
-export const getGitData = async (fileFsPath: string, viewProvider: ViewProvider, type: string, lines?: number[]): Promise<Code> => {
+export const getGitData = async (fileFsPath: string, viewProvider: ViewProvider, type: string, command: string, lines?: number[]): Promise<Code> => {
     const repoDir: string | null = findParentDir.sync(fileFsPath, '.git');
 
     let code: Code = {
@@ -152,7 +152,7 @@ export const getGitData = async (fileFsPath: string, viewProvider: ViewProvider,
                     code.url = provider.webUrl(sha, subdir);
                 }
             }
-            if (type !== 'lines') {
+            if (command !== 'code') {
                 await viewProvider.show();
                 function delay(time) {
                     return new Promise(resolve => setTimeout(resolve, time));
