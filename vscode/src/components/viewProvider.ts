@@ -38,6 +38,7 @@ export class ViewProvider implements WebviewViewProvider {
 	public authenticate(user: any): void {
 		this.globalState.setUserId(user.userId);
 		this._view?.webview.postMessage({ command: 'auth', args: user });
+		vscode.commands.executeCommand('mintlify.refresh-links');
 	}
 
 	public prefillDoc(docId: string): void {
@@ -47,8 +48,7 @@ export class ViewProvider implements WebviewViewProvider {
 
 	public logout(): void {
 		this._view?.webview.postMessage({ command: 'logout' });
-		this.globalState.deleteSubdomain();
-		this.globalState.deleteUserId();
+		this.globalState.clearState();
 	}
 
     public resolveWebviewView(webviewView: WebviewView): void | Thenable<void> {
@@ -90,7 +90,7 @@ export class ViewProvider implements WebviewViewProvider {
 						}
 					case 'link-submit':
 						{
-							const { userId, docId, title, code, subdomain, url } = message.args;
+							const { userId, docId, code, subdomain, url } = message.args;
 							vscode.window.withProgress({
 								location: vscode.ProgressLocation.Notification,
 								title: 'Connecting documentation with code',
@@ -117,6 +117,7 @@ export class ViewProvider implements WebviewViewProvider {
 									const errMessage = err?.response?.data?.error ?? `Error connecting code. Please log back in, re-install the extension, or report bug to hi@mintlify.com`;
 									vscode.window.showInformationMessage(errMessage);
 								}
+								vscode.commands.executeCommand('mintlify.refresh-links');
 								resolve(null);
 							}));
 							break;
