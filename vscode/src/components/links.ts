@@ -4,9 +4,38 @@ import { API_ENDPOINT } from '../utils/api';
 import GlobalState from '../utils/globalState';
 import { getRepoInfo } from '../utils/git';
 
+type Doc = {
+    _id: string;
+    org: string;
+    url: string;
+    method: string;
+    favicon?: string;
+    content?: string;
+    title?: string;
+    lastUpdatedAt: Date;
+    createdAt: Date;
+    changeConfirmationCount?: number;
+    isJustAdded: boolean;
+    createdBy?: string,
+    // when method = notion-private
+    notion?: {
+        pageId: string;
+    };
+    // when method = googledocs-private
+    googledocs?: {
+        id: string;
+    };
+    // when method = confluence-private
+    confluence?: {
+        id: string;
+    }
+    slack?: boolean;
+    email?: boolean;
+}
+
 export type Link = {
     _id: string;
-    doc: Object;
+    doc: Doc;
     sha: string;
     provider: string;
     file: string;
@@ -41,13 +70,15 @@ export const getLinks = async (globalState: GlobalState): Promise<Link[]> => {
 export const refreshLinksCommand = (globalState: GlobalState) => {
     return vscode.commands.registerCommand('mintlify.refresh-links', async (args) => {
         const window = vscode.window;
-        const editor = args.editor || window.activeTextEditor;
+        const editor = args?.editor || window.activeTextEditor;
         const fileFsPath: string = editor.document.uri.fsPath;
         const { gitOrg, repo } = await getRepoInfo(fileFsPath);
         globalState.setGitOrg(gitOrg);
         globalState.setRepo(repo);
-
+        console.log({gitOrg});
+        console.log({repo});
         const links = await getLinks(globalState);
         globalState.setLinks(links);
+        console.log({links});
     });
 };
