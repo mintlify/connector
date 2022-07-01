@@ -49,29 +49,6 @@ const locateGitConfig = (repoDir: string): Promise<string> => {
     });
 };
 
-/**
- * Example returns object:
- * {
- *  arg1: {
- *      branch "master": {
- *          remote: 'origin',
- *          merge: 'refs/heads/master'
- *      },
- *      core: {
- *          repositoryformatversion: '0',
- *          filemode: true,
- *          bare: false,
- *          logallrefupdates: true,
- *          ignorecase: true,
- *          precomposeunicode: true
- *      },
- *      remote "origin": {
- *          url: 'https://github.com/cornell-dti/course-plan',
- *          fetch: '+refs/heads/*:refs/remotes/origin/*'
- *      }
- *  }
- * }
- */
  const readConfigFile = (path: string) : {[key: string]: any;} => {
     return new Promise((resolve, reject) => {
         fs.readFile(path, 'utf-8', (err, data) => {
