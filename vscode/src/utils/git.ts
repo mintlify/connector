@@ -49,29 +49,6 @@ const locateGitConfig = (repoDir: string): Promise<string> => {
     });
 };
 
-/**
- * Example returns object:
- * {
- *  arg1: {
- *      branch "master": {
- *          remote: 'origin',
- *          merge: 'refs/heads/master'
- *      },
- *      core: {
- *          repositoryformatversion: '0',
- *          filemode: true,
- *          bare: false,
- *          logallrefupdates: true,
- *          ignorecase: true,
- *          precomposeunicode: true
- *      },
- *      remote "origin": {
- *          url: 'https://github.com/cornell-dti/course-plan',
- *          fetch: '+refs/heads/*:refs/remotes/origin/*'
- *      }
- *  }
- * }
- */
  const readConfigFile = (path: string) : {[key: string]: any;} => {
     return new Promise((resolve, reject) => {
         fs.readFile(path, 'utf-8', (err, data) => {
@@ -99,10 +76,9 @@ export type Code = {
     endLine?: number;
 };
 
-export const getGitData = async (fileFsPath: string, viewProvider: ViewProvider, type: string, lines?: number[]): Promise<Code> => {
+export const getGitData = async (fileFsPath: string, viewProvider: ViewProvider, type: string, command: string, lines?: number[]): Promise<Code> => {
     const repoDir: string | null = findParentDir.sync(fileFsPath, '.git');
 
-    // let sha, provider, fileName, org, repo;
     let code: Code = {
         url: '',
         sha: '',
@@ -176,7 +152,7 @@ export const getGitData = async (fileFsPath: string, viewProvider: ViewProvider,
                     code.url = provider.webUrl(sha, subdir);
                 }
             }
-            if (type !== 'lines') {
+            if (command !== 'code') {
                 await viewProvider.show();
                 function delay(time) {
                     return new Promise(resolve => setTimeout(resolve, time));
@@ -186,6 +162,75 @@ export const getGitData = async (fileFsPath: string, viewProvider: ViewProvider,
             return viewProvider.postCode(code);
         });
     });
-    
+
     return code;
+};
+
+export const getFilePath = (fileFsPath: string) => {
+    const repoDir: string | null = findParentDir.sync(fileFsPath, '.git');
+    if (!repoDir) {
+        return ''; // TODO - proper error handling
+    }
+    let formattedFilePath = path.relative(repoDir, fileFsPath).replace(/\\/g, '/');
+    formattedFilePath = formattedFilePath.replace(/\s{1}/g, '%20');
+    return formattedFilePath;
+};
+
+export const getRepoInfo = async (fileFsPath: string): Promise<{ repo: string, gitOrg: string, file: string }> => {
+    const repoDir: string | null = findParentDir.sync(fileFsPath, '.git');
+
+    let gitOrg: string, repo: string;
+
+    if (!repoDir) {
+        return { repo: '', gitOrg: '', file: '' }; // TODO - proper error handling
+    }
+
+    const gitConfigPath: string = await locateGitConfig(repoDir);
+    const config: {[key: string]: any;} = await readConfigFile(gitConfigPath);
+
+    const file: string = getFilePath(fileFsPath);
+
+    await gitRev.long(repoDir, async function (_: any, sha: any) {
+        let rawUri: any,
+            configuredBranch: any,
+            provider: BaseProvider | null = null,
+            remoteName: any;
+
+        await gitRev.branch(repoDir, async function (_: any, branch: any) {
+            // Check to see if the branch has a configured remote
+            configuredBranch = config[`remote "${branch}"`];
+            if (configuredBranch) {
+                // Use the current branch's configured remote
+                remoteName = configuredBranch.remote;
+                rawUri = config[`remote "${remoteName}"`].url;
+            } else {
+                const remotes = Object.keys(config).filter(k => k.startsWith('remote '));
+                if (remotes.length > 0) {
+                    rawUri = config[remotes[0]].url;
+                }
+            }
+            if (!rawUri) {
+                vscode.window.showWarningMessage(`No remote found on branch.`);
+                return;
+            }
+
+            try {
+                provider = gitProvider(rawUri, sha);
+            } catch (e: any) {
+                let errmsg = e.toString();
+                window.showWarningMessage(`Unknown Git provider. ${errmsg}`);
+                return;
+            }
+
+            let formattedFilePath = path.relative(repoDir, fileFsPath).replace(/\\/g, '/');
+            formattedFilePath = formattedFilePath.replace(/\s{1}/g, '%20');
+            if (provider != null) {
+                gitOrg = provider.gitUrl.organization;
+                repo = provider.gitUrl.name;
+                return { repo, gitOrg, file };
+            }
+        });
+    });
+
+    return { repo: '', gitOrg: '', file }; // TODO - proper error handling
 };

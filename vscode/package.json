@@ -1,7 +1,8 @@
 {
   "name": "connector",
   "publisher": "mintlify",
-  "displayName": "Mintlify Connect",
+  "displayName": "Document Connect",
+  "description": "Create connections between documentation and code",
   "version": "0.3.23",
   "icon": "assets/logo.png",
   "repository": {
@@ -35,6 +36,14 @@
       {
         "command": "mintlify.logout",
         "title": "Logout of Mintlify"
+      },
+      {
+        "command": "mintlify.refresh-links",
+        "title": "Refresh links"
+      },
+      {
+        "command": "mintlify.open-doc",
+        "title": "Open document"
       }
     ],
     "menus": {

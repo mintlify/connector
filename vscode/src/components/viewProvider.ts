@@ -7,6 +7,7 @@ import vscode, {
 import { Code } from "../utils/git";
 import { API_ENDPOINT } from '../utils/api';
 import { openLogin } from './authentication';
+import GlobalState from '../utils/globalState';
 
 export type Doc = {
 	org: string;
@@ -25,11 +26,19 @@ export type Link = {
 export class ViewProvider implements WebviewViewProvider {
     public static readonly viewType = 'primary';
     private _view?: WebviewView;
+	private globalState: GlobalState;
 
-    constructor(private readonly _extensionUri: Uri) { }
+    constructor(
+		private readonly _extensionUri: Uri,
+		globalState: GlobalState
+	) {
+		this.globalState = globalState;
+	}
 
 	public authenticate(user: any): void {
+		this.globalState.setUserId(user.userId);
 		this._view?.webview.postMessage({ command: 'auth', args: user });
+		vscode.commands.executeCommand('mintlify.refresh-links');
 	}
 
 	public prefillDoc(docId: string): void {
@@ -39,6 +48,7 @@ export class ViewProvider implements WebviewViewProvider {
 
 	public logout(): void {
 		this._view?.webview.postMessage({ command: 'logout' });
+		this.globalState.clearState();
 	}
 
     public resolveWebviewView(webviewView: WebviewView): void | Thenable<void> {
@@ -52,27 +62,35 @@ export class ViewProvider implements WebviewViewProvider {
 			webviewView.webview.onDidReceiveMessage(async message => {
 				switch (message.command) {
 					case 'sign-up':
-						vscode.env.openExternal(vscode.Uri.parse('https://www.mintlify.com/create'));
-						break;
+						{
+							vscode.env.openExternal(vscode.Uri.parse('https://www.mintlify.com/create'));
+							break;
+						}
 					case 'login':
-						openLogin(message.args);
-						break;
+						{
+							const { signInWithProtocol, subdomain } = message.args;
+							openLogin(signInWithProtocol);
+							this.globalState.setSubdomain(subdomain);
+							break;
+						}
 					case 'get-docs':
-						const { userId, subdomain } = message;
-						axios.get(`${API_ENDPOINT}/docs`, {
-							params: {
-								userId,
-								subdomain
-							}
-						})
-							.then((res) => {
-								const { data: { docs } } = res;
-								this._view?.webview.postMessage({ command: 'display-docs', docs });
-							});
-						break;
+						{
+							const { userId, subdomain } = message;
+							axios.get(`${API_ENDPOINT}/docs`, {
+								params: {
+									userId,
+									subdomain
+								}
+							})
+								.then((res) => {
+									const { data: { docs } } = res;
+									this._view?.webview.postMessage({ command: 'display-docs', docs });
+								});
+							break;
+						}
 					case 'link-submit':
 						{
-							const { userId, docId, title, code, subdomain, url } = message.args;
+							const { userId, docId, code, subdomain, url } = message.args;
 							vscode.window.withProgress({
 								location: vscode.ProgressLocation.Notification,
 								title: 'Connecting documentation with code',
@@ -99,14 +117,16 @@ export class ViewProvider implements WebviewViewProvider {
 									const errMessage = err?.response?.data?.error ?? `Error connecting code. Please log back in, re-install the extension, or report bug to hi@mintlify.com`;
 									vscode.window.showInformationMessage(errMessage);
 								}
+								vscode.commands.executeCommand('mintlify.refresh-links');
 								resolve(null);
 							}));
 							break;
 						}
-					case 'error': {
-						const errMessage = message?.message;
-						vscode.window.showInformationMessage(errMessage);
-					}
+					case 'error':
+						{
+							const errMessage = message?.message;
+							vscode.window.showInformationMessage(errMessage);
+						}
 				}
 			});
 

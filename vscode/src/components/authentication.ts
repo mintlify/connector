@@ -18,7 +18,7 @@ export const registerAuthRoute = (provider: ViewProvider) => {
             vscode.window.showErrorMessage('User has insufficient credentials. Try again later');
             return;
           }
-          
+
           provider.authenticate(user);
           vscode.window.showInformationMessage(`🙌 Successfully signed in with ${user.email}`);
         } catch (err) {

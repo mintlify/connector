@@ -8,12 +8,19 @@ import { indexDocsForSearch } from '../services/algolia';
 
 const linksRouter = express.Router();
 
-linksRouter.get('/', userMiddleware, async (_, res) => {
+linksRouter.get('/', userMiddleware, async (req, res) => {
   const { org } = res.locals.user;
+  let matchQuery: any = { org: org._id };
+
+  if (req.query?.repo && req.query?.gitOrg) {
+    matchQuery.repo = req.query.repo;
+    matchQuery.gitOrg = req.query.gitOrg;
+  }
+  
   try {
     const codes = await Code.aggregate([
       {
-        $match: { org: org._id }
+        $match: matchQuery
       },
       {
         $lookup: {
@@ -34,7 +41,7 @@ linksRouter.get('/', userMiddleware, async (_, res) => {
   catch (error: any) {
     res.status(400).send({ error });
   }
-})
+});
 
 linksRouter.put('/', userMiddleware, async (req, res) => {
   try {
