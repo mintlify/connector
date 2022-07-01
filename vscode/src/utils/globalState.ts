@@ -3,6 +3,15 @@ import { Link } from './links';
 
 export default class GlobalState {
     constructor(private storage: Memento) {}
+
+    public clearState() {
+      this.storage.update('userId', undefined);
+      this.storage.update('subdomain', undefined);
+      this.storage.update('links', undefined);
+      this.storage.update('repo', undefined);
+      this.storage.update('gitOrg', undefined);
+    }
+
     public getUserId(): string | undefined {
       return this.storage.get('userId', undefined);
     }
