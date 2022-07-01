@@ -20,8 +20,8 @@ export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationS
   notion: {
     type: 'notion',
     title: 'Notion',
-    description: 'Import Notion workspace',
-    installedDescription: 'Re-import Notion workspace',
+    description: 'Connect Notion workspace',
+    installedDescription: 'Re-connect Notion workspace',
   },
   confluence: {
     type: 'confluence',
@@ -32,8 +32,8 @@ export const addDocumentationMap: Record<AddDocumentationType, AddDocumentationS
   google: {
     type: 'google',
     title: 'Google Docs',
-    description: 'Import Google Docs documents',
-    installedDescription: 'Re-import Google Docs documents',
+    description: 'Sign in with Google',
+    installedDescription: 'Re-authenticate with Google',
   },
   github: {
     type: 'github',
