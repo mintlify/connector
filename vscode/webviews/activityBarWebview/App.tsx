@@ -1,8 +1,7 @@
 import axios from 'axios';
 import prependHttp from 'prepend-http';
-import { Combobox } from '@headlessui/react';
 import React, { useEffect, useState } from 'react';
-import { CheckIcon, LockClosedIcon, SelectorIcon } from '@heroicons/react/solid';
+import { LockClosedIcon } from '@heroicons/react/solid';
 import { vscode } from '../common/message';
 import { CodeSymbolIcon, CodeFileIcon } from '../common/svgs';
 
@@ -141,18 +140,19 @@ const App = () => {
   }, [user, dashboardUrl, API_ENDPOINT]);
 
   useEffect(() => {
-    if (isNoDocs) {
-      const urlStatus = checkIsURL(query);
-      setIsURL(urlStatus);
-      if (urlStatus) {
-        const newDoc = {
-          _id: 'create',
-          title: query,
-          url: query
-        };
-        setSelectedDoc(newDoc);
-        vscode.setState({...initialState, selectedDoc: newDoc});
-      }
+    const urlStatus = checkIsURL(query);
+    setIsURL(urlStatus);
+    if (urlStatus) {
+      const newDoc = {
+        _id: 'create',
+        title: query,
+        url: query
+      };
+      setSelectedDoc(newDoc);
+      vscode.setState({...initialState, selectedDoc: newDoc});
+    } else {
+      setSelectedDoc(initialDoc);
+      vscode.setState({...initialState, selectedDoc: initialDoc});
     }
   }, [query]);
 
@@ -168,12 +168,6 @@ const App = () => {
       url: selectedDoc.url
     };
     vscode.postMessage({ command: 'link-submit', args });
-  };
-
-  const updateSelectedDoc = (doc: Doc) => {
-    setSelectedDoc(doc);
-    setQuery('');
-    vscode.setState({ ...initialState, selectedDoc: doc, query: '' });
   };
 
   const checkIsURL = (str: string) => {
@@ -227,24 +221,11 @@ const App = () => {
     vscode.setState({ ...initialState, user: undefined });
   };
 
-  const onScrollOptionsHandler = (e) => {
-    const bottom = e.target.scrollHeight - e.target.scrollTop <= e.target.clientHeight + 100;
-    if (bottom) {
-      setDisplayPage(displayPage + 1);
-    }
-  };
-
   const onClickSignUp = () => {
     vscode.postMessage({ command: 'sign-up' });
   };
 
-  const limitedDocs = docs.slice(0, displayPage * 50);
   const hasDocSelected = !selectedDoc?.isDefault;
-  const filteredDocs = docs.filter((doc) => {
-    return doc.title.toLowerCase().includes(query.toLowerCase());
-  });
-  const displayDocs = query === '' ? limitedDocs : filteredDocs;
-  const isNoDocs = docs.length === 0 || docs[0] === initialDoc;
 
   return (
     <div className="space-y-1">
@@ -295,103 +276,17 @@ const App = () => {
             Documentation<span className='text-red-500'>*</span>
           </label>
           <div className="mt-1">
-            {isNoDocs ? (
-              <>
-                <input
-                  type="text"
-                  name="url"
-                  id="url"
-                  className="block w-full text-sm"
-                  placeholder="www.example.com"
-                  value={query}
-                  onChange={(event) => updateQuery(event.target.value)}
-                />
-                {!isURL && query !== '' && (
-                  <span className="text-red-500">Invalid URL</span>
-                )}
-              </>
-            ) : (
-            <Combobox value={selectedDoc} onChange={updateSelectedDoc}>
-              {() => (
-                <>
-                  <div className="mt-1 relative">
-                    <div className="relative w-full cursor-default overflow-hidden text-left sm:text-sm">
-                      <Combobox.Input
-                        className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 code"
-                        displayValue={(doc: Doc) => doc.title}
-                        onChange={(event) => updateQuery(event.target.value)}
-                      />
-                      <Combobox.Button className="z-10 w-full absolute inset-y-0 right-0 flex items-center pr-2 flex-row justify-end dropdown-button">
-                        <SelectorIcon
-                          className="h-5 w-5"
-                          aria-hidden="true"
-                        />
-                      </Combobox.Button>
-                    </div>
-                    <Combobox.Options className="absolute mt-1 max-h-60 z-10 w-full shadow-lg code py-1 overflow-auto" onScroll={onScrollOptionsHandler}>
-                      {query.length > 0 && isURL && (
-                        <Combobox.Option
-                        value={{ _id: 'create', title: query, url: query }}
-                        className="cursor-pointer relative py-2 pl-3 pr-9"
-                      >
-                        <span className="font-normal block truncate">
-                          Create "{query}"
-                        </span>
-                        {selectedDoc._id === 'create' ? (
-                          <span className='absolute inset-y-0 right-0 flex items-center pr-4'>
-                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                          </span>
-                        ) : null}
-                      </Combobox.Option>
-                      )}
-                      {filteredDocs.length === 0 && query.length > 0 && !isURL ? (
-                        <Combobox.Option
-                          value={{ id: 'create', title: query, url: query }}
-                          disabled={true}
-                          className="relative py-2 pl-3 pr-9"
-                        >
-                          <span className="font-normal block truncate opacity-75">
-                            Search again or paste a URL
-                          </span>
-                        </Combobox.Option>
-                      ) : (
-                        displayDocs.map((doc) => (
-                          <Combobox.Option
-                            key={doc._id}
-                            className={({ active }) =>
-                              classNames(
-                                active ? 'text-vscode active' : '',
-                                'cursor-pointer relative py-2 pl-3 pr-9'
-                              )
-                            }
-                            value={doc}
-                          >
-                            {({ selected, active }) => (
-                              <>
-                                <span className='font-normal block truncate'>
-                                  {doc.title}
-                                </span>
-
-                                {selected ? (
-                                  <span
-                                    className={classNames(
-                                      active ? 'text-white' : '',
-                                      'absolute inset-y-0 right-0 flex items-center pr-4'
-                                    )}
-                                  >
-                                    <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                                  </span>
-                                ) : null}
-                              </>
-                            )}
-                          </Combobox.Option>
-                        ))
-                      )}
-                    </Combobox.Options>
-                  </div>
-                </>
-              )}
-            </Combobox>
+            <input
+              type="text"
+              name="url"
+              id="url"
+              className="block w-full text-sm"
+              placeholder="www.example.com"
+              value={query}
+              onChange={(event) => updateQuery(event.target.value)}
+            />
+            {!isURL && query !== '' && (
+              <span className="text-red-500">Invalid URL</span>
             )}
           </div>
           <div className='flex flex-row mt-3'>
