@@ -23,7 +23,7 @@ export const linkCodeCommand = (provider: ViewProvider) => {
                 const selectedLines: number[] = [selection.start.line, selection.end.line];
                 await getGitData(fileFsPath, provider, 'lines', selectedLines);
             } else {
-                await getGitData(fileFsPath, provider, 'lines');
+                await getGitData(fileFsPath, provider, 'file');
             }
         }
     });
@@ -66,8 +66,11 @@ export const refreshLinksCommand = (globalState: GlobalState) => {
         const { gitOrg, repo } = await getRepoInfo(fileFsPath);
         globalState.setGitOrg(gitOrg);
         globalState.setRepo(repo);
+        console.log({gitOrg});
+        console.log({repo});
         const links = await getLinks(globalState);
         globalState.setLinks(links);
+        console.log('links refreshed: ', links);
     });
 };
 
