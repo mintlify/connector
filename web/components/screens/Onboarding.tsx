@@ -5,14 +5,14 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { API_ENDPOINT } from "../../helpers/api";
 import { classNames } from "../../helpers/functions";
-import { ConnectLinkIcon, DocumentationTypeIcon } from "../../helpers/Icons";
+import { ConnectLinkIcon } from "../../helpers/Icons";
 import { getSubdomain } from "../../helpers/user";
 import { Org, useProfile, User } from "../../context/ProfileContext";
 import { request } from "../../helpers/request";
 import Link from "next/link";
 import { Code } from "../../pages";
 import { onInstallIntegration } from "../../helpers/integrations";
-import { GitHubIntegration, VSCodeIntegration } from "../../pages/settings/integrations";
+import { VSCodeIntegration } from "../../pages/settings/integrations";
 
 const onboardStepLocalStateKey = 'onboarding-step';
 
@@ -41,7 +41,7 @@ const sizeOptions: Option[] = [
 
 const ProgressBar = ({ step }: { step: number }) => {
   return <div className="mt-4 flex space-x-1">
-  {Array.from(Array(3).keys()).map((i) => (
+  {Array.from(Array(2).keys()).map((i) => (
       <span key={i} className={classNames(`h-1 w-8 rounded-sm`, i > step ? 'bg-slate-200' : 'bg-primary')}></span>
     ))
   }
@@ -133,14 +133,6 @@ export default function Onboarding() {
           step={step}
         />;
       case 1:
-        return <InstallGitHubStep
-          user={user}
-          org={org}
-          onBack={onBack}
-          onNext={onNext}
-          step={step}
-        />;
-      case 2:
         return <ConnectStep
           user={user}
           org={org}
@@ -237,80 +229,6 @@ function IntroStep({ user, onBack, onNext, role, setRole, teamSize, setTeamSize,
       </div>
       </div>
     <NavButtons onBack={onBack} onNext={onNextFirstPage} isFirst isCompleted={isCompleted} />
-  </>;
-}
-
-function InstallGitHubStep({ user, org, onBack, onNext, step }: { user: User, org: Org, onBack: () => void, onNext: () => void, step: number }) {
-  const router = useRouter();
-  const [isGitHubInstalled, setIsGitHubInstalled] = useState<boolean>(false);
-
-  useEffect(() => {
-    request('GET', `routes/org/${org._id}/integrations`)
-        .then(({ data: { integrations } }) => {
-          if (integrations.github) {
-            setIsGitHubInstalled(integrations.github || false);
-          }
-        });
-    const statusInterval = setInterval(() => {  
-      request('GET', `routes/org/${org._id}/integrations`)
-        .then(({ data: { integrations } }) => {
-          if (integrations.github) {
-            setIsGitHubInstalled(integrations.github || false);
-          }
-        });
-      }, 1000);
-    return () => clearInterval(statusInterval);
-  }, [user.userId, org]);
-
-  const onInstallGitHub = () => {
-    onInstallIntegration(GitHubIntegration(org._id, user.userId), router);
-  }
-
-  return <>
-    <h1 className="text-3xl font-semibold flex items-center space-x-2">
-      <div className="inline">
-        Integrate with GitHub
-      </div>
-      <img src="assets/integrations/github.svg" className="h-6" />
-    </h1>
-    <p className="mt-1 text-gray-600">
-      Enable documentation review in the workflow
-    </p>
-    <ProgressBar step={step} /> 
-    <div className="mt-6">
-      <div className="shadow-md">
-      <video className="w-full rounded-sm" autoPlay controls muted>
-        <source src="assets/videos/workflow.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-      <div className="rounded-b-sm">
-          <button
-            className="flex items-center w-full max-h-96 scroll-py-3 overflow-y-auto p-3 bg-white hover:bg-gray-50 cursor-pointer rounded-sm"
-            onClick={onInstallGitHub}
-          >
-            <DocumentationTypeIcon type='github' />
-            <div className="ml-4 flex-auto">
-              <span className='flex items-center text-sm font-medium text-gray-900 hover:text-gray-700'>
-                GitHub App
-                { isGitHubInstalled && <CheckCircleIcon className="ml-1 h-4 w-4 text-green-600" /> }
-              </span>
-              <p className='text-sm text-gray-700 text-left'>
-                { isGitHubInstalled ? 'Installed' : 'Click to install' }
-              </p>
-            </div>
-            <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-gray-700" aria-hidden="true" />
-          </button>
-      </div>
-      </div>
-      <div className="mt-2">
-        <Link href="mailto:hi@mintlify.com?subject=I don't use GitHub, can you support [app]">
-          <a target="_blank" className="text-gray-500 hover:text-gray-700 text-sm">
-            Not using GitHub?
-          </a>
-        </Link>
-      </div>
-    </div>
-    <NavButtons onBack={onBack} onNext={onNext} isCompleted={isGitHubInstalled} />
   </>;
 }
 
@@ -436,7 +354,7 @@ function ConnectStep({ user, org, onBack, step }: { user: User, org: Org, onBack
         </div>
       </div>
       <div className="mt-2">
-        <Link href="mailto:hi@mintlify.com?subject=I don't use VS Code, can you support [app]">
+        <Link href="mailto:hi@mintlify.com?subject=I don't use VS Code, can you support">
           <a target="_blank" className="text-gray-500 hover:text-gray-700 text-sm">
             Not using VS Code?
           </a>
