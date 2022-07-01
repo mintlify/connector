@@ -1,11 +1,12 @@
 # 🌿 Mintlify
 
+![](https://img.shields.io/github/checks-status/mintlify/mintlify/38f1d5b1fd9397e56f5da3ec2d254b09859a579f) [![Stars](https://img.shields.io/github/stars/mintlify/mintlify?style=social)](https://github.com/mintlify/mintlify) [![Twitter](https://img.shields.io/twitter/follow/mintlify?style=social)](https://twitter.com/mintlify)
+
 [Mintlify](https://www.mintlify.com/) helps teams easily track and manage documentation.
 
-<p align="center" class="flex row">
-  <a href="https://www.mintlify.com/create"> <img src="./assets/GetStarted.svg" alt="Get Started"> </a>
-  <a href="https://www.loom.com/share/892d08e178144cd89b109f9396e4db98"> <img src="./assets/WatchDemo.svg" alt="Watch Demo"> </a>
-</p>
+🚀 [Get Started](https://www.mintlify.com/create)
+
+🎥 [Demo](https://www.loom.com/share/892d08e178144cd89b109f9396e4db98)
 
 ## Features
 
@@ -16,12 +17,6 @@ The goal of Mintlify is to increase visibility over documentation across your en
 Centralize your documentation into one searchable place
 
 <img src="./assets/platform.png" width="700px" />
-
-### 🏃🏽‍♀️ Keep people up-to-speed
-
-Set up integrations to receive alerts when documents change
-
-<img src="./assets/Slack.png" width="700px" />
 
 ### 🔗 Create links between code and documentation
 
