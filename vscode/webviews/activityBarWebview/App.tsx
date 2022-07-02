@@ -70,7 +70,6 @@ const App = () => {
   const [docs, setDocs] = useState<Doc[]>([initialDoc]);
   const [selectedDoc, setSelectedDoc] = useState<Doc>(initialState?.selectedDoc || initialDoc);
   const [code, setCode] = useState<Code | undefined>(initialState?.code);
-  const [displayPage, setDisplayPage] = useState(1);
   const [query, setQuery] = useState<string>(initialState?.query || '');
   const [isURL, setIsURL] = useState<boolean>(initialState?.isURL || false);
 
@@ -85,7 +84,6 @@ const App = () => {
           break;
         case 'display-docs':
           setDocs(message.docs || []);
-          setDisplayPage(1);
           break;
         case 'auth':
           const user = message?.args;
@@ -185,7 +183,8 @@ const App = () => {
     if (lineRange && code.endLine && code.endLine !== code.line) {
       lineRange += `-${code.endLine + 1}`;
     }
-    const title = `${code.file}${lineRange}`;
+    const filename = code.file.replace(/^.*[\\\/]/, '');
+    const title = `${filename}${lineRange}`;
     return (
       <div className='flex flex-row justify-between'>
         <div className='flex flex-row truncate'>
@@ -196,16 +195,6 @@ const App = () => {
           </div>
           {title}
         </div>
-      </div>
-    );
-  };
-
-  const CodesContent = ({ code }: { code?: Code }) => {
-    return (code == null) ? (
-      <div className='italic'>No code selected</div>
-    ) : (
-      <div>
-        <CodeContent code={code} key={code.sha} />
       </div>
     );
   };
@@ -262,13 +251,7 @@ const App = () => {
       }
       {
         user != null && <>
-        <p className="mt-1">
-          Link your code to documentation
-        </p>
-        <p>
-          <a className="cursor-pointer" href={dashboardUrl}>Open Dashboard</a>
-        </p>
-        <form className="mt-3" onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit}>
           <label htmlFor="url" className="block">
             Documentation<span className='text-red-500'>*</span>
           </label>
@@ -290,7 +273,7 @@ const App = () => {
             Select Relevant Code<span className='text-red-500'>*</span>
           </div>
           <div className='code'>
-            <CodesContent code={code} />
+            { code == null ? <div className='italic'>No code selected</div> : <CodeContent code={code} key={code.sha} /> }
           </div>
           <button
             type="submit"
