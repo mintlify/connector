@@ -23,14 +23,11 @@ export default class FileCodeLensProvider implements CodeLensProvider {
         const lenses: CodeLens[] = relatedLinks.map((link) => {
             let firstLine = document.lineAt(0);
             let lastLine = document.lineAt(document.lineCount - 1);
-            if (link.type === 'lines' && link?.line && link?.endLine) {
-                firstLine = document.lineAt(link.line);
-                lastLine = document.lineAt(link.endLine - 2);
-            }
             const range = new Range(firstLine.range.start, lastLine.range.end);
+            const title = this.formatTitle(link);
             const command: Command = {
                 command: 'mintlify.open-doc',
-                title: link.doc?.title || 'Go to document',
+                title,
                 arguments: [link.doc.url]
             };
             const lens: CodeLens = new CodeLens(range, command);
@@ -38,5 +35,20 @@ export default class FileCodeLensProvider implements CodeLensProvider {
         });
 
         return lenses; // TODO - proper error handling
+    }
+
+    private formatTitle(link: Link): string {
+        let formattedTitle = link.doc?.title;
+        if (formattedTitle == null) {
+            return 'Go to document';
+        }
+        if (formattedTitle.length > 30) {
+            formattedTitle = formattedTitle.slice(0, 30) + '...';
+        }
+        if (link?.line || link?.endLine) {
+            const lines = ` (${link.line}-${link.endLine})`;
+            formattedTitle = formattedTitle + lines;
+        }
+        return formattedTitle;
     }
 }
