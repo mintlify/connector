@@ -132,7 +132,7 @@ class Bitbucket extends BaseProvider {
         this.name = 'bitbucket';
     }
     webUrl(branch: string, filePath: string, line: number, endLine: number): string {
-        const fileName = path.basename(filePath)
+        const fileName = path.basename(filePath);
         return `${this.baseUrl}/src/${this.sha}` + (filePath ? `${filePath}` : '') + (line ? `#${fileName}-${line}` : '');
     }
 }
@@ -187,6 +187,6 @@ const gitProvider = (remoteUrl: string, sha: any): BaseProvider|null => {
         }
     }
     throw new Error('unknown Provider');
-}
+};
 
 export default gitProvider;

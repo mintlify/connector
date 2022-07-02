@@ -66,6 +66,10 @@
           "type": "webview",
           "id": "primary",
           "name": "Create connection"
+        },
+        {
+          "id": "connections",
+          "name": "Documents"
         }
       ]
     },

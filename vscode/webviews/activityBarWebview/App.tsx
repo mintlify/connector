@@ -283,6 +283,9 @@ const App = () => {
             Submit
           </button>
         </form>
+        <div className="mt-1">
+          Have questions? Join our <a href="https://discord.gg/6W7GuYuxra">community</a>
+        </div>
       </>
       }
     </div>
