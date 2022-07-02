@@ -18,11 +18,15 @@ export default class FileCodeLensProvider implements CodeLensProvider {
         const fileName = getFilePath(fileFsPath);
         // find link associated with this file
         const relatedLinks = links.filter((link) => {
-            return (link.type === 'file' || link.type === 'folder') && link.file === fileName || fileName.includes(link.file);
+            return link.file === fileName || fileName.includes(link.file);
         });
         const lenses: CodeLens[] = relatedLinks.map((link) => {
-            const firstLine = document.lineAt(0);
-            const lastLine = document.lineAt(document.lineCount - 1);
+            let firstLine = document.lineAt(0);
+            let lastLine = document.lineAt(document.lineCount - 1);
+            if (link.type === 'lines' && link?.line && link?.endLine) {
+                firstLine = document.lineAt(link.line);
+                lastLine = document.lineAt(link.endLine - 2);
+            }
             const range = new Range(firstLine.range.start, lastLine.range.end);
             const command: Command = {
                 command: 'mintlify.open-doc',
