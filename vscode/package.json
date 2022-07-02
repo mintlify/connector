@@ -65,7 +65,7 @@
         {
           "type": "webview",
           "id": "primary",
-          "name": "View"
+          "name": "Create connection"
         }
       ]
     },
@@ -73,7 +73,7 @@
       "activitybar": [
         {
           "id": "primary",
-          "title": "Mintlify Connect",
+          "title": "Document Connect",
           "icon": "assets/icon.png"
         }
       ]
