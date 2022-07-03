@@ -1,25 +1,41 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import GlobalState from '../utils/globalState';
+import axios from 'axios';
+import { API_ENDPOINT } from '../utils/api';
 
-// Options must also match contributes.properties in package.json
-const HOTKEY_OPTIONS_MAC = [
-  '⌘ + .',
-  '⌥ + .',
-];
+export class ConnectionsTreeProvider implements vscode.TreeDataProvider<GroupOption> {
+  private state: GlobalState;
 
-export class ConnectionsTreeProvider implements vscode.TreeDataProvider<HotkeyOption> {
-  constructor() {}
+  constructor(state: GlobalState) {
+    this.state = state;
+  }
 
-  getTreeItem(element: HotkeyOption): vscode.TreeItem {
+  getTreeItem(element: GroupOption): vscode.TreeItem {
     return element;
   }
 
-  getChildren(): HotkeyOption[] {
-    return [new HotkeyOption('Heyyo', vscode.TreeItemCollapsibleState.None)];
+  async getChildren(): Promise<GroupOption[]> {
+    const userId = this.state.getUserId();
+    if (!userId) {
+      return [];
+    }
+
+    const subdomain = this.state.getSubdomain();
+    const { data: { groups }  } = await axios.get(`${API_ENDPOINT}/docs/groups`, {
+      params: {
+        userId,
+        subdomain
+      }
+    });
+
+    return groups.map((group) => {
+      return new GroupOption(group.name, vscode.TreeItemCollapsibleState.None);
+    });
   }
 }
 
-class HotkeyOption extends vscode.TreeItem {
+class GroupOption extends vscode.TreeItem {
   constructor(
     public readonly label: string,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,

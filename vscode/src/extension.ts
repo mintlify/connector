@@ -6,8 +6,8 @@ import FileCodeLensProvider from './components/codeLensProvider';
 import GlobalState from './utils/globalState';
 import { ConnectionsTreeProvider } from './treeviews/connections';
 
-const createTreeViews = (): void => {
-	vscode.window.createTreeView('connections', { treeDataProvider: new ConnectionsTreeProvider() });
+const createTreeViews = (state: GlobalState): void => {
+	vscode.window.createTreeView('connections', { treeDataProvider: new ConnectionsTreeProvider(state) });
 };
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -31,6 +31,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.executeCommand('mintlify.link-code', { editor, scheme: 'file' });
 	});
 
-	createTreeViews();
+	createTreeViews(globalState);
 	vscode.commands.executeCommand('mintlify.refresh-links', context);
 }
