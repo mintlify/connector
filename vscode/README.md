@@ -4,7 +4,7 @@
 
 Link documentation to your codebase using [Mintlify](https://mintlify.com)
 
-<img src="/vscode/assets/mintlify-connect.png" width="300px" />
+<img src="/vscode/assets/Create-connection.gif" width="300px" />
 
 ## Get Started
 
