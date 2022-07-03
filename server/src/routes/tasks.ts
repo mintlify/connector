@@ -36,7 +36,7 @@ tasksRouter.get('/', userMiddleware, async (_, res) => {
         doc: { $ne: null }
       }
     }
-  ]);
+  ] as any);
   res.send({ tasks });
 });
 

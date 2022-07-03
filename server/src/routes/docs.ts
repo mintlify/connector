@@ -49,27 +49,29 @@ export const getDataFromUrl = async (urlInput: string) => {
   if (!urlWithProtocol.startsWith('https://')) {
     urlWithProtocol = `https://${urlWithProtocol}`;
   }
-
-  const { data: html } = await axios.get(urlWithProtocol);
-  const $ = cheerio.load(html);
-  const title = $('title').first().text().trim();
-  let favicon = $('link[rel="shortcut icon"]').attr('href') || $('link[rel="icon"]').attr('href');
-  if (favicon?.startsWith('//')) {
-    favicon = `https:${favicon}`;
-  } else if (favicon?.startsWith('/')) {
-    const urlParsed = new URL(urlWithProtocol);
-    favicon = `${urlParsed.origin}${favicon}`;
-  }
-  if (!favicon) {
-    try {
-      const faviconRes = await axios.get(`https://s2.googleusercontent.com/s2/favicons?sz=128&domain_url=${urlWithProtocol}`);
-      favicon = faviconRes.request.res.responseUrl;
-    } catch {
-      favicon = undefined;
+  try {
+    const { data: html } = await axios.get(urlWithProtocol);
+    const $ = cheerio.load(html);
+    const title = $('title').first().text().trim();
+    let favicon = $('link[rel="shortcut icon"]').attr('href') || $('link[rel="icon"]').attr('href');
+    if (favicon?.startsWith('//')) {
+      favicon = `https:${favicon}`;
+    } else if (favicon?.startsWith('/')) {
+      const urlParsed = new URL(urlWithProtocol);
+      favicon = `${urlParsed.origin}${favicon}`;
     }
+    if (!favicon) {
+      try {
+        const faviconRes = await axios.get(`https://s2.googleusercontent.com/s2/favicons?sz=128&domain_url=${urlWithProtocol}`);
+        favicon = faviconRes.request.res.responseUrl;
+      } catch {
+        favicon = undefined;
+      }
+    }
+    return {title, favicon, urlWithProtocol};
+  } catch (err) {
+    return { title: urlInput, favicon: undefined, urlWithProtocol };
   }
-
-  return {title, favicon, urlWithProtocol};
 }
 
 docsRouter.get('/preview', async (req, res) => {
