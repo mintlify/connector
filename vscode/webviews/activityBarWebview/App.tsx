@@ -1,4 +1,3 @@
-import axios from 'axios';
 import prependHttp from 'prepend-http';
 import React, { useEffect, useState } from 'react';
 import { LockClosedIcon } from '@heroicons/react/solid';
@@ -35,13 +34,6 @@ type State = {
   isURL: boolean;
 };
 
-const initialDoc: Doc = {
-  _id: 'initial',
-  title: '',
-  url: '',
-  isDefault: true,
-};
-
 const classNames = (...classes) => {
   return classes.filter(Boolean).join(' ');
 };
@@ -67,8 +59,7 @@ const App = () => {
   const [dashboardUrl, setDashboardUrl] = useState<string>(initialState?.dashboardUrl);
   const [API_ENDPOINT, setAPI_ENDPOINT] = useState<string>(initialState?.API_ENDPOINT);
   const [signInUrl, setSignInUrl] = useState<string>('');
-  const [docs, setDocs] = useState<Doc[]>([initialDoc]);
-  const [selectedDoc, setSelectedDoc] = useState<Doc>(initialState?.selectedDoc || initialDoc);
+  const [selectedDoc, setSelectedDoc] = useState<Doc | undefined>(initialState?.selectedDoc);
   const [code, setCode] = useState<Code | undefined>(initialState?.code);
   const [query, setQuery] = useState<string>(initialState?.query || '');
   const [isURL, setIsURL] = useState<boolean>(initialState?.isURL || false);
@@ -82,9 +73,6 @@ const App = () => {
           vscode.setState({ ...initialState, API_ENDPOINT });
           setAPI_ENDPOINT(API_ENDPOINT);
           break;
-        case 'display-docs':
-          setDocs(message.docs || []);
-          break;
         case 'auth':
           const user = message?.args;
           const newDashboardUrl = formatSignInUrl(signInUrl);
@@ -93,24 +81,8 @@ const App = () => {
           setDashboardUrl(newDashboardUrl);
           break;
         case 'prefill-doc':
-          if (!user?.userId || dashboardUrl == null) {
-            return;
-          }
-          const docId = message?.args;
-          axios.get(`${API_ENDPOINT}/docs`, {
-            params: {
-              userId: user.userId,
-              subdomain: getSubdomain(dashboardUrl)
-            }
-          })
-            .then((res) => {
-              const { data: { docs: docsResult } } = res;
-              const selectedDoc = docs.find(doc => doc._id === docId);
-              if (selectedDoc) {
-                setSelectedDoc(selectedDoc);
-              }
-              setDocs(docsResult);
-            });
+          const doc = message?.args;
+          setSelectedDoc(doc);
           break;
         case 'post-code':
           const code = message?.args;
@@ -120,22 +92,9 @@ const App = () => {
         case 'logout':
           onLogout();
           break;
-        case 'update-selected-doc':
-          const { newDoc, newDocs }: { newDoc: Doc, newDocs: Doc[] } = message;
-          setSelectedDoc(newDoc);
-          setDocs(newDocs);
-          vscode.setState({...initialState, selectedDoc: newDoc, docs: newDocs });
-          break;
       }
     });
   }, [signInUrl, user, dashboardUrl, API_ENDPOINT]);
-
-  useEffect(() => {
-    if (!user?.userId || dashboardUrl == null) {
-      return;
-    }
-    vscode.postMessage({ command: 'get-docs', userId: user.userId, subdomain: getSubdomain(dashboardUrl) });
-  }, [user, dashboardUrl, API_ENDPOINT]);
 
   useEffect(() => {
     const urlStatus = checkIsURL(query);
@@ -148,9 +107,6 @@ const App = () => {
       };
       setSelectedDoc(newDoc);
       vscode.setState({...initialState, selectedDoc: newDoc});
-    } else {
-      setSelectedDoc(initialDoc);
-      vscode.setState({...initialState, selectedDoc: initialDoc});
     }
   }, [query]);
 
@@ -159,11 +115,11 @@ const App = () => {
     const args = {
       userId: user.userId,
       subdomain: getSubdomain(dashboardUrl),
-      docId: selectedDoc._id,
-      title: selectedDoc.title,
+      docId: selectedDoc?._id,
+      title: selectedDoc?.title,
       org: code?.org,
       code: code,
-      url: selectedDoc.url
+      url: selectedDoc?.url
     };
     vscode.postMessage({ command: 'link-submit', args });
   };
@@ -256,15 +212,20 @@ const App = () => {
             Documentation<span className='text-red-500'>*</span>
           </label>
           <div className="mt-1">
-            <input
-              type="text"
-              name="url"
-              id="url"
-              className="block w-full text-sm"
-              placeholder="www.example.com"
-              value={query}
-              onChange={(event) => updateQuery(event.target.value)}
-            />
+            {
+              selectedDoc == null && <input
+                type="text"
+                name="url"
+                id="url"
+                className="block w-full text-sm"
+                placeholder="www.example.com"
+                value={query}
+                onChange={(event) => updateQuery(event.target.value)}
+              />
+            }
+            {
+              selectedDoc != null && <div className="block w-full text-sm">{selectedDoc.title}</div>
+            }
             {!isURL && query !== '' && (
               <span className="text-red-500">Invalid URL</span>
             )}

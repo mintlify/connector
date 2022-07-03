@@ -31,6 +31,10 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.executeCommand('mintlify.link-code', { editor, scheme: 'file' });
 	});
 
+	vscode.commands.registerCommand('mintlify.prefill-doc', (doc) => {
+		viewProvider.prefillDoc(doc);
+	});
+
 	createTreeViews(globalState);
 	vscode.commands.executeCommand('mintlify.refresh-links', context);
 }

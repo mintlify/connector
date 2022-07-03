@@ -3,20 +3,7 @@ import * as path from 'path';
 import GlobalState from '../utils/globalState';
 import axios from 'axios';
 import { API_ENDPOINT } from '../utils/api';
-
-type Doc = {
-  _id: string,
-  title: string,
-  lastUpdatedAt: string,
-  createdAt: string,
-  url: string,
-  content: string,
-  code: any[],
-  favicon?: string,
-  method: string,
-  slack?: boolean,
-  email?: boolean,
-};
+import { Doc } from '../components/viewProvider';
 
 type Group = {
   _id: string;
@@ -76,13 +63,6 @@ class GroupOption extends vscode.TreeItem {
     this.tooltip = this.group.name;
     this.description = `${this.group.count} documents`;
     this.iconPath = getIconPathForGroup(group._id);
-    // const onClickCommand: vscode.Command = {
-    //   title: 'Hotkey Config',
-    //   command: 'docs.hotkeyConfig',
-    //   arguments: [this.label]
-    // };
-
-    // this.command = onClickCommand;
   }
 }
 
@@ -97,6 +77,14 @@ class DocOption extends vscode.TreeItem {
       light: path.join(__filename, '..', '..', 'assets', 'icons', 'document.svg'),
       dark: path.join(__filename, '..', '..', 'assets', 'icons', 'document-dark.svg'),
     };
+
+    const onClickCommand: vscode.Command = {
+      title: 'Prefill Doc',
+      command: 'mintlify.prefill-doc',
+      arguments: [this.doc]
+    };
+
+    this.command = onClickCommand;
   }
 }
 

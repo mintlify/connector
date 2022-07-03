@@ -16,6 +16,7 @@ export type Doc = {
 	content?: string;
 	lastUpdatedAt?: Date;
 	createdAt?: Date;
+	title: string;
 };
 
 export type Link = {
@@ -26,7 +27,7 @@ export type Link = {
 export class ViewProvider implements WebviewViewProvider {
     public static readonly viewType = 'primary';
     private _view?: WebviewView;
-	private globalState: GlobalState;
+		private globalState: GlobalState;
 
     constructor(
 		private readonly _extensionUri: Uri,
@@ -41,9 +42,14 @@ export class ViewProvider implements WebviewViewProvider {
 		vscode.commands.executeCommand('mintlify.refresh-links');
 	}
 
-	public prefillDoc(docId: string): void {
+	public prefillDocWithDocId = (docId: string) => {
 		this.show();
-		this._view?.webview.postMessage({ command: 'prefill-doc', args: docId });
+		// TBD: Add doc data
+	};
+
+	public prefillDoc(doc: Doc): void {
+		this.show();
+		this._view?.webview.postMessage({ command: 'prefill-doc', args: doc });
 	}
 
 	public logout(): void {
@@ -73,21 +79,6 @@ export class ViewProvider implements WebviewViewProvider {
 							this.globalState.setSubdomain(subdomain);
 							break;
 						}
-					case 'get-docs':
-						{
-							const { userId, subdomain } = message;
-							axios.get(`${API_ENDPOINT}/docs`, {
-								params: {
-									userId,
-									subdomain
-								}
-							})
-								.then((res) => {
-									const { data: { docs } } = res;
-									this._view?.webview.postMessage({ command: 'display-docs', docs });
-								});
-							break;
-						}
 					case 'link-submit':
 						{
 							const { userId, docId, code, subdomain, url } = message.args;
@@ -102,16 +93,7 @@ export class ViewProvider implements WebviewViewProvider {
 											subdomain
 										}
 									});
-									await axios.get(`${API_ENDPOINT}/docs`, {
-										params: {
-											userId,
-											subdomain
-										}
-									})
-									.then((res) => {
-										const { data: { docs } } = res;
-										this._view?.webview.postMessage({ command: 'update-selected-doc', newDocs: docs, newDoc: response.data.doc });
-									});
+									this.prefillDoc(response.data.doc);
 									vscode.window.showInformationMessage(`Successfully connected code with ${response.data.doc.title}`);
 								} catch (err) {
 									const errMessage = err?.response?.data?.error ?? `Error connecting code. Please log back in, re-install the extension, or report bug to hi@mintlify.com`;
