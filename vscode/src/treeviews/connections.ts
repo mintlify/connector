@@ -50,7 +50,19 @@ export class ConnectionsTreeProvider implements vscode.TreeDataProvider<GroupOpt
       }
     });
 
-    return [...groups.map((group) => new GroupOption(group, vscode.TreeItemCollapsibleState.Collapsed)), new AddDocOption()];
+    // Add docs to home level when just 1 group
+    if (groups.length === 1) {
+      const group = groups[0];
+      const { data: { docs }  } = await axios.get(`${API_ENDPOINT}/docs/method/${group._id}`, {
+        params: {
+          userId,
+          subdomain
+        }
+      });
+      return docs.map((doc) => new DocOption(doc, vscode.TreeItemCollapsibleState.None));
+    }
+
+    return [...groups.map((group) => new GroupOption(group, vscode.TreeItemCollapsibleState.Collapsed))];
   }
 }
 
@@ -88,6 +100,7 @@ class DocOption extends vscode.TreeItem {
   }
 }
 
+// TBD: Add doc option
 class AddDocOption extends vscode.TreeItem {
   constructor() {
     super('', vscode.TreeItemCollapsibleState.Collapsed);

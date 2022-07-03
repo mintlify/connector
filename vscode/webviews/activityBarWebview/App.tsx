@@ -1,6 +1,6 @@
 import prependHttp from 'prepend-http';
 import React, { useEffect, useState } from 'react';
-import { LockClosedIcon } from '@heroicons/react/solid';
+import { DocumentTextIcon, LockClosedIcon, XIcon } from '@heroicons/react/solid';
 import { vscode } from '../common/message';
 import { CodeSymbolIcon, CodeFileIcon } from '../common/svgs';
 
@@ -224,7 +224,19 @@ const App = () => {
               />
             }
             {
-              selectedDoc != null && <div className="block w-full text-sm">{selectedDoc.title}</div>
+              selectedDoc != null && <div className="block w-full text-sm code">
+                <div className="flex items-center space-x-1">
+                  <div>
+                    <DocumentTextIcon className="h-4" />
+                  </div>
+                  <div className="flex-1">
+                    {selectedDoc.title}
+                  </div>
+                  <div className="cursor-pointer" onClick={() => setSelectedDoc(undefined)}>
+                    <XIcon className="h-4" />
+                  </div>
+                </div>
+              </div>
             }
             {!isURL && query !== '' && (
               <span className="text-red-500">Invalid URL</span>
