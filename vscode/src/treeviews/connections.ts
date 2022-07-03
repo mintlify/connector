@@ -30,14 +30,47 @@ export class ConnectionsTreeProvider implements vscode.TreeDataProvider<GroupOpt
     });
 
     return groups.map((group) => {
-      return new GroupOption(group.name, vscode.TreeItemCollapsibleState.None);
+      return new GroupOption(group.name, group._id, vscode.TreeItemCollapsibleState.None);
     });
   }
 }
 
+const getIconPathForGroup = (id: string): string | { light: string, dark: string } => {
+  switch (id) {
+    case 'github':
+      return {
+        light: path.join(__filename, '..', '..', 'assets', 'icons', 'github.svg'),
+        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'github-dark.svg')
+      };
+    case 'notion-private':
+      return {
+        light: path.join(__filename, '..', '..', 'assets', 'icons', 'notion.svg'),
+        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'notion-dark.svg'),
+      };
+    case 'googledocs-private':
+      return {
+        light: path.join(__filename, '..', '..', 'assets', 'icons', 'google-docs.svg'),
+        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'google-docs.svg'),
+      };
+    case 'confluence-private':
+      return {
+        light: path.join(__filename, '..', '..', 'assets', 'icons', 'confluence.svg'),
+        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'confluence.svg'),
+      };
+    case 'web':
+      return {
+        light: path.join(__filename, '..', '..', 'assets', 'icons', 'web.svg'),
+        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'web-dark.svg'),
+      };
+    default:
+      return '';
+  }
+};
+
 class GroupOption extends vscode.TreeItem {
   constructor(
     public readonly label: string,
+    public readonly id: string,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
     public readonly isDefault: boolean = false,
     public readonly selected: boolean = false
@@ -48,18 +81,13 @@ class GroupOption extends vscode.TreeItem {
       this.description = 'Default';
     }
 
-    if (this.selected) {
-      this.iconPath = {
-        light: path.join(__filename, '..', '..', 'assets', 'light', 'check.svg'),
-        dark: path.join(__filename, '..', '..', 'assets', 'dark', 'check.svg')
-      };
-    }
-    const onClickCommand: vscode.Command = {
-      title: 'Hotkey Config',
-      command: 'docs.hotkeyConfig',
-      arguments: [this.label]
-    };
+    this.iconPath = getIconPathForGroup(id);
+    // const onClickCommand: vscode.Command = {
+    //   title: 'Hotkey Config',
+    //   command: 'docs.hotkeyConfig',
+    //   arguments: [this.label]
+    // };
 
-    this.command = onClickCommand;
+    // this.command = onClickCommand;
   }
 }

@@ -144,10 +144,10 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
 });
 
 const groupMap: Record<ScrapingMethod, { name: string, importStatusId: string, id:  ScrapingMethod }> = {
-  'notion-private': { name: 'Notion Workspace', importStatusId: 'notion', id: 'notion-private' },
-  'confluence-private': { name: 'Confluence Space', importStatusId: 'confluence', id: 'confluence-private' },
+  'notion-private': { name: 'Notion', importStatusId: 'notion', id: 'notion-private' },
+  'confluence-private': { name: 'Confluence', importStatusId: 'confluence', id: 'confluence-private' },
   'googledocs-private': { name: 'Google Docs', importStatusId: 'googledocs', id: 'googledocs-private' },
-  'github': { name: 'GitHub Markdown', importStatusId: 'github', id: 'github' },
+  'github': { name: 'GitHub', importStatusId: 'github', id: 'github' },
   'web': { name: 'Web Pages', importStatusId: '', id: 'web' },
 }
 
