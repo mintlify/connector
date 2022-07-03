@@ -58,11 +58,11 @@ const App = () => {
   const [user, setUser] = useState<any>(initialState?.user);
   const [dashboardUrl, setDashboardUrl] = useState<string>(initialState?.dashboardUrl);
   const [API_ENDPOINT, setAPI_ENDPOINT] = useState<string>(initialState?.API_ENDPOINT);
-  const [signInUrl, setSignInUrl] = useState<string>('');
+  const [signInUrl, setSignInUrl] = useState<string>();
   const [selectedDoc, setSelectedDoc] = useState<Doc | undefined>(initialState?.selectedDoc);
   const [code, setCode] = useState<Code | undefined>(initialState?.code);
   const [query, setQuery] = useState<string>(initialState?.query || '');
-  const [isURL, setIsURL] = useState<boolean>(initialState?.isURL || false);
+  const [inputError, setInputError] = useState<string>();
 
   useEffect(() => {
     window.addEventListener('message', event => {
@@ -75,6 +75,9 @@ const App = () => {
           break;
         case 'auth':
           const user = message?.args;
+          if (!signInUrl) {
+            return;
+          };
           const newDashboardUrl = formatSignInUrl(signInUrl);
           vscode.setState({ ...initialState, user, dashboardUrl: newDashboardUrl });
           setUser(user);
@@ -96,42 +99,43 @@ const App = () => {
     });
   }, [signInUrl, user, dashboardUrl, API_ENDPOINT]);
 
-  useEffect(() => {
-    const urlStatus = checkIsURL(query);
-    setIsURL(urlStatus);
-    if (urlStatus) {
-      const newDoc = {
-        _id: 'create',
-        title: query,
-        url: query
-      };
-      setSelectedDoc(newDoc);
-      vscode.setState({...initialState, selectedDoc: newDoc});
-    }
-  }, [query]);
-
-  const handleSubmit = event => {
-    event.preventDefault();
-    const args = {
-      userId: user.userId,
-      subdomain: getSubdomain(dashboardUrl),
-      docId: selectedDoc?._id,
-      title: selectedDoc?.title,
-      org: code?.org,
-      code: code,
-      url: selectedDoc?.url
-    };
-    vscode.postMessage({ command: 'link-submit', args });
-  };
-
   const checkIsURL = (str: string) => {
     return /(([a-z]+:\/\/)?(([a-z0-9-]+\.)+([a-z]{2}|aero|arpa|biz|com|coop|edu|gov|info|int|jobs|mil|museum|name|nato|net|org|pro|travel|local|internal|dev|site))(:[0-9]{1,5})?(\/[a-z0-9_\-.~]+)*(\/([a-z0-9_\-.]*)(\?[a-z0-9+_\-.%=&amp;]*)?)?(#[a-zA-Z0-9!$&'()*+.=-_~:@/?]*)?)(\s+|$)/gi.test(str.trim());
   };
 
+  const handleSubmit = event => {
+    event.preventDefault();
+    let args;
+    if (selectedDoc) {
+      args = {
+        userId: user.userId,
+        subdomain: getSubdomain(dashboardUrl),
+        docId: selectedDoc?._id,
+        title: selectedDoc?.title,
+        org: code?.org,
+        code: code,
+        url: selectedDoc?.url
+      };
+    } else {
+      if (!checkIsURL(query)) {
+        setInputError('Invalid URL');
+        return;
+      }
+      args = {
+        userId: user.userId,
+        subdomain: getSubdomain(dashboardUrl),
+        docId: 'create',
+        org: code?.org,
+        code: code,
+        url: query
+      };
+    }
+    vscode.postMessage({ command: 'link-submit', args });
+  };
+
   const updateQuery = (newQuery: string) => {
     setQuery(newQuery);
-    const urlStatus = checkIsURL(newQuery);
-    setIsURL(urlStatus);
+    setInputError(undefined);
   };
 
   const CodeContent = ({ code }: { code: Code }) => {
@@ -156,9 +160,17 @@ const App = () => {
   };
 
   const onClickSignIn = () => {
+    if (!signInUrl) {
+      return;
+    }
     let signInWithProtocol = formatSignInUrl(signInUrl);
     const subdomain = getSubdomain(signInUrl);
     vscode.postMessage({ command: 'login', args: {signInWithProtocol, subdomain} });
+  };
+
+  const clearSelectedDoc = () => {
+    setSelectedDoc(undefined);
+    vscode.setState({ ...initialState, selectedDoc: undefined });
   };
 
   const onLogout = () => {
@@ -232,14 +244,14 @@ const App = () => {
                   <div className="flex-1">
                     {selectedDoc.title}
                   </div>
-                  <div className="cursor-pointer" onClick={() => setSelectedDoc(undefined)}>
+                  <div className="cursor-pointer" onClick={clearSelectedDoc}>
                     <XIcon className="h-4" />
                   </div>
                 </div>
               </div>
             }
-            {!isURL && query !== '' && (
-              <span className="text-red-500">Invalid URL</span>
+            {inputError && (
+              <span className="text-red-500">{inputError}</span>
             )}
           </div>
           <div className='flex flex-row mt-3'>
