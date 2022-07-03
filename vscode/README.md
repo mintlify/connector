@@ -2,9 +2,9 @@
 
 ![](https://img.shields.io/github/checks-status/mintlify/mintlify/38f1d5b1fd9397e56f5da3ec2d254b09859a579f) [![Stars](https://img.shields.io/github/stars/mintlify/mintlify?style=social)](https://github.com/mintlify/mintlify) [![Twitter](https://img.shields.io/twitter/follow/mintlify?style=social)](https://twitter.com/mintlify)
 
-Link documentation to your codebase using [Mintlify](https://mintlify.com)
+Link documentation to your codebase
 
-<img src="/vscode/assets/Create-connection.gif" width="300px" />
+<img src="/vscode/assets/Create-connection.gif" width="650px" />
 
 ## Get Started
 
