@@ -174,6 +174,7 @@ const App = () => {
 
   const updateQuery = (newQuery: string) => {
     setQuery(newQuery);
+    vscode.setState({...initialState, query: newQuery});
     const urlStatus = checkIsURL(newQuery);
     setIsURL(urlStatus);
   };

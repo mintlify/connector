@@ -4,15 +4,16 @@
 
 Link documentation to your codebase using [Mintlify](https://mintlify.com)
 
+<img src="/vscode/assets/mintlify-connect.png" width="300px" />
+
 ## Get Started
 
 1. Create a Mintlify dashboard [here](https://www.mintlify.com/create)
-2. Add documents through the platform
-3. Select the document you want to connect to code.
+2. Paste the URL of the document you want to connect.
 
-<img src="/vscode/assets/dropdown.png" width="250px" />
+<img src="/vscode/assets/document-link.png" width="250px" />
 
-4. Select code you want to associate with the document.
+3. Select code you want to associate with the document.
 
 - Highlighting the code
 
@@ -21,21 +22,11 @@ Link documentation to your codebase using [Mintlify](https://mintlify.com)
 - Select folders/files by right clicking on them in the explorer, and selecting "Link folder to documentation"
   <img src="/vscode/assets/link-file.png" width="300px" />
 
-5. Submit
-
-<img src="/vscode/assets/submit.png" width="300px" />
-
-### Features
-
-After your connections are made, enjoy having full visibility into your documentation and codebase.
-
-- Integrate with GitHub to receive alerts to update documentation when code changes.
-- Receive alerts on documentation changes.
-- Stay up-to-date with changes by receiving notifications through email, webhooks, or Slack
+4. Submit
 
 ### 🚨 Disclaimer
 
-We never store your code, but your code does leave your machine. You can learn more about our [security policies](https://www.mintlify.com/security).
+We never store your code. You can learn more about our [security policies](https://www.mintlify.com/security).
 
 ---
 
