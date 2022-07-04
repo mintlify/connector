@@ -16,6 +16,8 @@ type Group = {
 
 export class ConnectionsTreeProvider implements vscode.TreeDataProvider<GroupOption> {
   private state: GlobalState;
+  private _onDidChangeTreeData: vscode.EventEmitter<GroupOption | undefined | null | void> = new vscode.EventEmitter<GroupOption | undefined | null | void>();
+  readonly onDidChangeTreeData: vscode.Event<GroupOption | undefined | null | void> = this._onDidChangeTreeData.event;
 
   constructor(state: GlobalState) {
     this.state = state;
@@ -63,6 +65,10 @@ export class ConnectionsTreeProvider implements vscode.TreeDataProvider<GroupOpt
     }
 
     return [...groups.map((group) => new GroupOption(group, vscode.TreeItemCollapsibleState.Collapsed))];
+  }
+
+  refresh(): void {
+    this._onDidChangeTreeData.fire();
   }
 }
 

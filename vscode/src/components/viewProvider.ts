@@ -40,6 +40,7 @@ export class ViewProvider implements WebviewViewProvider {
 		this.globalState.setUserId(user.userId);
 		this._view?.webview.postMessage({ command: 'auth', args: user });
 		vscode.commands.executeCommand('mintlify.refresh-links');
+		vscode.commands.executeCommand('mintlify.refresh-docs');
 	}
 
 	public prefillDocWithDocId = (docId: string) => {
@@ -55,6 +56,7 @@ export class ViewProvider implements WebviewViewProvider {
 	public logout(): void {
 		this._view?.webview.postMessage({ command: 'logout' });
 		this.globalState.clearState();
+		vscode.commands.executeCommand('mintlify.refresh-docs');
 	}
 
     public resolveWebviewView(webviewView: WebviewView): void | Thenable<void> {

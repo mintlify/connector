@@ -7,7 +7,12 @@ import GlobalState from './utils/globalState';
 import { ConnectionsTreeProvider } from './treeviews/connections';
 
 const createTreeViews = (state: GlobalState): void => {
-	vscode.window.createTreeView('connections', { treeDataProvider: new ConnectionsTreeProvider(state) });
+	const connectionsTreeProvider = new ConnectionsTreeProvider(state);
+	vscode.window.createTreeView('connections', { treeDataProvider: connectionsTreeProvider });
+
+	vscode.commands.registerCommand('mintlify.refresh-docs', () => {
+		connectionsTreeProvider.refresh();
+	});
 };
 
 export async function activate(context: vscode.ExtensionContext) {

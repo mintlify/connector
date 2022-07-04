@@ -47,6 +47,10 @@
         "title": "Prefill document"
       },
       {
+        "command": "mintlify.refresh-docs",
+        "title": "Refresh documents view"
+      },
+      {
         "command": "mintlify.open-doc",
         "title": "Open document"
       }
