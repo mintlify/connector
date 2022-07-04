@@ -1,7 +1,6 @@
-import axios from 'axios';
 import prependHttp from 'prepend-http';
 import React, { useEffect, useState } from 'react';
-import { LockClosedIcon } from '@heroicons/react/solid';
+import { DocumentTextIcon, LockClosedIcon, XIcon } from '@heroicons/react/solid';
 import { vscode } from '../common/message';
 import { CodeSymbolIcon, CodeFileIcon } from '../common/svgs';
 
@@ -35,13 +34,6 @@ type State = {
   isURL: boolean;
 };
 
-const initialDoc: Doc = {
-  _id: 'initial',
-  title: '',
-  url: '',
-  isDefault: true,
-};
-
 const classNames = (...classes) => {
   return classes.filter(Boolean).join(' ');
 };
@@ -66,12 +58,11 @@ const App = () => {
   const [user, setUser] = useState<any>(initialState?.user);
   const [dashboardUrl, setDashboardUrl] = useState<string>(initialState?.dashboardUrl);
   const [API_ENDPOINT, setAPI_ENDPOINT] = useState<string>(initialState?.API_ENDPOINT);
-  const [signInUrl, setSignInUrl] = useState<string>('');
-  const [docs, setDocs] = useState<Doc[]>([initialDoc]);
-  const [selectedDoc, setSelectedDoc] = useState<Doc>(initialState?.selectedDoc || initialDoc);
+  const [signInUrl, setSignInUrl] = useState<string>();
+  const [selectedDoc, setSelectedDoc] = useState<Doc | undefined>(initialState?.selectedDoc);
   const [code, setCode] = useState<Code | undefined>(initialState?.code);
   const [query, setQuery] = useState<string>(initialState?.query || '');
-  const [isURL, setIsURL] = useState<boolean>(initialState?.isURL || false);
+  const [inputError, setInputError] = useState<string>();
 
   useEffect(() => {
     window.addEventListener('message', event => {
@@ -82,35 +73,19 @@ const App = () => {
           vscode.setState({ ...initialState, API_ENDPOINT });
           setAPI_ENDPOINT(API_ENDPOINT);
           break;
-        case 'display-docs':
-          setDocs(message.docs || []);
-          break;
         case 'auth':
           const user = message?.args;
+          if (!signInUrl) {
+            return;
+          };
           const newDashboardUrl = formatSignInUrl(signInUrl);
           vscode.setState({ ...initialState, user, dashboardUrl: newDashboardUrl });
           setUser(user);
           setDashboardUrl(newDashboardUrl);
           break;
         case 'prefill-doc':
-          if (!user?.userId || dashboardUrl == null) {
-            return;
-          }
-          const docId = message?.args;
-          axios.get(`${API_ENDPOINT}/docs`, {
-            params: {
-              userId: user.userId,
-              subdomain: getSubdomain(dashboardUrl)
-            }
-          })
-            .then((res) => {
-              const { data: { docs: docsResult } } = res;
-              const selectedDoc = docs.find(doc => doc._id === docId);
-              if (selectedDoc) {
-                setSelectedDoc(selectedDoc);
-              }
-              setDocs(docsResult);
-            });
+          const doc = message?.args;
+          setSelectedDoc(doc);
           break;
         case 'post-code':
           const code = message?.args;
@@ -120,63 +95,47 @@ const App = () => {
         case 'logout':
           onLogout();
           break;
-        case 'update-selected-doc':
-          const { newDoc, newDocs }: { newDoc: Doc, newDocs: Doc[] } = message;
-          setSelectedDoc(newDoc);
-          setDocs(newDocs);
-          vscode.setState({...initialState, selectedDoc: newDoc, docs: newDocs });
-          break;
       }
     });
   }, [signInUrl, user, dashboardUrl, API_ENDPOINT]);
-
-  useEffect(() => {
-    if (!user?.userId || dashboardUrl == null) {
-      return;
-    }
-    vscode.postMessage({ command: 'get-docs', userId: user.userId, subdomain: getSubdomain(dashboardUrl) });
-  }, [user, dashboardUrl, API_ENDPOINT]);
-
-  useEffect(() => {
-    const urlStatus = checkIsURL(query);
-    setIsURL(urlStatus);
-    if (urlStatus) {
-      const newDoc = {
-        _id: 'create',
-        title: query,
-        url: query
-      };
-      setSelectedDoc(newDoc);
-      vscode.setState({...initialState, selectedDoc: newDoc});
-    } else {
-      setSelectedDoc(initialDoc);
-      vscode.setState({...initialState, selectedDoc: initialDoc});
-    }
-  }, [query]);
-
-  const handleSubmit = event => {
-    event.preventDefault();
-    const args = {
-      userId: user.userId,
-      subdomain: getSubdomain(dashboardUrl),
-      docId: selectedDoc._id,
-      title: selectedDoc.title,
-      org: code?.org,
-      code: code,
-      url: selectedDoc.url
-    };
-    vscode.postMessage({ command: 'link-submit', args });
-  };
 
   const checkIsURL = (str: string) => {
     return /(([a-z]+:\/\/)?(([a-z0-9-]+\.)+([a-z]{2}|aero|arpa|biz|com|coop|edu|gov|info|int|jobs|mil|museum|name|nato|net|org|pro|travel|local|internal|dev|site))(:[0-9]{1,5})?(\/[a-z0-9_\-.~]+)*(\/([a-z0-9_\-.]*)(\?[a-z0-9+_\-.%=&amp;]*)?)?(#[a-zA-Z0-9!$&'()*+.=-_~:@/?]*)?)(\s+|$)/gi.test(str.trim());
   };
 
+  const handleSubmit = event => {
+    event.preventDefault();
+    let args;
+    if (selectedDoc) {
+      args = {
+        userId: user.userId,
+        subdomain: getSubdomain(dashboardUrl),
+        docId: selectedDoc?._id,
+        title: selectedDoc?.title,
+        org: code?.org,
+        code: code,
+        url: selectedDoc?.url
+      };
+    } else {
+      if (!checkIsURL(query)) {
+        setInputError('Invalid URL');
+        return;
+      }
+      args = {
+        userId: user.userId,
+        subdomain: getSubdomain(dashboardUrl),
+        docId: 'create',
+        org: code?.org,
+        code: code,
+        url: query
+      };
+    }
+    vscode.postMessage({ command: 'link-submit', args });
+  };
+
   const updateQuery = (newQuery: string) => {
     setQuery(newQuery);
-    vscode.setState({...initialState, query: newQuery});
-    const urlStatus = checkIsURL(newQuery);
-    setIsURL(urlStatus);
+    setInputError(undefined);
   };
 
   const CodeContent = ({ code }: { code: Code }) => {
@@ -201,9 +160,17 @@ const App = () => {
   };
 
   const onClickSignIn = () => {
+    if (!signInUrl) {
+      return;
+    }
     let signInWithProtocol = formatSignInUrl(signInUrl);
     const subdomain = getSubdomain(signInUrl);
     vscode.postMessage({ command: 'login', args: {signInWithProtocol, subdomain} });
+  };
+
+  const clearSelectedDoc = () => {
+    setSelectedDoc(undefined);
+    vscode.setState({ ...initialState, selectedDoc: undefined });
   };
 
   const onLogout = () => {
@@ -257,17 +224,34 @@ const App = () => {
             Documentation<span className='text-red-500'>*</span>
           </label>
           <div className="mt-1">
-            <input
-              type="text"
-              name="url"
-              id="url"
-              className="block w-full text-sm"
-              placeholder="www.example.com"
-              value={query}
-              onChange={(event) => updateQuery(event.target.value)}
-            />
-            {!isURL && query !== '' && (
-              <span className="text-red-500">Invalid URL</span>
+            {
+              selectedDoc == null && <input
+                type="text"
+                name="url"
+                id="url"
+                className="block w-full text-sm"
+                placeholder="www.example.com"
+                value={query}
+                onChange={(event) => updateQuery(event.target.value)}
+              />
+            }
+            {
+              selectedDoc != null && <div className="block w-full text-sm code">
+                <div className="flex items-center space-x-1">
+                  <div>
+                    <DocumentTextIcon className="h-4" />
+                  </div>
+                  <div className="flex-1">
+                    {selectedDoc.title}
+                  </div>
+                  <div className="cursor-pointer" onClick={clearSelectedDoc}>
+                    <XIcon className="h-4" />
+                  </div>
+                </div>
+              </div>
+            }
+            {inputError && (
+              <span className="text-red-500">{inputError}</span>
             )}
           </div>
           <div className='flex flex-row mt-3'>
@@ -284,6 +268,9 @@ const App = () => {
             Submit
           </button>
         </form>
+        <div className="mt-1">
+          Have questions? Join our <a href="https://discord.gg/6W7GuYuxra">community</a>
+        </div>
       </>
       }
     </div>

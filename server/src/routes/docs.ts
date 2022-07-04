@@ -145,11 +145,63 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
   }
 });
 
+docsRouter.get('/method/:method', userMiddleware, async (req, res) => {
+  const org = res.locals.user.org;
+  const { method } = req.params;
+
+  try {
+    const docs = await Doc.aggregate([
+      {
+        $match: { org: org._id, method },
+      },
+      {
+        $lookup: {
+          from: 'code',
+          foreignField: 'doc',
+          localField: '_id',
+          as: 'code',
+        },
+      },
+      {
+        $lookup: {
+          from: "tasks",
+          let: { doc: "$_id" },
+          pipeline: [
+             { $match:
+                { $expr:
+                   { $and:
+                      [
+                        { $eq: [ "$doc",  "$$doc" ] },
+                        { $eq: [ "$status", "todo" ] }
+                      ]
+                   }
+                }
+             },
+          ],
+          as: "tasks"
+        },
+      },
+      {
+        $set: {
+          tasksCount: { $size: "$tasks" },
+          codesCount: { $size: "$code" }
+        }
+      },
+      {
+        $sort: { tasksCount: -1, codesCount: -1, lastUpdatedAt: -1 },
+      },
+    ]);
+    return res.status(200).send({ docs });
+  } catch (error) {
+    return res.status(500).send({ error, docs: [] });
+  }
+})
+
 const groupMap: Record<ScrapingMethod, { name: string, importStatusId: string, id:  ScrapingMethod }> = {
-  'notion-private': { name: 'Notion Workspace', importStatusId: 'notion', id: 'notion-private' },
-  'confluence-private': { name: 'Confluence Space', importStatusId: 'confluence', id: 'confluence-private' },
+  'notion-private': { name: 'Notion', importStatusId: 'notion', id: 'notion-private' },
+  'confluence-private': { name: 'Confluence', importStatusId: 'confluence', id: 'confluence-private' },
   'googledocs-private': { name: 'Google Docs', importStatusId: 'googledocs', id: 'googledocs-private' },
-  'github': { name: 'GitHub Markdown', importStatusId: 'github', id: 'github' },
+  'github': { name: 'GitHub', importStatusId: 'github', id: 'github' },
   'web': { name: 'Web Pages', importStatusId: '', id: 'web' },
 }
 

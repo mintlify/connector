@@ -19,7 +19,8 @@
     "onStartupFinished",
     "onView:primary",
     "onCommand:mintlify.link-code",
-    "onCommand:mintlify.link-dir"
+    "onCommand:mintlify.link-dir",
+    "onCommand:mintlify.prefill-doc"
   ],
   "main": "./dist/extension.js",
   "browser": "./dist/browser/extension.js",
@@ -40,6 +41,14 @@
       {
         "command": "mintlify.refresh-links",
         "title": "Refresh links"
+      },
+      {
+        "command": "mintlify.prefill-doc",
+        "title": "Prefill document"
+      },
+      {
+        "command": "mintlify.refresh-docs",
+        "title": "Refresh documents view"
       },
       {
         "command": "mintlify.open-doc",
@@ -66,6 +75,10 @@
           "type": "webview",
           "id": "primary",
           "name": "Create connection"
+        },
+        {
+          "id": "connections",
+          "name": "Documents"
         }
       ]
     },

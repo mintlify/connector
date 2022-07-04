@@ -32,7 +32,7 @@ export const registerAuthRoute = (provider: ViewProvider) => {
           return;
         }
 
-        provider.prefillDoc(docId);
+        provider.prefillDocWithDocId(docId);
       }
     }
   });

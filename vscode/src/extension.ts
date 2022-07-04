@@ -4,6 +4,16 @@ import { linkCodeCommand, linkDirCommand, refreshLinksCommand, openDocsCommand }
 import { registerAuthRoute } from './components/authentication';
 import FileCodeLensProvider from './components/codeLensProvider';
 import GlobalState from './utils/globalState';
+import { ConnectionsTreeProvider } from './treeviews/connections';
+
+const createTreeViews = (state: GlobalState): void => {
+	const connectionsTreeProvider = new ConnectionsTreeProvider(state);
+	vscode.window.createTreeView('connections', { treeDataProvider: connectionsTreeProvider });
+
+	vscode.commands.registerCommand('mintlify.refresh-docs', () => {
+		connectionsTreeProvider.refresh();
+	});
+};
 
 export async function activate(context: vscode.ExtensionContext) {
 	const globalState = new GlobalState(context.globalState);
@@ -26,5 +36,10 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.executeCommand('mintlify.link-code', { editor, scheme: 'file' });
 	});
 
+	vscode.commands.registerCommand('mintlify.prefill-doc', (doc) => {
+		viewProvider.prefillDoc(doc);
+	});
+
+	createTreeViews(globalState);
 	vscode.commands.executeCommand('mintlify.refresh-links', context);
 }
