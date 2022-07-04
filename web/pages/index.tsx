@@ -112,7 +112,7 @@ export default function Home() {
     )
   }
 
-  if (!user?.onboarding?.isCompleted || (integrationsStatus != null && !integrationsStatus.github)) {
+  if (!user?.onboarding?.isCompleted) {
     return <Onboarding />
   }
 

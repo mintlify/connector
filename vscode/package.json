@@ -1,9 +1,9 @@
 {
   "name": "connector",
   "publisher": "mintlify",
-  "displayName": "Document Connect",
+  "displayName": "Document Connector",
   "description": "Create connections between documentation and code",
-  "version": "0.3.33",
+  "version": "0.3.37",
   "icon": "assets/logo.png",
   "repository": {
     "url": "https://github.com/mintlify/connect"
