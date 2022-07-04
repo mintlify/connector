@@ -5,6 +5,8 @@ import { registerAuthRoute } from './components/authentication';
 import FileCodeLensProvider from './components/codeLensProvider';
 import GlobalState from './utils/globalState';
 import { ConnectionsTreeProvider } from './treeviews/connections';
+import { doRegisterBuiltinGitProvider } from './utils/builtInGit';
+import { GitApiImpl } from './utils/gitApiImpl';
 
 const createTreeViews = (state: GlobalState): void => {
 	const connectionsTreeProvider = new ConnectionsTreeProvider(state);
@@ -15,7 +17,7 @@ const createTreeViews = (state: GlobalState): void => {
 	});
 };
 
-export async function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext): Promise<GitApiImpl> {
 	const globalState = new GlobalState(context.globalState);
 	const viewProvider = new ViewProvider(context.extensionUri, globalState);
 	const codeLensProvider = new FileCodeLensProvider(globalState);
@@ -42,4 +44,28 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	createTreeViews(globalState);
 	vscode.commands.executeCommand('mintlify.refresh-links', context);
+
+	const apiImpl = new GitApiImpl();
+	await deferredActivate(context, apiImpl);
+	console.log({apiImpl});
+	return apiImpl;
 }
+
+const deferredActivate = async (context: vscode.ExtensionContext, apiImpl: GitApiImpl) => {
+	if (!(await doRegisterBuiltinGitProvider(context, apiImpl))) {
+		const extensionsChangedDisposable = vscode.extensions.onDidChange(async () => {
+			if (await doRegisterBuiltinGitProvider(context, apiImpl)) {
+				extensionsChangedDisposable.dispose();
+			}
+		});
+		context.subscriptions.push(extensionsChangedDisposable);
+	}
+
+	context.subscriptions.push(apiImpl);
+
+	const repositories = apiImpl.repositories;
+	console.log({repositories});
+
+	// await init(context, apiImpl, credentialStore, repositories, prTree, liveshareApiPromise, showPRController);
+
+};
