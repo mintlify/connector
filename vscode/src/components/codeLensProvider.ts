@@ -18,7 +18,7 @@ export default class FileCodeLensProvider implements CodeLensProvider {
         const fileName = getFilePath(fileFsPath);
         // find link associated with this file
         const relatedLinks = links.filter((link) => {
-            return link.file === fileName || fileName.includes(link.file);
+            return link.file === fileName || fileName.includes(link.file) || link.file.includes(fileName);
         });
         const lenses: CodeLens[] = relatedLinks.map((link) => {
             let firstLine = document.lineAt(0);
