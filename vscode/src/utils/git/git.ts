@@ -6,7 +6,7 @@ import * as ini from 'ini';
 import * as gitRev from 'git-rev-2';
 
 import gitProvider, { BaseProvider } from './gitProvider';
-import { ViewProvider } from '../components/viewProvider';
+import { ViewProvider } from '../../components/viewProvider';
 
 const window = vscode.window;
 

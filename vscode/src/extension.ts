@@ -5,9 +5,9 @@ import { registerAuthRoute } from './components/authentication';
 import FileCodeLensProvider from './components/codeLensProvider';
 import GlobalState from './utils/globalState';
 import { ConnectionsTreeProvider } from './treeviews/connections';
-import { doRegisterBuiltinGitProvider } from './utils/builtInGit';
-import { GitApiImpl } from './utils/gitApiImpl';
-import { Repository } from './utils/types';
+import { doRegisterBuiltinGitProvider } from './utils/git/builtInGit';
+import { GitApiImpl } from './utils/git/gitApiImpl';
+import { Repository } from './utils/git/types';
 
 const createTreeViews = (state: GlobalState): void => {
 	const connectionsTreeProvider = new ConnectionsTreeProvider(state);

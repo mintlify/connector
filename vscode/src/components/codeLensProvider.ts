@@ -1,10 +1,10 @@
 import  { CodeLensProvider, TextDocument, CancellationToken, CodeLens, Range, Command, Uri } from 'vscode';
 import * as vscode from 'vscode';
 import GlobalState from '../utils/globalState';
-import { getFilePath } from '../utils/git';
+import { getFilePath } from '../utils/git/git';
 import { Link } from '../utils/links';
-import { Repository } from '../utils/types';
-import { mapOldPositionToNew } from '../utils/diffPositionMapping';
+import { Repository } from '../utils/git/types';
+import { mapOldPositionToNew } from '../utils/git/diffPositionMapping';
 
 export default class FileCodeLensProvider implements CodeLensProvider {
 
