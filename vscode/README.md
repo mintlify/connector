@@ -1,6 +1,6 @@
 # 🌿 Document Connector
 
-![](https://img.shields.io/github/checks-status/mintlify/mintlify/38f1d5b1fd9397e56f5da3ec2d254b09859a579f) [![Stars](https://img.shields.io/github/stars/mintlify/mintlify?style=social)](https://github.com/mintlify/mintlify) [![Twitter](https://img.shields.io/twitter/follow/mintlify?style=social)](https://twitter.com/mintlify)
+![](https://img.shields.io/github/checks-status/mintlify/mintlify/38f1d5b1fd9397e56f5da3ec2d254b09859a579f) [![discord](https://img.shields.io/discord/911693009253466123?logo=Discord&logoColor=white)](https://discord.gg/6W7GuYuxra) [![Stars](https://img.shields.io/github/stars/mintlify/mintlify?style=social)](https://github.com/mintlify/mintlify) [![Twitter](https://img.shields.io/twitter/follow/mintlify?style=social)](https://twitter.com/mintlify)
 
 Link documentation to your codebase
 
