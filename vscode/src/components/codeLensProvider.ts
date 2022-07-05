@@ -1,4 +1,5 @@
-import { CodeLensProvider, TextDocument, CancellationToken, ProviderResult, CodeLens, Range, Command } from 'vscode';
+import  { CodeLensProvider, TextDocument, CancellationToken, CodeLens, Range, Command, Uri } from 'vscode';
+import * as vscode from 'vscode';
 import GlobalState from '../utils/globalState';
 import { getFilePath } from '../utils/git';
 import { Link } from '../utils/links';
@@ -22,16 +23,16 @@ export default class FileCodeLensProvider implements CodeLensProvider {
             return link.file === fileName || fileName.includes(link.file) || link.file.includes(fileName);
         });
         const lensPromises: Promise<CodeLens | undefined>[] = relatedLinks.map(async (link) => {
-		    const localDiff = await this._repository.diffWithHEAD(link.file);
+            const diff = await this.getContentDiff(document.uri, fileName, link.sha);
             let firstLine = document.lineAt(0);
             let lastLine = document.lineAt(document.lineCount - 1);
             if (link.type === 'lines' && link?.line && link?.endLine) {
                 if (document.isDirty) {
                     return;
                 }
-                if (localDiff) {
-                    firstLine = document.lineAt(mapOldPositionToNew(localDiff, link.line));
-                    lastLine = document.lineAt(mapOldPositionToNew(localDiff, link.endLine) - 1);
+                if (diff) {
+                    firstLine = document.lineAt(mapOldPositionToNew(diff, link.line));
+                    lastLine = document.lineAt(mapOldPositionToNew(diff, link.endLine) - 1);
                 } else {
                     firstLine = document.lineAt(link.line);
                     lastLine = document.lineAt(link.endLine - 1);
@@ -62,5 +63,18 @@ export default class FileCodeLensProvider implements CodeLensProvider {
             formattedTitle = formattedTitle.slice(0, 30) + '...';
         }
         return formattedTitle;
+    }
+
+    private async getContentDiff(uri: Uri, fileName: string, sha: string): Promise<string> {
+        const matchedEditor = vscode.window.visibleTextEditors.find(
+			editor => editor.document.uri.toString() === uri.toString(),
+		);
+        if (matchedEditor && matchedEditor.document.isDirty) {
+            const documentText = matchedEditor.document.getText();
+            const idOfCurrentText = await this._repository.hashObject(documentText);
+            return await this._repository.diffBlobs(sha, idOfCurrentText);
+        } else {
+            return await this._repository.diffWith(sha, fileName);
+        }
     }
 }
