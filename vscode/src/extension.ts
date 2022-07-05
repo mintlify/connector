@@ -18,9 +18,6 @@ const createTreeViews = (state: GlobalState): void => {
 	});
 };
 
-
-
-
 export async function activate(context: vscode.ExtensionContext): Promise<GitApiImpl> {
 	const globalState = new GlobalState(context.globalState);
 	const viewProvider = new ViewProvider(context.extensionUri, globalState);
