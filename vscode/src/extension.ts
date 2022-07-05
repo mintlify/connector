@@ -63,7 +63,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 		viewProvider.prefillDoc(code.doc);
 	});
-
 	createTreeViews(globalState);
 	vscode.commands.executeCommand('mintlify.refresh-links', context);
 }
