@@ -18,6 +18,11 @@ const createTreeViews = (state: GlobalState): void => {
 		connectionsTreeProvider.refresh();
 	});
 
+	vscode.commands.registerCommand('mintlify.delete-connection', () => {
+		console.log('Deleting');
+	});
+
+
 	vscode.window.onDidChangeActiveTextEditor((editor) => {
 		if (editor == null) {
 			return;
