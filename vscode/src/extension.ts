@@ -7,6 +7,7 @@ import GlobalState from './utils/globalState';
 import { ConnectionsTreeProvider } from './treeviews/connections';
 import { doRegisterBuiltinGitProvider } from './utils/builtInGit';
 import { GitApiImpl } from './utils/gitApiImpl';
+import { Repository } from './utils/types';
 
 const createTreeViews = (state: GlobalState): void => {
 	const connectionsTreeProvider = new ConnectionsTreeProvider(state);
@@ -20,12 +21,9 @@ const createTreeViews = (state: GlobalState): void => {
 export async function activate(context: vscode.ExtensionContext): Promise<GitApiImpl> {
 	const globalState = new GlobalState(context.globalState);
 	const viewProvider = new ViewProvider(context.extensionUri, globalState);
-	const codeLensProvider = new FileCodeLensProvider(globalState);
-	const allLanguages = await vscode.languages.getLanguages();
 
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider(ViewProvider.viewType, viewProvider),
-		vscode.languages.registerCodeLensProvider(allLanguages, codeLensProvider),
 		linkCodeCommand(viewProvider),
 		linkDirCommand(viewProvider),
 		refreshLinksCommand(globalState),
@@ -46,12 +44,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<GitApi
 	vscode.commands.executeCommand('mintlify.refresh-links', context);
 
 	const apiImpl = new GitApiImpl();
-	await deferredActivate(context, apiImpl);
-	console.log({apiImpl});
+	await deferredActivate(context, globalState, apiImpl);
 	return apiImpl;
 }
 
-const deferredActivate = async (context: vscode.ExtensionContext, apiImpl: GitApiImpl) => {
+const deferredActivate = async (context: vscode.ExtensionContext, globalState: GlobalState, apiImpl: GitApiImpl) => {
 	if (!(await doRegisterBuiltinGitProvider(context, apiImpl))) {
 		const extensionsChangedDisposable = vscode.extensions.onDidChange(async () => {
 			if (await doRegisterBuiltinGitProvider(context, apiImpl)) {
@@ -64,8 +61,37 @@ const deferredActivate = async (context: vscode.ExtensionContext, apiImpl: GitAp
 	context.subscriptions.push(apiImpl);
 
 	const repositories = apiImpl.repositories;
-	console.log({repositories});
 
-	// await init(context, apiImpl, credentialStore, repositories, prTree, liveshareApiPromise, showPRController);
+	await init(context, globalState, repositories);
 
+};
+
+const init = async (context: vscode.ExtensionContext, globalState: GlobalState, repositories: Repository[]) => {
+	// Sort the repositories to match folders in a multiroot workspace (if possible).
+	const workspaceFolders = vscode.workspace.workspaceFolders;
+	if (workspaceFolders) {
+		repositories = repositories.sort((a, b) => {
+			let indexA = workspaceFolders.length;
+			let indexB = workspaceFolders.length;
+			for (let i = 0; i < workspaceFolders.length; i++) {
+				if (workspaceFolders[i].uri.toString() === a.rootUri.toString()) {
+					indexA = i;
+				} else if (workspaceFolders[i].uri.toString() === b.rootUri.toString()) {
+					indexB = i;
+				}
+				if (indexA !== workspaceFolders.length && indexB !== workspaceFolders.length) {
+					break;
+				}
+			}
+			return indexA - indexB;
+		});
+	}
+
+	if (repositories.length === 0) {
+		return;
+	}
+	const codeLensProvider = new FileCodeLensProvider(globalState, repositories[0]);
+	const allLanguages = await vscode.languages.getLanguages();
+
+	context.subscriptions.push(vscode.languages.registerCodeLensProvider(allLanguages, codeLensProvider));
 };

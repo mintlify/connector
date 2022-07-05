@@ -1,6 +1,18 @@
 import { Uri, Event, Disposable, ProviderResult } from 'vscode';
 export { ProviderResult } from 'vscode';
 
+export interface IRawFileChange {
+	filename: string;
+	previous_filename?: string;
+	additions: number;
+	deletions: number;
+	changes: number;
+	status: string;
+	raw_url: string;
+	blob_url: string;
+	patch: string;
+}
+
 export interface API {
 	/**
 	 * Register a [git provider](#IGit)
