@@ -11,10 +11,6 @@ export type Doc = {
   isDefault?: boolean;
 };
 
-
-
-
-
 export type Code = {
   url?: string;
   sha: string;
