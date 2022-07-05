@@ -4,7 +4,6 @@ import GlobalState from '../utils/globalState';
 import axios from 'axios';
 import { API_ENDPOINT } from '../utils/api';
 import { Doc } from '../components/viewProvider';
-import { getRepoInfo } from '../utils/git';
 
 type Group = {
   _id: string;
@@ -15,7 +14,7 @@ type Group = {
   isLoading: boolean;
 };
 
-export class ConnectionsTreeProvider implements vscode.TreeDataProvider<GroupOption> {
+export class DocumentsTreeProvider implements vscode.TreeDataProvider<GroupOption> {
   private state: GlobalState;
   private _onDidChangeTreeData: vscode.EventEmitter<GroupOption | undefined | null | void> = new vscode.EventEmitter<GroupOption | undefined | null | void>();
   readonly onDidChangeTreeData: vscode.Event<GroupOption | undefined | null | void> = this._onDidChangeTreeData.event;
@@ -35,13 +34,6 @@ export class ConnectionsTreeProvider implements vscode.TreeDataProvider<GroupOpt
     }
 
     const subdomain = this.state.getSubdomain();
-
-    const editor = vscode.window.activeTextEditor;
-    if (editor) {
-      const fileFsPath: string = editor.document.uri.fsPath;
-      const { gitOrg, repo, file } = await getRepoInfo(fileFsPath);
-      console.log({gitOrg, file, repo});
-    }
 
     if (groupElement) {
       const { data: { docs }  } = await axios.get(`${API_ENDPOINT}/docs/method/${groupElement.group._id}`, {

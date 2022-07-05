@@ -77,8 +77,12 @@
           "name": "Create connection"
         },
         {
-          "id": "connections",
+          "id": "documents",
           "name": "Documents"
+        },
+        {
+          "id": "connections",
+          "name": "Connections"
         }
       ]
     },
