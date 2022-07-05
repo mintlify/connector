@@ -47,6 +47,10 @@
         "title": "Prefill document"
       },
       {
+        "command": "mintlify.hightlight-connection",
+        "title": "Prefill document"
+      },
+      {
         "command": "mintlify.refresh-docs",
         "title": "Refresh documents view"
       },

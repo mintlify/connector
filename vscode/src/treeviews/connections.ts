@@ -6,7 +6,7 @@ import { API_ENDPOINT } from '../utils/api';
 import { Code, getRepoInfo } from '../utils/git';
 import { Doc } from '../components/viewProvider';
 
-type CodeReturned = Code & { doc: Doc };
+export type CodeReturned = Code & { doc: Doc };
 
 export class ConnectionsTreeProvider implements vscode.TreeDataProvider<ConnectionIcon> {
   private state: GlobalState;
@@ -71,9 +71,9 @@ class ConnectionIcon extends vscode.TreeItem {
     };
 
     const onClickCommand: vscode.Command = {
-      title: 'Prefill Doc',
-      command: 'mintlify.prefill-doc',
-      arguments: [this.code.doc]
+      title: 'Highlight connection',
+      command: 'mintlify.highlight-connection',
+      arguments: [this.code]
     };
 
     this.command = onClickCommand;
