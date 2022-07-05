@@ -3,31 +3,25 @@ import * as path from 'path';
 import GlobalState from '../utils/globalState';
 import axios from 'axios';
 import { API_ENDPOINT } from '../utils/api';
+import { Code, getRepoInfo } from '../utils/git';
 import { Doc } from '../components/viewProvider';
 
-type Group = {
-  _id: string;
-  name: string;
-  count: number;
-  lastUpdatedDoc: Doc;
-  tasksCount: number;
-  isLoading: boolean;
-};
+export type CodeReturned = Code & { doc: Doc };
 
-export class ConnectionsTreeProvider implements vscode.TreeDataProvider<GroupOption> {
+export class ConnectionsTreeProvider implements vscode.TreeDataProvider<ConnectionIcon> {
   private state: GlobalState;
-  private _onDidChangeTreeData: vscode.EventEmitter<GroupOption | undefined | null | void> = new vscode.EventEmitter<GroupOption | undefined | null | void>();
-  readonly onDidChangeTreeData: vscode.Event<GroupOption | undefined | null | void> = this._onDidChangeTreeData.event;
+  private _onDidChangeTreeData: vscode.EventEmitter<ConnectionIcon | undefined | null | void> = new vscode.EventEmitter<ConnectionIcon | undefined | null | void>();
+  readonly onDidChangeTreeData: vscode.Event<ConnectionIcon | undefined | null | void> = this._onDidChangeTreeData.event;
 
   constructor(state: GlobalState) {
     this.state = state;
   }
 
-  getTreeItem(element: GroupOption): vscode.TreeItem {
+  getTreeItem(element: ConnectionIcon): vscode.TreeItem {
     return element;
   }
 
-  async getChildren(groupElement: GroupOption): Promise<GroupOption[]> {
+  async getChildren(): Promise<any[]> {
     const userId = this.state.getUserId();
     if (!userId) {
       return [];
@@ -35,36 +29,29 @@ export class ConnectionsTreeProvider implements vscode.TreeDataProvider<GroupOpt
 
     const subdomain = this.state.getSubdomain();
 
-    if (groupElement) {
-      const { data: { docs }  } = await axios.get(`${API_ENDPOINT}/docs/method/${groupElement.group._id}`, {
-        params: {
-          userId,
-          subdomain
-        }
-      });
-      return docs.map((doc) => new DocOption(doc, vscode.TreeItemCollapsibleState.None));
+    const editor = vscode.window.activeTextEditor;
+    let gitOrg, file, repo;
+    if (editor) {
+      const fileFsPath: string = editor.document.uri.fsPath;
+      const { gitOrg: activeGitOrg, repo: activeRepo, file: activeFile } = await getRepoInfo(fileFsPath);
+      [gitOrg, file, repo] = [activeGitOrg, activeFile, activeRepo];
     }
 
-    const { data: { groups }  } = await axios.get(`${API_ENDPOINT}/docs/groups`, {
+    const { data: { codes }  } = await axios.get(`${API_ENDPOINT}/links`, {
       params: {
         userId,
-        subdomain
+        subdomain,
+        gitOrg,
+        file,
+        repo
       }
     });
 
-    // Add docs to home level when just 1 group
-    if (groups.length === 1) {
-      const group = groups[0];
-      const { data: { docs }  } = await axios.get(`${API_ENDPOINT}/docs/method/${group._id}`, {
-        params: {
-          userId,
-          subdomain
-        }
-      });
-      return docs.map((doc) => new DocOption(doc, vscode.TreeItemCollapsibleState.None));
+    if (codes.length === 0) {
+      return [new EmptyListIcon()];
     }
 
-    return [...groups.map((group) => new GroupOption(group, vscode.TreeItemCollapsibleState.Collapsed))];
+    return [...codes.map((code) => new ConnectionIcon(code))];
   }
 
   refresh(): void {
@@ -72,77 +59,30 @@ export class ConnectionsTreeProvider implements vscode.TreeDataProvider<GroupOpt
   }
 }
 
-class GroupOption extends vscode.TreeItem {
+class ConnectionIcon extends vscode.TreeItem {
   constructor(
-    public readonly group: Group,
-    public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+    public readonly code: CodeReturned,
   ) {
-    super(group.name, collapsibleState);
-    this.tooltip = this.group.name;
-    this.description = `${this.group.count} documents`;
-    this.iconPath = getIconPathForGroup(group._id);
-  }
-}
-
-class DocOption extends vscode.TreeItem {
-  constructor(
-    public readonly doc: Doc,
-    public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-  ) {
-    super(doc.title, collapsibleState);
-    this.tooltip = this.doc.title;
+    super(code.doc.title, vscode.TreeItemCollapsibleState.None);
+    this.tooltip = this.code.doc.title;
     this.iconPath = {
-      light: path.join(__filename, '..', '..', 'assets', 'icons', 'document.svg'),
-      dark: path.join(__filename, '..', '..', 'assets', 'icons', 'document-dark.svg'),
+      light: path.join(__filename, '..', '..', 'assets', 'icons', 'connect.svg'),
+      dark: path.join(__filename, '..', '..', 'assets', 'icons', 'connect-dark.svg'),
     };
 
     const onClickCommand: vscode.Command = {
-      title: 'Prefill Doc',
-      command: 'mintlify.prefill-doc',
-      arguments: [this.doc]
+      title: 'Highlight connection',
+      command: 'mintlify.highlight-connection',
+      arguments: [this.code]
     };
 
     this.command = onClickCommand;
   }
 }
 
-// TBD: Add doc option
-class AddDocOption extends vscode.TreeItem {
+class EmptyListIcon extends vscode.TreeItem {
   constructor() {
-    super('', vscode.TreeItemCollapsibleState.Collapsed);
-    this.tooltip = '';
-    this.description = 'Add new document';
+    super('No connections for this file', vscode.TreeItemCollapsibleState.None);
+    this.tooltip = 'No connections for this file';
   }
 }
-
-const getIconPathForGroup = (id: string): string | { light: string, dark: string } => {
-  switch (id) {
-    case 'github':
-      return {
-        light: path.join(__filename, '..', '..', 'assets', 'icons', 'github.svg'),
-        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'github-dark.svg')
-      };
-    case 'notion-private':
-      return {
-        light: path.join(__filename, '..', '..', 'assets', 'icons', 'notion.svg'),
-        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'notion-dark.svg'),
-      };
-    case 'googledocs-private':
-      return {
-        light: path.join(__filename, '..', '..', 'assets', 'icons', 'google-docs.svg'),
-        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'google-docs.svg'),
-      };
-    case 'confluence-private':
-      return {
-        light: path.join(__filename, '..', '..', 'assets', 'icons', 'confluence.svg'),
-        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'confluence.svg'),
-      };
-    case 'web':
-      return {
-        light: path.join(__filename, '..', '..', 'assets', 'icons', 'web.svg'),
-        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'web-dark.svg'),
-      };
-    default:
-      return '';
-  }
-};

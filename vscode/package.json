@@ -47,8 +47,12 @@
         "title": "Prefill document"
       },
       {
-        "command": "mintlify.refresh-docs",
-        "title": "Refresh documents view"
+        "command": "mintlify.hightlight-connection",
+        "title": "Highlight connection"
+      },
+      {
+        "command": "mintlify.refresh-views",
+        "title": "Refresh views"
       },
       {
         "command": "mintlify.open-doc",
@@ -77,8 +81,12 @@
           "name": "Create connection"
         },
         {
-          "id": "connections",
+          "id": "documents",
           "name": "Documents"
+        },
+        {
+          "id": "connections",
+          "name": "Connections"
         }
       ]
     },
@@ -86,7 +94,7 @@
       "activitybar": [
         {
           "id": "primary",
-          "title": "Document Connect",
+          "title": "Documents",
           "icon": "assets/icon.png"
         }
       ]
