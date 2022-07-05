@@ -94,7 +94,7 @@
       "activitybar": [
         {
           "id": "primary",
-          "title": "Document Connect",
+          "title": "Documents",
           "icon": "assets/icon.png"
         }
       ]
