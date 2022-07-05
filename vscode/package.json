@@ -51,8 +51,8 @@
         "title": "Highlight connection"
       },
       {
-        "command": "mintlify.refresh-docs",
-        "title": "Refresh documents view"
+        "command": "mintlify.refresh-views",
+        "title": "Refresh views"
       },
       {
         "command": "mintlify.open-doc",

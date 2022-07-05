@@ -13,8 +13,9 @@ const createTreeViews = (state: GlobalState): void => {
 	vscode.window.createTreeView('documents', { treeDataProvider: documentsTreeProvider });
 	vscode.window.createTreeView('connections', { treeDataProvider: connectionsTreeProvider });
 
-	vscode.commands.registerCommand('mintlify.refresh-docs', () => {
+	vscode.commands.registerCommand('mintlify.refresh-views', () => {
 		documentsTreeProvider.refresh();
+		connectionsTreeProvider.refresh();
 	});
 
 	vscode.window.onDidChangeActiveTextEditor((editor) => {
@@ -61,7 +62,6 @@ export async function activate(context: vscode.ExtensionContext) {
 				preserveFocus: true,
 			});
 		}
-		viewProvider.prefillDoc(code.doc);
 	});
 	createTreeViews(globalState);
 	vscode.commands.executeCommand('mintlify.refresh-links', context);
