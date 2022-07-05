@@ -19,6 +19,9 @@ const createTreeViews = (state: GlobalState): void => {
 };
 
 export async function activate(context: vscode.ExtensionContext): Promise<GitApiImpl> {
+	const openDiff = vscode.workspace.getConfiguration('git').get('openDiffOnClick', true);
+	await vscode.commands.executeCommand('setContext', 'openDiffOnClick', openDiff);
+
 	const globalState = new GlobalState(context.globalState);
 	const viewProvider = new ViewProvider(context.extensionUri, globalState);
 
