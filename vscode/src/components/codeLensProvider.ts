@@ -1,4 +1,4 @@
-import  { CodeLensProvider, TextDocument, CancellationToken, CodeLens, Range, Command, Uri } from 'vscode';
+import  { CodeLensProvider, TextDocument, CancellationToken, CodeLens, Range, Command, Uri, Event, EventEmitter } from 'vscode';
 import * as vscode from 'vscode';
 import GlobalState from '../utils/globalState';
 import { getFilePath } from '../utils/git';
@@ -9,44 +9,52 @@ import { mapOldPositionToNew } from '../utils/git/diffPositionMapping';
 
 export default class FileCodeLensProvider implements CodeLensProvider {
 
+    private _document: TextDocument;
+
     constructor(
-		private globalState: GlobalState,
+		private _globalState: GlobalState,
         private _repository: Repository,
         private _git: GitApiImpl
 	) {
 	}
+
     async provideCodeLenses(document: TextDocument, token: CancellationToken): Promise<CodeLens[]> {
-        const links : Link[] | undefined = this.globalState.getLinks();
+        this._document = document;
+        return await this.getCodeLenses();
+    }
+
+    async getCodeLenses(): Promise<CodeLens[]> {
+        const links : Link[] | undefined = this._globalState.getLinks();
         if (links == null || links?.length === 0) { return []; }
-        const fileFsPath: string = document.uri.fsPath;
+        const fileFsPath: string = this._document.uri.fsPath;
         const fileName = getFilePath(fileFsPath);
         // find link associated with this file
         const relatedLinks = links.filter((link) => {
             return link.file === fileName || fileName.includes(link.file) || link.file.includes(fileName);
         });
         const lensPromises: Promise<CodeLens | undefined>[] = relatedLinks.map(async (link) => {
-            let firstLine = document.lineAt(0);
-            let lastLine = document.lineAt(document.lineCount - 1);
+            let firstLine = this._document.lineAt(0);
+            let lastLine = this._document.lineAt(this._document.lineCount - 1);
             if (link.type === 'lines' && link?.line && link?.endLine) {
-                if (document.isDirty) {
+                if (this._document.isDirty) {
                     return;
                 }
                 if (this._git.state  !== 'uninitialized') {
-                    const diff = await this.getContentDiff(document.uri, fileName, link.sha);
+                    const diff = await this.getContentDiff(this._document.uri, fileName, link.sha);
                     if (diff) {
-                        firstLine = document.lineAt(mapOldPositionToNew(diff, link.line));
-                        lastLine = document.lineAt(mapOldPositionToNew(diff, link.endLine) - 1);
+                        firstLine = this._document.lineAt(mapOldPositionToNew(diff, link.line));
+                        lastLine = this._document.lineAt(mapOldPositionToNew(diff, link.endLine) - 1);
                     } else {
-                        firstLine = document.lineAt(link.line);
-                        lastLine = document.lineAt(link.endLine - 1);
+                        firstLine = this._document.lineAt(link.line);
+                        lastLine = this._document.lineAt(link.endLine - 1);
                     }
                 }
             }
-            if (lastLine.lineNumber > document.lineCount - 1) {
-                lastLine = document.lineAt(document.lineCount - 1);
+            if (lastLine.lineNumber > this._document.lineCount - 1) {
+                lastLine = this._document.lineAt(this._document.lineCount - 1);
             }
             if (firstLine.lineNumber < 0) {
-                firstLine = document.lineAt(0);
+                firstLine = this._document.lineAt(0);
             }
             const range = new Range(firstLine.range.start, lastLine.range.end);
             const title = this.formatTitle(link);

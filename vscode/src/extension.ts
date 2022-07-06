@@ -130,6 +130,11 @@ const deferredActivate = async (context: vscode.ExtensionContext, globalState: G
 };
 
 const init = async (context: vscode.ExtensionContext, git: GitApiImpl, globalState: GlobalState, repositories: Repository[]) => {
+	context.subscriptions.push(git.onDidChangeState(async (e) => {
+		if (e === 'initialized') {
+			await codeLensProvider.getCodeLenses();
+		}
+	}));
 	// Sort the repositories to match folders in a multiroot workspace (if possible).
 	const workspaceFolders = vscode.workspace.workspaceFolders;
 	if (workspaceFolders) {
