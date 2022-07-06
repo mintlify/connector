@@ -3,7 +3,8 @@ import vscode, {
 	WebviewViewProvider,
 	WebviewView,
 	Uri,
-	Webview } from "vscode";
+	Webview
+} from "vscode";
 import { Code } from "../utils/git";
 import { API_ENDPOINT } from '../utils/api';
 import { openLogin } from './authentication';
@@ -25,7 +26,7 @@ export type Link = {
 };
 
 export class ViewProvider implements WebviewViewProvider {
-    public static readonly viewType = 'primary';
+    public static readonly viewType = 'create';
     private _view?: WebviewView;
 		private globalState: GlobalState;
 
@@ -51,6 +52,10 @@ export class ViewProvider implements WebviewViewProvider {
 	public prefillDoc(doc: Doc): void {
 		this.show();
 		this._view?.webview.postMessage({ command: 'prefill-doc', args: doc });
+	}
+
+	public displaySignin(): void {
+		this._view?.webview.postMessage({ command: 'display-signin' });
 	}
 
 	public logout(): void {

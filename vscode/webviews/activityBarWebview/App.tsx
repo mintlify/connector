@@ -3,7 +3,7 @@ import { DocumentTextIcon, XIcon } from '@heroicons/react/solid';
 import { FolderIcon } from '@heroicons/react/outline';
 import { vscode } from '../common/message';
 import { CodeSymbolIcon, CodeFileIcon } from '../common/svgs';
-import { formatSignInUrl } from './Signup';
+import Signup, { formatSignInUrl } from './Signup';
 
 export type Doc = {
   _id: string;
@@ -50,6 +50,7 @@ const App = () => {
   const [dashboardUrl, setDashboardUrl] = useState<string>(initialState?.dashboardUrl);
   const [API_ENDPOINT, setAPI_ENDPOINT] = useState<string>(initialState?.API_ENDPOINT);
   const [signInUrl, setSignInUrl] = useState<string>();
+  const [isDisplayingSignin, setIsDisplayingSignin] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<Doc | undefined>(initialState?.selectedDoc);
   const [code, setCode] = useState<Code | undefined>(initialState?.code);
   const [query, setQuery] = useState<string>(initialState?.query || '');
@@ -73,6 +74,9 @@ const App = () => {
           vscode.setState({ ...initialState, user, dashboardUrl: newDashboardUrl });
           setUser(user);
           setDashboardUrl(newDashboardUrl);
+          break;
+        case 'display-signin':
+          setIsDisplayingSignin(true);
           break;
         case 'prefill-doc':
           const doc = message?.args;
@@ -164,6 +168,10 @@ const App = () => {
     setUser(undefined);
     vscode.setState({ ...initialState, user: undefined });
   };
+
+  if (isDisplayingSignin) {
+    return <Signup signInUrl={signInUrl} setSignInUrl={setSignInUrl} />;
+  }
 
   const hasDocSelected = !selectedDoc?.isDefault;
 

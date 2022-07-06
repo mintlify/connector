@@ -19,7 +19,7 @@ export const formatSignInUrl = (signInUrl: string) => {
 };
 
 type SignupProps = {
-  signInUrl: string,
+  signInUrl?: string,
   setSignInUrl: (string) => void
 };
 
