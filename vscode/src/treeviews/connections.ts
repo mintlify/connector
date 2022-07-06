@@ -24,7 +24,7 @@ export class ConnectionsTreeProvider implements vscode.TreeDataProvider<Connecti
   async getChildren(): Promise<any[]> {
     const userId = this.state.getUserId();
     if (!userId) {
-      return [];
+      return [new EmptyListOption()];
     }
 
     const editor = vscode.window.activeTextEditor;
@@ -35,20 +35,24 @@ export class ConnectionsTreeProvider implements vscode.TreeDataProvider<Connecti
       [gitOrg, file, repo] = [activeGitOrg, activeFile, activeRepo];
     }
 
-    const { data: { codes }  } = await axios.get(`${API_ENDPOINT}/links`, {
-      params: {
-        ...this.state.getAuthParams(),
-        gitOrg,
-        file,
-        repo
+    try {
+      const { data: { codes }  } = await axios.get(`${API_ENDPOINT}/links`, {
+        params: {
+          ...this.state.getAuthParams(),
+          gitOrg,
+          file,
+          repo
+        }
+      });
+
+      if (codes.length === 0) {
+        return [new EmptyListOption()];
       }
-    });
 
-    if (codes.length === 0) {
-      return [new EmptyListIcon()];
+      return [...codes.map((code) => new Connection(code))];
+    } catch {
+      return [new ErrorOption()];
     }
-
-    return [...codes.map((code) => new Connection(code))];
   }
 
   refresh(): void {
@@ -78,9 +82,16 @@ class Connection extends vscode.TreeItem {
   }
 }
 
-class EmptyListIcon extends vscode.TreeItem {
+class EmptyListOption extends vscode.TreeItem {
   constructor() {
-    super('No connections for this file', vscode.TreeItemCollapsibleState.None);
-    this.tooltip = 'No connections for this file';
+    super('', vscode.TreeItemCollapsibleState.None);
+    this.description = 'No connections for this file';
+  }
+}
+
+class ErrorOption extends vscode.TreeItem {
+  constructor() {
+    super('', vscode.TreeItemCollapsibleState.None);
+    this.description = 'Error loading connections for this file';
   }
 }

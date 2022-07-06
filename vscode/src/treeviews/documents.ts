@@ -27,10 +27,10 @@ export class DocumentsTreeProvider implements vscode.TreeDataProvider<GroupOptio
     return element;
   }
 
-  async getChildren(groupElement: GroupOption): Promise<GroupOption[]> {
+  async getChildren(groupElement: GroupOption): Promise<any[]> {
     const userId = this.state.getUserId();
     if (!userId) {
-      return [];
+      return [new NoDocsOption()];
     }
 
     if (groupElement) {
@@ -40,20 +40,24 @@ export class DocumentsTreeProvider implements vscode.TreeDataProvider<GroupOptio
       return docs.map((doc) => new DocOption(doc, vscode.TreeItemCollapsibleState.None));
     }
 
-    const { data: { groups }  } = await axios.get(`${API_ENDPOINT}/docs/groups`, {
-      params: this.state.getAuthParams()
-    });
-
-    // Add docs to home level when just 1 group
-    if (groups.length === 1) {
-      const group = groups[0];
-      const { data: { docs }  } = await axios.get(`${API_ENDPOINT}/docs/method/${group._id}`, {
+    try {
+      const { data: { groups }  } = await axios.get(`${API_ENDPOINT}/docs/groups`, {
         params: this.state.getAuthParams()
       });
-      return docs.map((doc) => new DocOption(doc, vscode.TreeItemCollapsibleState.None));
-    }
 
-    return [...groups.map((group) => new GroupOption(group, vscode.TreeItemCollapsibleState.Collapsed))];
+      // Add docs to home level when just 1 group
+      if (groups.length === 1) {
+        const group = groups[0];
+        const { data: { docs }  } = await axios.get(`${API_ENDPOINT}/docs/method/${group._id}`, {
+          params: this.state.getAuthParams()
+        });
+        return docs.map((doc) => new DocOption(doc, vscode.TreeItemCollapsibleState.None));
+      }
+
+      return [...groups.map((group) => new GroupOption(group, vscode.TreeItemCollapsibleState.Collapsed))];
+    } catch {
+      return [new ErrorOption()];
+    }
   }
 
   refresh(): void {
@@ -93,6 +97,20 @@ class DocOption extends vscode.TreeItem {
     };
 
     this.command = onClickCommand;
+  }
+}
+
+class NoDocsOption extends vscode.TreeItem {
+  constructor() {
+    super('', vscode.TreeItemCollapsibleState.None);
+    this.description = 'No documents connected';
+  }
+}
+
+class ErrorOption extends vscode.TreeItem {
+  constructor() {
+    super('', vscode.TreeItemCollapsibleState.None);
+    this.description = 'Error loading documents';
   }
 }
 
