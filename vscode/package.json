@@ -3,7 +3,7 @@
   "publisher": "mintlify",
   "displayName": "Document Connector",
   "description": "Create connections between documentation and code",
-  "version": "0.4.2",
+  "version": "0.4.4",
   "icon": "assets/logo.png",
   "repository": {
     "url": "https://github.com/mintlify/connect"
