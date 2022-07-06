@@ -23,6 +23,7 @@ const createTreeViews = (state: GlobalState): void => {
 	vscode.commands.registerCommand('mintlify.delete-connection', async (connection: { code: Code }) => {
 		deleteLink(state, connection.code._id);
 		connectionsTreeProvider.refresh();
+		vscode.commands.executeCommand('mintlify.refresh-links');
 	});
 
 
