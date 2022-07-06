@@ -1,7 +1,7 @@
 import  { CodeLensProvider, TextDocument, CancellationToken, CodeLens, Range, Command, Uri } from 'vscode';
 import * as vscode from 'vscode';
 import GlobalState from '../utils/globalState';
-import { getFilePath } from '../utils/git/git';
+import { getFilePath } from '../utils/git';
 import { Link } from '../utils/links';
 import { Repository } from '../utils/git/types';
 import { GitApiImpl } from '../utils/git/gitApiImpl';

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 import { ViewProvider } from './viewProvider';
-import { getGitData, getRepoInfo } from '../utils/git/git';
+import { getGitData, getRepoInfo } from '../utils/git';
 import { getHighlightedText } from '../utils';
 import GlobalState from '../utils/globalState';
 import { getLinks } from '../utils/links';

@@ -4,7 +4,7 @@ import vscode, {
 	WebviewView,
 	Uri,
 	Webview } from "vscode";
-import { Code } from "../utils/git/git";
+import { Code } from "../utils/git";
 import { API_ENDPOINT } from '../utils/api';
 import { openLogin } from './authentication';
 import GlobalState from '../utils/globalState';

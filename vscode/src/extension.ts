@@ -10,7 +10,7 @@ import { Repository } from './utils/git/types';
 import { DocumentsTreeProvider } from './treeviews/documents';
 import { CodeReturned, ConnectionsTreeProvider } from './treeviews/connections';
 import { deleteLink } from './utils/links';
-import { Code } from './utils/git/git';
+import { Code } from './utils/git';
 
 const createTreeViews = (state: GlobalState): void => {
 	const documentsTreeProvider = new DocumentsTreeProvider(state);
