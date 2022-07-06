@@ -153,9 +153,6 @@ export const getGitData = async (fileFsPath: string, viewProvider: ViewProvider,
                     code.url = provider.webUrl(sha, subdir);
                 }
             }
-            if (command !== 'code') {
-                await viewProvider.show();
-            }
             return viewProvider.postCode(code);
         });
     });

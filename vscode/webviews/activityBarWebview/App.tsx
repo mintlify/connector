@@ -97,6 +97,10 @@ const App = () => {
           break;
       }
     });
+
+    // Load code on everytime it opens
+    vscode.postMessage({ command: 'refresh-code' });
+
   }, [signInUrl, user, dashboardUrl, API_ENDPOINT]);
 
   const checkIsURL = (str: string) => {
