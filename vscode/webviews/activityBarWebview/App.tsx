@@ -1,6 +1,7 @@
 import prependHttp from 'prepend-http';
 import React, { useEffect, useState } from 'react';
 import { DocumentTextIcon, LockClosedIcon, XIcon } from '@heroicons/react/solid';
+import { FolderIcon } from '@heroicons/react/outline';
 import { vscode } from '../common/message';
 import { CodeSymbolIcon, CodeFileIcon } from '../common/svgs';
 
@@ -155,7 +156,7 @@ const App = () => {
         <div className='flex flex-row truncate'>
           <div className='mr-1 flex flex-col justify-center'>
             {
-              lineRange ? <CodeSymbolIcon /> : <CodeFileIcon />
+              lineRange ? <CodeSymbolIcon /> : code.type === 'folder' ? <FolderIcon className="h-4 w-4" /> : <CodeFileIcon />
             }
           </div>
           {title}
