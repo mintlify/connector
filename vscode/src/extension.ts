@@ -6,7 +6,7 @@ import FileCodeLensProvider from './components/codeLensProvider';
 import GlobalState from './utils/globalState';
 import { DocumentsTreeProvider } from './treeviews/documents';
 import { CodeReturned, ConnectionsTreeProvider } from './treeviews/connections';
-import { deleteLink } from './utils/links';
+import { deleteDoc, deleteLink } from './utils/links';
 import { Code } from './utils/git';
 
 const createTreeViews = (state: GlobalState): void => {
@@ -26,6 +26,11 @@ const createTreeViews = (state: GlobalState): void => {
 		vscode.commands.executeCommand('mintlify.refresh-links');
 	});
 
+	vscode.commands.registerCommand('mintlify.delete-document', async (docOption) => {
+		deleteDoc(state, docOption.doc._id);
+		documentsTreeProvider.refresh();
+		vscode.commands.executeCommand('mintlify.refresh-links');
+	});
 
 	vscode.window.onDidChangeActiveTextEditor((editor) => {
 		if (editor == null) {

@@ -3,7 +3,7 @@
   "publisher": "mintlify",
   "displayName": "Document Connector",
   "description": "Create connections between documentation and code",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "icon": "assets/logo.png",
   "repository": {
     "url": "https://github.com/mintlify/connect"
@@ -51,6 +51,14 @@
         "title": "Highlight connection"
       },
       {
+        "command": "mintlify.delete-document",
+        "title": "Delete Document",
+        "icon": {
+          "light": "assets/icons/delete.svg",
+          "dark": "assets/icons/delete-dark.svg"
+        }
+      },
+      {
         "command": "mintlify.delete-connection",
         "title": "Delete Connection",
         "icon": {
@@ -81,6 +89,11 @@
         }
       ],
       "view/item/context": [
+        {
+          "command": "mintlify.delete-document",
+          "when": "view == documents && viewItem == document",
+          "group": "inline"
+        },
         {
           "command": "mintlify.delete-connection",
           "when": "view == connections && viewItem == connection",

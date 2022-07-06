@@ -78,5 +78,16 @@ export const deleteLink = async (globalState: GlobalState, linkId?: string): Pro
             subdomain,
         }
     });
+};
 
+export const deleteDoc = async (globalState: GlobalState, docId: string): Promise<void> => {
+    const subdomain = globalState.getSubdomain();
+    const userId = globalState.getUserId();
+    if (subdomain == null || userId == null) {return;}
+    await axios.delete(`${API_ENDPOINT}/docs/${docId}`, {
+        params: {
+            userId,
+            subdomain,
+        }
+    });
 };
