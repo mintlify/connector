@@ -76,7 +76,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<GitApi
 		}
 	});
 	createTreeViews(globalState);
-	vscode.commands.executeCommand('mintlify.refresh-links', context);
 
 	const apiImpl = new GitApiImpl();
 	await deferredActivate(context, globalState, apiImpl);
@@ -98,7 +97,6 @@ const deferredActivate = async (context: vscode.ExtensionContext, globalState: G
 	const repositories = apiImpl.repositories;
 
 	await init(context, apiImpl, globalState, repositories);
-
 };
 
 const init = async (context: vscode.ExtensionContext, git: GitApiImpl, globalState: GlobalState, repositories: Repository[]) => {
@@ -129,4 +127,6 @@ const init = async (context: vscode.ExtensionContext, git: GitApiImpl, globalSta
 	const allLanguages = await vscode.languages.getLanguages();
 
 	context.subscriptions.push(vscode.languages.registerCodeLensProvider(allLanguages, codeLensProvider));
+
+	vscode.commands.executeCommand('mintlify.refresh-links', context);
 };

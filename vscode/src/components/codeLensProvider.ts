@@ -42,6 +42,12 @@ export default class FileCodeLensProvider implements CodeLensProvider {
                     }
                 }
             }
+            if (lastLine.lineNumber > document.lineCount - 1) {
+                lastLine = document.lineAt(document.lineCount - 1);
+            }
+            if (firstLine.lineNumber < 0) {
+                firstLine = document.lineAt(0);
+            }
             const range = new Range(firstLine.range.start, lastLine.range.end);
             const title = this.formatTitle(link);
             const command: Command = {
