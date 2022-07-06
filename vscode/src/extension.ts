@@ -21,12 +21,20 @@ const createTreeViews = (state: GlobalState): void => {
 	});
 
 	vscode.commands.registerCommand('mintlify.delete-connection', async (connection: { code: Code }) => {
+		const response = await vscode.window.showInformationMessage(`Are you sure you would like to delete the connection? This cannot be undone`, 'Delete', 'Cancel');
+		if (response !== 'Delete') {
+			return;
+		}
 		deleteLink(state, connection.code._id);
 		connectionsTreeProvider.refresh();
 		vscode.commands.executeCommand('mintlify.refresh-links');
 	});
 
 	vscode.commands.registerCommand('mintlify.delete-document', async (docOption) => {
+		const response = await vscode.window.showInformationMessage(`Are you sure you would like to delete ${docOption.doc.title}? This cannot be undone`, 'Delete', 'Cancel');
+		if (response !== 'Delete') {
+			return;
+		}
 		deleteDoc(state, docOption.doc._id);
 		documentsTreeProvider.refresh();
 		vscode.commands.executeCommand('mintlify.refresh-links');

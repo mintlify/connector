@@ -59,6 +59,14 @@
         }
       },
       {
+        "command": "mintlify.rename-document",
+        "title": "Rename Document",
+        "icon": {
+          "light": "assets/icons/edit.svg",
+          "dark": "assets/icons/edit-dark.svg"
+        }
+      },
+      {
         "command": "mintlify.delete-connection",
         "title": "Delete Connection",
         "icon": {
@@ -89,6 +97,11 @@
         }
       ],
       "view/item/context": [
+        {
+          "command": "mintlify.rename-document",
+          "when": "view == documents && viewItem == document",
+          "group": "inline"
+        },
         {
           "command": "mintlify.delete-document",
           "when": "view == documents && viewItem == document",
