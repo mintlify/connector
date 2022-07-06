@@ -107,6 +107,12 @@ export class ViewProvider implements WebviewViewProvider {
 							}));
 							break;
 						}
+					case 'refresh-code':
+						{
+							const editor = vscode.window.activeTextEditor;
+							vscode.commands.executeCommand('mintlify.link-code', { editor, scheme: 'file' });
+							break;
+						}
 					case 'error':
 						{
 							const errMessage = message?.message;

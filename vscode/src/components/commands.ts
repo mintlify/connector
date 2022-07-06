@@ -8,8 +8,7 @@ import { getLinks } from '../utils/links';
 
 export const linkCodeCommand = (provider: ViewProvider) => {
     return vscode.commands.registerCommand('mintlify.link-code', async (args) => {
-        const window = vscode.window;
-        const editor = args.editor || window.activeTextEditor;
+        const editor = args.editor || vscode.window.activeTextEditor;
 
         const { scheme } = args;
         if (scheme !== 'file') {

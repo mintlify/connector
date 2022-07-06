@@ -95,6 +95,7 @@ class DocOption extends vscode.TreeItem {
       light: path.join(__filename, '..', '..', 'assets', 'icons', 'document.svg'),
       dark: path.join(__filename, '..', '..', 'assets', 'icons', 'document-dark.svg'),
     };
+    this.contextValue = 'document';
 
     const onClickCommand: vscode.Command = {
       title: 'Prefill Doc',

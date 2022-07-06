@@ -1,6 +1,7 @@
 import prependHttp from 'prepend-http';
 import React, { useEffect, useState } from 'react';
 import { DocumentTextIcon, LockClosedIcon, XIcon } from '@heroicons/react/solid';
+import { FolderIcon } from '@heroicons/react/outline';
 import { vscode } from '../common/message';
 import { CodeSymbolIcon, CodeFileIcon } from '../common/svgs';
 
@@ -85,6 +86,7 @@ const App = () => {
           break;
         case 'prefill-doc':
           const doc = message?.args;
+          vscode.setState({ ...initialState, selectedDoc: doc });
           setSelectedDoc(doc);
           break;
         case 'post-code':
@@ -97,6 +99,10 @@ const App = () => {
           break;
       }
     });
+
+    // Load code on everytime it opens
+    vscode.postMessage({ command: 'refresh-code' });
+
   }, [signInUrl, user, dashboardUrl, API_ENDPOINT]);
 
   const checkIsURL = (str: string) => {
@@ -150,7 +156,7 @@ const App = () => {
         <div className='flex flex-row truncate'>
           <div className='mr-1 flex flex-col justify-center'>
             {
-              lineRange ? <CodeSymbolIcon /> : <CodeFileIcon />
+              lineRange ? <CodeSymbolIcon /> : code.type === 'folder' ? <FolderIcon className="h-4 w-4" /> : <CodeFileIcon />
             }
           </div>
           {title}

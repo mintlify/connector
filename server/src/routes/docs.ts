@@ -10,6 +10,7 @@ import { getNotionPageDataWithId } from '../services/notion';
 import { getConfluenceContentFromPageById } from './integrations/confluence';
 import { getGoogleDocsPrivateData } from '../services/googleDocs';
 import * as cheerio from 'cheerio';
+import Code from '../models/Code';
 
 const docsRouter = express.Router();
 
@@ -317,9 +318,10 @@ docsRouter.delete('/:docId', userMiddleware, async (req, res) => {
   try {
     const deleteDocPromise = Doc.findOneAndDelete({ _id: docId, org: org._id });
     const deleteEventsPromise = Event.deleteMany({ doc: docId });
+    const deleteCodesPromise = Code.deleteMany({ doc: docId });
     const deleteDocForSearchPromise = deleteDocForSearch(docId);
 
-    await Promise.all([deleteDocPromise, deleteEventsPromise, deleteDocForSearchPromise]);
+    await Promise.all([deleteDocPromise, deleteEventsPromise, deleteCodesPromise, deleteDocForSearchPromise]);
     res.end();
   } catch (error) {
     res.status(500).send({ error });
@@ -333,6 +335,18 @@ docsRouter.put('/:docId/slack', async (req, res) => {
     const doc = await Doc.findById(docId);
     if (doc == null) return res.status(400).json({ error: 'Invalid doc ID' });
     await Doc.findByIdAndUpdate(docId, { slack });
+    return res.end();
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
+});
+
+docsRouter.put('/:docId/title', userMiddleware, async (req, res) => {
+  try {
+    const { docId } = req.params;
+    const { title } = req.body;
+    const doc = await Doc.findByIdAndUpdate(docId, { title });
+    if (doc == null) return res.status(400).json({ error: 'Invalid doc ID' });
     return res.end();
   } catch (error) {
     return res.status(500).send({ error });
