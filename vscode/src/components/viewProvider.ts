@@ -40,7 +40,7 @@ export class ViewProvider implements WebviewViewProvider {
 		this.globalState.setUserId(user.userId);
 		this._view?.webview.postMessage({ command: 'auth', args: user });
 		vscode.commands.executeCommand('mintlify.refresh-links');
-		vscode.commands.executeCommand('mintlify.refresh-docs');
+		vscode.commands.executeCommand('mintlify.refresh-views');
 	}
 
 	public prefillDocWithDocId = (docId: string) => {
@@ -56,7 +56,7 @@ export class ViewProvider implements WebviewViewProvider {
 	public logout(): void {
 		this._view?.webview.postMessage({ command: 'logout' });
 		this.globalState.clearState();
-		vscode.commands.executeCommand('mintlify.refresh-docs');
+		vscode.commands.executeCommand('mintlify.refresh-views');
 	}
 
     public resolveWebviewView(webviewView: WebviewView): void | Thenable<void> {
@@ -96,6 +96,7 @@ export class ViewProvider implements WebviewViewProvider {
 										}
 									});
 									this.prefillDoc(response.data.doc);
+									vscode.commands.executeCommand('mintlify.refresh-views');
 									vscode.window.showInformationMessage(`Successfully connected code with ${response.data.doc.title}`);
 								} catch (err) {
 									const errMessage = err?.response?.data?.error ?? `Error connecting code. Please log back in, re-install the extension, or report bug to hi@mintlify.com`;

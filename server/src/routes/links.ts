@@ -12,9 +12,16 @@ linksRouter.get('/', userMiddleware, async (req, res) => {
   const { org } = res.locals.user;
   let matchQuery: any = { org: org._id };
 
-  if (req.query?.repo && req.query?.gitOrg) {
+  if (req.query?.repo) {
     matchQuery.repo = req.query.repo;
+  }
+
+  if (req.query?.gitOrg) {
     matchQuery.gitOrg = req.query.gitOrg;
+  }
+
+  if (req.query?.file) {
+    matchQuery.file = req.query.file;
   }
   
   try {
