@@ -29,7 +29,7 @@ type Doc = {
     }
     slack?: boolean;
     email?: boolean;
-}
+};
 
 export type Link = {
     _id: string;
@@ -62,5 +62,21 @@ export const getLinks = async (globalState: GlobalState): Promise<Link[]> => {
         console.log(err);
         return [];
     }
+
+};
+
+export const deleteLink = async (globalState: GlobalState, linkId?: string): Promise<void> => {
+    if (!linkId) {
+        return;
+    }
+    const subdomain = globalState.getSubdomain();
+    const userId = globalState.getUserId();
+    if (subdomain == null || userId == null) {return;} // TODO - proper error handling
+    await axios.delete(`${API_ENDPOINT}/links/${linkId}`, {
+        params: {
+            userId,
+            subdomain,
+        }
+    });
 
 };

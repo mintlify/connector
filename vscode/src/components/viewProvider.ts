@@ -96,6 +96,7 @@ export class ViewProvider implements WebviewViewProvider {
 										}
 									});
 									this.prefillDoc(response.data.doc);
+									vscode.commands.executeCommand('mintlify.refresh-views');
 									vscode.window.showInformationMessage(`Successfully connected code with ${response.data.doc.title}`);
 								} catch (err) {
 									const errMessage = err?.response?.data?.error ?? `Error connecting code. Please log back in, re-install the extension, or report bug to hi@mintlify.com`;

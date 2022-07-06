@@ -8,16 +8,16 @@ import { Doc } from '../components/viewProvider';
 
 export type CodeReturned = Code & { doc: Doc };
 
-export class ConnectionsTreeProvider implements vscode.TreeDataProvider<ConnectionIcon> {
+export class ConnectionsTreeProvider implements vscode.TreeDataProvider<Connection> {
   private state: GlobalState;
-  private _onDidChangeTreeData: vscode.EventEmitter<ConnectionIcon | undefined | null | void> = new vscode.EventEmitter<ConnectionIcon | undefined | null | void>();
-  readonly onDidChangeTreeData: vscode.Event<ConnectionIcon | undefined | null | void> = this._onDidChangeTreeData.event;
+  private _onDidChangeTreeData: vscode.EventEmitter<Connection | undefined | null | void> = new vscode.EventEmitter<Connection | undefined | null | void>();
+  readonly onDidChangeTreeData: vscode.Event<Connection | undefined | null | void> = this._onDidChangeTreeData.event;
 
   constructor(state: GlobalState) {
     this.state = state;
   }
 
-  getTreeItem(element: ConnectionIcon): vscode.TreeItem {
+  getTreeItem(element: Connection): vscode.TreeItem {
     return element;
   }
 
@@ -51,7 +51,7 @@ export class ConnectionsTreeProvider implements vscode.TreeDataProvider<Connecti
       return [new EmptyListIcon()];
     }
 
-    return [...codes.map((code) => new ConnectionIcon(code))];
+    return [...codes.map((code) => new Connection(code))];
   }
 
   refresh(): void {
@@ -59,7 +59,7 @@ export class ConnectionsTreeProvider implements vscode.TreeDataProvider<Connecti
   }
 }
 
-class ConnectionIcon extends vscode.TreeItem {
+class Connection extends vscode.TreeItem {
   constructor(
     public readonly code: CodeReturned,
   ) {
@@ -69,6 +69,7 @@ class ConnectionIcon extends vscode.TreeItem {
       light: path.join(__filename, '..', '..', 'assets', 'icons', 'connect.svg'),
       dark: path.join(__filename, '..', '..', 'assets', 'icons', 'connect-dark.svg'),
     };
+    this.contextValue = 'connection';
 
     const onClickCommand: vscode.Command = {
       title: 'Highlight connection',

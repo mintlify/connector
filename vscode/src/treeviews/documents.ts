@@ -119,28 +119,28 @@ const getIconPathForGroup = (id: string): string | { light: string, dark: string
   switch (id) {
     case 'github':
       return {
-        light: path.join(__filename, '..', '..', 'assets', 'icons', 'github.svg'),
-        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'github-dark.svg')
+        light: path.join(__filename, '..', '..', 'assets', 'icons', 'logos', 'github.svg'),
+        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'logos', 'github-dark.svg')
       };
     case 'notion-private':
       return {
-        light: path.join(__filename, '..', '..', 'assets', 'icons', 'notion.svg'),
-        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'notion-dark.svg'),
+        light: path.join(__filename, '..', '..', 'assets', 'icons', 'logos', 'notion.svg'),
+        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'logos', 'notion-dark.svg'),
       };
     case 'googledocs-private':
       return {
-        light: path.join(__filename, '..', '..', 'assets', 'icons', 'google-docs.svg'),
-        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'google-docs.svg'),
+        light: path.join(__filename, '..', '..', 'assets', 'icons', 'logos', 'google-docs.svg'),
+        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'logos', 'google-docs.svg'),
       };
     case 'confluence-private':
       return {
-        light: path.join(__filename, '..', '..', 'assets', 'icons', 'confluence.svg'),
-        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'confluence.svg'),
+        light: path.join(__filename, '..', '..', 'assets', 'icons', 'logos', 'confluence.svg'),
+        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'logos', 'confluence.svg'),
       };
     case 'web':
       return {
-        light: path.join(__filename, '..', '..', 'assets', 'icons', 'web.svg'),
-        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'web-dark.svg'),
+        light: path.join(__filename, '..', '..', 'assets', 'icons', 'logos', 'web.svg'),
+        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'logos', 'web-dark.svg'),
       };
     default:
       return '';

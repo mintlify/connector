@@ -64,6 +64,7 @@ const locateGitConfig = (repoDir: string): Promise<string> => {
 };
 
 export type Code = {
+    _id?: string;
     url: string;
     sha: string;
     provider: string;
