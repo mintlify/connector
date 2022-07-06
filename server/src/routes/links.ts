@@ -42,6 +42,9 @@ linksRouter.get('/', userMiddleware, async (req, res) => {
           doc: { $first: "$doc" },
         },
       },
+      {
+        $match: { doc: { $exists: true } }
+      },
     ]);
     res.send({codes});
   }
