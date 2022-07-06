@@ -85,6 +85,7 @@ const App = () => {
           break;
         case 'prefill-doc':
           const doc = message?.args;
+          vscode.setState({ ...initialState, doc });
           setSelectedDoc(doc);
           break;
         case 'post-code':
