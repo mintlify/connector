@@ -6,7 +6,7 @@ import FileCodeLensProvider from './components/codeLensProvider';
 import GlobalState from './utils/globalState';
 import { DocumentsTreeProvider } from './treeviews/documents';
 import { CodeReturned, ConnectionsTreeProvider } from './treeviews/connections';
-import { deleteDoc, deleteLink } from './utils/links';
+import { deleteDoc, deleteLink, editDocName } from './utils/links';
 import { Code } from './utils/git';
 
 const createTreeViews = (state: GlobalState): void => {
@@ -30,13 +30,30 @@ const createTreeViews = (state: GlobalState): void => {
 		vscode.commands.executeCommand('mintlify.refresh-links');
 	});
 
+	vscode.commands.registerCommand('mintlify.rename-document', async (docOption) => {
+		const newName = await vscode.window.showInputBox({
+			title: 'Edit name of document',
+			value: docOption.doc.title,
+			placeHolder: docOption.doc.title,
+		});
+
+		if (!newName) {
+			return vscode.window.showErrorMessage('New name cannot be empty');
+		}
+
+		await editDocName(state, docOption.doc._id, newName);
+		vscode.window.showInformationMessage(`Document has been renamed to ${newName}`);
+		vscode.commands.executeCommand('mintlify.refresh-views');
+		vscode.commands.executeCommand('mintlify.refresh-links');
+	});
+
 	vscode.commands.registerCommand('mintlify.delete-document', async (docOption) => {
 		const response = await vscode.window.showInformationMessage(`Are you sure you would like to delete ${docOption.doc.title}? This cannot be undone`, 'Delete', 'Cancel');
 		if (response !== 'Delete') {
 			return;
 		}
-		deleteDoc(state, docOption.doc._id);
-		documentsTreeProvider.refresh();
+		await deleteDoc(state, docOption.doc._id);
+		vscode.commands.executeCommand('mintlify.refresh-views');
 		vscode.commands.executeCommand('mintlify.refresh-links');
 	});
 

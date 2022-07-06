@@ -91,3 +91,15 @@ export const deleteDoc = async (globalState: GlobalState, docId: string): Promis
         }
     });
 };
+
+export const editDocName = async (globalState: GlobalState, docId: string, newName: string): Promise<void> => {
+    const subdomain = globalState.getSubdomain();
+    const userId = globalState.getUserId();
+    if (subdomain == null || userId == null) {return;}
+    await axios.put(`${API_ENDPOINT}/docs/${docId}/title`, { title: newName }, {
+        params: {
+            userId,
+            subdomain,
+        },
+    });
+};
