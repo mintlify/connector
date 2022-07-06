@@ -4,13 +4,15 @@ import GlobalState from '../utils/globalState';
 import { getFilePath } from '../utils/git/git';
 import { Link } from '../utils/links';
 import { Repository } from '../utils/git/types';
+import { GitApiImpl } from '../utils/git/gitApiImpl';
 import { mapOldPositionToNew } from '../utils/git/diffPositionMapping';
 
 export default class FileCodeLensProvider implements CodeLensProvider {
 
     constructor(
 		private globalState: GlobalState,
-        private _repository: Repository
+        private _repository: Repository,
+        private _git: GitApiImpl
 	) {
 	}
     async provideCodeLenses(document: TextDocument, token: CancellationToken): Promise<CodeLens[]> {
@@ -23,19 +25,21 @@ export default class FileCodeLensProvider implements CodeLensProvider {
             return link.file === fileName || fileName.includes(link.file) || link.file.includes(fileName);
         });
         const lensPromises: Promise<CodeLens | undefined>[] = relatedLinks.map(async (link) => {
-            const diff = await this.getContentDiff(document.uri, fileName, link.sha);
             let firstLine = document.lineAt(0);
             let lastLine = document.lineAt(document.lineCount - 1);
             if (link.type === 'lines' && link?.line && link?.endLine) {
                 if (document.isDirty) {
                     return;
                 }
-                if (diff) {
-                    firstLine = document.lineAt(mapOldPositionToNew(diff, link.line));
-                    lastLine = document.lineAt(mapOldPositionToNew(diff, link.endLine) - 1);
-                } else {
-                    firstLine = document.lineAt(link.line);
-                    lastLine = document.lineAt(link.endLine - 1);
+                if (this._git.state  !== 'uninitialized') {
+                    const diff = await this.getContentDiff(document.uri, fileName, link.sha);
+                    if (diff) {
+                        firstLine = document.lineAt(mapOldPositionToNew(diff, link.line));
+                        lastLine = document.lineAt(mapOldPositionToNew(diff, link.endLine) - 1);
+                    } else {
+                        firstLine = document.lineAt(link.line);
+                        lastLine = document.lineAt(link.endLine - 1);
+                    }
                 }
             }
             const range = new Range(firstLine.range.start, lastLine.range.end);

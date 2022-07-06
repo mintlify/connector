@@ -65,11 +65,11 @@ const deferredActivate = async (context: vscode.ExtensionContext, globalState: G
 
 	const repositories = apiImpl.repositories;
 
-	await init(context, globalState, repositories);
+	await init(context, apiImpl, globalState, repositories);
 
 };
 
-const init = async (context: vscode.ExtensionContext, globalState: GlobalState, repositories: Repository[]) => {
+const init = async (context: vscode.ExtensionContext, git: GitApiImpl, globalState: GlobalState, repositories: Repository[]) => {
 	// Sort the repositories to match folders in a multiroot workspace (if possible).
 	const workspaceFolders = vscode.workspace.workspaceFolders;
 	if (workspaceFolders) {
@@ -93,7 +93,7 @@ const init = async (context: vscode.ExtensionContext, globalState: GlobalState, 
 	if (repositories.length === 0) {
 		return;
 	}
-	const codeLensProvider = new FileCodeLensProvider(globalState, repositories[0]);
+	const codeLensProvider = new FileCodeLensProvider(globalState, repositories[0], git);
 	const allLanguages = await vscode.languages.getLanguages();
 
 	context.subscriptions.push(vscode.languages.registerCodeLensProvider(allLanguages, codeLensProvider));
