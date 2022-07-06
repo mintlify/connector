@@ -1,9 +1,9 @@
-import prependHttp from 'prepend-http';
 import React, { useEffect, useState } from 'react';
-import { DocumentTextIcon, LockClosedIcon, XIcon } from '@heroicons/react/solid';
+import { DocumentTextIcon, XIcon } from '@heroicons/react/solid';
 import { FolderIcon } from '@heroicons/react/outline';
 import { vscode } from '../common/message';
 import { CodeSymbolIcon, CodeFileIcon } from '../common/svgs';
+import { formatSignInUrl } from './Signup';
 
 export type Doc = {
   _id: string;
@@ -37,16 +37,6 @@ type State = {
 
 const classNames = (...classes) => {
   return classes.filter(Boolean).join(' ');
-};
-
-const formatSignInUrl = (signInUrl: string) => {
-  let signInWithProtocol = prependHttp(signInUrl);
-  const lastCharacter = signInWithProtocol[signInWithProtocol.length - 1];
-  if (lastCharacter === '/') {
-    signInWithProtocol = signInWithProtocol.slice(0, -1);
-  }
-
-  return signInWithProtocol;
 };
 
 export const getSubdomain = (url: string) => {
@@ -165,15 +155,6 @@ const App = () => {
     );
   };
 
-  const onClickSignIn = () => {
-    if (!signInUrl) {
-      return;
-    }
-    let signInWithProtocol = formatSignInUrl(signInUrl);
-    const subdomain = getSubdomain(signInUrl);
-    vscode.postMessage({ command: 'login', args: {signInWithProtocol, subdomain} });
-  };
-
   const clearSelectedDoc = () => {
     setSelectedDoc(undefined);
     vscode.setState({ ...initialState, selectedDoc: undefined });
@@ -184,47 +165,12 @@ const App = () => {
     vscode.setState({ ...initialState, user: undefined });
   };
 
-  const onClickSignUp = () => {
-    vscode.postMessage({ command: 'sign-up' });
-  };
-
   const hasDocSelected = !selectedDoc?.isDefault;
 
   return (
     <div className="space-y-1">
       {
-        user == null && <>
-         <button
-          type="submit"
-          className={classNames("flex items-center justify-center submit mt-2 opacity-100 hover:cursor-pointer")}
-          onClick={onClickSignUp}
-        >
-          Create an account
-        </button>
-        <p className="text-center">
-          OR
-        </p>
-        <p className="mt-1 font-medium">Dashboard URL</p>
-        <input
-          className="text-sm"
-          type="text"
-          value={signInUrl}
-          onChange={(e) => setSignInUrl(e.target.value)}
-          placeholder="name.mintlify.com"
-        />
-        <button
-          type="submit"
-          className={classNames("flex items-center justify-center submit mt-2", !signInUrl ? 'opacity-50 hover:cursor-default' : 'opacity-100 hover:cursor-pointer')}
-          onClick={onClickSignIn}
-          disabled={!signInUrl}
-        >
-          <LockClosedIcon className="mr-1 h-4 w-4" aria-hidden="true" />
-          Sign in with Mintlify
-        </button>
-        </>
-      }
-      {
-        user != null && <>
+        <>
         <form onSubmit={handleSubmit}>
           <label htmlFor="url" className="block">
             Documentation<span className='text-red-500'>*</span>

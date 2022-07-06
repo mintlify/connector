@@ -65,10 +65,15 @@ export type OrgType = {
 
 const OrgSchema = new Schema({
   name: { type: String, required: true },
-  subdomain: { type: String, required: true, unique: true },
+  subdomain: { type: String, unique: true },
   createdAt: { type: Date, default: Date.now },
   users: { type: [String], default: [] },
   invitedEmails: { type: [String], default: [] },
+  // Used for orgless usage with Connector
+  anonymousId: {
+    type: String,
+    id: String,
+  },
   logo: String,
   favicon: String,
   integrations: {

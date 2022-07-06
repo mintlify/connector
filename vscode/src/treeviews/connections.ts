@@ -27,8 +27,6 @@ export class ConnectionsTreeProvider implements vscode.TreeDataProvider<Connecti
       return [];
     }
 
-    const subdomain = this.state.getSubdomain();
-
     const editor = vscode.window.activeTextEditor;
     let gitOrg, file, repo;
     if (editor) {
@@ -39,8 +37,7 @@ export class ConnectionsTreeProvider implements vscode.TreeDataProvider<Connecti
 
     const { data: { codes }  } = await axios.get(`${API_ENDPOINT}/links`, {
       params: {
-        userId,
-        subdomain,
+        ...this.state.getAuthParams(),
         gitOrg,
         file,
         repo

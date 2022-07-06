@@ -90,10 +90,7 @@ export class ViewProvider implements WebviewViewProvider {
 							}, () => new Promise(async (resolve) => {
 								try {
 									const response = await axios.put(`${API_ENDPOINT}/links`, { docId, code, url }, {
-										params: {
-											userId,
-											subdomain
-										}
+										params: this.globalState.getAuthParams()
 									});
 									this.prefillDoc(response.data.doc);
 									vscode.commands.executeCommand('mintlify.refresh-views');

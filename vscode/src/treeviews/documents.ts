@@ -33,33 +33,22 @@ export class DocumentsTreeProvider implements vscode.TreeDataProvider<GroupOptio
       return [];
     }
 
-    const subdomain = this.state.getSubdomain();
-
     if (groupElement) {
       const { data: { docs }  } = await axios.get(`${API_ENDPOINT}/docs/method/${groupElement.group._id}`, {
-        params: {
-          userId,
-          subdomain
-        }
+        params: this.state.getAuthParams()
       });
       return docs.map((doc) => new DocOption(doc, vscode.TreeItemCollapsibleState.None));
     }
 
     const { data: { groups }  } = await axios.get(`${API_ENDPOINT}/docs/groups`, {
-      params: {
-        userId,
-        subdomain
-      }
+      params: this.state.getAuthParams()
     });
 
     // Add docs to home level when just 1 group
     if (groups.length === 1) {
       const group = groups[0];
       const { data: { docs }  } = await axios.get(`${API_ENDPOINT}/docs/method/${group._id}`, {
-        params: {
-          userId,
-          subdomain
-        }
+        params: this.state.getAuthParams()
       });
       return docs.map((doc) => new DocOption(doc, vscode.TreeItemCollapsibleState.None));
     }
