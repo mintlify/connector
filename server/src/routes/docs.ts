@@ -396,6 +396,19 @@ docsRouter.get('/content/:id', userMiddleware, async (req, res) => {
     console.log(error);
     return res.status(500).send({error: 'Internal systems error'});
   }
+});
+
+docsRouter.get('/html', async (req, res) => {
+  const { url } = req.body;
+
+  try {
+    const { data: html } = await axios.get(url);
+    const htmlWithAbsoluteUrl = `<head><base href="${url}" target="_blank"></head>${html}`
+    return res.send(htmlWithAbsoluteUrl);
+  }
+  catch {
+    return res.status(400).send('Error');
+  }
 })
 
 export default docsRouter;
