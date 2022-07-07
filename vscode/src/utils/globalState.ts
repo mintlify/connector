@@ -7,9 +7,6 @@ export default class GlobalState {
     public clearState() {
       this.storage.update('userId', undefined);
       this.storage.update('subdomain', undefined);
-      this.storage.update('links', undefined);
-      this.storage.update('repo', undefined);
-      this.storage.update('gitOrg', undefined);
     }
 
     public getUserId(): string | undefined {
