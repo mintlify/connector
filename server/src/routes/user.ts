@@ -42,10 +42,7 @@ export const userMiddleware = async (
     if (subdomain) {
       orgQuery.subdomain = subdomain as string;
     }
-    const org = await Org.findOne(orgQuery);
-    if (org == null) {
-      return res.status(400).send({ error: "User does not have access to any organization" });
-    }
+    org = await Org.findOne(orgQuery);
   }
   else if (anonymousId) {
     user = await User.findOneAndUpdate({ 'anonymousId.id': anonymousId }, {
@@ -60,6 +57,10 @@ export const userMiddleware = async (
 
   if (user == null) {
     return res.status(400).send({ error: "Invalid userId or anonymousId" });
+  }
+
+  if (org == null) {
+    return res.status(400).send({ error: "User does not have access to any organization" });
   }
 
   // Add org to user
