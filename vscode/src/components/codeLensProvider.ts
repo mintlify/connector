@@ -1,4 +1,4 @@
-import  { CodeLensProvider, TextDocument, CancellationToken, CodeLens, Range, Command, Uri, Event, EventEmitter } from 'vscode';
+import { CodeLensProvider, TextDocument, CancellationToken, CodeLens, Range, Command, Uri, Event, EventEmitter } from 'vscode';
 import * as vscode from 'vscode';
 import GlobalState from '../utils/globalState';
 import { getFilePath } from '../utils/git';
@@ -8,23 +8,24 @@ import { GitApiImpl } from '../utils/git/gitApiImpl';
 import { mapOldPositionToNew } from '../utils/git/diffPositionMapping';
 
 export default class FileCodeLensProvider implements CodeLensProvider {
-
     private _document: TextDocument;
+    private _lenses: CodeLens[] = [];
 
     constructor(
-		private _globalState: GlobalState,
+        private _globalState: GlobalState,
         private _repository: Repository,
         private _git: GitApiImpl
-	) {
-	}
+    ) {
+    }
 
     async provideCodeLenses(document: TextDocument, token: CancellationToken): Promise<CodeLens[]> {
         this._document = document;
-        return await this.getCodeLenses();
+        await this.refreshCodeLenses();
+        return this._lenses;
     }
 
-    async getCodeLenses(): Promise<CodeLens[]> {
-        const links : Link[] | undefined = this._globalState.getLinks();
+    async refreshCodeLenses() {
+        const links: Link[] | undefined = this._globalState.getLinks();
         if (links == null || links?.length === 0) { return []; }
         const fileFsPath: string = this._document.uri.fsPath;
         const fileName = getFilePath(fileFsPath);
@@ -39,7 +40,7 @@ export default class FileCodeLensProvider implements CodeLensProvider {
                 if (this._document.isDirty) {
                     return;
                 }
-                if (this._git.state  !== 'uninitialized') {
+                if (this._git.state !== 'uninitialized') {
                     const diff = await this.getContentDiff(this._document.uri, fileName, link.sha);
                     if (diff) {
                         firstLine = this._document.lineAt(mapOldPositionToNew(diff, link.line));
@@ -69,7 +70,7 @@ export default class FileCodeLensProvider implements CodeLensProvider {
 
         const lenses = await Promise.all(lensPromises);
 
-        return lenses.filter((lens) => lens != null) as CodeLens[]; // TODO - proper error handling
+        this._lenses = lenses.filter((lens) => lens != null) as CodeLens[]; // TODO - proper error handling
     }
 
     private formatTitle(link: Link): string {
@@ -85,8 +86,8 @@ export default class FileCodeLensProvider implements CodeLensProvider {
 
     private async getContentDiff(uri: Uri, fileName: string, sha: string): Promise<string> {
         const matchedEditor = vscode.window.visibleTextEditors.find(
-			editor => editor.document.uri.toString() === uri.toString(),
-		);
+            editor => editor.document.uri.toString() === uri.toString(),
+        );
         if (matchedEditor && matchedEditor.document.isDirty) {
             const documentText = matchedEditor.document.getText();
             const idOfCurrentText = await this._repository.hashObject(documentText);

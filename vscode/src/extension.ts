@@ -96,7 +96,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<GitApi
 	vscode.commands.registerCommand('mintlify.highlight-connection', async (code: CodeReturned) => {
 		if (code.line != null && code.endLine != null) {
 			const rootPath = vscode.workspace.workspaceFolders![0].uri.path;
-			const filePathUri  = vscode.Uri.parse(`${rootPath}/${code.file}`);
+			const filePathUri = vscode.Uri.parse(`${rootPath}/${code.file}`);
 			const selectedRange = new vscode.Range(code.line, 0, code.endLine, 9999);
 			vscode.window.activeTextEditor?.revealRange(selectedRange);
 			await vscode.window.showTextDocument(filePathUri, {
@@ -160,7 +160,7 @@ const init = async (context: vscode.ExtensionContext, git: GitApiImpl, globalSta
 
 	context.subscriptions.push(git.onDidChangeState(async (e) => {
 		if (e === 'initialized') {
-			await codeLensProvider.getCodeLenses();
+			await codeLensProvider.refreshCodeLenses();
 		}
 	}));
 
