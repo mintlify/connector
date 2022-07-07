@@ -115,7 +115,7 @@ userRouter.get('/login', async (req, res) => {
   if (org == null) {
     return res.redirect('https://mintlify.com/create');
   }
-  
+
   const subdomain = org.subdomain;
   const host = ISDEV ? `http://${subdomain}` : `https://${subdomain}.mintlify.com`
   const redirectUrl = `${host}/api/auth/landing?sessionToken=${authUser.session_token}`;
@@ -214,7 +214,7 @@ userRouter.post("/:userId/join/:orgId", async (req: express.Request, res: expres
         email,
         firstName,
         lastName,
-      })]); 
+      })]);
 
     identify(userId, {
       email,

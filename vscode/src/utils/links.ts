@@ -69,27 +69,18 @@ export const deleteLink = async (globalState: GlobalState, linkId?: string): Pro
     if (!linkId) {
         return;
     }
-    const subdomain = globalState.getSubdomain();
-    const userId = globalState.getUserId();
-    if (subdomain == null || userId == null) {return;} // TODO - proper error handling
     await axios.delete(`${API_ENDPOINT}/links/${linkId}`, {
         params: globalState.getAuthParams()
     });
 };
 
 export const deleteDoc = async (globalState: GlobalState, docId: string): Promise<void> => {
-    const subdomain = globalState.getSubdomain();
-    const userId = globalState.getUserId();
-    if (subdomain == null || userId == null) {return;}
     await axios.delete(`${API_ENDPOINT}/docs/${docId}`, {
         params: globalState.getAuthParams()
     });
 };
 
 export const editDocName = async (globalState: GlobalState, docId: string, newName: string): Promise<void> => {
-    const subdomain = globalState.getSubdomain();
-    const userId = globalState.getUserId();
-    if (subdomain == null || userId == null) {return;}
     await axios.put(`${API_ENDPOINT}/docs/${docId}/title`, { title: newName }, {
         params: globalState.getAuthParams(),
     });
