@@ -22,11 +22,6 @@ export class ConnectionsTreeProvider implements vscode.TreeDataProvider<Connecti
   }
 
   async getChildren(): Promise<any[]> {
-    const userId = this.state.getUserId();
-    if (!userId) {
-      return [new EmptyListOption()];
-    }
-
     const editor = vscode.window.activeTextEditor;
     let gitOrg, file, repo;
     if (editor) {

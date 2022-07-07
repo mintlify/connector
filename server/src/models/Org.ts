@@ -69,11 +69,6 @@ const OrgSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
   users: { type: [String], default: [] },
   invitedEmails: { type: [String], default: [] },
-  // Used for orgless usage with Connector
-  anonymousId: {
-    type: String,
-    id: String,
-  },
   logo: String,
   favicon: String,
   integrations: {

@@ -28,11 +28,6 @@ export class DocumentsTreeProvider implements vscode.TreeDataProvider<GroupOptio
   }
 
   async getChildren(groupElement: GroupOption): Promise<any[]> {
-    const userId = this.state.getUserId();
-    if (!userId) {
-      return [new NoDocsOption()];
-    }
-
     if (groupElement) {
       const { data: { docs }  } = await axios.get(`${API_ENDPOINT}/docs/method/${groupElement.group._id}`, {
         params: this.state.getAuthParams()
@@ -45,12 +40,19 @@ export class DocumentsTreeProvider implements vscode.TreeDataProvider<GroupOptio
         params: this.state.getAuthParams()
       });
 
+      if (groups.length === 0) {
+        return [new NoDocsOption()];
+      }
+
       // Add docs to home level when just 1 group
       if (groups.length === 1) {
         const group = groups[0];
         const { data: { docs }  } = await axios.get(`${API_ENDPOINT}/docs/method/${group._id}`, {
           params: this.state.getAuthParams()
         });
+        if (docs.length === 0) {
+          return [new NoDocsOption()];
+        }
         return docs.map((doc) => new DocOption(doc, vscode.TreeItemCollapsibleState.None));
       }
 

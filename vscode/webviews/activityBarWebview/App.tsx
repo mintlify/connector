@@ -39,7 +39,10 @@ const classNames = (...classes) => {
   return classes.filter(Boolean).join(' ');
 };
 
-export const getSubdomain = (url: string) => {
+export const getSubdomain = (url?: string) => {
+  if (!url) {
+    return url;
+  }
   const host = url.replace(/^https?:\/\//, '');
   return host.split('.')[0];
 };
@@ -108,7 +111,7 @@ const App = () => {
     let args;
     if (selectedDoc) {
       args = {
-        userId: user.userId,
+        userId: user?.userId,
         subdomain: getSubdomain(dashboardUrl),
         docId: selectedDoc?._id,
         title: selectedDoc?.title,
@@ -122,7 +125,7 @@ const App = () => {
         return;
       }
       args = {
-        userId: user.userId,
+        userId: user?.userId,
         subdomain: getSubdomain(dashboardUrl),
         docId: 'create',
         org: code?.org,

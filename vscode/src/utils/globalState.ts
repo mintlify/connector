@@ -76,10 +76,7 @@ export default class GlobalState {
       return {
         userId: this.getUserId(),
         subdomain: this.getSubdomain(),
-        anonymousId: {
-          type: 'vscode',
-          id: env.machineId,
-        }
+        anonymousId: env.machineId
       };
     }
   }

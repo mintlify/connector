@@ -6,6 +6,12 @@ import User from "../models/User";
 import { identify, track } from "../services/segment";
 import { client } from "../services/stytch";
 
+type UserMiddleWareQuery = {
+  userId?: string,
+  subdomain?: string,
+  anonymousId?: string,
+}
+
 export const removeUnneededDataFromOrg = (org?: any) => {
   if (org) {
     org.integrations = undefined;
@@ -21,26 +27,43 @@ export const userMiddleware = async (
   res: express.Response,
   next: () => void
 ) => {
-  const { userId, subdomain } = req.query;
-  if (!userId) {
-    return res.status(400).send({ error: "userId not provided" });
+  const { userId, subdomain, anonymousId }: UserMiddleWareQuery = req.query;
+
+  if (!userId && !anonymousId) {
+    return res.status(400).send({ error: "userId and anonymousId not provided" });
   }
 
-  const user = await User.findOne({ userId });
+  let user, org;
+
+  if (userId) {
+    user = await User.findOne({ userId });
+
+    const orgQuery: { users?: string, subdomain?: string } = { users: user?.userId };
+    if (subdomain) {
+      orgQuery.subdomain = subdomain as string;
+    }
+    const org = await Org.findOne(orgQuery);
+    if (org == null) {
+      return res.status(400).send({ error: "User does not have access to any organization" });
+    }
+  }
+  else if (anonymousId) {
+    user = await User.findOneAndUpdate({ 'anonymousId.id': anonymousId }, {
+      userId: `vscode:${anonymousId}`, // only vscode for now
+    }, { upsert: true, new: true });
+
+    const orgQuery: { users?: string } = { users: user.userId };
+    org = await Org.findOneAndUpdate(orgQuery, {
+      name: '',
+      users: [user.userId],
+    }, { upsert: true, new: true });
+  }
+
   if (user == null) {
-    return res.status(400).send({ error: "Invalid userId" });
+    return res.status(400).send({ error: "Invalid userId or anonymousId" });
   }
 
-  const orgQuery: { users: string, subdomain?: string } = { users: user.userId };
-  if (subdomain) {
-    orgQuery.subdomain = subdomain as string;
-  }
-  const org = await Org.findOne(orgQuery);
-  if (org == null) {
-    return res.status(400).send({ error: "User does not have access to any organization" });
-  }
-
-  // Add org to user Id
+  // Add org to user
   user.org = org;
   res.locals.user = user;
 
@@ -216,7 +239,7 @@ userRouter.post("/:userId/join/existing/:subdomain", async (req: express.Request
     return res.send({ user, org: removeUnneededDataFromOrg(org) });
   }
 
-  if (org?.access.mode === 'private' && !org.invitedEmails?.includes(user.email)) {
+  if (org?.access.mode === 'private' && user.email && !org.invitedEmails?.includes(user.email)) {
     return res.status(403).send({ error: 'You do not have access to join this organization' });
   }
 
