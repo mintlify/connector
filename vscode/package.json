@@ -92,10 +92,6 @@
         {
           "command": "mintlify.logout",
           "when": "view == create && mintlify.isLoggedIn"
-        },
-        {
-          "command": "mintlify.login",
-          "when": "view == create && !mintlify.isLoggedIn"
         }
       ],
       "explorer/context": [

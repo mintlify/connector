@@ -49,11 +49,10 @@ export const userMiddleware = async (
   }
   else if (anonymousId) {
     user = await User.findOneAndUpdate({ 'anonymousId.id': anonymousId }, {
-      userId: `vscode:${anonymousId}`, // only vscode for now
+      userId: `anon:${anonymousId}`,
     }, { upsert: true, new: true });
 
-    const orgQuery: { users?: string } = { users: user.userId };
-    org = await Org.findOneAndUpdate(orgQuery, {
+    org = await Org.findOneAndUpdate({ users: user.userId }, {
       name: '',
       users: [user.userId],
     }, { upsert: true, new: true });
