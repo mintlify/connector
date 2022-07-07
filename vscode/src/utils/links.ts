@@ -48,9 +48,6 @@ export type Link = {
 };
 
 export const getLinks = async (globalState: GlobalState): Promise<Link[]> => {
-    const subdomain = globalState.getSubdomain();
-    const userId = globalState.getUserId();
-    if (subdomain == null || userId == null) { return []; } // TODO - proper error handling
     const repo = globalState.getRepo();
     const gitOrg = globalState.getGitOrg();
     try {
@@ -59,7 +56,7 @@ export const getLinks = async (globalState: GlobalState): Promise<Link[]> => {
         });
         return codesResponse.data.codes;
     } catch (err) {
-        console.log(err);
+        // TODO - proper error handling
         return [];
     }
 
