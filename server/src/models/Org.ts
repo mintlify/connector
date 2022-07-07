@@ -65,7 +65,7 @@ export type OrgType = {
 
 const OrgSchema = new Schema({
   name: { type: String, required: true },
-  subdomain: { type: String, required: true, unique: true },
+  subdomain: { type: String, trim: true, index: true, unique: true, sparse: true },
   createdAt: { type: Date, default: Date.now },
   users: { type: [String], default: [] },
   invitedEmails: { type: [String], default: [] },

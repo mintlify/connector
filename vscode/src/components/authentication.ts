@@ -37,6 +37,10 @@ export const registerAuthRoute = (provider: ViewProvider) => {
     }
   });
 
+  vscode.commands.registerCommand('mintlify.login', () => {
+    provider.displaySignin();
+  });
+
   vscode.commands.registerCommand('mintlify.logout', () => {
     provider.logout();
   });
