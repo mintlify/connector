@@ -170,7 +170,11 @@ const App = () => {
   };
 
   if (isDisplayingSignin) {
-    return <Signup signInUrl={signInUrl} setSignInUrl={setSignInUrl} />;
+    return <Signup
+      signInUrl={signInUrl}
+      setSignInUrl={setSignInUrl}
+      onBack={() => setIsDisplayingSignin(false)}
+    />;
   }
 
   const hasDocSelected = !selectedDoc?.isDefault;
