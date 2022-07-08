@@ -1,4 +1,4 @@
-import { CodeLensProvider, TextDocument, CancellationToken, CodeLens, Range, Command, Uri, Event, EventEmitter } from 'vscode';
+import { CodeLensProvider, TextDocument, CancellationToken, CodeLens, Range, Command, Uri } from 'vscode';
 import * as vscode from 'vscode';
 import GlobalState from '../utils/globalState';
 import { getFilePath } from '../utils/git';
@@ -20,11 +20,11 @@ export default class FileCodeLensProvider implements CodeLensProvider {
 
     async provideCodeLenses(document: TextDocument, token: CancellationToken): Promise<CodeLens[]> {
         this._document = document;
-        await this.refreshCodeLenses();
+        this._lenses = await this.getCodeLenses();
         return this._lenses;
     }
 
-    async refreshCodeLenses() {
+    async getCodeLenses(): Promise<CodeLens[]> {
         const links: Link[] | undefined = this._globalState.getLinks();
         if (links == null || links?.length === 0) { return []; }
         const fileFsPath: string = this._document.uri.fsPath;
@@ -70,7 +70,11 @@ export default class FileCodeLensProvider implements CodeLensProvider {
 
         const lenses = await Promise.all(lensPromises);
 
-        this._lenses = lenses.filter((lens) => lens != null) as CodeLens[]; // TODO - proper error handling
+        return lenses.filter((lens) => lens != null) as CodeLens[]; // TODO - proper error handling
+    }
+
+    async refreshCodeLenses() {
+        this._lenses = await this.getCodeLenses();
     }
 
     private formatTitle(link: Link): string {
