@@ -11,11 +11,16 @@ export default class FileCodeLensProvider implements CodeLensProvider {
     private _document: TextDocument;
     private _lenses: CodeLens[] = [];
 
+    set repositories(repos: Repository[]) {
+        this._repositories = repos;
+    }
+
     constructor(
         private _globalState: GlobalState,
-        private _repository: Repository,
+        private _repositories: Repository[],
         private _git: GitApiImpl
     ) {
+
     }
 
     async provideCodeLenses(document: TextDocument, token: CancellationToken): Promise<CodeLens[]> {
@@ -92,12 +97,16 @@ export default class FileCodeLensProvider implements CodeLensProvider {
         const matchedEditor = vscode.window.visibleTextEditors.find(
             editor => editor.document.uri.toString() === uri.toString(),
         );
+        if (this._repositories.length === 0) {
+            return '';
+        }
+        const repo = this._repositories[0]
         if (matchedEditor && matchedEditor.document.isDirty) {
             const documentText = matchedEditor.document.getText();
-            const idOfCurrentText = await this._repository.hashObject(documentText);
-            return await this._repository.diffBlobs(sha, idOfCurrentText);
+            const idOfCurrentText = await repo.hashObject(documentText);
+            return await repo.diffBlobs(sha, idOfCurrentText);
         } else {
-            return await this._repository.diffWith(sha, fileName);
+            return await repo.diffWith(sha, fileName);
         }
     }
 }
