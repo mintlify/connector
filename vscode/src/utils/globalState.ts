@@ -1,4 +1,4 @@
-import { Memento } from "vscode";
+import { Memento, env } from "vscode";
 import { Link } from './links';
 
 export default class GlobalState {
@@ -7,9 +7,6 @@ export default class GlobalState {
     public clearState() {
       this.storage.update('userId', undefined);
       this.storage.update('subdomain', undefined);
-      this.storage.update('links', undefined);
-      this.storage.update('repo', undefined);
-      this.storage.update('gitOrg', undefined);
     }
 
     public getUserId(): string | undefined {
@@ -70,5 +67,13 @@ export default class GlobalState {
 
     public deleteGitOrg() {
       this.storage.update('gitOrg', undefined);
+    }
+
+    public getAuthParams() {
+      return {
+        userId: this.getUserId(),
+        subdomain: this.getSubdomain(),
+        anonymousId: env.machineId
+      };
     }
   }

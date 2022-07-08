@@ -3,7 +3,7 @@
   "publisher": "mintlify",
   "displayName": "Document Connector",
   "description": "Create connections between documentation and code",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "icon": "assets/logo.png",
   "repository": {
     "url": "https://github.com/mintlify/connect"
@@ -33,6 +33,10 @@
       {
         "command": "mintlify.link-dir",
         "title": "Link folder/file to documentation"
+      },
+      {
+        "command": "mintlify.login",
+        "title": "Login to Mintlify"
       },
       {
         "command": "mintlify.logout",
@@ -87,7 +91,7 @@
       "view/title": [
         {
           "command": "mintlify.logout",
-          "when": "view == primary"
+          "when": "view == create && mintlify.isLoggedIn"
         }
       ],
       "explorer/context": [
@@ -118,7 +122,7 @@
       "primary": [
         {
           "type": "webview",
-          "id": "primary",
+          "id": "create",
           "name": "Create connection"
         },
         {

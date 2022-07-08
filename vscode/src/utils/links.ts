@@ -48,18 +48,15 @@ export type Link = {
 };
 
 export const getLinks = async (globalState: GlobalState): Promise<Link[]> => {
-    const subdomain = globalState.getSubdomain();
-    const userId = globalState.getUserId();
-    if (subdomain == null || userId == null) { return []; } // TODO - proper error handling
     const repo = globalState.getRepo();
     const gitOrg = globalState.getGitOrg();
     try {
         const codesResponse = await axios.get(`${API_ENDPOINT}/links`, {
-            params: { userId, subdomain, repo, gitOrg }
+            params: { ...globalState.getAuthParams(), repo, gitOrg }
         });
         return codesResponse.data.codes;
     } catch (err) {
-        console.log(err);
+        // TODO - proper error handling
         return [];
     }
 
@@ -69,37 +66,19 @@ export const deleteLink = async (globalState: GlobalState, linkId?: string): Pro
     if (!linkId) {
         return;
     }
-    const subdomain = globalState.getSubdomain();
-    const userId = globalState.getUserId();
-    if (subdomain == null || userId == null) {return;} // TODO - proper error handling
     await axios.delete(`${API_ENDPOINT}/links/${linkId}`, {
-        params: {
-            userId,
-            subdomain,
-        }
+        params: globalState.getAuthParams()
     });
 };
 
 export const deleteDoc = async (globalState: GlobalState, docId: string): Promise<void> => {
-    const subdomain = globalState.getSubdomain();
-    const userId = globalState.getUserId();
-    if (subdomain == null || userId == null) {return;}
     await axios.delete(`${API_ENDPOINT}/docs/${docId}`, {
-        params: {
-            userId,
-            subdomain,
-        }
+        params: globalState.getAuthParams()
     });
 };
 
 export const editDocName = async (globalState: GlobalState, docId: string, newName: string): Promise<void> => {
-    const subdomain = globalState.getSubdomain();
-    const userId = globalState.getUserId();
-    if (subdomain == null || userId == null) {return;}
     await axios.put(`${API_ENDPOINT}/docs/${docId}/title`, { title: newName }, {
-        params: {
-            userId,
-            subdomain,
-        },
+        params: globalState.getAuthParams(),
     });
 };

@@ -3,10 +3,14 @@ import { OrgType } from './Org';
 
 export type UserType = {
     userId: string,
+    anonymousId?: {
+        type: string,
+        id: string,
+    },
     firstName?: string,
     lastName?: string,
     authMethod: string,
-    email: string,
+    email?: string,
     profilePicture?: string,
     createdAt: Date,
     createdBy: string,
@@ -27,7 +31,7 @@ const UserSchema = new Schema({
     firstName: String,
     lastName: String,
     authMethod: { type: String, default: 'stytch' },
-    email: { type: String, required: true },
+    email: String,
     profilePicture: String,
     createdAt: { type: Date, default: Date.now },
     createdBy: String,
@@ -38,7 +42,12 @@ const UserSchema = new Schema({
         isCompleted: Boolean,
         role: String,
         usingVSCode: Boolean,
-    }
+    },
+    // Used for unauthenticated users
+    anonymousId: {
+        type: String,
+        id: String,
+    },
 });
 
 const User = mongoose.model<UserType>('User', UserSchema, 'users');
