@@ -193,9 +193,9 @@ const init = async (context: vscode.ExtensionContext, git: GitApiImpl, globalSta
 		globalState.setLinks(links);
 	}
 
-	vscode.workspace.onWillSaveTextDocument(async (e) => {
-		console.log('onWillSaveTextDocument: ', e);
-		await refreshLinks(e.document.uri.fsPath);
+	vscode.workspace.onDidSaveTextDocument(async (e) => {
+		console.log('onDidSaveTextDocument: ', e);
+		await refreshLinks(e.uri.fsPath);
 		await codeLensProvider.refreshCodeLenses();
 	});
 
