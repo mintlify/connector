@@ -84,24 +84,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<GitApi
 	);
 	registerAuthRoute(viewProvider);
 
-	const refreshLinks = async (fileFsPath: string) => {
-		const { gitOrg, repo } = await getRepoInfo(fileFsPath);
-		globalState.setGitOrg(gitOrg);
-		globalState.setRepo(repo);
-		const links = await getLinks(globalState);
-		globalState.setLinks(links);
-	}
-
-	vscode.workspace.onWillSaveTextDocument(async (e) => {
-		console.log('onWillSaveTextDocument: ', e);
-		await refreshLinks(e.document.uri.fsPath);
-	});
-
-	vscode.workspace.onDidOpenTextDocument(async (e) => {
-		console.log('onDidOpenTextDocument: ', e);
-		await refreshLinks(e.uri.fsPath);
-	})
-
 	vscode.window.onDidChangeTextEditorSelection((event) => {
 		const editor = event.textEditor;
 		vscode.commands.executeCommand('mintlify.link-code', { editor, scheme: 'file' });
@@ -195,13 +177,33 @@ const init = async (context: vscode.ExtensionContext, git: GitApiImpl, globalSta
 
 	context.subscriptions.push(git.onDidCloseRepository(async (e) => {
 		console.log('onDidCloseRepository: ', e);
-		updateRepoInfo();
+		await updateRepoInfo();
 	}));
 
 	context.subscriptions.push(git.onDidOpenRepository(async (e) => {
 		console.log('onDidOpenRepository: ', e);
-		updateRepoInfo();
+		await updateRepoInfo();
 	}));
+
+	const refreshLinks = async (fileFsPath: string) => {
+		const { gitOrg, repo } = await getRepoInfo(fileFsPath);
+		globalState.setGitOrg(gitOrg);
+		globalState.setRepo(repo);
+		const links = await getLinks(globalState);
+		globalState.setLinks(links);
+	}
+
+	vscode.workspace.onWillSaveTextDocument(async (e) => {
+		console.log('onWillSaveTextDocument: ', e);
+		await refreshLinks(e.document.uri.fsPath);
+		await codeLensProvider.refreshCodeLenses();
+	});
+
+	vscode.workspace.onDidOpenTextDocument(async (e) => {
+		console.log('onDidOpenTextDocument: ', e);
+		await refreshLinks(e.uri.fsPath);
+		await codeLensProvider.refreshCodeLenses();
+	})
 
 	await vscode.commands.executeCommand('mintlify.refresh-links', context);
 	console.log('init done');

@@ -1,4 +1,4 @@
-import { CodeLensProvider, TextDocument, CancellationToken, CodeLens, Range, Command, Uri } from 'vscode';
+import { CodeLensProvider, TextDocument, CancellationToken, CodeLens, Range, Command, Uri, window } from 'vscode';
 import * as vscode from 'vscode';
 import GlobalState from '../utils/globalState';
 import { getFilePath } from '../utils/git';
@@ -8,7 +8,7 @@ import { GitApiImpl } from '../utils/git/gitApiImpl';
 import { mapOldPositionToNew } from '../utils/git/diffPositionMapping';
 
 export default class FileCodeLensProvider implements CodeLensProvider {
-    private _document: TextDocument;
+    private _document: TextDocument | undefined;
     private _lenses: CodeLens[] = [];
 
     set repositories(repos: Repository[]) {
@@ -30,6 +30,9 @@ export default class FileCodeLensProvider implements CodeLensProvider {
     }
 
     async getCodeLenses(): Promise<CodeLens[]> {
+        if (this._document == null) {
+            return [];
+        }
         const links: Link[] | undefined = this._globalState.getLinks();
         if (links == null || links?.length === 0) { return []; }
         const fileFsPath: string = this._document.uri.fsPath;
@@ -39,6 +42,7 @@ export default class FileCodeLensProvider implements CodeLensProvider {
             return link.file === fileName || fileName.includes(link.file) || link.file.includes(fileName);
         });
         const lensPromises: Promise<CodeLens | undefined>[] = relatedLinks.map(async (link) => {
+            if (this._document == null) return;
             let firstLine = this._document.lineAt(0);
             let lastLine = this._document.lineAt(this._document.lineCount - 1);
             if (link.type === 'lines' && link?.line && link?.endLine) {
@@ -79,6 +83,9 @@ export default class FileCodeLensProvider implements CodeLensProvider {
     }
 
     async refreshCodeLenses() {
+        if (this._document == null) {
+            this._document = window?.activeTextEditor?.document;
+        }
         this._lenses = await this.getCodeLenses();
     }
 
