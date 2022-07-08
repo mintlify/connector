@@ -7,7 +7,7 @@ import { Repository } from '../utils/git/types';
 import { GitApiImpl } from '../utils/git/gitApiImpl';
 import { mapOldPositionToNew } from '../utils/git/diffPositionMapping';
 
-export default class FileCodeLensProvider implements CodeLensProvider {
+export default class DocCodeLensProvider implements CodeLensProvider {
     private _document: TextDocument | undefined;
     private _lenses: CodeLens[] = [];
 
@@ -79,7 +79,10 @@ export default class FileCodeLensProvider implements CodeLensProvider {
 
         const lenses = await Promise.all(lensPromises);
 
-        return lenses.filter((lens) => lens != null) as CodeLens[]; // TODO - proper error handling
+        const filteredLenses = lenses.filter((lens) => lens != null) as CodeLens[];
+        console.log({ filteredLenses });
+
+        return filteredLenses; // TODO - proper error handling
     }
 
     async refreshCodeLenses() {

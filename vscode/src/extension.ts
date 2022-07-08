@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { Doc, ViewProvider } from './components/viewProvider';
 import { linkCodeCommand, linkDirCommand, refreshLinksCommand, openDocsCommand } from './components/commands';
 import { registerAuthRoute } from './components/authentication';
-import FileCodeLensProvider from './components/codeLensProvider';
+import DocCodeLensProvider from './components/codeLensProvider';
 import GlobalState from './utils/globalState';
 import { doRegisterBuiltinGitProvider } from './utils/git/builtInGit';
 import { GitApiImpl } from './utils/git/gitApiImpl';
@@ -157,7 +157,7 @@ const init = async (context: vscode.ExtensionContext, git: GitApiImpl, globalSta
 	if (repositories.length === 0) {
 		console.log('omg bruh?');
 	}
-	const codeLensProvider = new FileCodeLensProvider(globalState, repositories, git);
+	const codeLensProvider = new DocCodeLensProvider(globalState, repositories, git);
 	const allLanguages = await vscode.languages.getLanguages();
 
 	context.subscriptions.push(vscode.languages.registerCodeLensProvider(allLanguages, codeLensProvider));
