@@ -191,6 +191,8 @@
     "@headlessui/react": "^1.6.1",
     "@heroicons/react": "^1.0.6",
     "@tailwindcss/forms": "^0.5.1",
+    "dayjs": "^1.11.3",
+    "cheerio": "^1.0.0-rc.12",
     "postcss-loader": "^6.2.1",
     "postcss-preset-env": "^7.5.0",
     "prepend-http": "^4.0.0",

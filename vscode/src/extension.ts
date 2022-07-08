@@ -8,6 +8,7 @@ import { DocumentsTreeProvider } from './treeviews/documents';
 import { CodeReturned, ConnectionsTreeProvider } from './treeviews/connections';
 import { deleteDoc, deleteLink, editDocName } from './utils/links';
 import { Code } from './utils/git';
+import { getPreviewHtml } from './utils/documentPreview';
 
 const createTreeViews = (state: GlobalState): void => {
 	const documentsTreeProvider = new DocumentsTreeProvider(state);
@@ -86,7 +87,25 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.executeCommand('mintlify.link-code', { editor, scheme: 'file' });
 	});
 
-	vscode.commands.registerCommand('mintlify.prefill-doc', (doc: Doc) => {
+	vscode.commands.registerCommand('mintlify.prefill-doc', async (doc: Doc) => {
+		const panel = vscode.window.createWebviewPanel(
+			doc.url,
+			doc.title,
+			vscode.ViewColumn.Beside,
+			{
+				enableFindWidget: true,
+				enableScripts: true
+			}
+		);
+
+		try {
+			const url = doc.url;
+			const html = await getPreviewHtml(url);
+			panel.webview.html = html;
+		} catch {
+			vscode.env.openExternal(vscode.Uri.parse(doc.url));
+		}
+
 		viewProvider.prefillDoc(doc);
 	});
 
