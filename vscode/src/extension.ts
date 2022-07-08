@@ -9,8 +9,8 @@ import { GitApiImpl } from './utils/git/gitApiImpl';
 import { Repository } from './utils/git/types';
 import { DocumentsTreeProvider } from './treeviews/documents';
 import { CodeReturned, ConnectionsTreeProvider } from './treeviews/connections';
-import { deleteDoc, deleteLink, editDocName } from './utils/links';
-import { Code } from './utils/git';
+import { deleteDoc, deleteLink, editDocName, getLinks } from './utils/links';
+import { Code, getRepoInfo } from './utils/git';
 
 const createTreeViews = (state: GlobalState): void => {
 	const documentsTreeProvider = new DocumentsTreeProvider(state);
@@ -83,6 +83,24 @@ export async function activate(context: vscode.ExtensionContext): Promise<GitApi
 		openDocsCommand()
 	);
 	registerAuthRoute(viewProvider);
+
+	const refreshLinks = async (fileFsPath: string) => {
+		const { gitOrg, repo } = await getRepoInfo(fileFsPath);
+		globalState.setGitOrg(gitOrg);
+		globalState.setRepo(repo);
+		const links = await getLinks(globalState);
+		globalState.setLinks(links);
+	}
+
+	vscode.workspace.onWillSaveTextDocument(async (e) => {
+		console.log('onWillSaveTextDocument: ', e);
+		await refreshLinks(e.document.uri.fsPath);
+	});
+
+	vscode.workspace.onDidOpenTextDocument(async (e) => {
+		console.log('onDidOpenTextDocument: ', e);
+		await refreshLinks(e.uri.fsPath);
+	})
 
 	vscode.window.onDidChangeTextEditorSelection((event) => {
 		const editor = event.textEditor;
@@ -185,6 +203,6 @@ const init = async (context: vscode.ExtensionContext, git: GitApiImpl, globalSta
 		updateRepoInfo();
 	}));
 
-	vscode.commands.executeCommand('mintlify.refresh-links', context);
+	await vscode.commands.executeCommand('mintlify.refresh-links', context);
 	console.log('init done');
 };
