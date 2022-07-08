@@ -24,12 +24,15 @@ export default class DocCodeLensProvider implements CodeLensProvider {
     }
 
     async provideCodeLenses(document: TextDocument, token: CancellationToken): Promise<CodeLens[]> {
+        console.log('Provide code lenses');
         this._document = document;
         this._lenses = await this.getCodeLenses();
         return this._lenses;
     }
 
     async getCodeLenses(): Promise<CodeLens[]> {
+        console.log(Math.random());
+        console.log('Triggering code lens');
         if (this._document == null) {
             return [];
         }
@@ -42,7 +45,7 @@ export default class DocCodeLensProvider implements CodeLensProvider {
             return link.file === fileName || fileName.includes(link.file) || link.file.includes(fileName);
         });
         const lensPromises: Promise<CodeLens | undefined>[] = relatedLinks.map(async (link) => {
-            if (this._document == null) return;
+            if (this._document == null) { return; }
             let firstLine = this._document.lineAt(0);
             let lastLine = this._document.lineAt(this._document.lineCount - 1);
             if (link.type === 'lines' && link?.line && link?.endLine) {
@@ -79,13 +82,13 @@ export default class DocCodeLensProvider implements CodeLensProvider {
 
         const lenses = await Promise.all(lensPromises);
 
-        const filteredLenses = lenses.filter((lens) => lens != null) as CodeLens[];
-        console.log({ filteredLenses });
-
-        return filteredLenses; // TODO - proper error handling
+        const filteredLens = lenses.filter((lens) => lens != null) as CodeLens[]; // TODO - proper error handling
+        console.log(filteredLens);
+        return filteredLens;
     }
 
     async refreshCodeLenses() {
+        console.log('Refreshing code lenses');
         if (this._document == null) {
             this._document = window?.activeTextEditor?.document;
         }
@@ -110,7 +113,7 @@ export default class DocCodeLensProvider implements CodeLensProvider {
         if (this._repositories.length === 0) {
             return '';
         }
-        const repo = this._repositories[0]
+        const repo = this._repositories[0];
         if (matchedEditor && matchedEditor.document.isDirty) {
             const documentText = matchedEditor.document.getText();
             const idOfCurrentText = await repo.hashObject(documentText);

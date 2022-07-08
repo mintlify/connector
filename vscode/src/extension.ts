@@ -9,20 +9,21 @@ import { GitApiImpl } from './utils/git/gitApiImpl';
 import { Repository } from './utils/git/types';
 import { DocumentsTreeProvider } from './treeviews/documents';
 import { CodeReturned, ConnectionsTreeProvider } from './treeviews/connections';
-import { deleteDoc, deleteLink, editDocName, getLinks } from './utils/links';
-import { Code, getRepoInfo } from './utils/git';
+import { deleteDoc, deleteLink, editDocName } from './utils/links';
+import { Code } from './utils/git';
 
 const createTreeViews = (state: GlobalState): void => {
 	const documentsTreeProvider = new DocumentsTreeProvider(state);
 	const connectionsTreeProvider = new ConnectionsTreeProvider(state);
 	vscode.window.createTreeView('documents', { treeDataProvider: documentsTreeProvider });
 	vscode.window.createTreeView('connections', { treeDataProvider: connectionsTreeProvider });
-
 	vscode.commands.registerCommand('mintlify.refresh-views', () => {
 		documentsTreeProvider.refresh();
 		connectionsTreeProvider.refresh();
 	});
 
+
+	
 	vscode.commands.registerCommand('mintlify.delete-connection', async (connection: { code: Code }) => {
 		const response = await vscode.window.showInformationMessage(`Are you sure you would like to delete the connection? This cannot be undone`, 'Delete', 'Cancel');
 		if (response !== 'Delete') {
@@ -108,14 +109,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<GitApi
 	createTreeViews(globalState);
 
 	const apiImpl = new GitApiImpl();
-	console.log('before deferredActivate');
 	await deferredActivate(context, globalState, apiImpl);
-	console.log('after deferredActivate');
 	return apiImpl;
 }
 
 const deferredActivate = async (context: vscode.ExtensionContext, globalState: GlobalState, apiImpl: GitApiImpl) => {
-	console.log('deferredActivate');
 	if (!(await doRegisterBuiltinGitProvider(context, apiImpl))) {
 		const extensionsChangedDisposable = vscode.extensions.onDidChange(async () => {
 			if (await doRegisterBuiltinGitProvider(context, apiImpl)) {
@@ -124,7 +122,6 @@ const deferredActivate = async (context: vscode.ExtensionContext, globalState: G
 		});
 		context.subscriptions.push(extensionsChangedDisposable);
 	}
-	console.log('gitProvider registered');
 	context.subscriptions.push(apiImpl);
 
 	const repositories = apiImpl.repositories;
@@ -133,7 +130,6 @@ const deferredActivate = async (context: vscode.ExtensionContext, globalState: G
 };
 
 const init = async (context: vscode.ExtensionContext, git: GitApiImpl, globalState: GlobalState, repositories: Repository[]) => {
-	console.log('init');
 	// Sort the repositories to match folders in a multiroot workspace (if possible).
 	const workspaceFolders = vscode.workspace.workspaceFolders;
 	if (workspaceFolders) {
@@ -155,7 +151,7 @@ const init = async (context: vscode.ExtensionContext, git: GitApiImpl, globalSta
 	}
 
 	if (repositories.length === 0) {
-		console.log('omg bruh?');
+		// Repos is empty
 	}
 	const codeLensProvider = new DocCodeLensProvider(globalState, repositories, git);
 	const allLanguages = await vscode.languages.getLanguages();
@@ -163,48 +159,33 @@ const init = async (context: vscode.ExtensionContext, git: GitApiImpl, globalSta
 	context.subscriptions.push(vscode.languages.registerCodeLensProvider(allLanguages, codeLensProvider));
 
 	const updateRepoInfo = async () => {
+		console.log('Updating repo info');
 		const repos = git.repositories;
 		codeLensProvider.repositories = repos;
 		await codeLensProvider.refreshCodeLenses();
 	};
 
 	context.subscriptions.push(git.onDidChangeState(async (e) => {
-		console.log('onDidChangeState: ', e);
 		if (e === 'initialized') {
 			await updateRepoInfo();
 		}
 	}));
 
 	context.subscriptions.push(git.onDidCloseRepository(async (e) => {
-		console.log('onDidCloseRepository: ', e);
 		await updateRepoInfo();
 	}));
 
 	context.subscriptions.push(git.onDidOpenRepository(async (e) => {
-		console.log('onDidOpenRepository: ', e);
 		await updateRepoInfo();
 	}));
 
-	const refreshLinks = async (fileFsPath: string) => {
-		const { gitOrg, repo } = await getRepoInfo(fileFsPath);
-		globalState.setGitOrg(gitOrg);
-		globalState.setRepo(repo);
-		const links = await getLinks(globalState);
-		globalState.setLinks(links);
-	}
-
 	vscode.workspace.onDidSaveTextDocument(async (e) => {
-		console.log('onDidSaveTextDocument: ', e);
-		await refreshLinks(e.uri.fsPath);
-		await codeLensProvider.refreshCodeLenses();
+		await vscode.commands.executeCommand('mintlify.refresh-links');
 	});
 
 	vscode.workspace.onDidOpenTextDocument(async (e) => {
-		console.log('onDidOpenTextDocument: ', e);
-		await refreshLinks(e.uri.fsPath);
-		await codeLensProvider.refreshCodeLenses();
-	})
+		await vscode.commands.executeCommand('mintlify.refresh-links');
+	});
 
 	await vscode.commands.executeCommand('mintlify.refresh-links', context);
-	console.log('init done');
 };
