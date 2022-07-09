@@ -1,10 +1,9 @@
 import { Uri } from 'vscode';
-import { DateSource, DateStyle, GravatarDefaultStyle } from '../../../configuration';
-import { GlyphChars } from '../../glyphChars';
+import { getAvatarUri } from '../../../avatars';
+import { DateSource, DateStyle, GravatarDefaultStyle } from '../../../config';
+import { GlyphChars } from '../../constants';
 import { Container } from '../../../container';
 import { formatDate, fromNow } from '../../system/date';
-import { gate } from '../../system/decorators/gate';
-import { memoize } from '../../system/decorators/memoize';
 import { cancellable } from '../../system/promise';
 import { pad, pluralize } from '../../system/string';
 import { PreviousLineComparisonUrisResult } from '../gitProvider';
@@ -15,6 +14,8 @@ import { GitReference, GitRevision, GitRevisionReference, GitStashReference } fr
 import { Repository } from './repository';
 
 const stashNumberRegex = /stash@{(\d+)}/;
+
+export type SomeNonNullable<T, K extends keyof T> = Omit<T, K> & { [P in K]-?: NonNullable<T[P]> };
 
 export class GitCommit implements GitRevisionReference {
     static is(commit: any): commit is GitCommit {
@@ -143,12 +144,10 @@ export class GitCommit implements GitRevisionReference {
             : this.formatDateFromNow();
     }
 
-    @memoize()
     get isUncommitted(): boolean {
         return GitRevision.isUncommitted(this.sha);
     }
 
-    @memoize()
     get isUncommittedStaged(): boolean {
         return GitRevision.isUncommittedStaged(this.sha);
     }
@@ -183,7 +182,6 @@ export class GitCommit implements GitRevisionReference {
         return this.parents[0] ?? `${this.sha}^`;
     }
 
-    @gate()
     async ensureFullDetails(): Promise<void> {
         if (this.isUncommitted || GitCommit.hasFullDetails(this)) return;
 
@@ -392,7 +390,11 @@ export class GitCommit implements GitRevisionReference {
             this._pullRequest = getCore.call(this);
         }
 
-        return cancellable(this._pullRequest, options?.timeout);
+        return cancellable(this._pullRequest ?? Promise<undefined>, options?.timeout);
+    }
+
+    getAvatarUri(options?: { defaultStyle?: GravatarDefaultStyle; size?: number }): Uri | Promise<Uri> {
+        return this.author.getAvatarUri(this, options);
     }
 
     async getCommitForFile(file: string | GitFile): Promise<GitCommit | undefined> {
@@ -414,7 +416,6 @@ export class GitCommit implements GitRevisionReference {
         return commits ?? [];
     }
 
-    @memoize()
     getGitUri(previous: boolean = false): GitUri {
         const uri = this._file?.uri ?? this.container.git.getAbsoluteUri(this.repoPath, this.repoPath);
         if (!previous) return new GitUri(uri, this);
@@ -425,7 +426,6 @@ export class GitCommit implements GitRevisionReference {
         });
     }
 
-    @memoize<GitCommit['getPreviousComparisonUrisForLine']>((el, ref) => `${el}|${ref ?? ''}`)
     getPreviousComparisonUrisForLine(
         editorLine: number,
         ref?: string,
@@ -477,7 +477,6 @@ export class GitCommit implements GitRevisionReference {
         return this.container.git.getRepository(this.repoPath);
     }
 
-    @gate()
     async isPushed(): Promise<boolean> {
         return this.container.git.hasCommitBeenPushed(this.repoPath, this.ref);
     }
@@ -537,7 +536,6 @@ export class GitCommitIdentity {
         private readonly avatarUrl?: string | undefined,
     ) { }
 
-    @memoize<GitCommitIdentity['formatDate']>(format => format ?? 'MMMM Do, YYYY h:mma')
     formatDate(format?: string | null): string {
         return formatDate(this.date, format ?? 'MMMM Do, YYYY h:mma');
     }

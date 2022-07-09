@@ -38,7 +38,6 @@ interface BlameEntry {
 }
 
 export class GitBlameParser {
-	@debug({ args: false, singleLine: true })
 	static parse(
 		container: Container,
 		data: string,

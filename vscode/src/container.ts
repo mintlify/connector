@@ -1,6 +1,6 @@
 import { ExtensionContext, Event, EventEmitter } from "vscode";
 import { configuration } from "./configuration";
-import { Config } from './config';
+import { Config, DateSource, DateStyle } from './config';
 import { GitProviderService } from './utils/git/gitProviderService';
 import { Storage } from "./storage";
 
@@ -72,4 +72,25 @@ export class Container {
     get storage(): Storage {
         return this._storage;
     }
+
+    readonly CommitDateFormatting = {
+        dateFormat: null as string | null,
+        dateSource: DateSource.Authored,
+        dateStyle: DateStyle.Relative,
+
+        reset: () => {
+            this.CommitDateFormatting.dateFormat = configuration.get('defaultDateFormat');
+            this.CommitDateFormatting.dateSource = configuration.get('defaultDateSource');
+            this.CommitDateFormatting.dateStyle = configuration.get('defaultDateStyle');
+        },
+    };
+
+    readonly CommitShaFormatting = {
+        length: 7,
+
+        reset: () => {
+            // Don't allow shas to be shortened to less than 5 characters
+            this.CommitShaFormatting.length = Math.max(5, configuration.get('advanced.abbreviatedShaLength'));
+        },
+    };
 }
