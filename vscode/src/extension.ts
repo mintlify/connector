@@ -8,7 +8,8 @@ import { DocumentsTreeProvider } from './treeviews/documents';
 import { CodeReturned, ConnectionsTreeProvider } from './treeviews/connections';
 import { deleteDoc, deleteLink, editDocName } from './utils/links';
 import { Code } from './utils/git';
-import { getPreviewHtml } from './utils/documentPreview';
+import axios from 'axios';
+import { API_ENDPOINT } from './utils/api';
 
 const createTreeViews = (state: GlobalState): void => {
 	const documentsTreeProvider = new DocumentsTreeProvider(state);
@@ -89,20 +90,28 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand('mintlify.prefill-doc', async (doc: Doc) => {
 		const panel = vscode.window.createWebviewPanel(
-			doc.url,
+			'mintlify.preview',
 			doc.title,
-			vscode.ViewColumn.Beside,
 			{
-				enableFindWidget: true,
+				viewColumn: vscode.ViewColumn.Two,
+				preserveFocus: true,
+			},
+			{
 				enableScripts: true
 			}
 		);
 
 		try {
 			const url = doc.url;
-			const html = await getPreviewHtml(url);
-			panel.webview.html = html;
+			const { data: hyperbeamIframeUrl } = await axios.get(`${API_ENDPOINT}/links/iframe`, {
+				params: {
+					url
+				}
+			});
+			const iframe = `<iframe src="${hyperbeamIframeUrl}" style="position:fixed;border:0;width:100%;height:100%"></iframe>`;
+			panel.webview.html = iframe;
 		} catch {
+			panel.dispose();
 			vscode.env.openExternal(vscode.Uri.parse(doc.url));
 		}
 
