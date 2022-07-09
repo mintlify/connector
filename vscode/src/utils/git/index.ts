@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as ini from 'ini';
 import * as gitRev from 'git-rev-2';
 
-import gitProvider, { BaseProvider } from './gitProvider';
+import gitProvider, { BaseProvider } from './ogGitProvider';
 import { ViewProvider } from '../../components/viewProvider';
 
 const window = vscode.window;
@@ -38,7 +38,7 @@ const locateGitConfig = (repoDir: string): Promise<string> => {
                     const workTreeMatch = match.match(/\.git\/worktrees*/);
                     if (workTreeMatch) {
                         const mainGitFolder = match.slice(0, workTreeMatch.index);
-                        configPath = path.join(mainGitFolder, '.git','config');
+                        configPath = path.join(mainGitFolder, '.git', 'config');
                     }
                     resolve(configPath);
                 });
@@ -49,7 +49,7 @@ const locateGitConfig = (repoDir: string): Promise<string> => {
     });
 };
 
- const readConfigFile = (path: string) : {[key: string]: any;} => {
+const readConfigFile = (path: string): { [key: string]: any; } => {
     return new Promise((resolve, reject) => {
         fs.readFile(path, 'utf-8', (err, data) => {
             if (err) {
@@ -96,7 +96,7 @@ export const getGitData = async (fileFsPath: string, viewProvider: ViewProvider,
     }
 
     const gitConfigPath: string = await locateGitConfig(repoDir);
-    const config: {[key: string]: any;} = await readConfigFile(gitConfigPath);
+    const config: { [key: string]: any; } = await readConfigFile(gitConfigPath);
 
     await gitRev.long(repoDir, async function (_: any, sha: any) {
         code.sha = sha;
@@ -186,7 +186,7 @@ export const getRepoInfo = async (fileFsPath: string): Promise<{ repo: string, g
         }
 
         const gitConfigPath: string = await locateGitConfig(repoDir);
-        const config: {[key: string]: any} = await readConfigFile(gitConfigPath);
+        const config: { [key: string]: any } = await readConfigFile(gitConfigPath);
 
         const file: string = getFilePath(fileFsPath);
 
