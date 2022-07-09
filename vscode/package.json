@@ -81,10 +81,6 @@
       {
         "command": "mintlify.refresh-views",
         "title": "Refresh views"
-      },
-      {
-        "command": "mintlify.open-doc",
-        "title": "Open document"
       }
     ],
     "menus": {
