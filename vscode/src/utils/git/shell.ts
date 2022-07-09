@@ -2,7 +2,7 @@ import { ExecException, execFile } from 'child_process';
 import { exists, existsSync, Stats, statSync } from 'fs';
 import { join as joinPaths } from 'path';
 import { decode } from 'iconv-lite';
-import { Logger } from './logger';
+import { Logger } from '../../logger';
 
 export const isWindows = process.platform === 'win32';
 

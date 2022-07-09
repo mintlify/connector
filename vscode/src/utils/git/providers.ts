@@ -3,7 +3,7 @@ import { GitCommandOptions } from '../../git/commandOptions';
 import { GitProvider } from '../../git/gitProvider';
 // import { GitHubGitProvider } from '../../plus/github/githubGitProvider';
 import { Git } from './git/git';
-import { LocalGitProvider } from './git/localGitProvider';
+import { LocalGitProvider } from './localGitProvider';
 import { VslsGit, VslsGitProvider } from './git/vslsGitProvider';
 
 let gitInstance: Git | undefined;

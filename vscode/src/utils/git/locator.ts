@@ -1,9 +1,9 @@
 import { join as joinPaths } from 'path';
 import { GlyphChars } from '../glyphChars';
 import { any } from '../';
-import { Stopwatch } from './stopwatch';
+import { Stopwatch } from '../system/stopwatch';
 import { findExecutable, run } from './shell';
-import { LogLevel } from './logger';
+import { LogLevel } from '../../logger';
 
 export class UnableToFindGitError extends Error {
     constructor(public readonly original?: Error) {

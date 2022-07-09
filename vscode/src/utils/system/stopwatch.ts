@@ -1,6 +1,6 @@
 import { hrtime } from 'process';
 import { GlyphChars } from '../glyphChars';
-import { LogCorrelationContext, Logger, LogLevel } from './logger';
+import { LogCorrelationContext, Logger, LogLevel } from '../../logger';
 import { getNextCorrelationId } from './log';
 
 type StopwatchLogOptions = { message?: string; suffix?: string };

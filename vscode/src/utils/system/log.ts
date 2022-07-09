@@ -1,4 +1,4 @@
-import { LogCorrelationContext } from './logger';
+import { LogCorrelationContext } from '../../logger';
 
 const emptyStr = '';
 const maxSmallIntegerV8 = 2 ** 30; // Max number that can be stored in V8's smis (small integers)
@@ -16,3 +16,4 @@ export function getNextCorrelationId() {
     }
     return ++correlationCounter;
 }
+

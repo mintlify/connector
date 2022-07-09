@@ -2,6 +2,7 @@ import { ExtensionContext, Event, EventEmitter } from "vscode";
 import { configuration } from "./configuration";
 import { Config } from './config';
 import { GitProviderService } from './utils/git/gitProviderService';
+import { Storage } from "./storage";
 
 export class Container {
     static #instance: Container | undefined;
@@ -65,5 +66,10 @@ export class Container {
     private _git: GitProviderService;
     get git() {
         return this._git;
+    }
+
+    private readonly _storage: Storage;
+    get storage(): Storage {
+        return this._storage;
     }
 }

@@ -192,6 +192,7 @@
     "@headlessui/react": "^1.6.1",
     "@heroicons/react": "^1.0.6",
     "@tailwindcss/forms": "^0.5.1",
+    "crypto": "^1.0.1",
     "dayjs": "^1.11.3",
     "lodash-es": "^4.17.21",
     "postcss-loader": "^6.2.1",
