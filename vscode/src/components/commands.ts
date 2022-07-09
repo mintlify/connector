@@ -1,10 +1,12 @@
 import * as vscode from 'vscode';
 
-import { ViewProvider } from './viewProvider';
+import { Doc, ViewProvider } from './viewProvider';
 import { getGitData, getRepoInfo } from '../utils/git';
 import { getHighlightedText } from '../utils';
 import GlobalState from '../utils/globalState';
 import { getLinks } from '../utils/links';
+import axios from 'axios';
+import { API_ENDPOINT } from '../utils/api';
 
 export const linkCodeCommand = (provider: ViewProvider) => {
     return vscode.commands.registerCommand('mintlify.link-code', async (args) => {
@@ -73,5 +75,35 @@ export const refreshLinksCommand = (globalState: GlobalState) => {
 export const openDocsCommand = () => {
     return vscode.commands.registerCommand('mintlify.open-doc', async (url) => {
         vscode.env.openExternal(vscode.Uri.parse(url));
+    });
+};
+
+export const openPreviewCommand = () => {
+    return vscode.commands.registerCommand('mintlify.preview-doc', async (doc: Doc) => {
+        const panel = vscode.window.createWebviewPanel(
+			'mintlify.preview',
+			doc.title,
+			{
+				viewColumn: vscode.ViewColumn.Two,
+				preserveFocus: true,
+			},
+			{
+				enableScripts: true
+			}
+		);
+
+		try {
+			const url = doc.url;
+			const { data: hyperbeamIframeUrl } = await axios.get(`${API_ENDPOINT}/links/iframe`, {
+				params: {
+					url
+				}
+			});
+			const iframe = `<iframe src="${hyperbeamIframeUrl}" style="position:fixed;border:0;width:100%;height:100%"></iframe>`;
+			panel.webview.html = iframe;
+		} catch {
+			panel.dispose();
+			vscode.env.openExternal(vscode.Uri.parse(doc.url));
+		}
     });
 };

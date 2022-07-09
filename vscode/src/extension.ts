@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { Doc, ViewProvider } from './components/viewProvider';
-import { linkCodeCommand, linkDirCommand, refreshLinksCommand, openDocsCommand } from './components/commands';
+import { linkCodeCommand, linkDirCommand, refreshLinksCommand, openDocsCommand, openPreviewCommand } from './components/commands';
 import { registerAuthRoute } from './components/authentication';
 import FileCodeLensProvider from './components/codeLensProvider';
 import GlobalState from './utils/globalState';
@@ -8,6 +8,8 @@ import { DocumentsTreeProvider } from './treeviews/documents';
 import { CodeReturned, ConnectionsTreeProvider } from './treeviews/connections';
 import { deleteDoc, deleteLink, editDocName } from './utils/links';
 import { Code } from './utils/git';
+import axios from 'axios';
+import { API_ENDPOINT } from './utils/api';
 
 const createTreeViews = (state: GlobalState): void => {
 	const documentsTreeProvider = new DocumentsTreeProvider(state);
@@ -77,7 +79,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		linkCodeCommand(viewProvider),
 		linkDirCommand(viewProvider),
 		refreshLinksCommand(globalState),
-		openDocsCommand()
+		openDocsCommand(),
+		openPreviewCommand()
 	);
 	registerAuthRoute(viewProvider);
 
@@ -86,7 +89,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.executeCommand('mintlify.link-code', { editor, scheme: 'file' });
 	});
 
-	vscode.commands.registerCommand('mintlify.prefill-doc', (doc: Doc) => {
+	vscode.commands.registerCommand('mintlify.prefill-doc', async (doc: Doc) => {
+		vscode.commands.executeCommand('mintlify.preview-doc', doc);
 		viewProvider.prefillDoc(doc);
 	});
 

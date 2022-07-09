@@ -5,6 +5,7 @@ import { track } from '../services/segment';
 import { userMiddleware } from './user';
 import { getDataFromUrl } from './docs';
 import { indexDocsForSearch } from '../services/algolia';
+import { getHyperbeamIframeUrl } from '../services/hyperbeam';
 
 const linksRouter = express.Router();
 
@@ -108,6 +109,13 @@ linksRouter.put('/', userMiddleware, async (req, res) => {
     return res.status(400).send({error})
   }
 });
+
+linksRouter.get('/iframe', async (req, res) => {
+  const url = req.query.url as string;
+
+  const iframeUrl = await getHyperbeamIframeUrl(url);
+  res.send(iframeUrl);
+})
 
 linksRouter.delete('/:codeId', userMiddleware, async (req, res) => {
   const { codeId } = req.params;
