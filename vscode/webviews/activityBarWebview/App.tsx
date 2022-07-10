@@ -3,7 +3,7 @@ import { DocumentTextIcon, XIcon } from '@heroicons/react/solid';
 import { FolderIcon } from '@heroicons/react/outline';
 import { vscode } from '../common/message';
 import { CodeSymbolIcon, CodeFileIcon } from '../common/svgs';
-import Signup, { formatSignInUrl } from './Signup';
+import Authenticate, { formatSignInUrl } from './Authenticate';
 
 export type Doc = {
   _id: string;
@@ -70,13 +70,14 @@ const App = () => {
           break;
         case 'auth':
           const user = message?.args;
-          if (!signInUrl) {
-            return;
+          if (signInUrl) {
+            const newDashboardUrl = formatSignInUrl(signInUrl);
+            vscode.setState({ ...initialState, user, dashboardUrl: newDashboardUrl });
+            setDashboardUrl(newDashboardUrl);
           };
-          const newDashboardUrl = formatSignInUrl(signInUrl);
-          vscode.setState({ ...initialState, user, dashboardUrl: newDashboardUrl });
           setUser(user);
-          setDashboardUrl(newDashboardUrl);
+          setIsDisplayingSignin(false);
+          clearSelectedDoc();
           break;
         case 'display-signin':
           setIsDisplayingSignin(true);
@@ -93,6 +94,7 @@ const App = () => {
           break;
         case 'logout':
           onLogout();
+          clearSelectedDoc();
           break;
       }
     });
@@ -125,10 +127,7 @@ const App = () => {
         return;
       }
       args = {
-        userId: user?.userId,
-        subdomain: getSubdomain(dashboardUrl),
         docId: 'create',
-        org: code?.org,
         code: code,
         url: query
       };
@@ -173,7 +172,7 @@ const App = () => {
   };
 
   if (isDisplayingSignin) {
-    return <Signup
+    return <Authenticate
       signInUrl={signInUrl}
       setSignInUrl={setSignInUrl}
       onBack={() => setIsDisplayingSignin(false)}
