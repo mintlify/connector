@@ -39,10 +39,11 @@ export class ViewProvider implements WebviewViewProvider {
 
 	public authenticate(user: any): void {
 		this.globalState.setUserId(user.userId);
-		this._view?.webview.postMessage({ command: 'auth', args: user });
 		vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', true);
+		vscode.window.showInformationMessage(`🙌 Successfully signed in with ${user.email}`);
 		vscode.commands.executeCommand('mintlify.refresh-links');
 		vscode.commands.executeCommand('mintlify.refresh-views');
+		this._view?.webview.postMessage({ command: 'auth', args: user });
 	}
 
 	public prefillDocWithDocId = (docId: string) => {
@@ -79,8 +80,9 @@ export class ViewProvider implements WebviewViewProvider {
 				switch (message.command) {
 					case 'login-oauth':
 						{
+							const { provider } = message.args;
 							const anonymousId = vscode.env.machineId;
-							vscode.env.openExternal(vscode.Uri.parse(`${API_ENDPOINT}/user/anonymous/google?anonymousId=${anonymousId}`));
+							vscode.env.openExternal(vscode.Uri.parse(`${API_ENDPOINT}/user/anonymous/${provider}?anonymousId=${anonymousId}`));
 							break;
 						}
 					case 'login':

@@ -70,13 +70,14 @@ const App = () => {
           break;
         case 'auth':
           const user = message?.args;
-          if (!signInUrl) {
-            return;
+          if (signInUrl) {
+            const newDashboardUrl = formatSignInUrl(signInUrl);
+            vscode.setState({ ...initialState, user, dashboardUrl: newDashboardUrl });
+            setDashboardUrl(newDashboardUrl);
           };
-          const newDashboardUrl = formatSignInUrl(signInUrl);
-          vscode.setState({ ...initialState, user, dashboardUrl: newDashboardUrl });
           setUser(user);
-          setDashboardUrl(newDashboardUrl);
+          setIsDisplayingSignin(false);
+          console.log('Hey here');
           break;
         case 'display-signin':
           setIsDisplayingSignin(true);
@@ -93,7 +94,6 @@ const App = () => {
           break;
         case 'logout':
           onLogout();
-          setIsDisplayingSignin(false);
           break;
       }
     });

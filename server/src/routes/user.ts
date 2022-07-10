@@ -4,7 +4,7 @@ import { ENDPOINT } from "../helpers/github/octokit";
 import Org from "../models/Org";
 import User from "../models/User";
 import { identify, track } from "../services/segment";
-import { client, getGoogleRedirectUrl } from "../services/stytch";
+import { client, getGitHubRedirectUrl, getGoogleRedirectUrl } from "../services/stytch";
 
 type UserMiddleWareQuery = {
   userId?: string,
@@ -339,6 +339,16 @@ userRouter.get('/anonymous/google', userMiddleware, async (_, res) => {
   try {
     const { user } = res.locals;
     const url = getGoogleRedirectUrl(user);
+    return res.redirect(url);
+  } catch (error) {
+    return res.status(500).send({ error: 'System error' });
+  }
+});
+
+userRouter.get('/anonymous/github', userMiddleware, async (_, res) => {
+  try {
+    const { user } = res.locals;
+    const url = getGitHubRedirectUrl(user);
     return res.redirect(url);
   } catch (error) {
     return res.status(500).send({ error: 'System error' });

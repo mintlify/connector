@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeftIcon, LockClosedIcon } from '@heroicons/react/solid';
+import { LockClosedIcon } from '@heroicons/react/solid';
 import prependHttp from 'prepend-http';
 import { vscode } from '../common/message';
 import { getSubdomain } from './App';
@@ -36,8 +36,8 @@ export default function Authenticate({ signInUrl, setSignInUrl, onBack }: Signup
     vscode.postMessage({ command: 'login', args: {signInWithProtocol, subdomain} });
   };
 
-  const onClickSignInWithOAuth = () => {
-    vscode.postMessage({ command: 'login-oauth' });
+  const onClickSignInWithOAuth = (provider: 'google' | 'github') => {
+    vscode.postMessage({ command: 'login-oauth', args: { provider } });
   };
 
   if (signInMethod === 'mintlify') {
@@ -69,7 +69,7 @@ export default function Authenticate({ signInUrl, setSignInUrl, onBack }: Signup
     <button
       type="submit"
       className="flex items-center justify-center submit opacity-100 hover:cursor-pointer"
-      onClick={onClickSignInWithOAuth}
+      onClick={() => onClickSignInWithOAuth('google')}
     >
       <GoogleButton className="h-4 w-4 text-white mr-2" />
       Sign in with Google
@@ -77,7 +77,7 @@ export default function Authenticate({ signInUrl, setSignInUrl, onBack }: Signup
     <button
       type="submit"
       className="flex items-center justify-center submit opacity-100 hover:cursor-pointer"
-      onClick={onClickSignInWithOAuth}
+      onClick={() => onClickSignInWithOAuth('github')}
     >
       <GitHubButton className="h-4 w-4 text-white mr-2" />
       Sign in with GitHub
