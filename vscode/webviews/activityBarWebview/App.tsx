@@ -77,7 +77,6 @@ const App = () => {
           };
           setUser(user);
           setIsDisplayingSignin(false);
-          console.log('Hey here');
           break;
         case 'display-signin':
           setIsDisplayingSignin(true);
