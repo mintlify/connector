@@ -377,7 +377,11 @@ userRouter.get('/anonymous/login', async (req, res) => {
     return res.status(400).send({error: 'Invalid token'})
   }
 
-  await Org.findOneAndUpdate({ users: state.userId }, { "$set": { "users.$": authUser.user_id } });
+  const orgAlreadyExists = await Org.exists({users: authUser.user_id});
+
+  if (!orgAlreadyExists) {
+    await Org.findOneAndUpdate({ users: state.userId }, { "$set": { "users.$": authUser.user_id } });
+  }
   const user = await User.findOneAndUpdate({userId: state.userId}, {userId: authUser.user_id, email: authUser.user.emails[0].email}, { new: true })
   const userQuery = `user=${JSON.stringify(user)}`;
   return res.redirect(`vscode://mintlify.connector/auth?${userQuery}`);
