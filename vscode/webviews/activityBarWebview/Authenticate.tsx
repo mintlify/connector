@@ -41,11 +41,7 @@ export default function Authenticate({ signInUrl, setSignInUrl, onBack }: Signup
   };
 
   if (signInMethod === 'mintlify') {
-    return <>
-    <div className="flex items-center cursor-pointer" onClick={() => setSignInMethod(undefined)}>
-      <ChevronLeftIcon className="h-5 w-5" />
-      Back
-    </div>
+    return <div className="space-y-2">
     <p className="mt-1 font-medium">Dashboard URL</p>
     <input
       className="text-sm"
@@ -63,14 +59,13 @@ export default function Authenticate({ signInUrl, setSignInUrl, onBack }: Signup
       <LockClosedIcon className="mr-1 h-4 w-4" aria-hidden="true" />
       Sign in with Mintlify
     </button>
-    </>;
+    <div>
+      Use{' '}<a className="cursor-pointer" onClick={() => setSignInMethod(undefined)}>different sign in method</a>
+    </div>
+    </div>;
   }
 
   return <div className="space-y-2">
-    <div className="flex items-center cursor-pointer" onClick={onBack}>
-      <ChevronLeftIcon className="h-5 w-5" />
-      Back
-    </div>
     <button
       type="submit"
       className="flex items-center justify-center submit opacity-100 hover:cursor-pointer"
@@ -95,5 +90,8 @@ export default function Authenticate({ signInUrl, setSignInUrl, onBack }: Signup
       <MintlifyButton className="h-4 w-4 text-white mr-2" />
       Sign in with Mintlify
     </button>
+    <div>
+      <a className="cursor-pointer" onClick={onBack}>Go back</a>{' '}and use without signing in
+    </div>
     </div>;
 }
