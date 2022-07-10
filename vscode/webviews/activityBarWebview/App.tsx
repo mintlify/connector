@@ -77,6 +77,7 @@ const App = () => {
           };
           setUser(user);
           setIsDisplayingSignin(false);
+          clearSelectedDoc();
           break;
         case 'display-signin':
           setIsDisplayingSignin(true);
@@ -93,6 +94,7 @@ const App = () => {
           break;
         case 'logout':
           onLogout();
+          clearSelectedDoc();
           break;
       }
     });
