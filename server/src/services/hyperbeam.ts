@@ -16,5 +16,6 @@ export const getHyperbeamIframeUrl = async (url?: string) => {
       Authorization: `Bearer ${process.env.HYPERBEAM_API_KEY}`
     }
   });
+  
   return hyperbeamResponse.embed_url;
 }
