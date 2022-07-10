@@ -93,6 +93,7 @@ const App = () => {
           break;
         case 'logout':
           onLogout();
+          setIsDisplayingSignin(false);
           break;
       }
     });

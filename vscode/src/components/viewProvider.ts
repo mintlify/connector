@@ -40,6 +40,7 @@ export class ViewProvider implements WebviewViewProvider {
 	public authenticate(user: any): void {
 		this.globalState.setUserId(user.userId);
 		this._view?.webview.postMessage({ command: 'auth', args: user });
+		vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', true);
 		vscode.commands.executeCommand('mintlify.refresh-links');
 		vscode.commands.executeCommand('mintlify.refresh-views');
 	}
@@ -61,7 +62,9 @@ export class ViewProvider implements WebviewViewProvider {
 	public logout(): void {
 		this._view?.webview.postMessage({ command: 'logout' });
 		this.globalState.clearState();
+		vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', false);
 		vscode.commands.executeCommand('mintlify.refresh-views');
+		vscode.window.showInformationMessage('Successfully logged out of account');
 	}
 
     public resolveWebviewView(webviewView: WebviewView): void | Thenable<void> {
@@ -77,7 +80,7 @@ export class ViewProvider implements WebviewViewProvider {
 					case 'login-oauth':
 						{
 							const anonymousId = vscode.env.machineId;
-							vscode.env.openExternal(vscode.Uri.parse(`${API_ENDPOINT}/user/anonymous/auth?anonymousId=${anonymousId}`));
+							vscode.env.openExternal(vscode.Uri.parse(`${API_ENDPOINT}/user/anonymous/google?anonymousId=${anonymousId}`));
 							break;
 						}
 					case 'login':
@@ -89,7 +92,7 @@ export class ViewProvider implements WebviewViewProvider {
 						}
 					case 'link-submit':
 						{
-							const { userId, docId, code, subdomain, url } = message.args;
+							const { docId, code, url } = message.args;
 							vscode.window.withProgress({
 								location: vscode.ProgressLocation.Notification,
 								title: 'Connecting documentation with code',

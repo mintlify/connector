@@ -9,9 +9,14 @@ import { CodeReturned, ConnectionsTreeProvider } from './treeviews/connections';
 import { deleteDoc, deleteLink, editDocName } from './utils/links';
 import { Code } from './utils/git';
 
-const createTreeViews = (state: GlobalState): void => {
-	const documentsTreeProvider = new DocumentsTreeProvider(state);
-	const connectionsTreeProvider = new ConnectionsTreeProvider(state);
+const setLoginContext = (globalState: GlobalState): void => {
+	// Manage authentication states
+	vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', globalState.getUserId() != null);
+}
+
+const createTreeViews = (globalState: GlobalState): void => {
+	const documentsTreeProvider = new DocumentsTreeProvider(globalState);
+	const connectionsTreeProvider = new ConnectionsTreeProvider(globalState);
 	vscode.window.createTreeView('documents', { treeDataProvider: documentsTreeProvider });
 	vscode.window.createTreeView('connections', { treeDataProvider: connectionsTreeProvider });
 
@@ -25,7 +30,7 @@ const createTreeViews = (state: GlobalState): void => {
 		if (response !== 'Delete') {
 			return;
 		}
-		deleteLink(state, connection.code._id);
+		deleteLink(globalState, connection.code._id);
 		connectionsTreeProvider.refresh();
 		vscode.commands.executeCommand('mintlify.refresh-links');
 	});
@@ -41,7 +46,7 @@ const createTreeViews = (state: GlobalState): void => {
 			return vscode.window.showErrorMessage('New name cannot be empty');
 		}
 
-		await editDocName(state, docOption.doc._id, newName);
+		await editDocName(globalState, docOption.doc._id, newName);
 		vscode.window.showInformationMessage(`Document has been renamed to ${newName}`);
 		vscode.commands.executeCommand('mintlify.refresh-views');
 		vscode.commands.executeCommand('mintlify.refresh-links');
@@ -52,7 +57,7 @@ const createTreeViews = (state: GlobalState): void => {
 		if (response !== 'Delete') {
 			return;
 		}
-		await deleteDoc(state, docOption.doc._id);
+		await deleteDoc(globalState, docOption.doc._id);
 		vscode.commands.executeCommand('mintlify.refresh-views');
 		vscode.commands.executeCommand('mintlify.refresh-links');
 	});
@@ -70,6 +75,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	const viewProvider = new ViewProvider(context.extensionUri, globalState);
 	const codeLensProvider = new FileCodeLensProvider(globalState);
 	const allLanguages = await vscode.languages.getLanguages();
+
+	setLoginContext(globalState);
 
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider(ViewProvider.viewType, viewProvider),
