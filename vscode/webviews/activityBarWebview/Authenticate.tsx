@@ -91,7 +91,7 @@ export default function Authenticate({ signInUrl, setSignInUrl, onBack }: Signup
       Sign in with Mintlify
     </button>
     <div>
-      <a className="cursor-pointer" onClick={onBack}>Go back</a>{' '}and use without signing in
+      <a className="cursor-pointer" onClick={onBack}>Go back</a>{' '}and continue without signing in
     </div>
     </div>;
 }
