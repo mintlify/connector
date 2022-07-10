@@ -65,6 +65,7 @@ export class ViewProvider implements WebviewViewProvider {
 		this.globalState.clearState();
 		vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', false);
 		vscode.commands.executeCommand('mintlify.refresh-views');
+		vscode.commands.executeCommand('mintlify.refresh-links');
 		vscode.window.showInformationMessage('Successfully logged out of account');
 	}
 
