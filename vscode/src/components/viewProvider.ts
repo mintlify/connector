@@ -74,9 +74,10 @@ export class ViewProvider implements WebviewViewProvider {
 			webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 			webviewView.webview.onDidReceiveMessage(async message => {
 				switch (message.command) {
-					case 'sign-up':
+					case 'login-oauth':
 						{
-							vscode.env.openExternal(vscode.Uri.parse('https://www.mintlify.com/create'));
+							const anonymousId = vscode.env.machineId;
+							vscode.env.openExternal(vscode.Uri.parse(`${API_ENDPOINT}/user/anonymous/auth?anonymousId=${anonymousId}`));
 							break;
 						}
 					case 'login':

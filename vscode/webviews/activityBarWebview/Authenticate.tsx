@@ -25,9 +25,9 @@ type SignupProps = {
   onBack: () => void
 };
 
-export default function Signup({ signInUrl, setSignInUrl, onBack }: SignupProps) {
+export default function Authenticate({ signInUrl, setSignInUrl, onBack }: SignupProps) {
   const [signInMethod, setSignInMethod] = useState<string>();
-  const onClickSignIn = () => {
+  const onClickSignInWithMintlify = () => {
     if (!signInUrl) {
       return;
     }
@@ -36,8 +36,8 @@ export default function Signup({ signInUrl, setSignInUrl, onBack }: SignupProps)
     vscode.postMessage({ command: 'login', args: {signInWithProtocol, subdomain} });
   };
 
-  const onClickSignUp = () => {
-    vscode.postMessage({ command: 'sign-up' });
+  const onClickSignInWithOAuth = () => {
+    vscode.postMessage({ command: 'login-oauth' });
   };
 
   if (signInMethod === 'mintlify') {
@@ -46,7 +46,7 @@ export default function Signup({ signInUrl, setSignInUrl, onBack }: SignupProps)
       <ChevronLeftIcon className="h-5 w-5" />
       Back
     </div>
-    <p className="mt-1 font-medium">Mintlify Dashboard URL</p>
+    <p className="mt-1 font-medium">Dashboard URL</p>
     <input
       className="text-sm"
       type="text"
@@ -57,7 +57,7 @@ export default function Signup({ signInUrl, setSignInUrl, onBack }: SignupProps)
     <button
       type="submit"
       className={classNames("flex items-center justify-center submit mt-2", !signInUrl ? 'opacity-50 hover:cursor-default' : 'opacity-100 hover:cursor-pointer')}
-      onClick={onClickSignIn}
+      onClick={onClickSignInWithMintlify}
       disabled={!signInUrl}
     >
       <LockClosedIcon className="mr-1 h-4 w-4" aria-hidden="true" />
@@ -74,7 +74,7 @@ export default function Signup({ signInUrl, setSignInUrl, onBack }: SignupProps)
     <button
       type="submit"
       className="flex items-center justify-center submit opacity-100 hover:cursor-pointer"
-      onClick={onClickSignUp}
+      onClick={onClickSignInWithOAuth}
     >
       <GoogleButton className="h-4 w-4 text-white mr-2" />
       Sign in with Google
@@ -82,7 +82,7 @@ export default function Signup({ signInUrl, setSignInUrl, onBack }: SignupProps)
     <button
       type="submit"
       className="flex items-center justify-center submit opacity-100 hover:cursor-pointer"
-      onClick={onClickSignUp}
+      onClick={onClickSignInWithOAuth}
     >
       <GitHubButton className="h-4 w-4 text-white mr-2" />
       Sign in with GitHub

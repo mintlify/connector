@@ -86,6 +86,10 @@
     "menus": {
       "view/title": [
         {
+          "command": "mintlify.login",
+          "when": "view == create && !mintlify.isLoggedIn"
+        },
+        {
           "command": "mintlify.logout",
           "when": "view == create && mintlify.isLoggedIn"
         }

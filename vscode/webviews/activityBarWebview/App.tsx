@@ -3,7 +3,7 @@ import { DocumentTextIcon, XIcon } from '@heroicons/react/solid';
 import { FolderIcon } from '@heroicons/react/outline';
 import { vscode } from '../common/message';
 import { CodeSymbolIcon, CodeFileIcon } from '../common/svgs';
-import Signup, { formatSignInUrl } from './Signup';
+import Authenticate, { formatSignInUrl } from './Authenticate';
 
 export type Doc = {
   _id: string;
@@ -173,7 +173,7 @@ const App = () => {
   };
 
   if (isDisplayingSignin) {
-    return <Signup
+    return <Authenticate
       signInUrl={signInUrl}
       setSignInUrl={setSignInUrl}
       onBack={() => setIsDisplayingSignin(false)}
