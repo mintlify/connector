@@ -1,6 +1,8 @@
 import express from "express";
 import { ISDEV } from "../helpers/environment";
 import { ENDPOINT } from "../helpers/github/octokit";
+import Code from "../models/Code";
+import Doc from "../models/Doc";
 import Org from "../models/Org";
 import User from "../models/User";
 import { identify, track } from "../services/segment";
@@ -387,9 +389,20 @@ userRouter.get('/anonymous/login', async (req, res) => {
     return res.status(400).send({error: 'Invalid token'})
   }
 
-  const orgAlreadyExists = await Org.exists({users: authUser.user_id});
+  // See if org with userId already exists
+  const [existingOrg, currentOrg] = await Promise.all([Org.findOne({users: authUser.user_id}), Org.findOne({users: state.userId})]);
 
-  if (!orgAlreadyExists) {
+  if (!currentOrg) {
+    return res.status(400).send({error: 'Current org does not exist'});
+  }
+
+  if (existingOrg) {
+    // Add docs and code to new org
+    await Promise.all([
+      Doc.updateMany({ org: currentOrg._id }, { org: existingOrg._id }),
+      Code.updateMany({ org: currentOrg._id }, { org: existingOrg._id })
+    ]);
+  } else {
     await Org.findOneAndUpdate({ users: state.userId }, { "$set": { "users.$": authUser.user_id } });
   }
   const user = await User.findOneAndUpdate({userId: state.userId}, {userId: authUser.user_id, email: authUser.user.emails[0].email}, { new: true })
