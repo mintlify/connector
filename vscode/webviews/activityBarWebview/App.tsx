@@ -125,10 +125,7 @@ const App = () => {
         return;
       }
       args = {
-        userId: user?.userId,
-        subdomain: getSubdomain(dashboardUrl),
         docId: 'create',
-        org: code?.org,
         code: code,
         url: query
       };
