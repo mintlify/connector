@@ -9,12 +9,13 @@ import { Doc } from '../components/viewProvider';
 export type CodeReturned = Code & { doc: Doc };
 
 export class ConnectionsTreeProvider implements vscode.TreeDataProvider<Connection> {
-  private state: GlobalState;
   private _onDidChangeTreeData: vscode.EventEmitter<Connection | undefined | null | void> = new vscode.EventEmitter<Connection | undefined | null | void>();
   readonly onDidChangeTreeData: vscode.Event<Connection | undefined | null | void> = this._onDidChangeTreeData.event;
 
-  constructor(state: GlobalState) {
-    this.state = state;
+  constructor(
+    private state: GlobalState,
+    private context: vscode.ExtensionContext
+  ) {
   }
 
   getTreeItem(element: Connection): vscode.TreeItem {
@@ -44,7 +45,7 @@ export class ConnectionsTreeProvider implements vscode.TreeDataProvider<Connecti
         return [new EmptyListOption()];
       }
 
-      return [...codes.map((code) => new Connection(code))];
+      return [...codes.map((code) => new Connection(code, this.context))];
     } catch {
       return [new ErrorOption()];
     }
@@ -58,12 +59,13 @@ export class ConnectionsTreeProvider implements vscode.TreeDataProvider<Connecti
 class Connection extends vscode.TreeItem {
   constructor(
     public readonly code: CodeReturned,
+    private context: vscode.ExtensionContext
   ) {
     super(code.doc.title, vscode.TreeItemCollapsibleState.None);
     this.tooltip = this.code.doc.title;
     this.iconPath = {
-      light: path.join(__filename, '..', '..', 'assets', 'icons', 'connect.svg'),
-      dark: path.join(__filename, '..', '..', 'assets', 'icons', 'connect-dark.svg'),
+      light: this.context.asAbsolutePath('assets/icons/connect.svg'),
+      dark: this.context.asAbsolutePath('assets/icons/connect-dark.svg'),
     };
     this.contextValue = 'connection';
 

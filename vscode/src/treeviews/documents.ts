@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
 import GlobalState from '../utils/globalState';
 import axios from 'axios';
 import { API_ENDPOINT } from '../utils/api';
@@ -15,12 +14,13 @@ type Group = {
 };
 
 export class DocumentsTreeProvider implements vscode.TreeDataProvider<GroupOption> {
-  private state: GlobalState;
   private _onDidChangeTreeData: vscode.EventEmitter<GroupOption | undefined | null | void> = new vscode.EventEmitter<GroupOption | undefined | null | void>();
   readonly onDidChangeTreeData: vscode.Event<GroupOption | undefined | null | void> = this._onDidChangeTreeData.event;
 
-  constructor(state: GlobalState) {
-    this.state = state;
+  constructor(
+    private state: GlobalState,
+    private context: vscode.ExtensionContext
+  ) {
   }
 
   getTreeItem(element: GroupOption): vscode.TreeItem {
@@ -32,7 +32,7 @@ export class DocumentsTreeProvider implements vscode.TreeDataProvider<GroupOptio
       const { data: { docs }  } = await axios.get(`${API_ENDPOINT}/docs/method/${groupElement.group._id}`, {
         params: this.state.getAuthParams()
       });
-      return docs.map((doc) => new DocOption(doc, vscode.TreeItemCollapsibleState.None));
+      return docs.map((doc) => new DocOption(doc, vscode.TreeItemCollapsibleState.None, this.context));
     }
 
     try {
@@ -53,10 +53,10 @@ export class DocumentsTreeProvider implements vscode.TreeDataProvider<GroupOptio
         if (docs.length === 0) {
           return [new NoDocsOption()];
         }
-        return docs.map((doc) => new DocOption(doc, vscode.TreeItemCollapsibleState.None));
+        return docs.map((doc) => new DocOption(doc, vscode.TreeItemCollapsibleState.None, this.context));
       }
 
-      return [...groups.map((group) => new GroupOption(group, vscode.TreeItemCollapsibleState.Collapsed))];
+      return [...groups.map((group) => new GroupOption(group, vscode.TreeItemCollapsibleState.Collapsed, this.context))];
     } catch {
       return [new ErrorOption()];
     }
@@ -71,11 +71,12 @@ class GroupOption extends vscode.TreeItem {
   constructor(
     public readonly group: Group,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+    private context: vscode.ExtensionContext,
   ) {
     super(group.name, collapsibleState);
     this.tooltip = this.group.name;
     this.description = `${this.group.count} documents`;
-    this.iconPath = getIconPathForGroup(group._id);
+    this.iconPath = getIconPathForGroup(group._id, this.context);
   }
 }
 
@@ -83,12 +84,13 @@ class DocOption extends vscode.TreeItem {
   constructor(
     public readonly doc: Doc,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+    private context: vscode.ExtensionContext
   ) {
     super(doc.title, collapsibleState);
     this.tooltip = this.doc.title;
     this.iconPath = {
-      light: path.join(__filename, '..', '..', 'assets', 'icons', 'document.svg'),
-      dark: path.join(__filename, '..', '..', 'assets', 'icons', 'document-dark.svg'),
+      light: this.context.asAbsolutePath('assets/icons/document.svg'),
+      dark: this.context.asAbsolutePath('assets/icons/document-dark.svg'),
     };
     this.contextValue = 'document';
 
@@ -125,32 +127,32 @@ class AddDocOption extends vscode.TreeItem {
   }
 }
 
-const getIconPathForGroup = (id: string): string | { light: string, dark: string } => {
+const getIconPathForGroup = (id: string, context: vscode.ExtensionContext): string | { light: string, dark: string } => {
   switch (id) {
     case 'github':
       return {
-        light: path.join(__filename, '..', '..', 'assets', 'icons', 'logos', 'github.svg'),
-        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'logos', 'github-dark.svg')
+        light: context.asAbsolutePath('assets/icons/logos/github.svg'),
+        dark:  context.asAbsolutePath('assets/icons/logos/github-dark.svg')
       };
     case 'notion-private':
       return {
-        light: path.join(__filename, '..', '..', 'assets', 'icons', 'logos', 'notion.svg'),
-        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'logos', 'notion-dark.svg'),
+        light: context.asAbsolutePath('assets/icons/logos/notion.svg'),
+        dark: context.asAbsolutePath('assets/icons/logos/notion-dark.svg'),
       };
     case 'googledocs-private':
       return {
-        light: path.join(__filename, '..', '..', 'assets', 'icons', 'logos', 'google-docs.svg'),
-        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'logos', 'google-docs.svg'),
+        light: context.asAbsolutePath('assets/icons/logos/google-docs.svg'),
+        dark: context.asAbsolutePath('assets/icons/logos/google-docs.svg'),
       };
     case 'confluence-private':
       return {
-        light: path.join(__filename, '..', '..', 'assets', 'icons', 'logos', 'confluence.svg'),
-        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'logos', 'confluence.svg'),
+        light: context.asAbsolutePath('assets/icons/logos/confluence.svg'),
+        dark: context.asAbsolutePath('assets/icons/logos/confluence.svg'),
       };
     case 'web':
       return {
-        light: path.join(__filename, '..', '..', 'assets', 'icons', 'logos', 'web.svg'),
-        dark: path.join(__filename, '..', '..', 'assets', 'icons', 'logos', 'web-dark.svg'),
+        light: context.asAbsolutePath('assets/icons/logos/web.svg'),
+        dark: context.asAbsolutePath('assets/icons/logos/web-dark.svg'),
       };
     default:
       return '';

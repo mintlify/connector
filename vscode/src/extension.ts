@@ -12,11 +12,11 @@ import { Code } from './utils/git';
 const setLoginContext = (globalState: GlobalState): void => {
 	// Manage authentication states
 	vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', globalState.getUserId() != null);
-}
+};
 
-const createTreeViews = (globalState: GlobalState): void => {
-	const documentsTreeProvider = new DocumentsTreeProvider(globalState);
-	const connectionsTreeProvider = new ConnectionsTreeProvider(globalState);
+const createTreeViews = (globalState: GlobalState, context: vscode.ExtensionContext): void => {
+	const documentsTreeProvider = new DocumentsTreeProvider(globalState, context);
+	const connectionsTreeProvider = new ConnectionsTreeProvider(globalState, context);
 	vscode.window.createTreeView('documents', { treeDataProvider: documentsTreeProvider });
 	vscode.window.createTreeView('connections', { treeDataProvider: connectionsTreeProvider });
 
@@ -111,6 +111,6 @@ export async function activate(context: vscode.ExtensionContext) {
 			});
 		}
 	});
-	createTreeViews(globalState);
+	createTreeViews(globalState, context);
 	vscode.commands.executeCommand('mintlify.refresh-links', context);
 }
