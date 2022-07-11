@@ -148,7 +148,8 @@
         },
         {
           "id": "teammates",
-          "name": "Team Members"
+          "name": "Team Members",
+          "when": "mintlify.hasDocuments"
         }
       ]
     },

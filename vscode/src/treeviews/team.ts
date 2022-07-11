@@ -25,6 +25,11 @@ export class TeamTreeProvider implements vscode.TreeDataProvider<Account> {
   }
 
   async getChildren(): Promise<any[]> {
+    const isLoggedIn = this.state.getUserId() != null;
+
+    if (!isLoggedIn) {
+      return [new NotLoggedIn()]
+    }
     const { data: { users }  } = await axios.get(`${API_ENDPOINT}/org/users`, {
       params: this.state.getAuthParams()
     });
@@ -66,6 +71,23 @@ class InviteMember extends vscode.TreeItem {
     super('', vscode.TreeItemCollapsibleState.None);
     this.tooltip = 'Invite team member';
     this.description = '+ Invite team member'
+
+    const onClickCommand: vscode.Command = {
+      title: 'Invite team member',
+      command: 'mintlify.invite-member',
+    };
+
+    this.command = onClickCommand;
+  }
+}
+
+class NotLoggedIn extends vscode.TreeItem {
+  constructor() {
+    super('Invite team member', vscode.TreeItemCollapsibleState.None);
+    this.tooltip = 'Invite team member';
+    this.description = 'login required'
+
+    this.iconPath = new vscode.ThemeIcon("person-add");
 
     const onClickCommand: vscode.Command = {
       title: 'Invite team member',
