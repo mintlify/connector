@@ -152,7 +152,6 @@ userRouter.post("/invite", userMiddleware, async (req: express.Request, res: exp
 
       return res.status(200).end();
     } catch (error) {
-      console.log({error});
       return res.status(500).json({ error });
     }
   }

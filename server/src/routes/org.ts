@@ -216,7 +216,7 @@ orgRouter.put('/access', userMiddleware, async (req, res) => {
 });
 
 orgRouter.get('/gitOrg/:gitOrg/details', async (req, res) => {
-  const { gitOrg } : { gitOrg: string } = req.params;
+  const { gitOrg } = req.params;
   const { repo } = req.query;
   try {
     // FindOne might cause an issue with separate installations on the same org
@@ -239,6 +239,30 @@ orgRouter.delete('/trial/model', userMiddleware, async (_, res) => {
 
   await Org.findByIdAndUpdate(org._id, {'plan.isHidingModel': true});
   res.end();
+});
+
+orgRouter.delete('/member/:email', userMiddleware, async (req, res) => {
+  const { email } = req.params;
+  const { org } = res.locals.user;
+
+  try {
+    if (org.invitedEmails.includes(email)) {
+      await Org.findByIdAndUpdate(org._id, { $pull: { invitedEmails: email } });
+      return res.end();
+    }
+
+    // else remove user
+    const user = await User.findOne({ email });
+    if (user == null) {
+      return res.status(400).send({ error: 'User does not belong in organization' })
+    }
+    
+    await Org.findByIdAndUpdate(org._id, { $pull: { users: user.userId } });
+    return res.end();
+
+  } catch {
+    return res.status(500).send({ error: 'Error while deleting member' })
+  }
 })
 
 export default orgRouter;

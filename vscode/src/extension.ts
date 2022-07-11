@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ViewProvider } from './components/viewProvider';
-import { linkCodeCommand, linkDirCommand, refreshLinksCommand, openDocsCommand, openPreviewCommand, prefillDocCommand, highlightConnectionCommand, inviteTeamMemberCommand } from './components/commands';
+import { linkCodeCommand, linkDirCommand, refreshLinksCommand, openDocsCommand, openPreviewCommand, prefillDocCommand, highlightConnectionCommand, inviteTeamMemberCommand, removeTeamMemberCommand } from './components/commands';
 import { registerAuthRoute } from './components/authentication';
 import FileCodeLensProvider from './components/codeLensProvider';
 import GlobalState from './utils/globalState';
@@ -23,6 +23,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		openPreviewCommand(),
 		highlightConnectionCommand(),
 		inviteTeamMemberCommand(globalState),
+		removeTeamMemberCommand(globalState)
 	);
 
 	registerAuthRoute(viewProvider, globalState);
@@ -30,10 +31,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		const editor = event.textEditor;
 		vscode.commands.executeCommand('mintlify.link-code', { editor, scheme: 'file' });
 	});
-
-	vscode.commands.registerCommand('mintlify.remove-member', () => {
-		console.log('Deleting member')
-	})
 
 	createTreeViews(globalState);
 	vscode.commands.executeCommand('mintlify.refresh-links', context);

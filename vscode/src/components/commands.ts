@@ -161,8 +161,27 @@ export const inviteTeamMemberCommand = (globalState: GlobalState) => {
             })
             vscode.window.showInformationMessage(`Invited ${memberEmail} to your team`)
             vscode.commands.executeCommand('mintlify.refresh-views');
-        } catch {
-            vscode.window.showInformationMessage('Error occurred while sending the invite email')
+        } catch (error) {
+            vscode.window.showInformationMessage('Error occurred while inviting member')
         }
 	});
+}
+
+export const removeTeamMemberCommand = (globalState: GlobalState) => {
+    return vscode.commands.registerCommand('mintlify.remove-member', async (member) => {
+		const email = member.email;
+		const response = await vscode.window.showInformationMessage(`Are you sure you would like to remove ${email}?`, 'Yes', 'Cancel')
+		if (response === 'Yes') {
+			try {
+				await axios.delete(`${API_ENDPOINT}/org/member/${email}`, {
+					params: globalState.getAuthParams()
+				});
+				vscode.window.showInformationMessage(`Removed ${email} from organization`)
+				vscode.commands.executeCommand('mintlify.refresh-views');
+			}
+			catch {
+				vscode.window.showErrorMessage('Error occurred while removing team member')
+			}
+		}
+	})
 }
