@@ -87,6 +87,10 @@
         }
       },
       {
+        "command": "mintlify.invite-member",
+        "title": "Invite team member"
+      },
+      {
         "command": "mintlify.refresh-views",
         "title": "Refresh views"
       }
@@ -100,6 +104,18 @@
         {
           "command": "mintlify.logout",
           "when": "view == create && mintlify.isLoggedIn"
+        },
+        {
+          "command": "mintlify.login",
+          "when": "view == teammates && !mintlify.isLoggedIn"
+        },
+        {
+          "command": "mintlify.invite-member",
+          "when": "view == teammates && mintlify.isLoggedIn"
+        },
+        {
+          "command": "mintlify.logout",
+          "when": "view == teammates && mintlify.isLoggedIn"
         }
       ],
       "explorer/context": [
