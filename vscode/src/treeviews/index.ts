@@ -17,6 +17,7 @@ export const createTreeViews = (globalState: GlobalState): void => {
 	vscode.commands.registerCommand('mintlify.refresh-views', () => {
 		documentsTreeProvider.refresh();
 		connectionsTreeProvider.refresh();
+		teamTreeProvider.refresh()
 	});
 
 	vscode.commands.registerCommand('mintlify.delete-connection', async (connection: { code: Code }) => {

@@ -130,3 +130,29 @@ export const highlightConnectionCommand = () => {
 		}
 	});
 }
+
+export const inviteTeamMemberCommand = () => {
+    return vscode.commands.registerCommand('mintlify.invite-member', async () => {
+		const memberEmail = await vscode.window.showInputBox({
+            title: 'Invite member by email',
+            placeHolder: 'hi@example.com',
+            validateInput: (email: string) => {
+                const isValidEmail = email.toLowerCase().match(
+                    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+                  );
+
+                if (isValidEmail) {
+                    return null
+                }
+
+                return 'Invalid email address';
+            }
+        });
+
+        await axios.post(`${API_ENDPOINT}/user/invite`, {
+            emails: [memberEmail]
+        })
+
+        vscode.commands.executeCommand('mintlify.refresh-views');
+	});
+}

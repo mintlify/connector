@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ViewProvider } from './components/viewProvider';
-import { linkCodeCommand, linkDirCommand, refreshLinksCommand, openDocsCommand, openPreviewCommand, prefillDocCommand, highlightConnectionCommand } from './components/commands';
+import { linkCodeCommand, linkDirCommand, refreshLinksCommand, openDocsCommand, openPreviewCommand, prefillDocCommand, highlightConnectionCommand, inviteTeamMemberCommand } from './components/commands';
 import { registerAuthRoute } from './components/authentication';
 import FileCodeLensProvider from './components/codeLensProvider';
 import GlobalState from './utils/globalState';
@@ -22,6 +22,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		openDocsCommand(),
 		openPreviewCommand(),
 		highlightConnectionCommand(),
+		inviteTeamMemberCommand(),
 	);
 
 	registerAuthRoute(viewProvider, globalState);
