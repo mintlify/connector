@@ -389,14 +389,23 @@ userRouter.get('/anonymous/login', async (req, res) => {
     return res.status(400).send({error: 'Invalid token'})
   }
 
+  const email = authUser.user.emails[0].email
+
   // See if org with userId already exists
-  const [existingOrg, currentOrg] = await Promise.all([Org.findOne({users: authUser.user_id}), Org.findOne({users: state.userId})]);
+  const [existingOrg, currentOrg] = await Promise.all([
+    Org.findOne({$or: [{users: authUser.user_id}, {invitedEmails: email}]}),
+    Org.findOne({users: state.userId})
+  ]);
 
   if (!currentOrg) {
     return res.status(400).send({error: 'Current org does not exist'});
   }
 
   if (existingOrg) {
+    // Migrated user from invited to user if necessary
+    if (existingOrg.invitedEmails?.includes(email)) {
+      await Org.findOneAndUpdate({ _id: existingOrg._id, users: { $ne: authUser.user_id } }, { $push: { users: authUser.user_id }, $pull: { invitedEmails: email } });
+    }
     // Add docs and code to new org
     await Promise.all([
       Doc.updateMany({ org: currentOrg._id }, { org: existingOrg._id }),

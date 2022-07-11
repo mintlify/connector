@@ -171,8 +171,8 @@ export const inviteTeamMemberCommand = (globalState: GlobalState) => {
 export const removeTeamMemberCommand = (globalState: GlobalState) => {
     return vscode.commands.registerCommand('mintlify.remove-member', async (member) => {
 		const email = member.email;
-		const response = await vscode.window.showInformationMessage(`Are you sure you would like to remove ${email}?`, 'Yes', 'Cancel')
-		if (response === 'Yes') {
+		const response = await vscode.window.showInformationMessage(`Are you sure you would like to remove ${email}?`, 'Remove', 'Cancel')
+		if (response === 'Remove') {
 			try {
 				await axios.delete(`${API_ENDPOINT}/org/member/${email}`, {
 					params: globalState.getAuthParams()
