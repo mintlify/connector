@@ -123,10 +123,10 @@ userRouter.get('/login', async (req, res) => {
   const host = ISDEV ? `http://${subdomain}` : `https://${subdomain}.mintlify.com`
   const redirectUrl = `${host}/api/auth/landing?sessionToken=${authUser.session_token}`;
   return res.redirect(redirectUrl);
-})
+});
 
 userRouter.post("/invite", userMiddleware, async (req: express.Request, res: express.Response) => {
-    const { emails } = req.body;
+    const { emails, isVSCode } = req.body;
     const orgId = res.locals.user.org._id;
 
     try {
@@ -138,21 +138,25 @@ userRouter.post("/invite", userMiddleware, async (req: express.Request, res: exp
 
       const state = JSON.stringify({
         method: 'magiclink',
-        host: org?.subdomain, // org will never be null
+        host: org?.subdomain, // org will never be null,
+        orgId: org?._id.toString()
       })
-      const redirectUrl = `${ENDPOINT}/routes/user/login?state=${state}`;
-      const invitePromises = emails.map((email: string) => {
-        return client.magicLinks.email.invite({
-          email,
-          invite_magic_link_url: redirectUrl,
-        })
-      });
-
-      await Promise.all(invitePromises);
-
-      return res.status(200).end();
+      const redirectUrl = isVSCode ? `${ENDPOINT}/routes/user/join/vscode?state=${state}` : `${ENDPOINT}/routes/user/login?state=${state}`;
+      try {
+        const invitePromises = emails.map((email: string) => {
+          return client.magicLinks.email.invite({
+            email,
+            invite_magic_link_url: redirectUrl,
+          })
+        });
+        await Promise.all(invitePromises);
+      } catch {
+        // TBD: Handle when unable to invite user from stytch
+        // Currently you wouldn't get an email
+      } finally {
+        return res.status(200).end();
+      }
     } catch (error) {
-      console.log({error});
       return res.status(500).json({ error });
     }
   }
@@ -389,14 +393,23 @@ userRouter.get('/anonymous/login', async (req, res) => {
     return res.status(400).send({error: 'Invalid token'})
   }
 
+  const email = authUser.user.emails[0].email
+
   // See if org with userId already exists
-  const [existingOrg, currentOrg] = await Promise.all([Org.findOne({users: authUser.user_id}), Org.findOne({users: state.userId})]);
+  const [existingOrg, currentOrg] = await Promise.all([
+    Org.findOne({$or: [{users: authUser.user_id}, {invitedEmails: email}]}),
+    Org.findOne({users: state.userId})
+  ]);
 
   if (!currentOrg) {
     return res.status(400).send({error: 'Current org does not exist'});
   }
 
   if (existingOrg) {
+    // Migrated user from invited to user if necessary
+    if (existingOrg.invitedEmails?.includes(email)) {
+      await Org.findOneAndUpdate({ _id: existingOrg._id, users: { $ne: authUser.user_id } }, { $push: { users: authUser.user_id }, $pull: { invitedEmails: email } });
+    }
     // Add docs and code to new org
     await Promise.all([
       Doc.updateMany({ org: currentOrg._id }, { org: existingOrg._id }),
@@ -408,6 +421,60 @@ userRouter.get('/anonymous/login', async (req, res) => {
   const user = await User.findOneAndUpdate({userId: state.userId}, {userId: authUser.user_id, email: authUser.user.emails[0].email}, { new: true })
   const userQuery = `user=${JSON.stringify(user)}`;
   return res.redirect(`vscode://mintlify.connector/auth?${userQuery}`);
+});
+
+userRouter.get('/join/vscode', async (req, res) => {
+  const stateRaw = req.query.state as string;
+  const token = req.query.token as string;
+
+  if (!stateRaw || !token) {
+    return res.status(400).send({error: 'No state or token provided'});
+  }
+
+  const state = JSON.parse(stateRaw);
+  const { orgId } = state;
+
+  // For authentication from landing page
+  const tokenType = req.query.stytch_token_type;
+  let authUser;
+
+  try {
+    if (tokenType === 'magic_links') {
+      authUser = await client.magicLinks.authenticate(token, {
+        session_duration_minutes: 5,
+      });
+    }
+    else if (tokenType === 'oauth') {
+      authUser = await client.oauth.authenticate(token, {
+        session_duration_minutes: 5,
+      });
+    }
+    if (authUser == null) {
+      return res.status(400).send({error: 'Invalid token'})
+    }
+  
+    const userId = authUser.user_id;
+    const email = authUser.user.emails[0].email;
+    const { first_name: firstName, last_name: lastName } = authUser.user.name
+  
+    const user = await User.findOneAndUpdate(
+      {
+        userId,
+      },
+      {
+        userId,
+        email,
+        firstName,
+        lastName,
+      },
+      { upsert: true, new: true }
+    );
+    await Org.findOneAndUpdate({ _id: orgId, users: { $ne: userId } }, { $push: { users: userId }, $pull: { invitedEmails: email } }, { new: true });
+    const redirectUrl = `vscode://mintlify.connector/auth?user=${JSON.stringify(user)}`;
+    return res.redirect(redirectUrl);
+  } catch {
+    res.send('Link has expired. Try asking your admin to send another invite or contact hi@mintlify.com for help.');
+  }
 })
 
 export default userRouter;
