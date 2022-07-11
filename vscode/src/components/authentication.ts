@@ -20,7 +20,6 @@ export const registerAuthRoute = (provider: ViewProvider) => {
           }
 
           provider.authenticate(user);
-          vscode.window.showInformationMessage(`🙌 Successfully signed in with ${user.email}`);
         } catch (err) {
           vscode.window.showErrorMessage('Error authenticating user');
         }

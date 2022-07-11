@@ -396,6 +396,7 @@ docsRouter.get('/content/:id', userMiddleware, async (req, res) => {
     console.log(error);
     return res.status(500).send({error: 'Internal systems error'});
   }
-})
+});
+
 
 export default docsRouter;

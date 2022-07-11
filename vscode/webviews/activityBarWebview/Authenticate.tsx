@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeftIcon, LockClosedIcon } from '@heroicons/react/solid';
+import { LockClosedIcon } from '@heroicons/react/solid';
 import prependHttp from 'prepend-http';
 import { vscode } from '../common/message';
 import { getSubdomain } from './App';
@@ -25,9 +25,9 @@ type SignupProps = {
   onBack: () => void
 };
 
-export default function Signup({ signInUrl, setSignInUrl, onBack }: SignupProps) {
+export default function Authenticate({ signInUrl, setSignInUrl, onBack }: SignupProps) {
   const [signInMethod, setSignInMethod] = useState<string>();
-  const onClickSignIn = () => {
+  const onClickSignInWithMintlify = () => {
     if (!signInUrl) {
       return;
     }
@@ -36,17 +36,13 @@ export default function Signup({ signInUrl, setSignInUrl, onBack }: SignupProps)
     vscode.postMessage({ command: 'login', args: {signInWithProtocol, subdomain} });
   };
 
-  const onClickSignUp = () => {
-    vscode.postMessage({ command: 'sign-up' });
+  const onClickSignInWithOAuth = (provider: 'google' | 'github') => {
+    vscode.postMessage({ command: 'login-oauth', args: { provider } });
   };
 
   if (signInMethod === 'mintlify') {
-    return <>
-    <div className="flex items-center cursor-pointer" onClick={() => setSignInMethod(undefined)}>
-      <ChevronLeftIcon className="h-5 w-5" />
-      Back
-    </div>
-    <p className="mt-1 font-medium">Mintlify Dashboard URL</p>
+    return <div className="space-y-2">
+    <p className="mt-1 font-medium">Dashboard URL</p>
     <input
       className="text-sm"
       type="text"
@@ -57,24 +53,23 @@ export default function Signup({ signInUrl, setSignInUrl, onBack }: SignupProps)
     <button
       type="submit"
       className={classNames("flex items-center justify-center submit mt-2", !signInUrl ? 'opacity-50 hover:cursor-default' : 'opacity-100 hover:cursor-pointer')}
-      onClick={onClickSignIn}
+      onClick={onClickSignInWithMintlify}
       disabled={!signInUrl}
     >
       <LockClosedIcon className="mr-1 h-4 w-4" aria-hidden="true" />
       Sign in with Mintlify
     </button>
-    </>;
+    <div>
+      Use{' '}<a className="cursor-pointer" onClick={() => setSignInMethod(undefined)}>different sign in method</a>
+    </div>
+    </div>;
   }
 
   return <div className="space-y-2">
-    <div className="flex items-center cursor-pointer" onClick={onBack}>
-      <ChevronLeftIcon className="h-5 w-5" />
-      Back
-    </div>
     <button
       type="submit"
       className="flex items-center justify-center submit opacity-100 hover:cursor-pointer"
-      onClick={onClickSignUp}
+      onClick={() => onClickSignInWithOAuth('google')}
     >
       <GoogleButton className="h-4 w-4 text-white mr-2" />
       Sign in with Google
@@ -82,7 +77,7 @@ export default function Signup({ signInUrl, setSignInUrl, onBack }: SignupProps)
     <button
       type="submit"
       className="flex items-center justify-center submit opacity-100 hover:cursor-pointer"
-      onClick={onClickSignUp}
+      onClick={() => onClickSignInWithOAuth('github')}
     >
       <GitHubButton className="h-4 w-4 text-white mr-2" />
       Sign in with GitHub
@@ -95,5 +90,8 @@ export default function Signup({ signInUrl, setSignInUrl, onBack }: SignupProps)
       <MintlifyButton className="h-4 w-4 text-white mr-2" />
       Sign in with Mintlify
     </button>
+    <div>
+      <a className="cursor-pointer" onClick={onBack}>Go back</a>{' '}and continue without signing in
+    </div>
     </div>;
 }

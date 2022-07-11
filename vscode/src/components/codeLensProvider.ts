@@ -72,9 +72,9 @@ export default class DocCodeLensProvider implements CodeLensProvider {
             const range = new Range(firstLine.range.start, lastLine.range.end);
             const title = this.formatTitle(link);
             const command: Command = {
-                command: 'mintlify.open-doc',
+                command: 'mintlify.preview-doc',
                 title,
-                arguments: [link.doc.url]
+                arguments: [link.doc]
             };
             const lens: CodeLens = new CodeLens(range, command);
             return lens;

@@ -3,7 +3,7 @@
   "publisher": "mintlify",
   "displayName": "Document Connector",
   "description": "Create connections between documentation and code",
-  "version": "0.4.5",
+  "version": "0.5.14",
   "icon": "assets/logo.png",
   "repository": {
     "url": "https://github.com/mintlify/connect"
@@ -81,14 +81,14 @@
       {
         "command": "mintlify.refresh-views",
         "title": "Refresh views"
-      },
-      {
-        "command": "mintlify.open-doc",
-        "title": "Open document"
       }
     ],
     "menus": {
       "view/title": [
+        {
+          "command": "mintlify.login",
+          "when": "view == create && !mintlify.isLoggedIn"
+        },
         {
           "command": "mintlify.logout",
           "when": "view == create && mintlify.isLoggedIn"

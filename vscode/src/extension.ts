@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { Doc, ViewProvider } from './components/viewProvider';
-import { linkCodeCommand, linkDirCommand, refreshLinksCommand, openDocsCommand } from './components/commands';
+import { linkCodeCommand, linkDirCommand, refreshLinksCommand, openDocsCommand, openPreviewCommand } from './components/commands';
 import { registerAuthRoute } from './components/authentication';
 import DocCodeLensProvider from './components/codeLensProvider';
 import GlobalState from './utils/globalState';
@@ -12,9 +12,14 @@ import { CodeReturned, ConnectionsTreeProvider } from './treeviews/connections';
 import { deleteDoc, deleteLink, editDocName } from './utils/links';
 import { Code } from './utils/git';
 
-const createTreeViews = (state: GlobalState): void => {
-	const documentsTreeProvider = new DocumentsTreeProvider(state);
-	const connectionsTreeProvider = new ConnectionsTreeProvider(state);
+const setLoginContext = (globalState: GlobalState): void => {
+	// Manage authentication states
+	vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', globalState.getUserId() != null);
+}
+
+const createTreeViews = (globalState: GlobalState): void => {
+	const documentsTreeProvider = new DocumentsTreeProvider(globalState);
+	const connectionsTreeProvider = new ConnectionsTreeProvider(globalState);
 	vscode.window.createTreeView('documents', { treeDataProvider: documentsTreeProvider });
 	vscode.window.createTreeView('connections', { treeDataProvider: connectionsTreeProvider });
 	vscode.commands.registerCommand('mintlify.refresh-views', () => {
@@ -29,7 +34,7 @@ const createTreeViews = (state: GlobalState): void => {
 		if (response !== 'Delete') {
 			return;
 		}
-		deleteLink(state, connection.code._id);
+		deleteLink(globalState, connection.code._id);
 		connectionsTreeProvider.refresh();
 		vscode.commands.executeCommand('mintlify.refresh-links');
 	});
@@ -45,7 +50,7 @@ const createTreeViews = (state: GlobalState): void => {
 			return vscode.window.showErrorMessage('New name cannot be empty');
 		}
 
-		await editDocName(state, docOption.doc._id, newName);
+		await editDocName(globalState, docOption.doc._id, newName);
 		vscode.window.showInformationMessage(`Document has been renamed to ${newName}`);
 		vscode.commands.executeCommand('mintlify.refresh-views');
 		vscode.commands.executeCommand('mintlify.refresh-links');
@@ -56,7 +61,7 @@ const createTreeViews = (state: GlobalState): void => {
 		if (response !== 'Delete') {
 			return;
 		}
-		await deleteDoc(state, docOption.doc._id);
+		await deleteDoc(globalState, docOption.doc._id);
 		vscode.commands.executeCommand('mintlify.refresh-views');
 		vscode.commands.executeCommand('mintlify.refresh-links');
 	});
@@ -76,12 +81,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<GitApi
 	const globalState = new GlobalState(context.globalState);
 	const viewProvider = new ViewProvider(context.extensionUri, globalState);
 
+	setLoginContext(globalState);
+
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider(ViewProvider.viewType, viewProvider),
 		linkCodeCommand(viewProvider),
 		linkDirCommand(viewProvider),
 		refreshLinksCommand(globalState),
-		openDocsCommand()
+		openDocsCommand(),
+		openPreviewCommand()
 	);
 	registerAuthRoute(viewProvider);
 
@@ -90,7 +98,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<GitApi
 		vscode.commands.executeCommand('mintlify.link-code', { editor, scheme: 'file' });
 	});
 
-	vscode.commands.registerCommand('mintlify.prefill-doc', (doc: Doc) => {
+	vscode.commands.registerCommand('mintlify.prefill-doc', async (doc: Doc) => {
+		vscode.commands.executeCommand('mintlify.preview-doc', doc);
 		viewProvider.prefillDoc(doc);
 	});
 
