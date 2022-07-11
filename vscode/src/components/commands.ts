@@ -131,7 +131,7 @@ export const highlightConnectionCommand = () => {
 	});
 }
 
-export const inviteTeamMemberCommand = () => {
+export const inviteTeamMemberCommand = (globalState: GlobalState) => {
     return vscode.commands.registerCommand('mintlify.invite-member', async () => {
 		const memberEmail = await vscode.window.showInputBox({
             title: 'Invite member by email',
@@ -149,10 +149,16 @@ export const inviteTeamMemberCommand = () => {
             }
         });
 
-        await axios.post(`${API_ENDPOINT}/user/invite`, {
-            emails: [memberEmail]
-        })
-
-        vscode.commands.executeCommand('mintlify.refresh-views');
+        try {
+            await axios.post(`${API_ENDPOINT}/user/invite`, {
+                emails: [memberEmail]
+            }, {
+                params: globalState.getAuthParams(),
+            })
+            vscode.window.showInformationMessage(`Invited ${memberEmail} to your team`)
+            vscode.commands.executeCommand('mintlify.refresh-views');
+        } catch {
+            vscode.window.showInformationMessage(`Error occurred while sending the invite email`)
+        }
 	});
 }

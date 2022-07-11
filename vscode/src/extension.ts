@@ -22,7 +22,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		openDocsCommand(),
 		openPreviewCommand(),
 		highlightConnectionCommand(),
-		inviteTeamMemberCommand(),
+		inviteTeamMemberCommand(globalState),
 	);
 
 	registerAuthRoute(viewProvider, globalState);
