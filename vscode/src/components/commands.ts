@@ -155,7 +155,8 @@ export const inviteTeamMemberCommand = (globalState: GlobalState) => {
 
         try {
             await axios.post(`${API_ENDPOINT}/user/invite`, {
-                emails: [memberEmail]
+                emails: [memberEmail],
+                isVSCode: true,
             }, {
                 params: globalState.getAuthParams(),
             })
