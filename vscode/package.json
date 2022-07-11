@@ -79,6 +79,14 @@
         }
       },
       {
+        "command": "mintlify.remove-member",
+        "title": "Remove member from team",
+        "icon": {
+          "light": "assets/icons/remove-user.svg",
+          "dark": "assets/icons/remove-user-dark.svg"
+        }
+      },
+      {
         "command": "mintlify.refresh-views",
         "title": "Refresh views"
       }
@@ -114,6 +122,11 @@
         {
           "command": "mintlify.delete-connection",
           "when": "view == connections && viewItem == connection",
+          "group": "inline"
+        },
+        {
+          "command": "mintlify.remove-member",
+          "when": "view == teammates && viewItem == member",
           "group": "inline"
         }
       ]

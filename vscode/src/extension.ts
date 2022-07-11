@@ -30,6 +30,11 @@ export async function activate(context: vscode.ExtensionContext) {
 		const editor = event.textEditor;
 		vscode.commands.executeCommand('mintlify.link-code', { editor, scheme: 'file' });
 	});
+
+	vscode.commands.registerCommand('mintlify.remove-member', () => {
+		console.log('Deleting member')
+	})
+
 	createTreeViews(globalState);
 	vscode.commands.executeCommand('mintlify.refresh-links', context);
 }

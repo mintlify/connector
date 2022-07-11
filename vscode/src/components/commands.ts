@@ -149,6 +149,10 @@ export const inviteTeamMemberCommand = (globalState: GlobalState) => {
             }
         });
 
+        if (!memberEmail) {
+            return;
+        }
+
         try {
             await axios.post(`${API_ENDPOINT}/user/invite`, {
                 emails: [memberEmail]
@@ -158,7 +162,7 @@ export const inviteTeamMemberCommand = (globalState: GlobalState) => {
             vscode.window.showInformationMessage(`Invited ${memberEmail} to your team`)
             vscode.commands.executeCommand('mintlify.refresh-views');
         } catch {
-            vscode.window.showInformationMessage(`Error occurred while sending the invite email`)
+            vscode.window.showInformationMessage('Error occurred while sending the invite email')
         }
 	});
 }

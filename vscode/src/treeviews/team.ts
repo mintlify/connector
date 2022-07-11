@@ -31,11 +31,11 @@ export class TeamTreeProvider implements vscode.TreeDataProvider<Account> {
 
     const currentUserId = this.state.getUserId();
     const currentUser = users.find((user) => user.userId === currentUserId);
-    const allOtherMembers = users.filter((user) => user.email !== currentUser.email);
+    const allOtherMembers = users.filter((user) => user.email && user.email !== currentUser.email);
 
     return [
       new Account(currentUser.email, false, true),
-      ...allOtherMembers.map((user) => new Account(user.email, user.pending)),
+      ...allOtherMembers.map((user) => new Account(user.email, user?.pending)),
       new InviteMember()
     ];
   }
@@ -53,6 +53,9 @@ class Account extends vscode.TreeItem {
       this.description = 'Me';
     } else if (isPending) {
       this.description = 'Pending';
+      this.contextValue = 'member';
+    } else {
+      this.contextValue = 'member';
     }
     this.iconPath = new vscode.ThemeIcon("account");
   }
