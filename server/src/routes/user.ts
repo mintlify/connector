@@ -142,16 +142,20 @@ userRouter.post("/invite", userMiddleware, async (req: express.Request, res: exp
         orgId: org?._id.toString()
       })
       const redirectUrl = isVSCode ? `${ENDPOINT}/routes/user/join/vscode?state=${state}` : `${ENDPOINT}/routes/user/login?state=${state}`;
-      const invitePromises = emails.map((email: string) => {
-        return client.magicLinks.email.invite({
-          email,
-          invite_magic_link_url: redirectUrl,
-        })
-      });
-
-      await Promise.all(invitePromises);
-
-      return res.status(200).end();
+      try {
+        const invitePromises = emails.map((email: string) => {
+          return client.magicLinks.email.invite({
+            email,
+            invite_magic_link_url: redirectUrl,
+          })
+        });
+        await Promise.all(invitePromises);
+      } catch {
+        // TBD: Handle when unable to invite user from stytch
+        // Currently you wouldn't get an email
+      } finally {
+        return res.status(200).end();
+      }
     } catch (error) {
       return res.status(500).json({ error });
     }
