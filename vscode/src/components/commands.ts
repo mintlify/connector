@@ -7,6 +7,7 @@ import GlobalState from '../utils/globalState';
 import { getLinks } from '../utils/links';
 import axios from 'axios';
 import { API_ENDPOINT } from '../utils/api';
+import { CodeReturned } from '../treeviews/connections';
 
 export const linkCodeCommand = (provider: ViewProvider) => {
     return vscode.commands.registerCommand('mintlify.link-code', async (args) => {
@@ -107,3 +108,25 @@ export const openPreviewCommand = () => {
 		}
     });
 };
+
+export const prefillDocCommand = (viewProvider: ViewProvider) => {
+    return vscode.commands.registerCommand('mintlify.prefill-doc', async (doc: Doc) => {
+		vscode.commands.executeCommand('mintlify.preview-doc', doc);
+		viewProvider.prefillDoc(doc);
+	});
+}
+
+export const highlightConnectionCommand = () => {
+    return vscode.commands.registerCommand('mintlify.highlight-connection', async (code: CodeReturned) => {
+		if (code.line != null && code.endLine != null) {
+			const rootPath = vscode.workspace.workspaceFolders![0].uri.path;
+			const filePathUri  = vscode.Uri.parse(`${rootPath}/${code.file}`);
+			const selectedRange = new vscode.Range(code.line, 0, code.endLine, 9999);
+			vscode.window.activeTextEditor?.revealRange(selectedRange);
+			await vscode.window.showTextDocument(filePathUri, {
+				selection: selectedRange,
+				preserveFocus: true,
+			});
+		}
+	});
+}

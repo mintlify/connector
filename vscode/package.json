@@ -132,6 +132,10 @@
         {
           "id": "connections",
           "name": "Connections"
+        },
+        {
+          "id": "teammates",
+          "name": "Team Members"
         }
       ]
     },
