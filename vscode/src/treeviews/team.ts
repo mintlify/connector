@@ -68,15 +68,16 @@ class Account extends vscode.TreeItem {
 
 class InviteMember extends vscode.TreeItem {
   constructor() {
-    super('', vscode.TreeItemCollapsibleState.None);
+    super('Invite team member', vscode.TreeItemCollapsibleState.None);
     this.tooltip = 'Invite team member';
-    this.description = '+ Invite team member'
+    this.description = ''
 
     const onClickCommand: vscode.Command = {
       title: 'Invite team member',
       command: 'mintlify.invite-member',
     };
 
+    this.iconPath = new vscode.ThemeIcon("person-add");
     this.command = onClickCommand;
   }
 }
@@ -90,8 +91,8 @@ class NotLoggedIn extends vscode.TreeItem {
     this.iconPath = new vscode.ThemeIcon("person-add");
 
     const onClickCommand: vscode.Command = {
-      title: 'Invite team member',
-      command: 'mintlify.invite-member',
+      title: 'Sign in',
+      command: 'mintlify.login',
     };
 
     this.command = onClickCommand;
