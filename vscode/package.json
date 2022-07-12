@@ -3,7 +3,7 @@
   "publisher": "mintlify",
   "displayName": "Document Connector",
   "description": "Create connections between documentation and code",
-  "version": "0.5.14",
+  "version": "0.6.1",
   "icon": "assets/logo.png",
   "repository": {
     "url": "https://github.com/mintlify/connect"
@@ -13,7 +13,21 @@
   },
   "module": "es2020",
   "categories": [
+    "Notebooks",
+    "Programming Languages",
     "Other"
+  ],
+  "keywords": [
+    "documentation",
+    "connection",
+    "typescript",
+    "javascript",
+    "python",
+    "c++",
+    "webpage",
+    "url",
+    "webpage",
+    "website"
   ],
   "activationEvents": [
     "onStartupFinished",
