@@ -4,16 +4,10 @@ import { linkCodeCommand, linkDirCommand, refreshLinksCommand, openDocsCommand, 
 import { registerAuthRoute } from './components/authentication';
 import DocCodeLensProvider from './components/codeLensProvider';
 import GlobalState from './utils/globalState';
-import { 
-} from './utils/git/builtInGit';
+import { doRegisterBuiltinGitProvider } from './utils/git/builtInGit';
 import { GitApiImpl } from './utils/git/gitApiImpl';
 import { Repository } from './utils/git/types';
 import { createTreeViews } from './treeviews';
-
-const setLoginContext = (globalState: GlobalState): void => {
-	// Manage authentication states
-	vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', globalState.getUserId() != null);
-}
 
 export async function activate(context: vscode.ExtensionContext): Promise<GitApiImpl> {
 	const openDiff = vscode.workspace.getConfiguration('git').get('openDiffOnClick', true);
