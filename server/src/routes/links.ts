@@ -110,10 +110,12 @@ linksRouter.put('/', userMiddleware, async (req, res) => {
   }
 });
 
-linksRouter.get('/iframe', async (req, res) => {
+linksRouter.get('/iframe', userMiddleware, async (req, res) => {
   const url = req.query.url as string;
+  const { user } = res.locals;
 
   const iframeUrl = await getHyperbeamIframeUrl(url);
+  track(user.userId, 'Open document');
   res.send(iframeUrl);
 })
 

@@ -79,7 +79,7 @@ export const openDocsCommand = () => {
     });
 };
 
-export const openPreviewCommand = () => {
+export const openPreviewCommand = (globalState: GlobalState) => {
     return vscode.commands.registerCommand('mintlify.preview-doc', async (doc: Doc) => {
         const panel = vscode.window.createWebviewPanel(
 			'mintlify.preview',
@@ -97,6 +97,7 @@ export const openPreviewCommand = () => {
 			const url = doc.url;
 			const { data: hyperbeamIframeUrl } = await axios.get(`${API_ENDPOINT}/links/iframe`, {
 				params: {
+                    ...globalState.getAuthParams(),
 					url
 				}
 			});

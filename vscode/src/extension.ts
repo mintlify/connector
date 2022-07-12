@@ -20,7 +20,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		refreshLinksCommand(globalState),
 		prefillDocCommand(viewProvider),
 		openDocsCommand(),
-		openPreviewCommand(),
+		openPreviewCommand(globalState),
 		highlightConnectionCommand(),
 		inviteTeamMemberCommand(globalState),
 		removeTeamMemberCommand(globalState)
