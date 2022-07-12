@@ -10,6 +10,7 @@ import {
 	openPreviewCommand,
 	prefillDocCommand,
 	refreshLinksCommand,
+	removeTeamMemberCommand,
 } from './commands';
 import { CodeReturned, ConnectionsTreeProvider } from './treeviews/connections';
 import { DocumentsTreeProvider } from './treeviews/documents';
@@ -99,7 +100,7 @@ export async function mintlifyActivate(context: vscode.ExtensionContext): Promis
 		refreshLinksCommand(globalState),
 		prefillDocCommand(viewProvider),
 		openDocsCommand(),
-		openPreviewCommand(),
+		openPreviewCommand(globalState),
 		highlightConnectionCommand(),
 		inviteTeamMemberCommand(globalState),
 		removeTeamMemberCommand(globalState),

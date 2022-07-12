@@ -133,7 +133,8 @@ userRouter.post("/invite", userMiddleware, async (req: express.Request, res: exp
       const org = await Org.findOneAndUpdate({ _id: orgId, invitedEmails: { $ne: emails } }, { $push: { invitedEmails: { $each: emails } } });
       track(res.locals.user.userId, 'Invite member', {
         emails,
-        org: orgId.toString()
+        org: orgId.toString(),
+        isVSCode: Boolean(isVSCode)
       });
 
       const state = JSON.stringify({

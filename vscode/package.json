@@ -3,7 +3,7 @@
   "publisher": "mintlify",
   "displayName": "Document Connector",
   "description": "Create connections between documentation and code",
-  "version": "0.6.1",
+  "version": "0.6.4",
   "icon": "assets/logo.png",
   "repository": {
     "url": "https://github.com/mintlify/connect"
@@ -10435,6 +10435,7 @@
     "compile": "webpack --mode development --config-name extension:node --config-name webviews",
     "publish": "vsce publish"
   },
+  "extensionDependencies": ["eamodio.gitlens"],
   "devDependencies": {
     "@heroicons/react": "^1.0.6",
 		"@octokit/core": "3.5.1",

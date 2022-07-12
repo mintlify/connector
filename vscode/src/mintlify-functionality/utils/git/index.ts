@@ -1,32 +1,33 @@
-import * as vscode from 'vscode';
-import * as findParentDir from 'find-parent-dir';
+/* eslint-disable @typescript-eslint/await-thenable */
+/* eslint-disable no-restricted-imports */
 import * as fs from 'fs';
 import * as path from 'path';
-import * as ini from 'ini';
+import * as findParentDir from 'find-parent-dir';
 import * as gitRev from 'git-rev-2';
-
-import gitProvider, { BaseProvider } from './gitProvider';
+import * as ini from 'ini';
+import * as vscode from 'vscode';
 import { ViewProvider } from '../../viewProvider';
+import gitProvider, { BaseProvider } from './gitProvider';
 
 const window = vscode.window;
 
 const locateGitConfig = (repoDir: string): Promise<string> => {
 	return new Promise((resolve, reject) => {
 		fs.lstat(path.join(repoDir, '.git'), (err, stat) => {
-			if (err) {
+			if (err != null) {
 				reject(err);
 			}
 			if (stat.isFile()) {
 				// .git may be a file, similar to symbolic link, containing "gitdir: <relative path to git dir>""
 				// this happens in gitsubmodules
 				fs.readFile(path.join(repoDir, '.git'), 'utf-8', (err, data) => {
-					if (err) {
+					if (err != null) {
 						reject(err);
 					}
 
 					const matchArray: RegExpMatchArray | null = data.match(/gitdir: (.*)/);
 					let match = '';
-					if (matchArray) {
+					if (matchArray != null) {
 						match = matchArray[1];
 					}
 					if (!match) {
@@ -36,7 +37,7 @@ const locateGitConfig = (repoDir: string): Promise<string> => {
 
 					// for worktrees traverse up to the main .git folder
 					const workTreeMatch = match.match(/\.git\/worktrees*/);
-					if (workTreeMatch) {
+					if (workTreeMatch != null) {
 						const mainGitFolder = match.slice(0, workTreeMatch.index);
 						configPath = path.join(mainGitFolder, '.git', 'config');
 					}
@@ -52,7 +53,7 @@ const locateGitConfig = (repoDir: string): Promise<string> => {
 const readConfigFile = (path: string): { [key: string]: any } => {
 	return new Promise((resolve, reject) => {
 		fs.readFile(path, 'utf-8', (err, data) => {
-			if (err) {
+			if (err != null) {
 				console.error(err);
 				reject(err);
 			}
@@ -86,7 +87,7 @@ export const getGitData = async (
 ): Promise<Code> => {
 	const repoDir: string | null = findParentDir.sync(fileFsPath, '.git');
 
-	let code: Code = {
+	const code: Code = {
 		url: '',
 		sha: '',
 		provider: '',
@@ -94,7 +95,7 @@ export const getGitData = async (
 		gitOrg: '',
 		repo: '',
 		branch: '',
-		type,
+		type: type,
 	};
 
 	if (!repoDir) {
@@ -104,14 +105,14 @@ export const getGitData = async (
 	const gitConfigPath: string = await locateGitConfig(repoDir);
 	const config: { [key: string]: any } = await readConfigFile(gitConfigPath);
 
-	await gitRev.long(repoDir, async function (_: any, sha: any) {
+	await gitRev.long(repoDir, async (_: any, sha: any) => {
 		code.sha = sha;
-		let rawUri: any,
-			configuredBranch: any,
-			provider: BaseProvider | null = null,
-			remoteName: any;
+		let rawUri: any;
+		let configuredBranch: any;
+		let provider: BaseProvider | null = null;
+		let remoteName: any;
 
-		await gitRev.branch(repoDir, async function (_: any, branch: any) {
+		await gitRev.branch(repoDir, async (_: any, branch: any) => {
 			// Check to see if the branch has a configured remote
 			configuredBranch = config[`remote "${branch}"`];
 			code.branch = branch;
@@ -125,28 +126,28 @@ export const getGitData = async (
 					rawUri = config[remotes[0]].url;
 				}
 			}
-			if (!rawUri) {
-				vscode.window.showWarningMessage(`No remote found on branch.`);
+			if (rawUri == null) {
+				await vscode.window.showWarningMessage(`No remote found on branch.`);
 				return;
 			}
 
 			try {
 				provider = gitProvider(rawUri, sha);
 			} catch (e: any) {
-				let errmsg = e.toString();
-				window.showWarningMessage(`Unknown Git provider. ${errmsg}`);
+				const errmsg = e.toString();
+				await window.showWarningMessage(`Unknown Git provider. ${errmsg}`);
 				return;
 			}
 
 			let formattedFilePath = path.relative(repoDir, fileFsPath).replace(/\\/g, '/');
 			formattedFilePath = formattedFilePath.replace(/\s{1}/g, '%20');
 			code.file = formattedFilePath;
-			let subdir = repoDir !== fileFsPath ? '/' + formattedFilePath : '';
+			const subdir = repoDir !== fileFsPath ? `/${formattedFilePath}` : '';
 			if (provider != null) {
 				code.provider = provider.name;
 				code.gitOrg = provider.gitUrl.organization;
 				code.repo = provider.gitUrl.name;
-				if (lines) {
+				if (lines != null) {
 					if (lines[0] === lines[1]) {
 						code.url = provider.webUrl(sha, subdir, lines[0] + 1);
 						code.line = lines[0];
@@ -184,28 +185,29 @@ export const getFilePath = (fileFsPath: string) => {
 };
 
 export const getRepoInfo = async (fileFsPath: string): Promise<{ repo: string; gitOrg: string; file: string }> => {
-	return new Promise(async (resolve, reject) => {
-		const repoDir: string | null = findParentDir.sync(fileFsPath, '.git');
-		let gitOrg: string, repo: string;
-		if (!repoDir) {
-			return resolve({ repo: '', gitOrg: '', file: '' }); // TODO - proper error handling
-		}
+	const repoDir: string | null = findParentDir.sync(fileFsPath, '.git');
+	let gitOrg: string;
+	let repo: string;
+	if (!repoDir) {
+		return { repo: '', gitOrg: '', file: '' }; // TODO - proper error handling
+	}
 
-		const gitConfigPath: string = await locateGitConfig(repoDir);
-		const config: { [key: string]: any } = await readConfigFile(gitConfigPath);
+	const gitConfigPath: string = await locateGitConfig(repoDir);
+	const config: { [key: string]: any } = await readConfigFile(gitConfigPath);
 
-		const file: string = getFilePath(fileFsPath);
+	const file: string = getFilePath(fileFsPath);
 
-		await gitRev.long(repoDir, async function (_: any, sha: any) {
-			let rawUri: any,
-				configuredBranch: any,
-				provider: BaseProvider | null = null,
-				remoteName: any;
+	return new Promise((resolve, reject) => {
+		gitRev.long(repoDir, async (_: any, sha: any) => {
+			let rawUri: any;
+			let configuredBranch: any;
+			let provider: BaseProvider | null = null;
+			let remoteName: any;
 
-			await gitRev.branch(repoDir, async function (_: any, branch: any) {
+			await gitRev.branch(repoDir, async (_: any, branch: any) => {
 				// Check to see if the branch has a configured remote
 				configuredBranch = config[`remote "${branch}"`];
-				if (configuredBranch) {
+				if (configuredBranch != null) {
 					// Use the current branch's configured remote
 					remoteName = configuredBranch.remote;
 					rawUri = config[`remote "${remoteName}"`].url;
@@ -215,25 +217,23 @@ export const getRepoInfo = async (fileFsPath: string): Promise<{ repo: string; g
 						rawUri = config[remotes[0]].url;
 					}
 				}
-				if (!rawUri) {
-					vscode.window.showWarningMessage(`No remote found on branch.`);
+				if (rawUri == null) {
+					await vscode.window.showWarningMessage(`No remote found on branch.`);
 					return reject();
 				}
 
 				try {
 					provider = gitProvider(rawUri, sha);
 				} catch (e: any) {
-					let errmsg = e.toString();
-					window.showWarningMessage(`Unknown Git provider. ${errmsg}`);
+					const errmsg = e.toString();
+					await window.showWarningMessage(`Unknown Git provider. ${errmsg}`);
 					return reject();
 				}
 
-				let formattedFilePath = path.relative(repoDir, fileFsPath).replace(/\\/g, '/');
-				formattedFilePath = formattedFilePath.replace(/\s{1}/g, '%20');
 				if (provider != null) {
 					gitOrg = provider.gitUrl.organization;
 					repo = provider.gitUrl.name;
-					return resolve({ repo, gitOrg, file });
+					return resolve({ repo: repo, gitOrg: gitOrg, file: file });
 				}
 			});
 		});
