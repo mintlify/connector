@@ -185,59 +185,59 @@ const App = () => {
     <div className="space-y-1">
       {
         <>
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="url" className="block">
-            Documentation<span className='text-red-500'>*</span>
-          </label>
-          <div className="mt-1">
-            {
-              selectedDoc == null && <input
-                type="text"
-                name="url"
-                id="url"
-                className="block w-full text-sm"
-                placeholder="www.example.com"
-                value={query}
-                onChange={(event) => updateQuery(event.target.value)}
-              />
-            }
-            {
-              selectedDoc != null && <div className="block w-full text-sm code">
-                <div className="flex items-center space-x-1">
-                  <div>
-                    <DocumentTextIcon className="h-4" />
-                  </div>
-                  <div className="flex-1">
-                    {selectedDoc.title}
-                  </div>
-                  <div className="cursor-pointer" onClick={clearSelectedDoc}>
-                    <XIcon className="h-4" />
+          <form onSubmit={handleSubmit}>
+            <label htmlFor="url" className="block">
+              Documentation<span className='text-red-500'>*</span>
+            </label>
+            <div className="mt-1">
+              {
+                selectedDoc == null && <input
+                  type="text"
+                  name="url"
+                  id="url"
+                  className="block w-full text-sm"
+                  placeholder="www.example.com"
+                  value={query}
+                  onChange={(event) => updateQuery(event.target.value)}
+                />
+              }
+              {
+                selectedDoc != null && <div className="block w-full text-sm code">
+                  <div className="flex items-center space-x-1">
+                    <div>
+                      <DocumentTextIcon className="h-4" />
+                    </div>
+                    <div className="flex-1">
+                      {selectedDoc.title}
+                    </div>
+                    <div className="cursor-pointer" onClick={clearSelectedDoc}>
+                      <XIcon className="h-4" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            }
-            {inputError && (
-              <span className="text-red-500">{inputError}</span>
-            )}
+              }
+              {inputError && (
+                <span className="text-red-500">{inputError}</span>
+              )}
+            </div>
+            <div className='flex flex-row mt-3'>
+              Select Relevant Code<span className='text-red-500'>*</span>
+            </div>
+            <div className='code'>
+              {code == null ? <div className='italic'>No code selected</div> : <CodeContent code={code} key={code.sha} />}
+            </div>
+            <button
+              type="submit"
+              className={classNames("submit", hasDocSelected ? 'opacity-100 hover:cursor-pointer' : 'opacity-50 hover:cursor-default')}
+              disabled={!hasDocSelected}
+            >
+              Submit
+            </button>
+          </form>
+          <div className="mt-1">
+            Have questions? Join our <a href="https://discord.gg/6W7GuYuxra">community</a>
           </div>
-          <div className='flex flex-row mt-3'>
-            Select Relevant Code<span className='text-red-500'>*</span>
-          </div>
-          <div className='code'>
-            { code == null ? <div className='italic'>No code selected</div> : <CodeContent code={code} key={code.sha} /> }
-          </div>
-          <button
-            type="submit"
-            className={classNames("submit", hasDocSelected ? 'opacity-100 hover:cursor-pointer' : 'opacity-50 hover:cursor-default')}
-            disabled={!hasDocSelected}
-          >
-            Submit
-          </button>
-        </form>
-        <div className="mt-1">
-          Have questions? Join our <a href="https://discord.gg/6W7GuYuxra">community</a>
-        </div>
-      </>
+        </>
       }
     </div>
   );
