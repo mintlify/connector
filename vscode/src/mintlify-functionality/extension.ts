@@ -1,7 +1,16 @@
 import * as vscode from 'vscode';
 import { registerAuthRoute } from './authentication';
 import DocCodeLensProvider from './codeLensProvider';
-import { linkCodeCommand, linkDirCommand, openDocsCommand, refreshLinksCommand } from './commands';
+import {
+	highlightConnectionCommand,
+	inviteTeamMemberCommand,
+	linkCodeCommand,
+	linkDirCommand,
+	openDocsCommand,
+	openPreviewCommand,
+	prefillDocCommand,
+	refreshLinksCommand,
+} from './commands';
 import { CodeReturned, ConnectionsTreeProvider } from './treeviews/connections';
 import { DocumentsTreeProvider } from './treeviews/documents';
 import { Code } from './utils/git';
@@ -23,7 +32,11 @@ const createTreeViews = (state: GlobalState): void => {
 	});
 
 	vscode.commands.registerCommand('mintlify.delete-connection', async (connection: { code: Code }) => {
-		const response = await vscode.window.showInformationMessage(`Are you sure you would like to delete the connection? This cannot be undone`, 'Delete', 'Cancel');
+		const response = await vscode.window.showInformationMessage(
+			`Are you sure you would like to delete the connection? This cannot be undone`,
+			'Delete',
+			'Cancel',
+		);
 		if (response !== 'Delete') {
 			return;
 		}
@@ -32,7 +45,7 @@ const createTreeViews = (state: GlobalState): void => {
 		await vscode.commands.executeCommand('mintlify.refresh-links');
 	});
 
-	vscode.commands.registerCommand('mintlify.rename-document', async (docOption) => {
+	vscode.commands.registerCommand('mintlify.rename-document', async docOption => {
 		const newName = await vscode.window.showInputBox({
 			title: 'Edit name of document',
 			value: docOption.doc.title,
@@ -50,8 +63,12 @@ const createTreeViews = (state: GlobalState): void => {
 		await vscode.commands.executeCommand('mintlify.refresh-links');
 	});
 
-	vscode.commands.registerCommand('mintlify.delete-document', async (docOption) => {
-		const response = await vscode.window.showInformationMessage(`Are you sure you would like to delete ${docOption.doc.title}? This cannot be undone`, 'Delete', 'Cancel');
+	vscode.commands.registerCommand('mintlify.delete-document', async docOption => {
+		const response = await vscode.window.showInformationMessage(
+			`Are you sure you would like to delete ${docOption.doc.title}? This cannot be undone`,
+			'Delete',
+			'Cancel',
+		);
 		if (response !== 'Delete') {
 			return;
 		}
@@ -60,7 +77,7 @@ const createTreeViews = (state: GlobalState): void => {
 		await vscode.commands.executeCommand('mintlify.refresh-links');
 	});
 
-	vscode.window.onDidChangeActiveTextEditor((editor) => {
+	vscode.window.onDidChangeActiveTextEditor(editor => {
 		if (editor == null) {
 			return;
 		}
@@ -80,17 +97,23 @@ export async function mintlifyActivate(context: vscode.ExtensionContext): Promis
 		linkCodeCommand(viewProvider),
 		linkDirCommand(viewProvider),
 		refreshLinksCommand(globalState),
-		openDocsCommand()
+		prefillDocCommand(viewProvider),
+		openDocsCommand(),
+		openPreviewCommand(),
+		highlightConnectionCommand(),
+		inviteTeamMemberCommand(globalState),
+		removeTeamMemberCommand(globalState),
 	);
-	registerAuthRoute(viewProvider);
 
-	vscode.window.onDidChangeTextEditorSelection(async (event) => {
+	registerAuthRoute(viewProvider, globalState);
+
+	vscode.window.onDidChangeTextEditorSelection(async event => {
 		const editor = event.textEditor;
 		await vscode.commands.executeCommand('mintlify.link-code', { editor: editor, scheme: 'file' });
 	});
 
-	vscode.commands.registerCommand('mintlify.prefill-doc', async (doc: Doc) => {
-		await viewProvider.prefillDoc(doc);
+	vscode.commands.registerCommand('mintlify.prefill-doc', (doc: Doc) => {
+		viewProvider.prefillDoc(doc);
 	});
 
 	vscode.commands.registerCommand('mintlify.highlight-connection', async (code: CodeReturned) => {
@@ -128,7 +151,12 @@ const deferredActivate = async (context: vscode.ExtensionContext, globalState: G
 	await init(context, apiImpl, globalState, repositories);
 };
 
-const init = async (context: vscode.ExtensionContext, git: GitApiImpl, globalState: GlobalState, repositories: Repository[]) => {
+const init = async (
+	context: vscode.ExtensionContext,
+	git: GitApiImpl,
+	globalState: GlobalState,
+	repositories: Repository[],
+) => {
 	// Sort the repositories to match folders in a multiroot workspace (if possible).
 	const workspaceFolders = vscode.workspace.workspaceFolders;
 	if (workspaceFolders != null) {
@@ -164,19 +192,25 @@ const init = async (context: vscode.ExtensionContext, git: GitApiImpl, globalSta
 		await codeLensProvider.refreshCodeLenses();
 	};
 
-	context.subscriptions.push(git.onDidChangeState(async (e) => {
-		if (e === 'initialized') {
+	context.subscriptions.push(
+		git.onDidChangeState(async e => {
+			if (e === 'initialized') {
+				await updateRepoInfo();
+			}
+		}),
+	);
+
+	context.subscriptions.push(
+		git.onDidCloseRepository(async () => {
 			await updateRepoInfo();
-		}
-	}));
+		}),
+	);
 
-	context.subscriptions.push(git.onDidCloseRepository(async () => {
-		await updateRepoInfo();
-	}));
-
-	context.subscriptions.push(git.onDidOpenRepository(async () => {
-		await updateRepoInfo();
-	}));
+	context.subscriptions.push(
+		git.onDidOpenRepository(async () => {
+			await updateRepoInfo();
+		}),
+	);
 
 	vscode.workspace.onDidSaveTextDocument(async () => {
 		await vscode.commands.executeCommand('mintlify.refresh-links');

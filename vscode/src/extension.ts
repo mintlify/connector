@@ -11,6 +11,7 @@ import { GitUri } from './git/gitUri';
 import { GitBranch, GitCommit } from './git/models';
 import { Logger, LogLevel } from './logger';
 import { Messages } from './messages';
+import { mintlifyActivate } from './mintlify-functionality/extension';
 import { registerPartnerActionRunners } from './partners';
 import { StorageKeys, SyncedStorageKeys } from './storage';
 import { executeCommand, registerCommands } from './system/command';
@@ -19,7 +20,6 @@ import { once } from './system/event';
 import { Stopwatch } from './system/stopwatch';
 import { compare } from './system/version';
 import { ViewNode } from './views/nodes';
-import { mintlifyActivate } from './mintlify-functionality/extension';
 
 export async function activate(context: ExtensionContext): Promise<GitLensApi | undefined> {
 	const insiders = context.extension.id === 'eamodio.gitlens-insiders';
@@ -197,4 +197,3 @@ function registerBuiltInActionRunners(container: Container): void {
 		}),
 	);
 }
-

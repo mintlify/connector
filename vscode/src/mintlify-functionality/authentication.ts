@@ -1,7 +1,14 @@
 import * as vscode from 'vscode';
+import GlobalState from '../utils/globalState';
 import { ViewProvider } from './viewProvider';
 
-export const registerAuthRoute = (provider: ViewProvider) => {
+// Register the global when clause for isLoggedIn
+const setLoginContext = (globalState: GlobalState): void => {
+	// Manage authentication states
+	vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', globalState.getUserId() != null);
+}
+
+export const registerAuthRoute = (provider: ViewProvider, globalState: GlobalState) => {
   vscode.window.registerUriHandler({
     async handleUri(uri: vscode.Uri) {
       if (uri.path === '/auth') {
@@ -20,7 +27,6 @@ export const registerAuthRoute = (provider: ViewProvider) => {
           }
 
           provider.authenticate(user);
-          vscode.window.showInformationMessage(`🙌 Successfully signed in with ${user.email}`);
         } catch (err) {
           vscode.window.showErrorMessage('Error authenticating user');
         }
@@ -44,6 +50,8 @@ export const registerAuthRoute = (provider: ViewProvider) => {
   vscode.commands.registerCommand('mintlify.logout', () => {
     provider.logout();
   });
+
+  setLoginContext(globalState);
 };
 
 export const openLogin = (endpoint: string) => {

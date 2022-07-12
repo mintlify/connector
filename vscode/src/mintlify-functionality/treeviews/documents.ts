@@ -1,8 +1,9 @@
-import * as vscode from 'vscode';
+// eslint-disable-next-line no-restricted-imports
 import * as path from 'path';
-import GlobalState from '../utils/globalState';
 import axios from 'axios';
+import * as vscode from 'vscode';
 import { API_ENDPOINT } from '../utils/api';
+import GlobalState from '../utils/globalState';
 import { Doc } from '../viewProvider';
 
 type Group = {
@@ -30,12 +31,13 @@ export class DocumentsTreeProvider implements vscode.TreeDataProvider<GroupOptio
 	}
 
 	async getChildren(groupElement: GroupOption): Promise<any[]> {
-		if (groupElement) {
+		if (groupElement != null) {
 			const {
 				data: { docs },
 			} = await axios.get(`${API_ENDPOINT}/docs/method/${groupElement.group._id}`, {
 				params: this.state.getAuthParams(),
 			});
+			await vscode.commands.executeCommand('setContext', 'mintlify.hasDocuments', true);
 			return docs.map((doc: any) => new DocOption(doc, vscode.TreeItemCollapsibleState.None));
 		}
 
@@ -47,6 +49,7 @@ export class DocumentsTreeProvider implements vscode.TreeDataProvider<GroupOptio
 			});
 
 			if (groups.length === 0) {
+				await vscode.commands.executeCommand('setContext', 'mintlify.hasDocuments', false);
 				return [new NoDocsOption()];
 			}
 
@@ -59,10 +62,13 @@ export class DocumentsTreeProvider implements vscode.TreeDataProvider<GroupOptio
 					params: this.state.getAuthParams(),
 				});
 				if (docs.length === 0) {
+					await vscode.commands.executeCommand('setContext', 'mintlify.hasDocuments', false);
 					return [new NoDocsOption()];
 				}
 				return docs.map((doc: any) => new DocOption(doc, vscode.TreeItemCollapsibleState.None));
 			}
+
+			await vscode.commands.executeCommand('setContext', 'mintlify.hasDocuments', true);
 
 			return [...groups.map((group: any) => new GroupOption(group, vscode.TreeItemCollapsibleState.Collapsed))];
 		} catch {

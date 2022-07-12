@@ -1,9 +1,10 @@
-import * as vscode from 'vscode';
+// eslint-disable-next-line no-restricted-imports
 import * as path from 'path';
-import GlobalState from '../utils/globalState';
 import axios from 'axios';
+import * as vscode from 'vscode';
 import { API_ENDPOINT } from '../utils/api';
 import { Code, getRepoInfo } from '../utils/git';
+import GlobalState from '../utils/globalState';
 import { Doc } from '../viewProvider';
 
 export type CodeReturned = Code & { doc: Doc };
@@ -25,8 +26,10 @@ export class ConnectionsTreeProvider implements vscode.TreeDataProvider<Connecti
 
 	async getChildren(): Promise<any[]> {
 		const editor = vscode.window.activeTextEditor;
-		let gitOrg, file, repo;
-		if (editor) {
+		let gitOrg;
+		let file;
+		let repo;
+		if (editor != null) {
 			const fileFsPath: string = editor.document.uri.fsPath;
 			const { gitOrg: activeGitOrg, repo: activeRepo, file: activeFile } = await getRepoInfo(fileFsPath);
 			[gitOrg, file, repo] = [activeGitOrg, activeFile, activeRepo];
@@ -38,9 +41,9 @@ export class ConnectionsTreeProvider implements vscode.TreeDataProvider<Connecti
 			} = await axios.get(`${API_ENDPOINT}/links`, {
 				params: {
 					...this.state.getAuthParams(),
-					gitOrg,
-					file,
-					repo,
+					gitOrg: gitOrg,
+					file: file,
+					repo: repo,
 				},
 			});
 

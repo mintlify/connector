@@ -16,7 +16,6 @@ webviews/**
 *.tsbuildinfo
 yarn.lock
 **/*.map
-**/*.svg
 **/*.ts
 *.vsix
 **/*.bak

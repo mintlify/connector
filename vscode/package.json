@@ -3,7 +3,7 @@
   "publisher": "mintlify",
   "displayName": "Document Connector",
   "description": "Create connections between documentation and code",
-  "version": "0.4.5",
+  "version": "0.6.1",
   "icon": "assets/logo.png",
   "repository": {
     "url": "https://github.com/mintlify/connect"
@@ -13,7 +13,21 @@
   },
   "module": "es2020",
   "categories": [
+    "Notebooks",
+    "Programming Languages",
     "Other"
+  ],
+  "keywords": [
+    "documentation",
+    "connection",
+    "typescript",
+    "javascript",
+    "python",
+    "c++",
+    "webpage",
+    "url",
+    "webpage",
+    "website"
   ],
   "main": "./dist/gitlens.js",
 	"browser": "./dist/browser/gitlens.js",
@@ -10451,7 +10465,7 @@
 		"uuid": "8.3.2"
   },
   "dependencies": {
-    "@squoosh/lib": "^0.4.0",
+    	"@squoosh/lib": "^0.4.0",
 		"@types/axios": "^0.14.0",
 		"@types/chroma-js": "2.1.3",
 		"@types/glob": "7.2.0",

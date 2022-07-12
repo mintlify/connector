@@ -1,11 +1,11 @@
-import { CodeLensProvider, TextDocument, CancellationToken, CodeLens, Range, Command, Uri, window } from 'vscode';
+import { CancellationToken, CodeLens, CodeLensProvider, Command, Range, TextDocument, Uri, window } from 'vscode';
 import * as vscode from 'vscode';
-import GlobalState from './utils/globalState';
 import { getFilePath } from './utils/git';
-import { Link } from './utils/links';
-import { Repository } from './utils/git/types';
-import { GitApiImpl } from './utils/git/gitApiImpl';
 import { mapOldPositionToNew } from './utils/git/diffPositionMapping';
+import { GitApiImpl } from './utils/git/gitApiImpl';
+import { Repository } from './utils/git/types';
+import GlobalState from './utils/globalState';
+import { Link } from './utils/links';
 
 export default class DocCodeLensProvider implements CodeLensProvider {
 	private _document: TextDocument | undefined;
@@ -17,7 +17,7 @@ export default class DocCodeLensProvider implements CodeLensProvider {
 
 	constructor(private _globalState: GlobalState, private _repositories: Repository[], private _git: GitApiImpl) {}
 
-	async provideCodeLenses(document: TextDocument, token: CancellationToken): Promise<CodeLens[]> {
+	async provideCodeLenses(document: TextDocument, _: CancellationToken): Promise<CodeLens[]> {
 		console.log('Provide code lenses');
 		this._document = document;
 		this._lenses = await this.getCodeLenses();
@@ -70,9 +70,9 @@ export default class DocCodeLensProvider implements CodeLensProvider {
 			const range = new Range(firstLine.range.start, lastLine.range.end);
 			const title = this.formatTitle(link);
 			const command: Command = {
-				command: 'mintlify.open-doc',
-				title,
-				arguments: [link.doc.url],
+				command: 'mintlify.preview-doc',
+				title: title,
+				arguments: [link.doc],
 			};
 			const lens: CodeLens = new CodeLens(range, command);
 			return lens;
@@ -99,7 +99,7 @@ export default class DocCodeLensProvider implements CodeLensProvider {
 			return 'Go to document';
 		}
 		if (formattedTitle.length > 30) {
-			formattedTitle = formattedTitle.slice(0, 30) + '...';
+			formattedTitle = `${formattedTitle.slice(0, 30)}...`;
 		}
 		return formattedTitle;
 	}
@@ -112,12 +112,11 @@ export default class DocCodeLensProvider implements CodeLensProvider {
 			return '';
 		}
 		const repo = this._repositories[0];
-		if (matchedEditor && matchedEditor.document.isDirty) {
+		if (matchedEditor?.document.isDirty) {
 			const documentText = matchedEditor.document.getText();
 			const idOfCurrentText = await repo.hashObject(documentText);
-			return await repo.diffBlobs(sha, idOfCurrentText);
-		} else {
-			return await repo.diffWith(sha, fileName);
+			return repo.diffBlobs(sha, idOfCurrentText);
 		}
+		return repo.diffWith(sha, fileName);
 	}
 }
