@@ -37,8 +37,11 @@ export class ViewProvider implements WebviewViewProvider {
 		this.globalState = globalState;
 	}
 
-	public authenticate(user: any): void {
+	public authenticate(user: any, subdomain?: string | null): void {
 		this.globalState.setUserId(user.userId);
+		if (subdomain) {
+			this.globalState.setSubdomain(subdomain);
+		}
 		vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', true);
 		vscode.window.showInformationMessage(`🙌 Successfully signed in with ${user.email}`);
 		vscode.commands.executeCommand('mintlify.refresh-links');

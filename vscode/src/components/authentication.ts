@@ -25,8 +25,8 @@ export const registerAuthRoute = (provider: ViewProvider, globalState: GlobalSta
             vscode.window.showErrorMessage('User has insufficient credentials. Try again later');
             return;
           }
-
-          provider.authenticate(user);
+          const subdomain = query.get('subdomain');
+          provider.authenticate(user, subdomain);
         } catch (err) {
           vscode.window.showErrorMessage('Error authenticating user');
         }
