@@ -22,8 +22,6 @@ const createTreeViews = (state: GlobalState): void => {
 		connectionsTreeProvider.refresh();
 	});
 
-
-	
 	vscode.commands.registerCommand('mintlify.delete-connection', async (connection: { code: Code }) => {
 		const response = await vscode.window.showInformationMessage(`Are you sure you would like to delete the connection? This cannot be undone`, 'Delete', 'Cancel');
 		if (response !== 'Delete') {

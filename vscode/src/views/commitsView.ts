@@ -1,0 +1,404 @@
+import {
+	CancellationToken,
+	commands,
+	ConfigurationChangeEvent,
+	Disposable,
+	ProgressLocation,
+	TreeItem,
+	TreeItemCollapsibleState,
+	window,
+} from 'vscode';
+import { CommitsViewConfig, configuration, ViewFilesLayout, ViewShowBranchComparison } from '../configuration';
+import { Commands, ContextKeys, GlyphChars } from '../constants';
+import { Container } from '../container';
+import { setContext } from '../context';
+import { GitUri } from '../git/gitUri';
+import {
+	GitCommit,
+	GitReference,
+	GitRevisionReference,
+	Repository,
+	RepositoryChange,
+	RepositoryChangeComparisonMode,
+	RepositoryChangeEvent,
+} from '../git/models';
+import { executeCommand } from '../system/command';
+import { gate } from '../system/decorators/gate';
+import { debug } from '../system/decorators/log';
+import { disposableInterval } from '../system/function';
+import {
+	BranchNode,
+	BranchTrackingStatusNode,
+	RepositoriesSubscribeableNode,
+	RepositoryFolderNode,
+	RepositoryNode,
+	ViewNode,
+} from './nodes';
+import { ViewBase } from './viewBase';
+
+export class CommitsRepositoryNode extends RepositoryFolderNode<CommitsView, BranchNode> {
+	async getChildren(): Promise<ViewNode[]> {
+		if (this.child == null) {
+			const branch = await this.repo.getBranch();
+			if (branch == null) {
+				this.view.message = 'No commits could be found.';
+
+				return [];
+			}
+
+			this.view.message = undefined;
+
+			let authors;
+			if (this.view.state.myCommitsOnly) {
+				const user = await this.view.container.git.getCurrentUser(this.repo.path);
+				if (user != null) {
+					authors = [{ name: user.name, email: user.email, username: user.username, id: user.id }];
+				}
+			}
+
+			this.child = new BranchNode(this.uri, this.view, this, branch, true, {
+				expanded: true,
+				limitCommits: !this.splatted,
+				showComparison: this.view.config.showBranchComparison,
+				showCurrent: false,
+				showTracking: true,
+				authors: authors,
+			});
+		}
+
+		return this.child.getChildren();
+	}
+
+	@gate()
+	@debug()
+	override async refresh(reset: boolean = false) {
+		if (reset) {
+			this.child = undefined;
+		} else {
+			void this.parent?.triggerChange(false);
+		}
+
+		await this.ensureSubscription();
+	}
+
+	@debug()
+	protected override async subscribe() {
+		const lastFetched = (await this.repo?.getLastFetched()) ?? 0;
+
+		const interval = Repository.getLastFetchedUpdateInterval(lastFetched);
+		if (lastFetched !== 0 && interval > 0) {
+			return Disposable.from(
+				await super.subscribe(),
+				disposableInterval(() => {
+					// Check if the interval should change, and if so, reset it
+					if (interval !== Repository.getLastFetchedUpdateInterval(lastFetched)) {
+						void this.resetSubscription();
+					}
+
+					if (this.splatted) {
+						void this.view.triggerNodeChange(this.parent ?? this);
+					} else {
+						void this.view.triggerNodeChange(this);
+					}
+				}, interval),
+			);
+		}
+
+		return super.subscribe();
+	}
+
+	protected changed(e: RepositoryChangeEvent) {
+		return e.changed(
+			RepositoryChange.Config,
+			RepositoryChange.Heads,
+			RepositoryChange.Index,
+			RepositoryChange.Remotes,
+			RepositoryChange.RemoteProviders,
+			RepositoryChange.Status,
+			RepositoryChange.Unknown,
+			RepositoryChangeComparisonMode.Any,
+		);
+	}
+}
+
+export class CommitsViewNode extends RepositoriesSubscribeableNode<CommitsView, CommitsRepositoryNode> {
+	async getChildren(): Promise<ViewNode[]> {
+		if (this.children == null) {
+			const repositories = this.view.container.git.openRepositories;
+			if (repositories.length === 0) {
+				this.view.message = 'No commits could be found.';
+
+				return [];
+			}
+
+			this.view.message = undefined;
+
+			const splat = repositories.length === 1;
+			this.children = repositories.map(
+				r =>
+					new CommitsRepositoryNode(GitUri.fromRepoPath(r.path), this.view, this, r, splat, {
+						showBranchAndLastFetched: true,
+					}),
+			);
+		}
+
+		if (this.children.length === 1) {
+			const [child] = this.children;
+
+			const branch = await child.repo.getBranch();
+			if (branch != null) {
+				const lastFetched = (await child.repo.getLastFetched()) ?? 0;
+
+				const status = branch.getTrackingStatus();
+				this.view.description = `${status ? `${status} ${GlyphChars.Dot} ` : ''}${branch.name}${
+					branch.rebasing ? ' (Rebasing)' : ''
+				}${lastFetched ? ` ${GlyphChars.Dot} Last fetched ${Repository.formatLastFetched(lastFetched)}` : ''}`;
+			}
+
+			return child.getChildren();
+		}
+
+		return this.children;
+	}
+
+	getTreeItem(): TreeItem {
+		const item = new TreeItem('Commits', TreeItemCollapsibleState.Expanded);
+		return item;
+	}
+}
+
+interface CommitsViewState {
+	myCommitsOnly?: boolean;
+}
+
+export class CommitsView extends ViewBase<CommitsViewNode, CommitsViewConfig> {
+	protected readonly configKey = 'commits';
+
+	constructor(container: Container) {
+		super('gitlens.views.commits', 'Commits', container);
+	}
+
+	override get canReveal(): boolean {
+		return this.config.reveal || !configuration.get('views.repositories.showCommits');
+	}
+
+	private readonly _state: CommitsViewState = {};
+	get state(): CommitsViewState {
+		return this._state;
+	}
+
+	protected getRoot() {
+		return new CommitsViewNode(this);
+	}
+
+	protected registerCommands(): Disposable[] {
+		void this.container.viewCommands;
+
+		return [
+			commands.registerCommand(
+				this.getQualifiedCommand('copy'),
+				() => executeCommand(Commands.ViewsCopy, this.selection),
+				this,
+			),
+			commands.registerCommand(
+				this.getQualifiedCommand('refresh'),
+				() => {
+					this.container.git.resetCaches('branches', 'status', 'tags');
+					return this.refresh(true);
+				},
+				this,
+			),
+			commands.registerCommand(
+				this.getQualifiedCommand('setFilesLayoutToAuto'),
+				() => this.setFilesLayout(ViewFilesLayout.Auto),
+				this,
+			),
+			commands.registerCommand(
+				this.getQualifiedCommand('setFilesLayoutToList'),
+				() => this.setFilesLayout(ViewFilesLayout.List),
+				this,
+			),
+			commands.registerCommand(
+				this.getQualifiedCommand('setFilesLayoutToTree'),
+				() => this.setFilesLayout(ViewFilesLayout.Tree),
+				this,
+			),
+			commands.registerCommand(
+				this.getQualifiedCommand('setMyCommitsOnlyOn'),
+				() => this.setMyCommitsOnly(true),
+				this,
+			),
+			commands.registerCommand(
+				this.getQualifiedCommand('setMyCommitsOnlyOff'),
+				() => this.setMyCommitsOnly(false),
+				this,
+			),
+			commands.registerCommand(
+				this.getQualifiedCommand('setShowAvatarsOn'),
+				() => this.setShowAvatars(true),
+				this,
+			),
+			commands.registerCommand(
+				this.getQualifiedCommand('setShowAvatarsOff'),
+				() => this.setShowAvatars(false),
+				this,
+			),
+			commands.registerCommand(
+				this.getQualifiedCommand('setShowBranchComparisonOn'),
+				() => this.setShowBranchComparison(true),
+				this,
+			),
+			commands.registerCommand(
+				this.getQualifiedCommand('setShowBranchComparisonOff'),
+				() => this.setShowBranchComparison(false),
+				this,
+			),
+			commands.registerCommand(
+				this.getQualifiedCommand('setShowBranchPullRequestOn'),
+				() => this.setShowBranchPullRequest(true),
+				this,
+			),
+			commands.registerCommand(
+				this.getQualifiedCommand('setShowBranchPullRequestOff'),
+				() => this.setShowBranchPullRequest(false),
+				this,
+			),
+		];
+	}
+
+	protected override filterConfigurationChanged(e: ConfigurationChangeEvent) {
+		const changed = super.filterConfigurationChanged(e);
+		if (
+			!changed &&
+			!configuration.changed(e, 'defaultDateFormat') &&
+			!configuration.changed(e, 'defaultDateLocale') &&
+			!configuration.changed(e, 'defaultDateShortFormat') &&
+			!configuration.changed(e, 'defaultDateSource') &&
+			!configuration.changed(e, 'defaultDateStyle') &&
+			!configuration.changed(e, 'defaultGravatarsStyle') &&
+			!configuration.changed(e, 'defaultTimeFormat')
+		) {
+			return false;
+		}
+
+		return true;
+	}
+
+	async findCommit(commit: GitCommit | { repoPath: string; ref: string }, token?: CancellationToken) {
+		const repoNodeId = RepositoryNode.getId(commit.repoPath);
+
+		const branch = await this.container.git.getBranch(commit.repoPath);
+		if (branch == null) return undefined;
+
+		// Check if the commit exists on the current branch
+		const branches = await Container.instance.git.getCommitBranches(commit.repoPath, commit.ref, {
+			branch: branch.name,
+			commitDate: GitCommit.is(commit) ? commit.committer.date : undefined,
+		});
+		if (!branches.length) return undefined;
+
+		return this.findNode((n: any) => n.commit?.ref === commit.ref, {
+			allowPaging: true,
+			maxDepth: 2,
+			canTraverse: async n => {
+				if (n instanceof CommitsViewNode) {
+					let node: ViewNode | undefined = await n.getSplattedChild?.();
+					if (node instanceof CommitsRepositoryNode) {
+						node = await node.getSplattedChild?.();
+						if (node instanceof BranchNode) {
+							await node.loadMore({ until: commit.ref });
+						}
+					}
+
+					return true;
+				}
+
+				if (n instanceof CommitsRepositoryNode) {
+					if (n.id.startsWith(repoNodeId)) {
+						const node = await n.getSplattedChild?.();
+						if (node instanceof BranchNode) {
+							await node.loadMore({ until: commit.ref });
+							return true;
+						}
+					}
+				}
+
+				if (n instanceof BranchTrackingStatusNode) {
+					return n.id.startsWith(repoNodeId);
+				}
+
+				return false;
+			},
+			token: token,
+		});
+	}
+
+	@gate(() => '')
+	async revealCommit(
+		commit: GitRevisionReference,
+		options?: {
+			select?: boolean;
+			focus?: boolean;
+			expand?: boolean | number;
+		},
+	) {
+		return window.withProgress(
+			{
+				location: ProgressLocation.Notification,
+				title: `Revealing ${GitReference.toString(commit, { icon: false, quoted: true })} in the side bar...`,
+				cancellable: true,
+			},
+			async (progress, token) => {
+				const node = await this.findCommit(commit, token);
+				if (node == null) return undefined;
+
+				await this.ensureRevealNode(node, options);
+
+				return node;
+			},
+		);
+	}
+
+	@gate(() => '')
+	async revealRepository(
+		repoPath: string,
+		options?: { select?: boolean; focus?: boolean; expand?: boolean | number },
+	) {
+		const node = await this.findNode(RepositoryFolderNode.getId(repoPath), {
+			maxDepth: 1,
+			canTraverse: n => n instanceof CommitsViewNode || n instanceof RepositoryFolderNode,
+		});
+
+		if (node !== undefined) {
+			await this.reveal(node, options);
+		}
+
+		return node;
+	}
+
+	private setFilesLayout(layout: ViewFilesLayout) {
+		return configuration.updateEffective(`views.${this.configKey}.files.layout` as const, layout);
+	}
+
+	private setMyCommitsOnly(enabled: boolean) {
+		void setContext(ContextKeys.ViewsCommitsMyCommitsOnly, enabled);
+		this.state.myCommitsOnly = enabled;
+		void this.refresh(true);
+	}
+
+	private setShowAvatars(enabled: boolean) {
+		return configuration.updateEffective(`views.${this.configKey}.avatars` as const, enabled);
+	}
+
+	private setShowBranchComparison(enabled: boolean) {
+		return configuration.updateEffective(
+			`views.${this.configKey}.showBranchComparison` as const,
+			enabled ? ViewShowBranchComparison.Working : false,
+		);
+	}
+
+	private async setShowBranchPullRequest(enabled: boolean) {
+		await configuration.updateEffective(`views.${this.configKey}.pullRequests.showForBranches` as const, enabled);
+		await configuration.updateEffective(`views.${this.configKey}.pullRequests.enabled` as const, enabled);
+	}
+}
