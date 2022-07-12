@@ -32,6 +32,8 @@ export class DocumentsTreeProvider implements vscode.TreeDataProvider<GroupOptio
       const { data: { docs }  } = await axios.get(`${API_ENDPOINT}/docs/method/${groupElement.group._id}`, {
         params: this.state.getAuthParams()
       });
+
+      vscode.commands.executeCommand('setContext', 'mintlify.hasDocuments', true);
       return docs.map((doc) => new DocOption(doc, vscode.TreeItemCollapsibleState.None));
     }
 
@@ -41,6 +43,7 @@ export class DocumentsTreeProvider implements vscode.TreeDataProvider<GroupOptio
       });
 
       if (groups.length === 0) {
+        vscode.commands.executeCommand('setContext', 'mintlify.hasDocuments', false);
         return [new NoDocsOption()];
       }
 
@@ -51,8 +54,11 @@ export class DocumentsTreeProvider implements vscode.TreeDataProvider<GroupOptio
           params: this.state.getAuthParams()
         });
         if (docs.length === 0) {
+          vscode.commands.executeCommand('setContext', 'mintlify.hasDocuments', false);
           return [new NoDocsOption()];
         }
+
+        vscode.commands.executeCommand('setContext', 'mintlify.hasDocuments', true);
         return docs.map((doc) => new DocOption(doc, vscode.TreeItemCollapsibleState.None));
       }
 
