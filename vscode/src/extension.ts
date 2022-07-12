@@ -1,4 +1,4 @@
-import { version as codeVersion, env, ExtensionContext, extensions, window, workspace } from 'vscode';
+import { version as codeVersion, env, ExtensionContext, extensions, workspace } from 'vscode';
 import { isWeb } from '@env/platform';
 import { Api } from './api/api';
 import type { CreatePullRequestActionContext, GitLensApi, OpenPullRequestActionContext } from './api/gitlens';
