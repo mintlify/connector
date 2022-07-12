@@ -1,12 +1,11 @@
 {
 	"extends": "./tsconfig.base.json",
 	"compilerOptions": {
-		"tsBuildInfoFile": "tsconfig.tsbuildinfo",
-		"strictNullChecks": true
+    "jsx": "react",
+		"paths": {
+			"@env/*": ["src/env/node/*"]
+		}
 	},
-	"exclude": [
-		"node_modules",
-		"src/test",
-		"webviews"
-	]
+	"include": ["src/**/*"],
+	"exclude": ["src/test/**/*", "src/webviews/apps/**/*", "src/env/browser/**/*", "webviews/**/*"]
 }

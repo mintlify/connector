@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { Doc, ViewProvider } from './components/viewProvider';
 import { linkCodeCommand, linkDirCommand, refreshLinksCommand, openDocsCommand } from './components/commands';
-import { registerAuthRoute } from './components/authentication';
+import { registerAuthRoute } from './mintlify-functionality/authentication';
 import DocCodeLensProvider from './components/codeLensProvider';
 import GlobalState from './utils/globalState';
 import { doRegisterBuiltinGitProvider } from './utils/git/builtInGit';
