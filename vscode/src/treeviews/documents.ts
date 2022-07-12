@@ -62,6 +62,7 @@ export class DocumentsTreeProvider implements vscode.TreeDataProvider<GroupOptio
         return docs.map((doc) => new DocOption(doc, vscode.TreeItemCollapsibleState.None));
       }
 
+      vscode.commands.executeCommand('setContext', 'mintlify.hasDocuments', true);
       return [...groups.map((group) => new GroupOption(group, vscode.TreeItemCollapsibleState.Collapsed))];
     } catch {
       return [new ErrorOption()];
