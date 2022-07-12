@@ -11,10 +11,9 @@
 
 ### 🔗 Create links between code and documentation
 
-Implement a CI Check for documentation - connect documentation to code and receive alerts to update your documentation when the code changes
+Connect documentation to code and receive alerts to update your documentation when the code changes
 
-<img src="./assets/VSCode.png" width="700px" />
-<img src="./assets/GitHub.png" width="700px" />
+<img src="./vscode/assets/connector.png" width="700px" />
 
 ### 🔌 Integrations
 

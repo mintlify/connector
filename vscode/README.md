@@ -4,7 +4,7 @@
 
 Link documentation to your codebase
 
-<img src="/vscode/assets/Create-connection.gif" width="650px" />
+<img src="/vscode/assets/connector.png" width="650px" />
 
 ## Get Started
 
