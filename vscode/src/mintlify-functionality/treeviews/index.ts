@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
-import GlobalState from '../utils/globalState';
-import { DocumentsTreeProvider } from './documents';
-import { ConnectionsTreeProvider } from './connections';
-import { deleteDoc, deleteLink, editDocName } from '../utils/links';
 import { Code } from '../utils/git';
+import { GlobalState } from '../utils/globalState';
+import { deleteDoc, deleteLink, editDocName } from '../utils/links';
+import { ConnectionsTreeProvider } from './connections';
+import { DocumentsTreeProvider } from './documents';
 import { TeamTreeProvider } from './team';
 
 export const createTreeViews = (globalState: GlobalState): void => {
@@ -17,20 +17,24 @@ export const createTreeViews = (globalState: GlobalState): void => {
 	vscode.commands.registerCommand('mintlify.refresh-views', () => {
 		documentsTreeProvider.refresh();
 		connectionsTreeProvider.refresh();
-		teamTreeProvider.refresh()
+		teamTreeProvider.refresh();
 	});
 
 	vscode.commands.registerCommand('mintlify.delete-connection', async (connection: { code: Code }) => {
-		const response = await vscode.window.showInformationMessage(`Are you sure you would like to delete the connection? This cannot be undone`, 'Delete', 'Cancel');
+		const response = await vscode.window.showInformationMessage(
+			`Are you sure you would like to delete the connection? This cannot be undone`,
+			'Delete',
+			'Cancel',
+		);
 		if (response !== 'Delete') {
 			return;
 		}
-		deleteLink(globalState, connection.code._id);
+		await deleteLink(globalState, connection.code._id);
 		connectionsTreeProvider.refresh();
-		vscode.commands.executeCommand('mintlify.refresh-links');
+		await vscode.commands.executeCommand('mintlify.refresh-links');
 	});
 
-	vscode.commands.registerCommand('mintlify.rename-document', async (docOption) => {
+	vscode.commands.registerCommand('mintlify.rename-document', async docOption => {
 		const newName = await vscode.window.showInputBox({
 			title: 'Edit name of document',
 			value: docOption.doc.title,
@@ -42,22 +46,26 @@ export const createTreeViews = (globalState: GlobalState): void => {
 		}
 
 		await editDocName(globalState, docOption.doc._id, newName);
-		vscode.window.showInformationMessage(`Document has been renamed to ${newName}`);
-		vscode.commands.executeCommand('mintlify.refresh-views');
-		vscode.commands.executeCommand('mintlify.refresh-links');
+		await vscode.window.showInformationMessage(`Document has been renamed to ${newName}`);
+		await vscode.commands.executeCommand('mintlify.refresh-views');
+		return vscode.commands.executeCommand('mintlify.refresh-links');
 	});
 
-	vscode.commands.registerCommand('mintlify.delete-document', async (docOption) => {
-		const response = await vscode.window.showInformationMessage(`Are you sure you would like to delete ${docOption.doc.title}? This cannot be undone`, 'Delete', 'Cancel');
+	vscode.commands.registerCommand('mintlify.delete-document', async docOption => {
+		const response = await vscode.window.showInformationMessage(
+			`Are you sure you would like to delete ${docOption.doc.title}? This cannot be undone`,
+			'Delete',
+			'Cancel',
+		);
 		if (response !== 'Delete') {
 			return;
 		}
 		await deleteDoc(globalState, docOption.doc._id);
-		vscode.commands.executeCommand('mintlify.refresh-views');
-		vscode.commands.executeCommand('mintlify.refresh-links');
+		await vscode.commands.executeCommand('mintlify.refresh-views');
+		await vscode.commands.executeCommand('mintlify.refresh-links');
 	});
 
-	vscode.window.onDidChangeActiveTextEditor((editor) => {
+	vscode.window.onDidChangeActiveTextEditor(editor => {
 		if (editor == null) {
 			return;
 		}

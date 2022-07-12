@@ -4,7 +4,7 @@ import axios from 'axios';
 import * as vscode from 'vscode';
 import { API_ENDPOINT } from '../utils/api';
 import { Code, getRepoInfo } from '../utils/git';
-import GlobalState from '../utils/globalState';
+import { GlobalState } from '../utils/globalState';
 import { Doc } from '../viewProvider';
 
 export type CodeReturned = Code & { doc: Doc };

@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 'use strict';
+// eslint-disable-next-line no-restricted-imports
 import { sep } from 'path';
 import dayjs from 'dayjs';
 import * as relativeTime from 'dayjs/plugin/relativeTime';
@@ -81,7 +83,7 @@ export function anyEvent<T>(...events: Event<T>[]): Event<T> {
 	return (listener, thisArgs = null, disposables?) => {
 		const result = combinedDisposable(events.map(event => event(i => listener.call(thisArgs, i))));
 
-		if (disposables) {
+		if (disposables != null) {
 			disposables.push(result);
 		}
 
@@ -144,12 +146,12 @@ interface HookError extends Error {
 }
 
 function isHookError(e: Error): e is HookError {
-	return !!(e as any).errors;
+	return Boolean((e as any).errors);
 }
 
 function hasFieldErrors(e: any): e is Error & { errors: { value: string; field: string; code: string }[] } {
 	let areFieldErrors = true;
-	if (!!e.errors && Array.isArray(e.errors)) {
+	if (Boolean(e.errors) && Array.isArray(e.errors)) {
 		for (const error of e.errors) {
 			if (!error.field || !error.value || !error.code) {
 				areFieldErrors = false;
@@ -190,9 +192,8 @@ export function formatError(e: HookError | any): string {
 			.map((error: any) => {
 				if (typeof error === 'string') {
 					return error;
-				} else {
-					return error.message;
 				}
+				return error.message;
 			})
 			.join(', ');
 	}
@@ -329,8 +330,8 @@ export function compareSubstringIgnoreCase(
 	bEnd: number = b.length,
 ): number {
 	for (; aStart < aEnd && bStart < bEnd; aStart++, bStart++) {
-		let codeA = a.charCodeAt(aStart);
-		let codeB = b.charCodeAt(bStart);
+		const codeA = a.charCodeAt(aStart);
+		const codeB = b.charCodeAt(bStart);
 
 		if (codeA === codeB) {
 			// equal
@@ -349,9 +350,8 @@ export function compareSubstringIgnoreCase(
 		if (isLowerAsciiLetter(codeA) && isLowerAsciiLetter(codeB)) {
 			//
 			return diff;
-		} else {
-			return compareSubstring(a.toLowerCase(), b.toLowerCase(), aStart, aEnd, bStart, bEnd);
 		}
+		return compareSubstring(a.toLowerCase(), b.toLowerCase(), aStart, aEnd, bStart, bEnd);
 	}
 
 	const aLen = aEnd - aStart;
@@ -607,7 +607,7 @@ class TernarySearchTreeNode<K, V> {
 	right: TernarySearchTreeNode<K, V> | undefined;
 
 	isEmpty(): boolean {
-		return !this.left && !this.mid && !this.right && !this.value;
+		return this.left == null && this.mid == null && this.right == null && !this.value;
 	}
 }
 
@@ -643,7 +643,7 @@ export class TernarySearchTree<K, V> {
 		const iter = this._iter.reset(key);
 		let node: TernarySearchTreeNode<K, V>;
 
-		if (!this._root) {
+		if (this._root == null) {
 			this._root = new TernarySearchTreeNode<K, V>();
 			this._root.segment = iter.value();
 		}
@@ -653,14 +653,14 @@ export class TernarySearchTree<K, V> {
 			const val = iter.cmp(node.segment);
 			if (val > 0) {
 				// left
-				if (!node.left) {
+				if (node.left == null) {
 					node.left = new TernarySearchTreeNode<K, V>();
 					node.left.segment = iter.value();
 				}
 				node = node.left;
 			} else if (val < 0) {
 				// right
-				if (!node.right) {
+				if (node.right == null) {
 					node.right = new TernarySearchTreeNode<K, V>();
 					node.right.segment = iter.value();
 				}
@@ -668,7 +668,7 @@ export class TernarySearchTree<K, V> {
 			} else if (iter.hasNext()) {
 				// mid
 				iter.next();
-				if (!node.mid) {
+				if (node.mid == null) {
 					node.mid = new TernarySearchTreeNode<K, V>();
 					node.mid.segment = iter.value();
 				}
@@ -690,7 +690,7 @@ export class TernarySearchTree<K, V> {
 	private _getNode(key: K) {
 		const iter = this._iter.reset(key);
 		let node = this._root;
-		while (node) {
+		while (node != null) {
 			const val = iter.cmp(node.segment);
 			if (val > 0) {
 				// left
@@ -728,7 +728,7 @@ export class TernarySearchTree<K, V> {
 		let node = this._root;
 
 		// find and unset node
-		while (node) {
+		while (node != null) {
 			const val = iter.cmp(node.segment);
 			if (val > 0) {
 				// left
@@ -756,7 +756,7 @@ export class TernarySearchTree<K, V> {
 
 				// clean up empty nodes
 				while (stack.length > 0 && node.isEmpty()) {
-					let [dir, parent] = stack.pop()!;
+					const [dir, parent] = stack.pop()!;
 					switch (dir) {
 						case 1:
 							parent.left = undefined;
@@ -779,7 +779,7 @@ export class TernarySearchTree<K, V> {
 		const iter = this._iter.reset(key);
 		let node = this._root;
 		let candidate: V | undefined = undefined;
-		while (node) {
+		while (node != null) {
 			const val = iter.cmp(node.segment);
 			if (val > 0) {
 				// left
@@ -796,13 +796,13 @@ export class TernarySearchTree<K, V> {
 				break;
 			}
 		}
-		return (node && node.value) || candidate;
+		return (node != null && node.value) || candidate;
 	}
 
 	findSuperstr(key: K): IterableIterator<[K, V]> | undefined {
 		const iter = this._iter.reset(key);
 		let node = this._root;
-		while (node) {
+		while (node != null) {
 			const val = iter.cmp(node.segment);
 			if (val > 0) {
 				// left
@@ -816,11 +816,10 @@ export class TernarySearchTree<K, V> {
 				node = node.mid;
 			} else {
 				// collect
-				if (!node.mid) {
+				if (node.mid == null) {
 					return undefined;
-				} else {
-					return this._entries(node.mid);
 				}
+				return this._entries(node.mid);
 			}
 		}
 		return undefined;
@@ -837,7 +836,7 @@ export class TernarySearchTree<K, V> {
 	}
 
 	private *_entries(node: TernarySearchTreeNode<K, V> | undefined): IterableIterator<[K, V]> {
-		if (node) {
+		if (node != null) {
 			// left
 			yield* this._entries(node.left);
 

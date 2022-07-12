@@ -1,7 +1,8 @@
+/* eslint-disable no-restricted-imports */
 'use strict';
 import * as path from 'path';
-import * as gitUrlParse from 'git-url-parse';
 import * as querystring from 'querystring';
+import * as gitUrlParse from 'git-url-parse';
 
 const useCommitSHAInURL = false;
 
@@ -30,7 +31,7 @@ git_suffix (Boolean): Whether to add the .git suffix or not.
 */
 type GitUrl = {
 	protocols: Array<any>;
-	port: null | Number;
+	port: null | number;
 	resource: string;
 	user: string;
 	pathname: string;
@@ -90,9 +91,7 @@ class GitHub extends BaseProvider {
 			blob = this.sha;
 		}
 		if (filePath) {
-			return (
-				`${this.baseUrl}/blob/${blob}${filePath}` + (line ? '#L' + line : '') + (endLine ? '-L' + endLine : '')
-			);
+			return `${this.baseUrl}/blob/${blob}${filePath}${line ? `#L${line}` : ''}${endLine ? `-L${endLine}` : ''}`;
 		}
 		return `${this.baseUrl}/tree/${blob}`;
 	}
@@ -105,7 +104,7 @@ class GitLab extends BaseProvider {
 	}
 	override webUrl(branch: string, filePath: string, line: number, endLine: number): string {
 		if (filePath) {
-			return `${this.baseUrl}/blob/${branch}` + (filePath ? `${filePath}` : '') + (line ? `#L${line}` : '');
+			return `${this.baseUrl}/blob/${branch}${filePath ? `${filePath}` : ''}${line ? `#L${line}` : ''}`;
 		}
 		return `${this.baseUrl}/tree/${branch}`;
 	}
@@ -122,7 +121,7 @@ class Gitea extends BaseProvider {
 			blobPath = `commit/${this.sha}`;
 		}
 		if (filePath) {
-			return `${this.baseUrl}/src/${blobPath}` + (filePath ? `${filePath}` : '') + (line ? `#L${line}` : '');
+			return `${this.baseUrl}/src/${blobPath}${filePath ? `${filePath}` : ''}${line ? `#L${line}` : ''}`;
 		}
 		return `${this.baseUrl}/src/${blobPath}`;
 	}
@@ -135,9 +134,7 @@ class Bitbucket extends BaseProvider {
 	}
 	override webUrl(branch: string, filePath: string, line: number, endLine: number): string {
 		const fileName = path.basename(filePath);
-		return (
-			`${this.baseUrl}/src/${this.sha}` + (filePath ? `${filePath}` : '') + (line ? `#${fileName}-${line}` : '')
-		);
+		return `${this.baseUrl}/src/${this.sha}${filePath ? `${filePath}` : ''}${line ? `#${fileName}-${line}` : ''}`;
 	}
 }
 
@@ -151,7 +148,7 @@ class VisualStudio extends BaseProvider {
 	}
 
 	override webUrl(branch: string, filePath: string, line: number, endLine: number): string {
-		let query: any = {
+		const query: any = {
 			version: `GB${branch}`,
 		};
 		if (filePath) {
@@ -166,7 +163,6 @@ class VisualStudio extends BaseProvider {
 
 const gitHubDomain = 'github.com';
 const giteaDomain = 'gitea.io';
-const providerType = 'unknown';
 const providerProtocol = 'https';
 
 const providers = {
@@ -183,7 +179,7 @@ const providers = {
  * @param {string} remoteUrl
  * @return {BaseProvider|null}
  */
-const gitProvider = (remoteUrl: string, sha: any): BaseProvider | null => {
+export const gitProvider = (remoteUrl: string, sha: any): BaseProvider | null => {
 	const gitUrl: GitUrl = gitUrlParse(remoteUrl);
 	for (const domain of Object.keys(providers)) {
 		if (domain === gitUrl.resource || domain === gitUrl.source) {
@@ -192,5 +188,3 @@ const gitProvider = (remoteUrl: string, sha: any): BaseProvider | null => {
 	}
 	throw new Error('unknown Provider');
 };
-
-export default gitProvider;

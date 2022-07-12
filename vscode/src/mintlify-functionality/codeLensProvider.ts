@@ -4,10 +4,10 @@ import { getFilePath } from './utils/git';
 import { mapOldPositionToNew } from './utils/git/diffPositionMapping';
 import { GitApiImpl } from './utils/git/gitApiImpl';
 import { Repository } from './utils/git/types';
-import GlobalState from './utils/globalState';
+import { GlobalState } from './utils/globalState';
 import { Link } from './utils/links';
 
-export default class DocCodeLensProvider implements CodeLensProvider {
+export class DocCodeLensProvider implements CodeLensProvider {
 	private _document: TextDocument | undefined;
 	private _lenses: CodeLens[] = [];
 

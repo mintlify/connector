@@ -3,7 +3,7 @@ import * as path from 'path';
 import axios from 'axios';
 import * as vscode from 'vscode';
 import { API_ENDPOINT } from '../utils/api';
-import GlobalState from '../utils/globalState';
+import { GlobalState } from '../utils/globalState';
 import { Doc } from '../viewProvider';
 
 type Group = {

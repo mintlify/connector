@@ -3218,6 +3218,18 @@
 				}
 			},
 			{
+				"command": "mintlify.remove-member",
+				"title": "Remove member from team",
+				"icon": {
+				  "light": "assets/icons/remove-user.svg",
+				  "dark": "assets/icons/remove-user-dark.svg"
+				}
+			},
+			{
+				"command": "mintlify.invite-member",
+				"title": "Invite team member"
+			},
+			{
 				"command": "mintlify.refresh-views",
 				"title": "Refresh views"
 			},
@@ -7426,6 +7438,18 @@
 					"when": "view == create && mintlify.isLoggedIn"
 				},
 				{
+					"command": "mintlify.login",
+					"when": "view == teammates && !mintlify.isLoggedIn"
+				},
+				{
+					"command": "mintlify.invite-member",
+					"when": "view == teammates && mintlify.isLoggedIn"
+				},
+				{
+					"command": "mintlify.logout",
+					"when": "view == teammates && mintlify.isLoggedIn"
+				},
+				{
 					"command": "gitlens.views.switchToAnotherBranch",
 					"when": "!gitlens:readonly && !gitlens:untrusted && !gitlens:hasVirtualFolders && view =~ /^gitlens\\.views\\.branches/",
 					"group": "navigation@10"
@@ -8126,6 +8150,11 @@
 					"command": "mintlify.delete-connection",
 					"when": "view == connections && viewItem == connection",
 					"group": "inline"
+				},
+				{
+				  "command": "mintlify.remove-member",
+				  "when": "view == teammates && viewItem == member",
+				  "group": "inline"
 				},
 				{
 					"command": "gitlens.views.switchToAnotherBranch",
@@ -10227,6 +10256,11 @@
 				{
 					"id": "connections",
 					"name": "Connections"
+				},
+				{
+				  "id": "teammates",
+				  "name": "Team Members",
+				  "when": "mintlify.hasDocuments"
 				}
 			],
 			"scm": [
@@ -10435,7 +10469,6 @@
     "compile": "webpack --mode development --config-name extension:node --config-name webviews",
     "publish": "vsce publish"
   },
-  "extensionDependencies": ["eamodio.gitlens"],
   "devDependencies": {
     "@heroicons/react": "^1.0.6",
 		"@octokit/core": "3.5.1",

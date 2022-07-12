@@ -4,7 +4,7 @@ import { CodeReturned } from './treeviews/connections';
 import { getHighlightedText } from './utils';
 import { API_ENDPOINT } from './utils/api';
 import { getGitData, getRepoInfo } from './utils/git';
-import GlobalState from './utils/globalState';
+import { GlobalState } from './utils/globalState';
 import { getLinks } from './utils/links';
 import { Doc, ViewProvider } from './viewProvider';
 
@@ -65,10 +65,10 @@ export const refreshLinksCommand = (globalState: GlobalState) => {
 		const editor = args?.editor ?? window.activeTextEditor;
 		const fileFsPath: string = editor.document.uri.fsPath;
 		const { gitOrg, repo } = await getRepoInfo(fileFsPath);
-		globalState.setGitOrg(gitOrg);
-		globalState.setRepo(repo);
+		await globalState.setGitOrg(gitOrg);
+		await globalState.setRepo(repo);
 		const links = await getLinks(globalState);
-		globalState.setLinks(links);
+		await globalState.setLinks(links);
 	});
 };
 
@@ -112,7 +112,7 @@ export const openPreviewCommand = (globalState: GlobalState) => {
 export const prefillDocCommand = (viewProvider: ViewProvider) => {
 	return vscode.commands.registerCommand('mintlify.prefill-doc', async (doc: Doc) => {
 		await vscode.commands.executeCommand('mintlify.preview-doc', doc);
-		viewProvider.prefillDoc(doc);
+		await viewProvider.prefillDoc(doc);
 	});
 };
 

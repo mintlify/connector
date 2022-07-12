@@ -1,9 +1,9 @@
 import axios from 'axios';
-import vscode, { WebviewViewProvider, WebviewView, Uri, Webview } from 'vscode';
-import { Code } from './utils/git';
-import { API_ENDPOINT } from './utils/api';
+import vscode, { Uri, Webview, WebviewView, WebviewViewProvider } from 'vscode';
 import { openLogin } from './authentication';
-import GlobalState from './utils/globalState';
+import { API_ENDPOINT } from './utils/api';
+import { Code } from './utils/git';
+import { GlobalState } from './utils/globalState';
 
 export type Doc = {
 	org: string;
@@ -29,13 +29,13 @@ export class ViewProvider implements WebviewViewProvider {
 		this.globalState = globalState;
 	}
 
-	public authenticate(user: any): void {
-		this.globalState.setUserId(user.userId);
-		vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', true);
-		vscode.window.showInformationMessage(`🙌 Successfully signed in with ${user.email}`);
-		vscode.commands.executeCommand('mintlify.refresh-links');
-		vscode.commands.executeCommand('mintlify.refresh-views');
-		this._view?.webview.postMessage({ command: 'auth', args: user });
+	public async authenticate(user: any) {
+		await this.globalState.setUserId(user.userId);
+		await vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', true);
+		await vscode.window.showInformationMessage(`🙌 Successfully signed in with ${user.email}`);
+		await vscode.commands.executeCommand('mintlify.refresh-links');
+		await vscode.commands.executeCommand('mintlify.refresh-views');
+		await this._view?.webview.postMessage({ command: 'auth', args: user });
 	}
 
 	public prefillDocWithDocId = (docId: string) => {
@@ -43,25 +43,25 @@ export class ViewProvider implements WebviewViewProvider {
 		// TBD: Add doc data
 	};
 
-	public prefillDoc(doc: Doc): void {
+	public async prefillDoc(doc: Doc) {
 		this.show();
-		this._view?.webview.postMessage({ command: 'prefill-doc', args: doc });
+		await this._view?.webview.postMessage({ command: 'prefill-doc', args: doc });
 	}
 
-	public displaySignin(): void {
-		this._view?.webview.postMessage({ command: 'display-signin' });
+	public async displaySignin() {
+		await this._view?.webview.postMessage({ command: 'display-signin' });
 	}
 
-	public logout(): void {
-		this._view?.webview.postMessage({ command: 'logout' });
-		this.globalState.clearState();
-		vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', false);
-		vscode.commands.executeCommand('mintlify.refresh-views');
-		vscode.commands.executeCommand('mintlify.refresh-links');
-		vscode.window.showInformationMessage('Successfully logged out of account');
+	public async logout() {
+		await this._view?.webview.postMessage({ command: 'logout' });
+		await this.globalState.clearState();
+		await vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', false);
+		await vscode.commands.executeCommand('mintlify.refresh-views');
+		await vscode.commands.executeCommand('mintlify.refresh-links');
+		await vscode.window.showInformationMessage('Successfully logged out of account');
 	}
 
-	public resolveWebviewView(webviewView: WebviewView): void | Thenable<void> {
+	public async resolveWebviewView(webviewView: WebviewView) {
 		webviewView.webview.options = {
 			// Allow scripts in the webview
 			enableScripts: true,
@@ -74,65 +74,63 @@ export class ViewProvider implements WebviewViewProvider {
 				case 'login-oauth': {
 					const { provider } = message.args;
 					const anonymousId = vscode.env.machineId;
-					vscode.env.openExternal(
+					await vscode.env.openExternal(
 						vscode.Uri.parse(`${API_ENDPOINT}/user/anonymous/${provider}?anonymousId=${anonymousId}`),
 					);
 					break;
 				}
 				case 'login': {
 					const { signInWithProtocol, subdomain } = message.args;
-					openLogin(signInWithProtocol);
-					this.globalState.setSubdomain(subdomain);
+					await openLogin(signInWithProtocol);
+					await this.globalState.setSubdomain(subdomain);
 					break;
 				}
 				case 'link-submit': {
 					const { docId, code, url } = message.args;
-					vscode.window.withProgress(
+					await vscode.window.withProgress(
 						{
 							location: vscode.ProgressLocation.Notification,
 							title: 'Connecting documentation with code',
 						},
-						() =>
-							new Promise(async resolve => {
-								try {
-									const response = await axios.put(
-										`${API_ENDPOINT}/links`,
-										{ docId, code, url },
-										{
-											params: this.globalState.getAuthParams(),
-										},
-									);
-									this.prefillDoc(response.data.doc);
-									vscode.commands.executeCommand('mintlify.refresh-views');
-									vscode.window.showInformationMessage(
-										`Successfully connected code with ${response.data.doc.title}`,
-									);
-								} catch (err) {
-									const errMessage =
-										err?.response?.data?.error ??
-										`Error connecting code. Please log back in, re-install the extension, or report bug to hi@mintlify.com`;
-									vscode.window.showInformationMessage(errMessage);
-								}
-								vscode.commands.executeCommand('mintlify.refresh-links');
-								resolve(null);
-							}),
+						async () => {
+							try {
+								const response = await axios.put(
+									`${API_ENDPOINT}/links`,
+									{ docId: docId, code: code, url: url },
+									{
+										params: this.globalState.getAuthParams(),
+									},
+								);
+								await this.prefillDoc(response.data.doc);
+								await vscode.commands.executeCommand('mintlify.refresh-views');
+								await vscode.window.showInformationMessage(
+									`Successfully connected code with ${response.data.doc.title}`,
+								);
+							} catch (err) {
+								const errMessage =
+									err?.response?.data?.error ??
+									`Error connecting code. Please log back in, re-install the extension, or report bug to hi@mintlify.com`;
+								await vscode.window.showInformationMessage(errMessage);
+							}
+							await vscode.commands.executeCommand('mintlify.refresh-links');
+						},
 					);
 					break;
 				}
 				case 'refresh-code': {
 					const editor = vscode.window.activeTextEditor;
-					vscode.commands.executeCommand('mintlify.link-code', { editor, scheme: 'file' });
+					await vscode.commands.executeCommand('mintlify.link-code', { editor: editor, scheme: 'file' });
 					break;
 				}
 				case 'error': {
 					const errMessage = message?.message;
-					vscode.window.showInformationMessage(errMessage);
+					await vscode.window.showInformationMessage(errMessage);
 				}
 			}
 		});
 
 		this._view = webviewView;
-		this._view?.webview.postMessage({ command: 'start', args: API_ENDPOINT });
+		await this._view?.webview.postMessage({ command: 'start', args: API_ENDPOINT });
 	}
 
 	public show() {

@@ -5,7 +5,7 @@ import { vscode } from '../common/message';
 import { CodeSymbolIcon, CodeFileIcon } from '../common/svgs';
 import Authenticate, { formatSignInUrl } from './Authenticate';
 
-export type Doc = {
+export type Doc = {  
   _id: string;
   title: string;
   url: string;

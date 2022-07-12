@@ -1,4 +1,6 @@
-import { Uri, Event, Disposable, ProviderResult } from 'vscode';
+/* eslint-disable @typescript-eslint/naming-convention */
+import { Disposable, Event, ProviderResult, Uri } from 'vscode';
+
 export { ProviderResult } from 'vscode';
 
 export interface IRawFileChange {

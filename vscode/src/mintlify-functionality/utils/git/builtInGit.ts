@@ -1,13 +1,13 @@
 import * as vscode from 'vscode';
-import { APIState, GitAPI, GitExtension, PublishEvent, IGit, Repository, API } from './types';
 import { GitApiImpl } from './gitApiImpl';
+import { API, APIState, GitAPI, GitExtension, IGit, PublishEvent, Repository } from './types';
 
 export const doRegisterBuiltinGitProvider = async (
 	context: vscode.ExtensionContext,
 	apiImpl: GitApiImpl,
 ): Promise<boolean> => {
 	const builtInGitProvider = await registerBuiltinGitProvider(apiImpl);
-	if (builtInGitProvider) {
+	if (builtInGitProvider != null) {
 		context.subscriptions.push(builtInGitProvider);
 		return true;
 	}
@@ -16,10 +16,11 @@ export const doRegisterBuiltinGitProvider = async (
 
 export const registerBuiltinGitProvider = async (apiImpl: API): Promise<vscode.Disposable | undefined> => {
 	const builtInGitProvider = await BuiltinGitProvider.createProvider();
-	if (builtInGitProvider) {
+	if (builtInGitProvider != null) {
 		apiImpl.registerGitProvider(builtInGitProvider);
 		return builtInGitProvider;
 	}
+	// eslint-disable-next-line no-useless-return
 	return;
 };
 
@@ -51,9 +52,10 @@ export class BuiltinGitProvider implements IGit, vscode.Disposable {
 			this._gitAPI = gitExtension.getAPI(1);
 		} catch (e) {
 			// The git extension will throw if a git model cannot be found, i.e. if git is not installed.
-			vscode.window.showErrorMessage(
-				'Activating the Pull Requests and Issues extension failed. Please make sure you have git installed.',
-			);
+			// vscode.window.showErrorMessage(
+			// 	'Activating the Pull Requests and Issues extension failed. Please make sure you have git installed.',
+			// );
+			console.log(e);
 			throw e;
 		}
 
@@ -66,7 +68,7 @@ export class BuiltinGitProvider implements IGit, vscode.Disposable {
 
 	static async createProvider(): Promise<BuiltinGitProvider | undefined> {
 		const extension = vscode.extensions.getExtension<GitExtension>('vscode.git');
-		if (extension) {
+		if (extension != null) {
 			await extension.activate();
 			return new BuiltinGitProvider(extension);
 		}

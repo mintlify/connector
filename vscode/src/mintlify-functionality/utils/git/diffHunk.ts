@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
@@ -7,8 +8,8 @@
  * Inspired by and includes code from GitHub/VisualStudio project, obtained from  https://github.com/github/VisualStudio/blob/master/src/GitHub.Exports/Models/DiffLine.cs
  */
 
-import { Repository, IRawFileChange } from './types';
 import { GitChangeType, InMemFileChange, SlimFileChange } from './file';
+import { IRawFileChange, Repository } from './types';
 
 export enum DiffChangeType {
 	Context,
@@ -62,7 +63,7 @@ export class DiffHunk {
 	) {}
 }
 
-export const DIFF_HUNK_HEADER = /^@@ \-(\d+)(,(\d+))?( \+(\d+)(,(\d+)?)?)? @@/;
+export const DIFF_HUNK_HEADER = /^@@ -(\d+)(,(\d+))?( \+(\d+)(,(\d+)?)?)? @@/;
 
 export function countCarriageReturns(text: string): number {
 	let count = 0;
@@ -108,7 +109,7 @@ export function* parseDiffHunk(diffHunkPatch: string): IterableIterator<DiffHunk
 	while (!itr.done) {
 		const line = itr.value;
 		if (DIFF_HUNK_HEADER.test(line)) {
-			if (diffHunk) {
+			if (diffHunk != null) {
 				yield diffHunk;
 				diffHunk = undefined;
 			}
@@ -128,11 +129,11 @@ export function* parseDiffHunk(diffHunkPatch: string): IterableIterator<DiffHunk
 			diffHunk = new DiffHunk(oriStartLine, oriLen, newStartLine, newLen, positionInHunk);
 			// @rebornix todo, once we have enough tests, this should be removed.
 			diffHunk.diffLines.push(new DiffLine(DiffChangeType.Control, -1, -1, positionInHunk, line));
-		} else if (diffHunk) {
+		} else if (diffHunk != null) {
 			const type = getDiffChangeType(line);
 
 			if (type === DiffChangeType.Control) {
-				if (diffHunk.diffLines && diffHunk.diffLines.length) {
+				if (diffHunk?.diffLines.length) {
 					diffHunk.diffLines[diffHunk.diffLines.length - 1].endwithLineBreak = false;
 				}
 			} else {
@@ -169,7 +170,7 @@ export function* parseDiffHunk(diffHunkPatch: string): IterableIterator<DiffHunk
 		itr = lineReader.next();
 	}
 
-	if (diffHunk) {
+	if (diffHunk != null) {
 		yield diffHunk;
 	}
 }
@@ -186,8 +187,7 @@ export function parsePatch(patch: string): DiffHunk[] {
 
 		for (let j = 0; j < diffHunk.diffLines.length; j++) {
 			const diffLine = diffHunk.diffLines[j];
-			if (diffLine.type === DiffChangeType.Delete || diffLine.type === DiffChangeType.Control) {
-			} else if (diffLine.type === DiffChangeType.Add) {
+			if (diffLine.type === DiffChangeType.Add) {
 				right.push(diffLine.text);
 			} else {
 				const codeInFirstLine = diffLine.text;
@@ -223,8 +223,7 @@ export function getModifiedContentFromDiffHunk(originalContent: string, patch: s
 
 		for (let j = 0; j < diffHunk.diffLines.length; j++) {
 			const diffLine = diffHunk.diffLines[j];
-			if (diffLine.type === DiffChangeType.Delete || diffLine.type === DiffChangeType.Control) {
-			} else if (diffLine.type === DiffChangeType.Add) {
+			if (diffLine.type === DiffChangeType.Add) {
 				right.push(diffLine.text);
 			} else {
 				const codeInFirstLine = diffLine.text;

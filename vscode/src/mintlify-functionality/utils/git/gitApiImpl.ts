@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode';
 import { TernarySearchTree } from './ternarySearchTree';
-import { API, IGit, Repository, APIState, PublishEvent } from './types';
+import { API, APIState, IGit, PublishEvent, Repository } from './types';
 
 export const enum RefType {
 	Head,
@@ -21,7 +21,7 @@ export class GitApiImpl implements API, IGit, vscode.Disposable {
 		const ret: Repository[] = [];
 
 		this._providers.forEach(({ repositories }) => {
-			if (repositories) {
+			if (repositories != null) {
 				ret.push(...repositories);
 			}
 		});
@@ -57,11 +57,11 @@ export class GitApiImpl implements API, IGit, vscode.Disposable {
 		this._disposables = [];
 	}
 
-	private _updateReposContext() {
+	private async _updateReposContext() {
 		const reposCount = Array.from(this._providers.values()).reduce((prev, current) => {
 			return prev + current.repositories.length;
 		}, 0);
-		vscode.commands.executeCommand('setContext', 'gitHubOpenRepositoryCount', reposCount);
+		await vscode.commands.executeCommand('setContext', 'gitHubOpenRepositoryCount', reposCount);
 	}
 
 	registerGitProvider(provider: IGit): vscode.Disposable {
@@ -70,19 +70,19 @@ export class GitApiImpl implements API, IGit, vscode.Disposable {
 
 		this._disposables.push(provider.onDidCloseRepository(e => this._onDidCloseRepository.fire(e)));
 		this._disposables.push(
-			provider.onDidOpenRepository(e => {
-				this._updateReposContext();
+			provider.onDidOpenRepository(async e => {
+				await this._updateReposContext();
 				this._onDidOpenRepository.fire(e);
 			}),
 		);
-		if (provider.onDidChangeState) {
+		if (provider.onDidChangeState != null) {
 			this._disposables.push(provider.onDidChangeState(e => this._onDidChangeState.fire(e)));
 		}
-		if (provider.onDidPublish) {
+		if (provider.onDidPublish != null) {
 			this._disposables.push(provider.onDidPublish(e => this._onDidPublish.fire(e)));
 		}
 
-		this._updateReposContext();
+		void this._updateReposContext();
 		provider.repositories.forEach(repository => {
 			this._onDidOpenRepository.fire(repository);
 		});
@@ -90,7 +90,7 @@ export class GitApiImpl implements API, IGit, vscode.Disposable {
 		return {
 			dispose: () => {
 				const repos = provider?.repositories;
-				if (repos && repos.length > 0) {
+				if (repos?.length > 0) {
 					repos.forEach(r => this._onDidCloseRepository.fire(r));
 				}
 				this._providers.delete(handle);
@@ -103,7 +103,7 @@ export class GitApiImpl implements API, IGit, vscode.Disposable {
 
 		this._providers.forEach(provider => {
 			const repos = provider.repositories;
-			if (repos && repos.length > 0) {
+			if (repos?.length > 0) {
 				for (const repository of repos) {
 					foldersMap.set(repository.rootUri, provider);
 				}

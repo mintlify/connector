@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { registerAuthRoute } from './authentication';
-import DocCodeLensProvider from './codeLensProvider';
+import { DocCodeLensProvider } from './codeLensProvider';
 import {
 	highlightConnectionCommand,
 	inviteTeamMemberCommand,
@@ -12,79 +12,12 @@ import {
 	refreshLinksCommand,
 	removeTeamMemberCommand,
 } from './commands';
-import { CodeReturned, ConnectionsTreeProvider } from './treeviews/connections';
-import { DocumentsTreeProvider } from './treeviews/documents';
-import { Code } from './utils/git';
+import { createTreeViews } from './treeviews';
 import { doRegisterBuiltinGitProvider } from './utils/git/builtInGit';
 import { GitApiImpl } from './utils/git/gitApiImpl';
 import { Repository } from './utils/git/types';
-import GlobalState from './utils/globalState';
-import { deleteDoc, deleteLink, editDocName } from './utils/links';
-import { Doc, ViewProvider } from './viewProvider';
-
-const createTreeViews = (state: GlobalState): void => {
-	const documentsTreeProvider = new DocumentsTreeProvider(state);
-	const connectionsTreeProvider = new ConnectionsTreeProvider(state);
-	vscode.window.createTreeView('documents', { treeDataProvider: documentsTreeProvider });
-	vscode.window.createTreeView('connections', { treeDataProvider: connectionsTreeProvider });
-	vscode.commands.registerCommand('mintlify.refresh-views', () => {
-		documentsTreeProvider.refresh();
-		connectionsTreeProvider.refresh();
-	});
-
-	vscode.commands.registerCommand('mintlify.delete-connection', async (connection: { code: Code }) => {
-		const response = await vscode.window.showInformationMessage(
-			`Are you sure you would like to delete the connection? This cannot be undone`,
-			'Delete',
-			'Cancel',
-		);
-		if (response !== 'Delete') {
-			return;
-		}
-		await deleteLink(state, connection.code._id);
-		connectionsTreeProvider.refresh();
-		await vscode.commands.executeCommand('mintlify.refresh-links');
-	});
-
-	vscode.commands.registerCommand('mintlify.rename-document', async docOption => {
-		const newName = await vscode.window.showInputBox({
-			title: 'Edit name of document',
-			value: docOption.doc.title,
-			placeHolder: docOption.doc.title,
-		});
-
-		if (!newName) {
-			await vscode.window.showErrorMessage('New name cannot be empty');
-			return;
-		}
-
-		await editDocName(state, docOption.doc._id, newName);
-		await vscode.window.showInformationMessage(`Document has been renamed to ${newName}`);
-		await vscode.commands.executeCommand('mintlify.refresh-views');
-		await vscode.commands.executeCommand('mintlify.refresh-links');
-	});
-
-	vscode.commands.registerCommand('mintlify.delete-document', async docOption => {
-		const response = await vscode.window.showInformationMessage(
-			`Are you sure you would like to delete ${docOption.doc.title}? This cannot be undone`,
-			'Delete',
-			'Cancel',
-		);
-		if (response !== 'Delete') {
-			return;
-		}
-		await deleteDoc(state, docOption.doc._id);
-		await vscode.commands.executeCommand('mintlify.refresh-views');
-		await vscode.commands.executeCommand('mintlify.refresh-links');
-	});
-
-	vscode.window.onDidChangeActiveTextEditor(editor => {
-		if (editor == null) {
-			return;
-		}
-		connectionsTreeProvider.refresh();
-	});
-};
+import { GlobalState } from './utils/globalState';
+import { ViewProvider } from './viewProvider';
 
 export async function mintlifyActivate(context: vscode.ExtensionContext): Promise<GitApiImpl> {
 	const openDiff = vscode.workspace.getConfiguration('git').get('openDiffOnClick', true);
@@ -106,29 +39,13 @@ export async function mintlifyActivate(context: vscode.ExtensionContext): Promis
 		removeTeamMemberCommand(globalState),
 	);
 
-	registerAuthRoute(viewProvider, globalState);
+	await registerAuthRoute(viewProvider, globalState);
 
 	vscode.window.onDidChangeTextEditorSelection(async event => {
 		const editor = event.textEditor;
 		await vscode.commands.executeCommand('mintlify.link-code', { editor: editor, scheme: 'file' });
 	});
 
-	vscode.commands.registerCommand('mintlify.prefill-doc', (doc: Doc) => {
-		viewProvider.prefillDoc(doc);
-	});
-
-	vscode.commands.registerCommand('mintlify.highlight-connection', async (code: CodeReturned) => {
-		if (code.line != null && code.endLine != null) {
-			const rootPath = vscode.workspace.workspaceFolders![0].uri.path;
-			const filePathUri = vscode.Uri.parse(`${rootPath}/${code.file}`);
-			const selectedRange = new vscode.Range(code.line, 0, code.endLine, 9999);
-			vscode.window.activeTextEditor?.revealRange(selectedRange);
-			await vscode.window.showTextDocument(filePathUri, {
-				selection: selectedRange,
-				preserveFocus: true,
-			});
-		}
-	});
 	createTreeViews(globalState);
 
 	const apiImpl = new GitApiImpl();
