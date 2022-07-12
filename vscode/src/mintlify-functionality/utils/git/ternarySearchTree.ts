@@ -227,13 +227,13 @@ export async function promiseFromEvent<T, U>(event: Event<T>, adapter: PromiseAd
 	let subscription: Disposable;
 	return new Promise<U>(
 		(resolve, reject) =>
-		(subscription = event((value: T) => {
-			try {
-				Promise.resolve<U>(adapter(value, resolve as any, reject)).catch(reject);
-			} catch (error) {
-				reject(error);
-			}
-		})),
+			(subscription = event((value: T) => {
+				try {
+					Promise.resolve<U>(adapter(value, resolve as any, reject)).catch(reject);
+				} catch (error) {
+					reject(error);
+				}
+			})),
 	).then(
 		(result: U) => {
 			subscription.dispose();
@@ -418,7 +418,7 @@ export class ConfigKeysIterator implements IKeyIterator<string> {
 	private _from!: number;
 	private _to!: number;
 
-	constructor(private readonly _caseSensitive: boolean = true) { }
+	constructor(private readonly _caseSensitive: boolean = true) {}
 
 	reset(key: string): this {
 		this._value = key;
@@ -466,7 +466,7 @@ export class PathIterator implements IKeyIterator<string> {
 	private _from!: number;
 	private _to!: number;
 
-	constructor(private readonly _splitOnBackslash: boolean = true, private readonly _caseSensitive: boolean = true) { }
+	constructor(private readonly _splitOnBackslash: boolean = true, private readonly _caseSensitive: boolean = true) {}
 
 	reset(key: string): this {
 		this._value = key.replace(/\\$|\/$/, '');
@@ -523,7 +523,7 @@ export class UriIterator implements IKeyIterator<Uri> {
 	private _states: UriIteratorState[] = [];
 	private _stateIdx: number = 0;
 
-	constructor(private readonly _ignorePathCasing: (uri: Uri) => boolean) { }
+	constructor(private readonly _ignorePathCasing: (uri: Uri) => boolean) {}
 
 	reset(key: Uri): this {
 		this._value = key;

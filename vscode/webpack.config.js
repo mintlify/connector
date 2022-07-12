@@ -43,7 +43,7 @@ module.exports =
 			getExtensionConfig('node', mode, env),
 			// getExtensionConfig('webworker', mode, env), Todo - add back in to support web
 			getWebviewConfig(mode, env, {
-				'webviewActivityBar': './src/mintlify/webviews/activityBarWebview/index.ts'
+				'webviewActivityBar': './webviews/activityBarWebview/index.ts'
 			})
 		];
 	};
@@ -71,7 +71,7 @@ function getWebviewConfig(mode, env, entry) {
 	];
 
 	return {
-		name: 'mintlify-webviews',
+		name: 'webviews',
 		entry: entry,
 		mode: mode,
 		target: 'web',
@@ -283,7 +283,7 @@ function getExtensionConfig(target, mode, env) {
 			alias: {
 				'@env': path.resolve(__dirname, 'src', 'env', target === 'webworker' ? 'browser' : target),
 				// This dependency is very large, and isn't needed for our use-case
-				tr46: path.resolve(__dirname, 'patches', 'tr46.js'),
+				// tr46: path.resolve(__dirname, 'patches', 'tr46.js'),
 			},
 			fallback: target === 'webworker' ? { path: require.resolve('path-browserify') } : undefined,
 			mainFields: target === 'webworker' ? ['browser', 'module', 'main'] : ['module', 'main'],

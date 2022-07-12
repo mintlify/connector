@@ -33,7 +33,7 @@ export class DiffLine {
 		public positionInHunk: number,
 		private _raw: string,
 		public endwithLineBreak: boolean = true,
-	) { }
+	) {}
 }
 
 export function getDiffChangeType(text: string) {
@@ -59,7 +59,7 @@ export class DiffHunk {
 		public newLineNumber: number,
 		public newLength: number,
 		public positionInHunk: number,
-	) { }
+	) {}
 }
 
 export const DIFF_HUNK_HEADER = /^@@ \-(\d+)(,(\d+))?( \+(\d+)(,(\d+)?)?)? @@/;

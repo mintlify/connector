@@ -9,3 +9,4 @@ out
 images/settings
 gitlens-*.vsix
 tsconfig*.tsbuildinfo
+yarn-error.log

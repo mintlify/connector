@@ -276,7 +276,6 @@ export interface API {
 	getGitProvider(uri: Uri): IGit | undefined;
 }
 
-
 export interface Git {
 	readonly path: string;
 }
@@ -287,13 +286,13 @@ export interface InputBox {
 
 export const enum ForcePushMode {
 	Force,
-	ForceWithLease
+	ForceWithLease,
 }
 
 export const enum RefType {
 	Head,
 	RemoteHead,
-	Tag
+	Tag,
 }
 
 export interface Ref {
@@ -338,7 +337,6 @@ export interface Remote {
 }
 
 export interface Change {
-
 	/**
 	 * Returns either `originalUri` or `renameUri`, depending
 	 * on whether this change is a rename change. When
@@ -428,7 +426,12 @@ export interface CredentialsProvider {
 }
 
 export interface PushErrorHandler {
-	handlePushError(repository: Repository, remote: Remote, refspec: string, error: Error & { gitErrorCode: GitErrorCodes }): Promise<boolean>;
+	handlePushError(
+		repository: Repository,
+		remote: Remote,
+		refspec: string,
+		error: Error & { gitErrorCode: GitErrorCodes },
+	): Promise<boolean>;
 }
 
 export type APIState = 'uninitialized' | 'initialized';
@@ -450,7 +453,7 @@ export interface GitAPI {
 	toGitUri(uri: Uri, ref: string): Uri;
 	getRepository(uri: Uri): Repository | null;
 	init(root: Uri): Promise<Repository | null>;
-	openRepository(root: Uri): Promise<Repository | null>
+	openRepository(root: Uri): Promise<Repository | null>;
 
 	registerRemoteSourceProvider(provider: RemoteSourceProvider): Disposable;
 	registerCredentialsProvider(provider: CredentialsProvider): Disposable;
@@ -458,7 +461,6 @@ export interface GitAPI {
 }
 
 export interface GitExtension {
-
 	readonly enabled: boolean;
 	readonly onDidChangeEnablement: Event<boolean>;
 

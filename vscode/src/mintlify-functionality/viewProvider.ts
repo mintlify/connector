@@ -1,14 +1,9 @@
 import axios from 'axios';
-import vscode, {
-	WebviewViewProvider,
-	WebviewView,
-	Uri,
-	Webview
-} from "vscode";
-import { Code } from "../utils/git";
-import { API_ENDPOINT } from '../utils/api';
+import vscode, { WebviewViewProvider, WebviewView, Uri, Webview } from 'vscode';
+import { Code } from './utils/git';
+import { API_ENDPOINT } from './utils/api';
 import { openLogin } from './authentication';
-import GlobalState from '../utils/globalState';
+import GlobalState from './utils/globalState';
 
 export type Doc = {
 	org: string;
@@ -26,14 +21,11 @@ export type Link = {
 };
 
 export class ViewProvider implements WebviewViewProvider {
-    public static readonly viewType = 'create';
-    private _view?: WebviewView;
-		private globalState: GlobalState;
+	public static readonly viewType = 'create';
+	private _view?: WebviewView;
+	private globalState: GlobalState;
 
-    constructor(
-		private readonly _extensionUri: Uri,
-		globalState: GlobalState
-	) {
+	constructor(private readonly _extensionUri: Uri, globalState: GlobalState) {
 		this.globalState = globalState;
 	}
 
@@ -64,68 +56,75 @@ export class ViewProvider implements WebviewViewProvider {
 		vscode.commands.executeCommand('mintlify.refresh-views');
 	}
 
-    public resolveWebviewView(webviewView: WebviewView): void | Thenable<void> {
-			webviewView.webview.options = {
-					// Allow scripts in the webview
-					enableScripts: true,
-					localResourceRoots: [this._extensionUri]
-			};
+	public resolveWebviewView(webviewView: WebviewView): void | Thenable<void> {
+		webviewView.webview.options = {
+			// Allow scripts in the webview
+			enableScripts: true,
+			localResourceRoots: [this._extensionUri],
+		};
 
-			webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-			webviewView.webview.onDidReceiveMessage(async message => {
-				switch (message.command) {
-					case 'sign-up':
+		webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+		webviewView.webview.onDidReceiveMessage(async message => {
+			switch (message.command) {
+				case 'sign-up': {
+					vscode.env.openExternal(vscode.Uri.parse('https://www.mintlify.com/create'));
+					break;
+				}
+				case 'login': {
+					const { signInWithProtocol, subdomain } = message.args;
+					openLogin(signInWithProtocol);
+					this.globalState.setSubdomain(subdomain);
+					break;
+				}
+				case 'link-submit': {
+					const { userId, docId, code, subdomain, url } = message.args;
+					vscode.window.withProgress(
 						{
-							vscode.env.openExternal(vscode.Uri.parse('https://www.mintlify.com/create'));
-							break;
-						}
-					case 'login':
-						{
-							const { signInWithProtocol, subdomain } = message.args;
-							openLogin(signInWithProtocol);
-							this.globalState.setSubdomain(subdomain);
-							break;
-						}
-					case 'link-submit':
-						{
-							const { userId, docId, code, subdomain, url } = message.args;
-							vscode.window.withProgress({
-								location: vscode.ProgressLocation.Notification,
-								title: 'Connecting documentation with code',
-							}, () => new Promise(async (resolve) => {
+							location: vscode.ProgressLocation.Notification,
+							title: 'Connecting documentation with code',
+						},
+						() =>
+							new Promise(async resolve => {
 								try {
-									const response = await axios.put(`${API_ENDPOINT}/links`, { docId, code, url }, {
-										params: this.globalState.getAuthParams()
-									});
+									const response = await axios.put(
+										`${API_ENDPOINT}/links`,
+										{ docId, code, url },
+										{
+											params: this.globalState.getAuthParams(),
+										},
+									);
 									this.prefillDoc(response.data.doc);
 									vscode.commands.executeCommand('mintlify.refresh-views');
-									vscode.window.showInformationMessage(`Successfully connected code with ${response.data.doc.title}`);
+									vscode.window.showInformationMessage(
+										`Successfully connected code with ${response.data.doc.title}`,
+									);
 								} catch (err) {
-									const errMessage = err?.response?.data?.error ?? `Error connecting code. Please log back in, re-install the extension, or report bug to hi@mintlify.com`;
+									const errMessage =
+										err?.response?.data?.error ??
+										`Error connecting code. Please log back in, re-install the extension, or report bug to hi@mintlify.com`;
 									vscode.window.showInformationMessage(errMessage);
 								}
 								vscode.commands.executeCommand('mintlify.refresh-links');
 								resolve(null);
-							}));
-							break;
-						}
-					case 'refresh-code':
-						{
-							const editor = vscode.window.activeTextEditor;
-							vscode.commands.executeCommand('mintlify.link-code', { editor, scheme: 'file' });
-							break;
-						}
-					case 'error':
-						{
-							const errMessage = message?.message;
-							vscode.window.showInformationMessage(errMessage);
-						}
+							}),
+					);
+					break;
 				}
-			});
+				case 'refresh-code': {
+					const editor = vscode.window.activeTextEditor;
+					vscode.commands.executeCommand('mintlify.link-code', { editor, scheme: 'file' });
+					break;
+				}
+				case 'error': {
+					const errMessage = message?.message;
+					vscode.window.showInformationMessage(errMessage);
+				}
+			}
+		});
 
-			this._view = webviewView;
-			this._view?.webview.postMessage({ command: 'start', args: API_ENDPOINT });
-    }
+		this._view = webviewView;
+		this._view?.webview.postMessage({ command: 'start', args: API_ENDPOINT });
+	}
 
 	public show() {
 		this._view?.show();
@@ -135,7 +134,7 @@ export class ViewProvider implements WebviewViewProvider {
 		return this._view?.webview.postMessage({ command: 'post-code', args: code });
 	}
 
-  private _getHtmlForWebview(webview: Webview) {
+	private _getHtmlForWebview(webview: Webview) {
 		// Use a nonce to whitelist which scripts can be run
 		const nonce = getNonce();
 
@@ -162,8 +161,8 @@ export class ViewProvider implements WebviewViewProvider {
 }
 
 function getNonce() {
-	let text = "";
-	const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	let text = '';
+	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 	for (let i = 0; i < 32; i++) {
 		text += possible.charAt(Math.floor(Math.random() * possible.length));
 	}

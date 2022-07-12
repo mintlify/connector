@@ -2,7 +2,10 @@ import * as vscode from 'vscode';
 import { APIState, GitAPI, GitExtension, PublishEvent, IGit, Repository, API } from './types';
 import { GitApiImpl } from './gitApiImpl';
 
-export const doRegisterBuiltinGitProvider = async (context: vscode.ExtensionContext, apiImpl: GitApiImpl): Promise<boolean>  => {
+export const doRegisterBuiltinGitProvider = async (
+	context: vscode.ExtensionContext,
+	apiImpl: GitApiImpl,
+): Promise<boolean> => {
 	const builtInGitProvider = await registerBuiltinGitProvider(apiImpl);
 	if (builtInGitProvider) {
 		context.subscriptions.push(builtInGitProvider);
@@ -11,15 +14,14 @@ export const doRegisterBuiltinGitProvider = async (context: vscode.ExtensionCont
 	return false;
 };
 
-export const registerBuiltinGitProvider = async (
-	apiImpl: API,
-): Promise<vscode.Disposable | undefined> => {
+export const registerBuiltinGitProvider = async (apiImpl: API): Promise<vscode.Disposable | undefined> => {
 	const builtInGitProvider = await BuiltinGitProvider.createProvider();
 	if (builtInGitProvider) {
 		apiImpl.registerGitProvider(builtInGitProvider);
 		return builtInGitProvider;
 	}
-}
+	return;
+};
 
 export class BuiltinGitProvider implements IGit, vscode.Disposable {
 	get repositories(): Repository[] {
@@ -49,7 +51,9 @@ export class BuiltinGitProvider implements IGit, vscode.Disposable {
 			this._gitAPI = gitExtension.getAPI(1);
 		} catch (e) {
 			// The git extension will throw if a git model cannot be found, i.e. if git is not installed.
-			vscode.window.showErrorMessage('Activating the Pull Requests and Issues extension failed. Please make sure you have git installed.');
+			vscode.window.showErrorMessage(
+				'Activating the Pull Requests and Issues extension failed. Please make sure you have git installed.',
+			);
 			throw e;
 		}
 

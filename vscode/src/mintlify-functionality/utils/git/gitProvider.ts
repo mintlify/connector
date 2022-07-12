@@ -29,135 +29,139 @@ organization (String): The organization the owner belongs to. This is CloudForge
 git_suffix (Boolean): Whether to add the .git suffix or not.
 */
 type GitUrl = {
-    protocols: Array<any>;
-    port: null|Number;
-    resource: string;
-    user: string;
-    pathname: string;
-    hash: string;
-    search: string;
-    href: string;
-    protocol: string;
-    token: string;
-    source: string;
-    owner: string;
-    name: string;
-    ref: string;
-    filepath: string;
-    filepathtype: string;
-    full_name: string;
-    toString: any;
-    organization: string;
-    git_suffix: boolean;
+	protocols: Array<any>;
+	port: null | Number;
+	resource: string;
+	user: string;
+	pathname: string;
+	hash: string;
+	search: string;
+	href: string;
+	protocol: string;
+	token: string;
+	source: string;
+	owner: string;
+	name: string;
+	ref: string;
+	filepath: string;
+	filepathtype: string;
+	full_name: string;
+	toString: any;
+	organization: string;
+	git_suffix: boolean;
 };
 
 export class BaseProvider {
-    name: string;
-    gitUrl: GitUrl;
-    sha: any;
-    constructor(gitUrl: GitUrl, sha: any) {
-        this.gitUrl = gitUrl;
-        this.sha = sha;
-        this.name = '';
-    }
+	name: string;
+	gitUrl: GitUrl;
+	sha: any;
+	constructor(gitUrl: GitUrl, sha: any) {
+		this.gitUrl = gitUrl;
+		this.sha = sha;
+		this.name = '';
+	}
 
-    get baseUrl() {
-        return this.gitUrl.toString(providerProtocol).replace(/(\.git)$/, '');
-    }
+	get baseUrl() {
+		return this.gitUrl.toString(providerProtocol).replace(/(\.git)$/, '');
+	}
 
-    /**
-     * Get the Web URL.
-     *
-     * @param {string} branch
-     * @param {string} filePath The file path relative to repository root, beginning with '/'.
-     * @param {number} line
-     * @param {number} endLine The last line in a multi-line selection
-     * @return {string} The URL to be opened with the browser.
-     */
-    webUrl(branch: string, filePath: string, line?: number, endLine?: number): string {
-        return '';
-    }
+	/**
+	 * Get the Web URL.
+	 *
+	 * @param {string} branch
+	 * @param {string} filePath The file path relative to repository root, beginning with '/'.
+	 * @param {number} line
+	 * @param {number} endLine The last line in a multi-line selection
+	 * @return {string} The URL to be opened with the browser.
+	 */
+	webUrl(branch: string, filePath: string, line?: number, endLine?: number): string {
+		return '';
+	}
 }
 
 class GitHub extends BaseProvider {
-    constructor(gitUrl: GitUrl, sha: any) {
-        super(gitUrl, sha);
-        this.name = 'github';
-    }
-    webUrl(branch: string, filePath: string, line: number, endLine: number): string {
-        let blob = branch;
-        if (useCommitSHAInURL) {
-            blob = this.sha;
-        }
-        if (filePath) {
-            return `${this.baseUrl}/blob/${blob}${filePath}` + (line ? '#L' + line : '') + (endLine ? '-L' + endLine : '');
-        }
-        return `${this.baseUrl}/tree/${blob}`;
-    }
+	constructor(gitUrl: GitUrl, sha: any) {
+		super(gitUrl, sha);
+		this.name = 'github';
+	}
+	override webUrl(branch: string, filePath: string, line: number, endLine: number): string {
+		let blob = branch;
+		if (useCommitSHAInURL) {
+			blob = this.sha;
+		}
+		if (filePath) {
+			return (
+				`${this.baseUrl}/blob/${blob}${filePath}` + (line ? '#L' + line : '') + (endLine ? '-L' + endLine : '')
+			);
+		}
+		return `${this.baseUrl}/tree/${blob}`;
+	}
 }
 
 class GitLab extends BaseProvider {
-    constructor(gitUrl: GitUrl, sha: any) {
-        super(gitUrl, sha);
-        this.name = 'gitlab';
-    }
-    webUrl(branch: string, filePath: string, line: number, endLine: number): string {
-        if (filePath) {
-            return `${this.baseUrl}/blob/${branch}` + (filePath ? `${filePath}` : '') + (line ? `#L${line}` : '');
-        }
-        return `${this.baseUrl}/tree/${branch}`;
-    }
+	constructor(gitUrl: GitUrl, sha: any) {
+		super(gitUrl, sha);
+		this.name = 'gitlab';
+	}
+	override webUrl(branch: string, filePath: string, line: number, endLine: number): string {
+		if (filePath) {
+			return `${this.baseUrl}/blob/${branch}` + (filePath ? `${filePath}` : '') + (line ? `#L${line}` : '');
+		}
+		return `${this.baseUrl}/tree/${branch}`;
+	}
 }
 
 class Gitea extends BaseProvider {
-    constructor(gitUrl: GitUrl, sha: any) {
-        super(gitUrl, sha);
-        this.name = 'gitea';
-    }
-    webUrl(branch: string, filePath: string, line: number, endLine: number): string {
-        let blobPath = `branch/${branch}`;
-        if (useCommitSHAInURL) {
-            blobPath = `commit/${this.sha}`;
-        }
-        if (filePath) {
-            return `${this.baseUrl}/src/${blobPath}` + (filePath ? `${filePath}` : '') + (line ? `#L${line}` : '');
-        }
-        return `${this.baseUrl}/src/${blobPath}`;
-    }
+	constructor(gitUrl: GitUrl, sha: any) {
+		super(gitUrl, sha);
+		this.name = 'gitea';
+	}
+	override webUrl(branch: string, filePath: string, line: number, endLine: number): string {
+		let blobPath = `branch/${branch}`;
+		if (useCommitSHAInURL) {
+			blobPath = `commit/${this.sha}`;
+		}
+		if (filePath) {
+			return `${this.baseUrl}/src/${blobPath}` + (filePath ? `${filePath}` : '') + (line ? `#L${line}` : '');
+		}
+		return `${this.baseUrl}/src/${blobPath}`;
+	}
 }
 
 class Bitbucket extends BaseProvider {
-    constructor(gitUrl: GitUrl, sha: any) {
-        super(gitUrl, sha);
-        this.name = 'bitbucket';
-    }
-    webUrl(branch: string, filePath: string, line: number, endLine: number): string {
-        const fileName = path.basename(filePath);
-        return `${this.baseUrl}/src/${this.sha}` + (filePath ? `${filePath}` : '') + (line ? `#${fileName}-${line}` : '');
-    }
+	constructor(gitUrl: GitUrl, sha: any) {
+		super(gitUrl, sha);
+		this.name = 'bitbucket';
+	}
+	override webUrl(branch: string, filePath: string, line: number, endLine: number): string {
+		const fileName = path.basename(filePath);
+		return (
+			`${this.baseUrl}/src/${this.sha}` + (filePath ? `${filePath}` : '') + (line ? `#${fileName}-${line}` : '')
+		);
+	}
 }
 
 class VisualStudio extends BaseProvider {
-    constructor(gitUrl: GitUrl, sha: any) {
-        super(gitUrl, sha);
-        this.name = 'visualstudio';
-    }
-    get baseUrl() {
-        return `https://${this.gitUrl.resource}${this.gitUrl.pathname}`.replace(/\.git/, '');
-    }
+	constructor(gitUrl: GitUrl, sha: any) {
+		super(gitUrl, sha);
+		this.name = 'visualstudio';
+	}
+	override get baseUrl() {
+		return `https://${this.gitUrl.resource}${this.gitUrl.pathname}`.replace(/\.git/, '');
+	}
 
-    webUrl(branch: string, filePath: string, line: number, endLine: number): string {
-        let query: any = {
-            version: `GB${branch}`,
-        };
-        if (filePath) {
-            query['path'] = filePath;
-        }
-        if (line) {
-            query['line'] = line;
-        }
-        return `${this.baseUrl}?${querystring.stringify(query)}`;
-    }
+	override webUrl(branch: string, filePath: string, line: number, endLine: number): string {
+		let query: any = {
+			version: `GB${branch}`,
+		};
+		if (filePath) {
+			query['path'] = filePath;
+		}
+		if (line) {
+			query['line'] = line;
+		}
+		return `${this.baseUrl}?${querystring.stringify(query)}`;
+	}
 }
 
 const gitHubDomain = 'github.com';
@@ -166,11 +170,11 @@ const providerType = 'unknown';
 const providerProtocol = 'https';
 
 const providers = {
-    [gitHubDomain]: GitHub,
-    'gitlab.com': GitLab,
-    [giteaDomain]: Gitea,
-    'bitbucket.org': Bitbucket,
-    'visualstudio.com': VisualStudio
+	[gitHubDomain]: GitHub,
+	'gitlab.com': GitLab,
+	[giteaDomain]: Gitea,
+	'bitbucket.org': Bitbucket,
+	'visualstudio.com': VisualStudio,
 };
 
 /**
@@ -179,14 +183,14 @@ const providers = {
  * @param {string} remoteUrl
  * @return {BaseProvider|null}
  */
-const gitProvider = (remoteUrl: string, sha: any): BaseProvider|null => {
-    const gitUrl: GitUrl = gitUrlParse(remoteUrl);
-    for (const domain of Object.keys(providers)) {
-        if (domain === gitUrl.resource || domain === gitUrl.source) {
-            return new (providers as any)[domain](gitUrl, sha);
-        }
-    }
-    throw new Error('unknown Provider');
+const gitProvider = (remoteUrl: string, sha: any): BaseProvider | null => {
+	const gitUrl: GitUrl = gitUrlParse(remoteUrl);
+	for (const domain of Object.keys(providers)) {
+		if (domain === gitUrl.resource || domain === gitUrl.source) {
+			return new (providers as any)[domain](gitUrl, sha);
+		}
+	}
+	throw new Error('unknown Provider');
 };
 
 export default gitProvider;
