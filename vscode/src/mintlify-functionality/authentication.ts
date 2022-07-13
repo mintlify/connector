@@ -26,7 +26,7 @@ export const registerAuthRoute = async (provider: ViewProvider, globalState: Glo
 						return;
 					}
 
-					provider.authenticate(user);
+					await provider.authenticate(user);
 				} catch (err) {
 					await vscode.window.showErrorMessage('Error authenticating user');
 				}
@@ -43,12 +43,12 @@ export const registerAuthRoute = async (provider: ViewProvider, globalState: Glo
 		},
 	});
 
-	vscode.commands.registerCommand('mintlify.login', () => {
-		provider.displaySignin();
+	vscode.commands.registerCommand('mintlify.login', async () => {
+		await provider.displaySignin();
 	});
 
-	vscode.commands.registerCommand('mintlify.logout', () => {
-		provider.logout();
+	vscode.commands.registerCommand('mintlify.logout', async () => {
+		await provider.logout();
 	});
 
 	await setLoginContext(globalState);

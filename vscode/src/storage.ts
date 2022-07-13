@@ -1,4 +1,4 @@
-import { Disposable, Event, EventEmitter, ExtensionContext, SecretStorageChangeEvent } from 'vscode';
+import { Disposable, env, Event, EventEmitter, ExtensionContext, SecretStorageChangeEvent } from 'vscode';
 import type { ViewShowBranchComparison } from './config';
 import type { SearchPattern } from './git/search';
 
@@ -41,6 +41,16 @@ export class Storage implements Disposable {
 
 	async storeSecret(key: SecretKeys, value: string): Promise<void> {
 		return this.context.secrets.store(key, value);
+	}
+
+	async getAuthParams(): Promise<object> {
+		const userId = await this.getSecret('userId');
+		const subdomain = await this.getSecret('subdomain');
+		return {
+			userId: userId,
+			subdomain: subdomain,
+			anonymousId: env.machineId,
+		};
 	}
 
 	getWorkspace<T>(key: WorkspaceStorageKeys | `${WorkspaceStorageKeys.ConnectedPrefix}${string}`): T | undefined;

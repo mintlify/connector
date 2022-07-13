@@ -1,9 +1,22 @@
 import axios from 'axios';
-import vscode, { Uri, Webview, WebviewView, WebviewViewProvider } from 'vscode';
-import { openLogin } from './authentication';
-import { API_ENDPOINT } from './utils/api';
-import { Code } from './utils/git';
-import { GlobalState } from './utils/globalState';
+import {
+	CancellationToken,
+	Disposable,
+	Uri,
+	Webview,
+	WebviewView,
+	WebviewViewProvider,
+	WebviewViewResolveContext,
+	window,
+} from 'vscode';
+import * as vscode from 'vscode';
+import { getNonce } from '@env/crypto';
+import { Container } from '../../container';
+import { Logger } from '../../logger';
+import { API_ENDPOINT } from '../../mintlify-functionality/utils/api';
+import { Code } from '../../mintlify-functionality/utils/git';
+import { executeCommand } from '../../system/command';
+import { log } from '../../system/decorators/log';
 
 export type Doc = {
 	org: string;
@@ -19,18 +32,66 @@ export type Link = {
 	doc: Doc;
 	codes: Code[];
 };
-
+// TODO - create webviewbase, message handler
 export class ViewProvider implements WebviewViewProvider {
 	public static readonly viewType = 'create';
 	private _view?: WebviewView;
-	private globalState: GlobalState;
+	protected readonly disposables: Disposable[] = [];
+	protected isReady: boolean = false;
+	private _disposableView: Disposable | undefined;
 
-	constructor(private readonly _extensionUri: Uri, globalState: GlobalState) {
-		this.globalState = globalState;
+	constructor(private readonly container: Container) {
+		this.disposables.push(window.registerWebviewViewProvider(ViewProvider.viewType, this));
+	}
+
+	dispose() {
+		this.disposables.forEach(d => d.dispose());
+		this._disposableView?.dispose();
+	}
+
+	get visible() {
+		return this._view?.visible ?? false;
+	}
+
+	@log()
+	async show(options?: { preserveFocus?: boolean }) {
+		const cc = Logger.getCorrelationContext();
+
+		try {
+			void (await executeCommand(`${ViewProvider.viewType}.focus`, options));
+		} catch (ex) {
+			Logger.error(ex, cc);
+		}
+	}
+
+	protected refresh() {
+		if (this._view == null) return;
+
+		this._view.webview.html = this._getHtmlForWebview(this._view.webview);
+	}
+
+	private onViewDisposed() {
+		this._disposableView?.dispose();
+		this._disposableView = undefined;
+		this._view = undefined;
+	}
+
+	private onViewVisibilityChanged() {
+		const visible = this.visible;
+		Logger.debug(`WebviewView(${ViewProvider.viewType}).onViewVisibilityChanged`, `visible=${visible}`);
+
+		if (visible) {
+			this.refresh();
+		}
+	}
+
+	private async deleteAuthSecrets() {
+		await this.container.storage.deleteSecret('userId');
+		await this.container.storage.deleteSecret('subdomain');
 	}
 
 	public async authenticate(user: any) {
-		await this.globalState.setUserId(user.userId);
+		await this.container.storage.storeSecret('userId', user.userId);
 		await vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', true);
 		await vscode.window.showInformationMessage(`🙌 Successfully signed in with ${user.email}`);
 		await vscode.commands.executeCommand('mintlify.refresh-links');
@@ -38,13 +99,13 @@ export class ViewProvider implements WebviewViewProvider {
 		await this._view?.webview.postMessage({ command: 'auth', args: user });
 	}
 
-	public prefillDocWithDocId = (docId: string) => {
-		this.show();
+	public prefillDocWithDocId = async (docId: string) => {
+		await this.show();
 		// TBD: Add doc data
 	};
 
 	public async prefillDoc(doc: Doc) {
-		this.show();
+		await this.show();
 		await this._view?.webview.postMessage({ command: 'prefill-doc', args: doc });
 	}
 
@@ -54,21 +115,37 @@ export class ViewProvider implements WebviewViewProvider {
 
 	public async logout() {
 		await this._view?.webview.postMessage({ command: 'logout' });
-		await this.globalState.clearState();
+		await this.deleteAuthSecrets();
 		await vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', false);
 		await vscode.commands.executeCommand('mintlify.refresh-views');
 		await vscode.commands.executeCommand('mintlify.refresh-links');
 		await vscode.window.showInformationMessage('Successfully logged out of account');
 	}
 
-	public async resolveWebviewView(webviewView: WebviewView) {
+	public postCode(code: Code) {
+		return this._view?.webview.postMessage({ command: 'post-code', args: code });
+	}
+
+	public async resolveWebviewView(
+		webviewView: WebviewView,
+		_context: WebviewViewResolveContext<unknown>,
+		_token: CancellationToken,
+	) {
+		this._view = webviewView;
+
 		webviewView.webview.options = {
 			// Allow scripts in the webview
 			enableScripts: true,
-			localResourceRoots: [this._extensionUri],
+			localResourceRoots: [this.container.context.extensionUri],
 		};
 
-		webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+		this._disposableView = Disposable.from(
+			this._view.onDidDispose(this.onViewDisposed, this),
+			this._view.onDidChangeVisibility(this.onViewVisibilityChanged, this),
+		);
+
+		this.refresh();
+
 		webviewView.webview.onDidReceiveMessage(async message => {
 			switch (message.command) {
 				case 'login-oauth': {
@@ -82,7 +159,7 @@ export class ViewProvider implements WebviewViewProvider {
 				case 'login': {
 					const { signInWithProtocol, subdomain } = message.args;
 					await openLogin(signInWithProtocol);
-					await this.globalState.setSubdomain(subdomain);
+					await this.container.storage.storeSecret('subdomain', subdomain);
 					break;
 				}
 				case 'link-submit': {
@@ -94,11 +171,12 @@ export class ViewProvider implements WebviewViewProvider {
 						},
 						async () => {
 							try {
+								const authParams = await this.container.storage.getAuthParams();
 								const response = await axios.put(
 									`${API_ENDPOINT}/links`,
 									{ docId: docId, code: code, url: url },
 									{
-										params: this.globalState.getAuthParams(),
+										params: authParams,
 									},
 								);
 								await this.prefillDoc(response.data.doc);
@@ -129,23 +207,14 @@ export class ViewProvider implements WebviewViewProvider {
 			}
 		});
 
-		this._view = webviewView;
-		await this._view?.webview.postMessage({ command: 'start', args: API_ENDPOINT }); // 이거
-	}
-
-	public show() {
-		this._view?.show();
-	}
-
-	public postCode(code: Code) {
-		return this._view?.webview.postMessage({ command: 'post-code', args: code });
+		await this._view?.webview.postMessage({ command: 'start', args: API_ENDPOINT });
 	}
 
 	private _getHtmlForWebview(webview: Webview) {
 		// Use a nonce to whitelist which scripts can be run
 		const nonce = getNonce();
 
-		const uri = Uri.joinPath(this._extensionUri, 'dist', 'webviewActivityBar.js');
+		const uri = Uri.joinPath(this.container.context.extensionUri, 'dist', 'webviewActivityBar.js');
 
 		return `<!DOCTYPE html>
 			<html lang="en">
@@ -167,11 +236,6 @@ export class ViewProvider implements WebviewViewProvider {
 	}
 }
 
-function getNonce() {
-	let text = '';
-	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-	for (let i = 0; i < 32; i++) {
-		text += possible.charAt(Math.floor(Math.random() * possible.length));
-	}
-	return text;
-}
+export const openLogin = (endpoint: string) => {
+	return vscode.env.openExternal(vscode.Uri.parse(`${endpoint}/api/login/vscode`));
+};

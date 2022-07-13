@@ -27,6 +27,7 @@ import { GitProviderService } from './git/gitProviderService';
 import { LineHoverController } from './hovers/lineHoverController';
 import { Keyboard } from './keyboard';
 import { Logger } from './logger';
+import { DocCodeLensController } from './mintlify/codelens/codeLensController';
 import { Storage } from './storage';
 import { executeCommand } from './system/command';
 import { log } from './system/decorators/log';
@@ -156,6 +157,7 @@ export class Container {
 
 		context.subscriptions.push((this._fileAnnotationController = new FileAnnotationController(this)));
 		context.subscriptions.push((this._lineHoverController = new LineHoverController(this)));
+		context.subscriptions.push((this._codeLensController = new DocCodeLensController(this)));
 
 		context.subscriptions.push(new ViewFileDecorationProvider());
 
@@ -169,7 +171,6 @@ export class Container {
 		context.subscriptions.push((this._tagsView = new TagsView(this)));
 		context.subscriptions.push((this._contributorsView = new ContributorsView(this)));
 		context.subscriptions.push((this._searchAndCompareView = new SearchAndCompareView(this)));
-
 
 		if (config.terminalLinks.enabled) {
 			context.subscriptions.push((this._terminalLinks = new GitTerminalLinkProvider(this)));
@@ -242,6 +243,11 @@ export class Container {
 		}
 
 		return this._autolinks;
+	}
+
+	private _codeLensController: DocCodeLensController;
+	get codeLens() {
+		return this._codeLensController;
 	}
 
 	private _branchesView: BranchesView | undefined;

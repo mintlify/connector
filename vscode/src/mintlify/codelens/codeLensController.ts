@@ -1,15 +1,15 @@
 import { ConfigurationChangeEvent, Disposable, languages } from 'vscode';
-import { configuration } from '../configuration';
-import { ContextKeys } from '../constants';
-import { Container } from '../container';
-import { setContext } from '../context';
-import { Logger } from '../logger';
-import { once } from '../system/event';
+import { configuration } from '../../configuration';
+import { ContextKeys } from '../../constants';
+import { Container } from '../../container';
+import { setContext } from '../../context';
+import { Logger } from '../../logger';
+import { once } from '../../system/event';
 import {
 	DocumentBlameStateChangeEvent,
 	DocumentDirtyIdleTriggerEvent,
 	GitDocumentState,
-} from '../trackers/gitDocumentTracker';
+} from '../../trackers/gitDocumentTracker';
 import { DocCodeLensProvider } from './codeLensProvider';
 
 export class DocCodeLensController implements Disposable {

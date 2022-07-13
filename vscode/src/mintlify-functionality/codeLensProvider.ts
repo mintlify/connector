@@ -25,7 +25,6 @@ export class DocCodeLensProvider implements CodeLensProvider {
 	}
 
 	async getCodeLenses(): Promise<CodeLens[]> {
-		console.log(Math.random());
 		console.log('Triggering code lens');
 		if (this._document == null) {
 			return [];
