@@ -9,7 +9,6 @@ import {
 	Range,
 	TextDocument,
 } from 'vscode';
-import { CodeLensScopes, configuration } from '../../configuration';
 import { ContextKeys, Schemes } from '../../constants';
 import { Container } from '../../container';
 import { getContext } from '../../context';
@@ -59,7 +58,6 @@ export class DocCodeLensProvider implements CodeLensProvider {
 		const lenses: CodeLens[] = [];
 
 		const links: Link[] | undefined = getContext<Link[]>(ContextKeys.Links);
-		console.log({ links: links });
 		if (links == null || links?.length === 0) {
 			return lenses;
 		}
@@ -77,8 +75,6 @@ export class DocCodeLensProvider implements CodeLensProvider {
 			blame = await this.container.git.getBlame(gitUri, document);
 			if (blame == null || blame?.lines.length === 0) return lenses;
 		}
-
-		console.log({ blame: blame });
 
 		relatedLinks.forEach(link => {
 			let firstLine = document.lineAt(0);
