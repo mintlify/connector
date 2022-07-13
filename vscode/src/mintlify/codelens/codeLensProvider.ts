@@ -56,29 +56,10 @@ export class DocCodeLensProvider implements CodeLensProvider {
 			}
 		}
 
-		const cfg = configuration.get('codeLens', document);
-
-		let languageScope = cfg.scopesByLanguage?.find(ll => ll.language?.toLowerCase() === document.languageId);
-		if (languageScope == null) {
-			languageScope = {
-				language: document.languageId,
-			};
-		}
-		if (languageScope.scopes == null) {
-			languageScope.scopes = cfg.scopes;
-		}
-		if (languageScope.symbolScopes == null) {
-			languageScope.symbolScopes = cfg.symbolScopes;
-		}
-
-		languageScope.symbolScopes =
-			languageScope.symbolScopes != null
-				? (languageScope.symbolScopes = languageScope.symbolScopes.map(s => s.toLowerCase()))
-				: [];
-
 		const lenses: CodeLens[] = [];
 
 		const links: Link[] | undefined = getContext<Link[]>(ContextKeys.Links);
+		console.log({ links: links });
 		if (links == null || links?.length === 0) {
 			return lenses;
 		}
@@ -95,10 +76,6 @@ export class DocCodeLensProvider implements CodeLensProvider {
 			if (token.isCancellationRequested) return lenses;
 			blame = await this.container.git.getBlame(gitUri, document);
 			if (blame == null || blame?.lines.length === 0) return lenses;
-		} else if (languageScope.scopes.length !== 1 || !languageScope.scopes.includes(CodeLensScopes.Document)) {
-			const tracked = await this.container.git.isTracked(gitUri);
-
-			if (!tracked) return lenses;
 		}
 
 		console.log({ blame: blame });

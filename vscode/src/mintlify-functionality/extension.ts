@@ -106,4 +106,5 @@ const init = async (
 	});
 
 	await vscode.commands.executeCommand('mintlify.refresh-links', context);
+	await vscode.commands.executeCommand('mintlify.refreshLinks');
 };

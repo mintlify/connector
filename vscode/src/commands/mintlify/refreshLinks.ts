@@ -18,8 +18,9 @@ export class RefreshLinks extends ActiveEditorCommand {
 		const fileFsPath: string = editor.document.uri.fsPath;
 		const { gitOrg, repo } = await getRepoInfo(fileFsPath);
 		try {
+			const authParams = await this.container.storage.getAuthParams();
 			const codesResponse = await axios.get(`${API_ENDPOINT}/links`, {
-				params: { ...this.container.storage.getAuthParams(), repo: repo, gitOrg: gitOrg },
+				params: { ...authParams, repo: repo, gitOrg: gitOrg },
 			});
 			await setContext(ContextKeys.Links, codesResponse.data.codes);
 		} catch (err) {

@@ -45,15 +45,9 @@ export class DocCodeLensController implements Disposable {
 				Logger.log('CodeLens config changed; resetting CodeLens provider');
 			}
 
-			const cfg = this.container.config.codeLens;
-			if (cfg.enabled && (cfg.recentChange.enabled || cfg.authors.enabled)) {
-				this.ensureProvider();
-			} else {
-				this._providerDisposable?.dispose();
-				this._provider = undefined;
-			}
+			this.ensureProvider();
 
-			this._canToggle = cfg.recentChange.enabled || cfg.authors.enabled;
+			this._canToggle = true;
 			void setContext(ContextKeys.DisabledToggleCodeLens, !this._canToggle);
 		}
 	}
