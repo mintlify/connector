@@ -3186,6 +3186,10 @@
 				"title": "Refresh links"
 			},
 			{
+				"command": "mintlify.refreshLinks",
+				"title": "Refresh Mintlify links"
+			},
+			{
 				"command": "mintlify.prefill-doc",
 				"title": "Prefill document"
 			},

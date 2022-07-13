@@ -116,6 +116,7 @@ export const prefillDocCommand = (viewProvider: ViewProvider) => {
 	});
 };
 
+// TODO - update this to correspond with git line changes
 export const highlightConnectionCommand = () => {
 	return vscode.commands.registerCommand('mintlify.highlight-connection', async (code: CodeReturned) => {
 		if (code.line != null && code.endLine != null) {

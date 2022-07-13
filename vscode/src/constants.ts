@@ -217,6 +217,9 @@ export const enum Commands {
 	Deprecated_OpenInRemote = 'gitlens.openInRemote',
 	Deprecated_OpenRepoInRemote = 'gitlens.openRepoInRemote',
 	Deprecated_ShowFileHistoryInView = 'gitlens.showFileHistoryInView',
+
+	// mintlify
+	RefreshLinks = 'mintlify.refreshLinks',
 }
 
 export const enum ContextKeys {
