@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { registerAuthRoute } from './authentication';
-import { DocCodeLensProvider } from './codeLensProvider';
 import {
 	highlightConnectionCommand,
 	inviteTeamMemberCommand,
@@ -98,38 +97,6 @@ const init = async (
 	if (repositories.length === 0) {
 		// Repos is empty
 	}
-	const codeLensProvider = new DocCodeLensProvider(globalState, repositories, git);
-	const allLanguages = await vscode.languages.getLanguages();
-
-	context.subscriptions.push(vscode.languages.registerCodeLensProvider(allLanguages, codeLensProvider));
-
-	const updateRepoInfo = async () => {
-		console.log('Updating repo info');
-		const repos = git.repositories;
-		codeLensProvider.repositories = repos;
-		await codeLensProvider.refreshCodeLenses();
-	};
-
-	context.subscriptions.push(
-		git.onDidChangeState(async e => {
-			if (e === 'initialized') {
-				await updateRepoInfo();
-			}
-		}),
-	);
-
-	context.subscriptions.push(
-		git.onDidCloseRepository(async () => {
-			await updateRepoInfo();
-		}),
-	);
-
-	context.subscriptions.push(
-		git.onDidOpenRepository(async () => {
-			await updateRepoInfo();
-		}),
-	);
-
 	vscode.workspace.onDidSaveTextDocument(async () => {
 		await vscode.commands.executeCommand('mintlify.refresh-links');
 	});

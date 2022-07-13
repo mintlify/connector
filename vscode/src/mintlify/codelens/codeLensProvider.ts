@@ -2,15 +2,20 @@ import {
 	CancellationToken,
 	CodeLens,
 	CodeLensProvider,
+	Command,
 	DocumentSelector,
 	Event,
 	EventEmitter,
+	Range,
 	TextDocument,
 } from 'vscode';
 import { CodeLensScopes, configuration } from '../../configuration';
-import { Schemes } from '../../constants';
+import { ContextKeys, Schemes } from '../../constants';
 import { Container } from '../../container';
+import { getContext } from '../../context';
 import { GitBlame } from '../../git/models';
+import { getFilePath } from '../../mintlify-functionality/utils/git';
+import { Link } from '../../mintlify-functionality/utils/links';
 
 export class DocCodeLensProvider implements CodeLensProvider {
 	static selector: DocumentSelector = [
@@ -73,6 +78,16 @@ export class DocCodeLensProvider implements CodeLensProvider {
 
 		const lenses: CodeLens[] = [];
 
+		const links: Link[] | undefined = getContext<Link[]>(ContextKeys.Links);
+		if (links == null || links?.length === 0) {
+			return lenses;
+		}
+		const fileFsPath: string = document.uri.fsPath;
+		const fileName = getFilePath(fileFsPath);
+		const relatedLinks = links.filter(link => {
+			return link.file === fileName || fileName.includes(link.file) || link.file.includes(fileName);
+		});
+
 		const gitUri = trackedDocument.uri;
 		let blame: GitBlame | undefined;
 
@@ -86,8 +101,44 @@ export class DocCodeLensProvider implements CodeLensProvider {
 			if (!tracked) return lenses;
 		}
 
+		console.log({ blame: blame });
+
+		relatedLinks.forEach(link => {
+			let firstLine = document.lineAt(0);
+			let lastLine = document.lineAt(document.lineCount - 1);
+			if (link.type === 'lines' && link?.line && link?.endLine) {
+				return;
+			}
+			if (lastLine.lineNumber > document.lineCount - 1) {
+				lastLine = document.lineAt(document.lineCount - 1);
+			}
+			if (firstLine.lineNumber < 0) {
+				firstLine = document.lineAt(0);
+			}
+			const range = new Range(firstLine.range.start, lastLine.range.end);
+			const title = this.formatTitle(link);
+			const command: Command = {
+				command: 'mintlify.preview-doc',
+				title: title,
+				arguments: [link.doc],
+			};
+			const lens: CodeLens = new CodeLens(range, command);
+			lenses.push(lens);
+		});
+
 		if (token.isCancellationRequested) return lenses;
 
 		return lenses;
+	}
+
+	private formatTitle(link: Link): string {
+		let formattedTitle = link.doc?.title;
+		if (formattedTitle == null) {
+			return 'Go to document';
+		}
+		if (formattedTitle.length > 30) {
+			formattedTitle = `${formattedTitle.slice(0, 30)}...`;
+		}
+		return formattedTitle;
 	}
 }
