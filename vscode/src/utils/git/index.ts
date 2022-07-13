@@ -120,7 +120,7 @@ export const getGitData = async (fileFsPath: string, viewProvider: ViewProvider,
                 }
             }
             if (!rawUri) {
-                vscode.window.showWarningMessage(`No remote found on branch.`);
+                // vscode.window.showWarningMessage(`No remote found on branch.`);
                 return;
             }
 
@@ -210,7 +210,7 @@ export const getRepoInfo = async (fileFsPath: string): Promise<{ repo: string, g
                     }
                 }
                 if (!rawUri) {
-                    vscode.window.showWarningMessage(`No remote found on branch.`);
+                    // vscode.window.showWarningMessage(`No remote found on branch.`);
                     return reject();
                 }
 
