@@ -14,6 +14,7 @@ import { Container } from '../../container';
 import { getContext } from '../../context';
 import { GitBlame } from '../../git/models';
 import { getFilePath } from '../../mintlify-functionality/utils/git';
+import { mapOldPositionToNew } from '../../mintlify-functionality/utils/git/diffPositionMapping';
 import { Link } from '../../mintlify-functionality/utils/links';
 
 export class DocCodeLensProvider implements CodeLensProvider {
@@ -84,8 +85,24 @@ export class DocCodeLensProvider implements CodeLensProvider {
 				if (document.isDirty) {
 					return;
 				}
-				const diff = await this.container.git.getDiffForFileContents(gitUri, fileName, link.sha);
-				console.log({ diff: diff, link: link });
+				try {
+					const diffForFileContents = await this.container.git.getDiffForFileContents(
+						gitUri,
+						fileName,
+						link.sha,
+					);
+					console.log({ diffForFileContents: diffForFileContents });
+					let diff = diffForFileContents?.diff;
+					if (diff == null && diffForFileContents?.hunks != null && diffForFileContents.hunks.length > 0) {
+						diff = diffForFileContents.hunks[0].diff;
+					}
+					if (diff != null) {
+						firstLine = document.lineAt(mapOldPositionToNew(diff, link.line));
+						lastLine = document.lineAt(mapOldPositionToNew(diff, link.endLine) - 1);
+					}
+				} catch {
+					return;
+				}
 			}
 			if (lastLine.lineNumber > document.lineCount - 1) {
 				lastLine = document.lineAt(document.lineCount - 1);

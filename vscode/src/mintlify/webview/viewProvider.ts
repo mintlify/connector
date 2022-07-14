@@ -209,16 +209,16 @@ export class ViewProvider implements WebviewViewProvider {
 								);
 								await this.prefillDoc(response.data.doc);
 								await vscode.commands.executeCommand('mintlify.refresh-views');
-								await vscode.window.showInformationMessage(
+								await executeCommand(Commands.RefreshLinks);
+								return vscode.window.showInformationMessage(
 									`Successfully connected code with ${response.data.doc.title}`,
 								);
 							} catch (err) {
 								const errMessage =
 									err?.response?.data?.error ??
 									`Error connecting code. Please log back in, re-install the extension, or report bug to hi@mintlify.com`;
-								await vscode.window.showInformationMessage(errMessage);
+								return vscode.window.showInformationMessage(errMessage);
 							}
-							await executeCommand(Commands.RefreshLinks);
 						},
 					);
 					break;
