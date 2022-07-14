@@ -9,7 +9,7 @@ import {
 	Range,
 	TextDocument,
 } from 'vscode';
-import { ContextKeys, Schemes } from '../../constants';
+import { Commands, ContextKeys, Schemes } from '../../constants';
 import { Container } from '../../container';
 import { getContext } from '../../context';
 import { GitBlame } from '../../git/models';
@@ -96,9 +96,9 @@ export class DocCodeLensProvider implements CodeLensProvider {
 			const range = new Range(firstLine.range.start, lastLine.range.end);
 			const title = this.formatTitle(link);
 			const command: Command = {
-				command: 'mintlify.preview-doc',
+				command: Commands.PreviewDoc,
 				title: title,
-				arguments: [link.doc],
+				arguments: [{ doc: link.doc }],
 			};
 			const lens: CodeLens = new CodeLens(range, command);
 			return lens;

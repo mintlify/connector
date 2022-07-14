@@ -17,7 +17,7 @@ export class PrefillDoc extends Command {
 	async execute(args?: PrefillDocArgs) {
 		const doc = args?.doc;
 		if (doc == null) return;
-		await executeCommand(Commands.PreviewDoc, doc);
+		await executeCommand(Commands.PreviewDoc, { doc: doc });
 		await this.container.viewProvider.prefillDoc(doc);
 	}
 }
