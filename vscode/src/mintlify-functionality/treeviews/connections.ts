@@ -1,23 +1,50 @@
 // eslint-disable-next-line no-restricted-imports
 import * as path from 'path';
 import axios from 'axios';
+import { Disposable, TextEditor, TreeView, window } from 'vscode';
 import * as vscode from 'vscode';
+import { Container } from '../../container';
+import { once } from '../../system/event';
 import { API_ENDPOINT } from '../utils/api';
 import { Code, getRepoInfo } from '../utils/git';
-import { GlobalState } from '../utils/globalState';
 import { Doc } from '../utils/types';
 
 export type CodeReturned = Code & { doc: Doc };
 
-export class ConnectionsTreeProvider implements vscode.TreeDataProvider<Connection> {
-	private state: GlobalState;
+export class ConnectionsTreeProvider implements vscode.TreeDataProvider<Connection>, Disposable {
+	protected disposables: Disposable[] = [];
+	protected tree: TreeView<Connection> | undefined;
+
 	private _onDidChangeTreeData: vscode.EventEmitter<Connection | undefined | null | void> = new vscode.EventEmitter<
 		Connection | undefined | null | void
 	>();
 	readonly onDidChangeTreeData: vscode.Event<Connection | undefined | null | void> = this._onDidChangeTreeData.event;
 
-	constructor(state: GlobalState) {
-		this.state = state;
+	constructor(private readonly container: Container) {
+		this.disposables.push(
+			once(container.onReady)(this.onReady, this),
+			window.onDidChangeActiveTextEditor(this.onActiveTextEditorChanged, this),
+		);
+	}
+
+	private onActiveTextEditorChanged(editor: TextEditor | undefined) {
+		if (editor == null) return;
+		this.refresh();
+	}
+
+	private onReady() {
+		this.initialize();
+	}
+
+	dispose() {
+		Disposable.from(...this.disposables).dispose();
+	}
+
+	protected initialize() {
+		this.tree = window.createTreeView<Connection>('connections', {
+			treeDataProvider: this,
+		});
+		this.disposables.push(this.tree);
 	}
 
 	getTreeItem(element: Connection): vscode.TreeItem {
@@ -36,11 +63,12 @@ export class ConnectionsTreeProvider implements vscode.TreeDataProvider<Connecti
 		}
 
 		try {
+			const authParams = await this.container.storage.getAuthParams();
 			const {
 				data: { codes },
 			} = await axios.get(`${API_ENDPOINT}/links`, {
 				params: {
-					...this.state.getAuthParams(),
+					...authParams,
 					gitOrg: gitOrg,
 					file: file,
 					repo: repo,

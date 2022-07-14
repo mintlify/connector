@@ -1,6 +1,7 @@
 import { Code } from './git';
 
 export type Doc = {
+	_id: string;
 	org: string;
 	url: string;
 	method: string;

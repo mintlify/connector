@@ -2,60 +2,7 @@ import axios from 'axios';
 import * as vscode from 'vscode';
 import { CodeReturned } from './treeviews/connections';
 import { API_ENDPOINT } from './utils/api';
-import { getRepoInfo } from './utils/git';
 import { GlobalState } from './utils/globalState';
-import { getLinks } from './utils/links';
-import { Doc } from './utils/types';
-
-export const refreshLinksCommand = (globalState: GlobalState) => {
-	return vscode.commands.registerCommand('mintlify.refresh-links', async args => {
-		const window = vscode.window;
-		const editor = args?.editor ?? window.activeTextEditor;
-		const fileFsPath: string = editor.document.uri.fsPath;
-		const { gitOrg, repo } = await getRepoInfo(fileFsPath);
-		await globalState.setGitOrg(gitOrg);
-		await globalState.setRepo(repo);
-		const links = await getLinks(globalState);
-		await globalState.setLinks(links);
-	});
-};
-
-export const openDocsCommand = () => {
-	return vscode.commands.registerCommand('mintlify.open-doc', async url => {
-		await vscode.env.openExternal(vscode.Uri.parse(url));
-	});
-};
-
-export const openPreviewCommand = (globalState: GlobalState) => {
-	return vscode.commands.registerCommand('mintlify.preview-doc', async (doc: Doc) => {
-		const panel = vscode.window.createWebviewPanel(
-			'mintlify.preview',
-			doc.title,
-			{
-				viewColumn: vscode.ViewColumn.Two,
-				preserveFocus: true,
-			},
-			{
-				enableScripts: true,
-			},
-		);
-
-		try {
-			const url = doc.url;
-			const { data: hyperbeamIframeUrl } = await axios.get(`${API_ENDPOINT}/links/iframe`, {
-				params: {
-					...globalState.getAuthParams(),
-					url: url,
-				},
-			});
-			const iframe = `<iframe src="${hyperbeamIframeUrl}" style="position:fixed;border:0;width:100%;height:100%"></iframe>`;
-			panel.webview.html = iframe;
-		} catch {
-			panel.dispose();
-			await vscode.env.openExternal(vscode.Uri.parse(doc.url));
-		}
-	});
-};
 
 // TODO - update this to correspond with git line changes
 export const highlightConnectionCommand = () => {

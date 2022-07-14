@@ -1,21 +1,40 @@
 import axios from 'axios';
+import { Disposable, TreeView, window } from 'vscode';
 import * as vscode from 'vscode';
+import { Container } from '../../container';
+import { once } from '../../system/event';
 import { API_ENDPOINT } from '../utils/api';
 import { Code } from '../utils/git';
-import { GlobalState } from '../utils/globalState';
 import { Doc } from '../utils/types';
 
 export type CodeReturned = Code & { doc: Doc };
 
-export class TeamTreeProvider implements vscode.TreeDataProvider<Account> {
-	private state: GlobalState;
+export class TeamTreeProvider implements vscode.TreeDataProvider<Account>, Disposable {
+	protected disposables: Disposable[] = [];
+	protected tree: TreeView<Account> | undefined;
+
 	private _onDidChangeTreeData: vscode.EventEmitter<Account | undefined | null | void> = new vscode.EventEmitter<
 		Account | undefined | null | void
 	>();
 	readonly onDidChangeTreeData: vscode.Event<Account | undefined | null | void> = this._onDidChangeTreeData.event;
 
-	constructor(state: GlobalState) {
-		this.state = state;
+	constructor(private readonly container: Container) {
+		this.disposables.push(once(container.onReady)(this.onReady, this));
+	}
+
+	private onReady() {
+		this.initialize();
+	}
+
+	protected initialize() {
+		this.tree = window.createTreeView<Account>('teammates', {
+			treeDataProvider: this,
+		});
+		this.disposables.push(this.tree);
+	}
+
+	dispose() {
+		Disposable.from(...this.disposables).dispose();
 	}
 
 	refresh(): void {
@@ -27,18 +46,18 @@ export class TeamTreeProvider implements vscode.TreeDataProvider<Account> {
 	}
 
 	async getChildren(): Promise<any[]> {
-		const isLoggedIn = this.state.getUserId() != null;
+		const currentUserId = this.container.storage.getSecret('userId');
 
-		if (!isLoggedIn) {
+		if (currentUserId == null) {
 			return [new NotLoggedIn()];
 		}
+		const authParams = await this.container.storage.getAuthParams();
 		const {
 			data: { users },
 		} = await axios.get(`${API_ENDPOINT}/org/users`, {
-			params: this.state.getAuthParams(),
+			params: authParams,
 		});
 
-		const currentUserId = this.state.getUserId();
 		const currentUser = users.find((user: any) => user.userId === currentUserId);
 		const allOtherMembers = users.filter((user: any) => user?.email !== currentUser.email);
 

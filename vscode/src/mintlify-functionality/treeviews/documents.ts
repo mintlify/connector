@@ -1,10 +1,12 @@
 // eslint-disable-next-line no-restricted-imports
 import * as path from 'path';
 import axios from 'axios';
+import { Disposable, TreeView, window } from 'vscode';
 import * as vscode from 'vscode';
 import { Commands } from '../../constants';
+import { Container } from '../../container';
+import { once } from '../../system/event';
 import { API_ENDPOINT } from '../utils/api';
-import { GlobalState } from '../utils/globalState';
 import { Doc } from '../utils/types';
 
 type Group = {
@@ -16,15 +18,32 @@ type Group = {
 	isLoading: boolean;
 };
 
-export class DocumentsTreeProvider implements vscode.TreeDataProvider<GroupOption> {
-	private state: GlobalState;
+export class DocumentsTreeProvider implements vscode.TreeDataProvider<GroupOption>, Disposable {
+	protected disposables: Disposable[] = [];
+	protected tree: TreeView<GroupOption> | undefined;
+
 	private _onDidChangeTreeData: vscode.EventEmitter<GroupOption | undefined | null | void> = new vscode.EventEmitter<
 		GroupOption | undefined | null | void
 	>();
 	readonly onDidChangeTreeData: vscode.Event<GroupOption | undefined | null | void> = this._onDidChangeTreeData.event;
 
-	constructor(state: GlobalState) {
-		this.state = state;
+	constructor(private readonly container: Container) {
+		this.disposables.push(once(container.onReady)(this.onReady, this));
+	}
+
+	private onReady() {
+		this.initialize();
+	}
+
+	protected initialize() {
+		this.tree = window.createTreeView<GroupOption>('documents', {
+			treeDataProvider: this,
+		});
+		this.disposables.push(this.tree);
+	}
+
+	dispose() {
+		Disposable.from(...this.disposables).dispose();
 	}
 
 	getTreeItem(element: GroupOption): vscode.TreeItem {
@@ -32,11 +51,12 @@ export class DocumentsTreeProvider implements vscode.TreeDataProvider<GroupOptio
 	}
 
 	async getChildren(groupElement: GroupOption): Promise<any[]> {
+		const authParams = await this.container.storage.getAuthParams();
 		if (groupElement != null) {
 			const {
 				data: { docs },
 			} = await axios.get(`${API_ENDPOINT}/docs/method/${groupElement.group._id}`, {
-				params: this.state.getAuthParams(),
+				params: authParams,
 			});
 			await vscode.commands.executeCommand('setContext', 'mintlify.hasDocuments', true);
 			return docs.map((doc: any) => new DocOption(doc, vscode.TreeItemCollapsibleState.None));
@@ -46,7 +66,7 @@ export class DocumentsTreeProvider implements vscode.TreeDataProvider<GroupOptio
 			const {
 				data: { groups },
 			} = await axios.get(`${API_ENDPOINT}/docs/groups`, {
-				params: this.state.getAuthParams(),
+				params: authParams,
 			});
 
 			if (groups.length === 0) {
@@ -60,7 +80,7 @@ export class DocumentsTreeProvider implements vscode.TreeDataProvider<GroupOptio
 				const {
 					data: { docs },
 				} = await axios.get(`${API_ENDPOINT}/docs/method/${group._id}`, {
-					params: this.state.getAuthParams(),
+					params: authParams,
 				});
 				if (docs.length === 0) {
 					await vscode.commands.executeCommand('setContext', 'mintlify.hasDocuments', false);

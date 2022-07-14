@@ -224,6 +224,10 @@ export const enum Commands {
 	LinkDir = 'mintlify.linkDir',
 	PreviewDoc = 'mintlify.previewDoc',
 	PrefillDoc = 'mintlify.prefillDoc',
+	RefreshViews = 'mintlify.refreshViews',
+	DeleteLink = 'mintlify.deleteLink',
+	DeleteDoc = 'mintlify.deleteDoc',
+	RenameDoc = 'mintlify.renameDoc',
 }
 
 export const enum ContextKeys {

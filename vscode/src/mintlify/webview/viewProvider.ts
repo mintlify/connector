@@ -138,7 +138,7 @@ export class ViewProvider implements WebviewViewProvider {
 		await vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', true);
 		await vscode.window.showInformationMessage(`🙌 Successfully signed in with ${user.email}`);
 		await executeCommand(Commands.RefreshLinks);
-		await vscode.commands.executeCommand('mintlify.refresh-views');
+		await executeCommand(Commands.RefreshViews);
 		await this._view?.webview.postMessage({ command: 'auth', args: user });
 	}
 
@@ -160,8 +160,8 @@ export class ViewProvider implements WebviewViewProvider {
 		await this._view?.webview.postMessage({ command: 'logout' });
 		await this.deleteAuthSecrets();
 		await vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', false);
-		await vscode.commands.executeCommand('mintlify.refresh-views');
 		await executeCommand(Commands.RefreshLinks);
+		await executeCommand(Commands.RefreshViews);
 		await vscode.window.showInformationMessage('Successfully logged out of account');
 	}
 
@@ -213,8 +213,8 @@ export class ViewProvider implements WebviewViewProvider {
 										)
 										.then(response => {
 											return this.prefillDoc(response.data.doc)
-												.then(() => vscode.commands.executeCommand('mintlify.refresh-links'))
-												.then(() => vscode.commands.executeCommand('mintlify.refresh-views'))
+												.then(() => executeCommand(Commands.RefreshLinks))
+												.then(() => executeCommand(Commands.RefreshViews))
 												.then(() => resolve(response.data.doc.title));
 										})
 										.catch(err => {

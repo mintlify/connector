@@ -3191,7 +3191,7 @@
 				"title": "Highlight connection"
 			},
 			{
-				"command": "mintlify.delete-document",
+				"command": "mintlify.deleteDoc",
 				"title": "Delete Document",
 				"icon": {
 					"light": "assets/icons/delete.svg",
@@ -3199,7 +3199,7 @@
 				}
 			},
 			{
-				"command": "mintlify.rename-document",
+				"command": "mintlify.renameDoc",
 				"title": "Rename Document",
 				"icon": {
 					"light": "assets/icons/edit.svg",
@@ -3207,7 +3207,7 @@
 				}
 			},
 			{
-				"command": "mintlify.delete-connection",
+				"command": "mintlify.deleteLink",
 				"title": "Delete Connection",
 				"icon": {
 					"light": "assets/icons/delete.svg",
@@ -3227,7 +3227,7 @@
 				"title": "Invite team member"
 			},
 			{
-				"command": "mintlify.refresh-views",
+				"command": "mintlify.refreshViews",
 				"title": "Refresh views"
 			},
 			{
@@ -8134,17 +8134,17 @@
 			],
 			"view/item/context": [
 				{
-					"command": "mintlify.rename-document",
+					"command": "mintlify.renameDoc",
 					"when": "view == documents && viewItem == document",
 					"group": "inline"
 				},
 				{
-					"command": "mintlify.delete-document",
+					"command": "mintlify.deleteDoc",
 					"when": "view == documents && viewItem == document",
 					"group": "inline"
 				},
 				{
-					"command": "mintlify.delete-connection",
+					"command": "mintlify.deleteLink",
 					"when": "view == connections && viewItem == connection",
 					"group": "inline"
 				},

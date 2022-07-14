@@ -27,6 +27,9 @@ import { GitProviderService } from './git/gitProviderService';
 import { LineHoverController } from './hovers/lineHoverController';
 import { Keyboard } from './keyboard';
 import { Logger } from './logger';
+import { ConnectionsTreeProvider } from './mintlify-functionality/treeviews/connections';
+import { DocumentsTreeProvider } from './mintlify-functionality/treeviews/documents';
+import { TeamTreeProvider } from './mintlify-functionality/treeviews/team';
 import { DocCodeLensController } from './mintlify/codelens/codeLensController';
 import { ViewProvider } from './mintlify/webview/viewProvider';
 import { Storage } from './storage';
@@ -172,6 +175,9 @@ export class Container {
 		context.subscriptions.push((this._tagsView = new TagsView(this)));
 		context.subscriptions.push((this._contributorsView = new ContributorsView(this)));
 		context.subscriptions.push((this._searchAndCompareView = new SearchAndCompareView(this)));
+		context.subscriptions.push((this._connectionsTreeProvider = new ConnectionsTreeProvider(this)));
+		context.subscriptions.push((this._documentsTreeProvider = new DocumentsTreeProvider(this)));
+		context.subscriptions.push((this._teamTreeProvider = new TeamTreeProvider(this)));
 
 		context.subscriptions.push((this._viewProvider = new ViewProvider(this)));
 
@@ -253,6 +259,14 @@ export class Container {
 		return this._codeLensController;
 	}
 
+	private _connectionsTreeProvider: ConnectionsTreeProvider | undefined;
+	get connectionsTreeProvider() {
+		if (this._connectionsTreeProvider == null) {
+			this._context.subscriptions.push((this._connectionsTreeProvider = new ConnectionsTreeProvider(this)));
+		}
+		return this._connectionsTreeProvider;
+	}
+
 	private _branchesView: BranchesView | undefined;
 	get branchesView() {
 		if (this._branchesView == null) {
@@ -296,6 +310,14 @@ export class Container {
 	@memoize()
 	get debugging() {
 		return this._context.extensionMode === ExtensionMode.Development;
+	}
+
+	private _documentsTreeProvider: DocumentsTreeProvider | undefined;
+	get documentsTreeProvider() {
+		if (this._documentsTreeProvider == null) {
+			this._context.subscriptions.push((this._documentsTreeProvider = new DocumentsTreeProvider(this)));
+		}
+		return this._documentsTreeProvider;
 	}
 
 	@memoize()
@@ -423,6 +445,14 @@ export class Container {
 		}
 
 		return this._tagsView;
+	}
+
+	private _teamTreeProvider: TeamTreeProvider | undefined;
+	get teamTreeProvider() {
+		if (this._teamTreeProvider == null) {
+			this._context.subscriptions.push((this._teamTreeProvider = new TeamTreeProvider(this)));
+		}
+		return this._teamTreeProvider;
 	}
 
 	private _tracker: GitDocumentTracker;
