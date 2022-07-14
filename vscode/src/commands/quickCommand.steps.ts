@@ -1190,7 +1190,7 @@ export async function* pickContributorsStep<
 
 export async function* pickRepositoryStep<
 	State extends PartialStepState & { repo?: string | Repository },
-	Context extends { repos: Repository[]; title: string; associatedView: ViewsWithRepositoryFolders },
+	Context extends { repos: Repository[]; title: string },
 >(state: State, context: Context, placeholder: string = 'Choose a repository'): AsyncStepResultGenerator<Repository> {
 	if (typeof state.repo === 'string') {
 		state.repo = Container.instance.git.getRepository(state.repo);
@@ -1214,25 +1214,7 @@ export async function* pickRepositoryStep<
 							}),
 						),
 				  ),
-		onDidClickItemButton: (quickpick, button, { item }) => {
-			if (button === QuickCommandButtons.RevealInSideBar) {
-				void GitActions.Repository.reveal(item.path, context.associatedView, {
-					select: true,
-					focus: false,
-					expand: true,
-				});
-			}
-		},
 		keys: ['right', 'alt+right', 'ctrl+right'],
-		onDidPressKey: quickpick => {
-			if (quickpick.activeItems.length === 0) return;
-
-			void GitActions.Repository.reveal(quickpick.activeItems[0].item.path, context.associatedView, {
-				select: true,
-				focus: false,
-				expand: true,
-			});
-		},
 	});
 	const selection: StepSelection<typeof step> = yield step;
 	return QuickCommand.canPickStepContinue(step, state, selection) ? selection[0].item : StepResult.Break;
@@ -1240,7 +1222,7 @@ export async function* pickRepositoryStep<
 
 export async function* pickRepositoriesStep<
 	State extends PartialStepState & { repos?: string[] | Repository[] },
-	Context extends { repos: Repository[]; title: string; associatedView: ViewsWithRepositoryFolders },
+	Context extends { repos: Repository[]; title: string },
 >(
 	state: State,
 	context: Context,
@@ -1284,25 +1266,7 @@ export async function* pickRepositoriesStep<
 							),
 						),
 				  ),
-		onDidClickItemButton: (quickpick, button, { item }) => {
-			if (button === QuickCommandButtons.RevealInSideBar) {
-				void GitActions.Repository.reveal(item.path, context.associatedView, {
-					select: true,
-					focus: false,
-					expand: true,
-				});
-			}
-		},
 		keys: ['right', 'alt+right', 'ctrl+right'],
-		onDidPressKey: quickpick => {
-			if (quickpick.activeItems.length === 0) return;
-
-			void GitActions.Repository.reveal(quickpick.activeItems[0].item.path, context.associatedView, {
-				select: true,
-				focus: false,
-				expand: true,
-			});
-		},
 	});
 	const selection: StepSelection<typeof step> = yield step;
 	return QuickCommand.canPickStepContinue(step, state, selection) ? selection.map(i => i.item) : StepResult.Break;

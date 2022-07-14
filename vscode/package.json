@@ -9082,14 +9082,6 @@
 					"visibility": "hidden"
 				},
 				{
-					"id": "mintlify.views.branches",
-					"name": "Branches",
-					"when": "!gitlens:disabled",
-					"contextualTitle": "GitLens",
-					"icon": "images/views/branches.svg",
-					"visibility": "collapsed"
-				},
-				{
 					"id": "mintlify.views.remotes",
 					"name": "Remotes",
 					"when": "!gitlens:disabled",

@@ -40,7 +40,6 @@ import { memoize } from './system/decorators/memoize';
 import { GitTerminalLinkProvider } from './terminal/linkProvider';
 import { GitDocumentTracker } from './trackers/gitDocumentTracker';
 import { GitLineTracker } from './trackers/gitLineTracker';
-import { BranchesView } from './views/branchesView';
 import { CommitsView } from './views/commitsView';
 import { ContributorsView } from './views/contributorsView';
 import { FileHistoryView } from './views/fileHistoryView';
@@ -170,7 +169,6 @@ export class Container {
 		context.subscriptions.push((this._commitsView = new CommitsView(this)));
 		context.subscriptions.push((this._fileHistoryView = new FileHistoryView(this)));
 		context.subscriptions.push((this._lineHistoryView = new LineHistoryView(this)));
-		context.subscriptions.push((this._branchesView = new BranchesView(this)));
 		context.subscriptions.push((this._remotesView = new RemotesView(this)));
 		context.subscriptions.push((this._stashesView = new StashesView(this)));
 		context.subscriptions.push((this._tagsView = new TagsView(this)));
@@ -272,15 +270,6 @@ export class Container {
 			this._context.subscriptions.push((this._connectionsTreeProvider = new ConnectionsTreeProvider(this)));
 		}
 		return this._connectionsTreeProvider;
-	}
-
-	private _branchesView: BranchesView | undefined;
-	get branchesView() {
-		if (this._branchesView == null) {
-			this._context.subscriptions.push((this._branchesView = new BranchesView(this)));
-		}
-
-		return this._branchesView;
 	}
 
 	private _commitsView: CommitsView | undefined;

@@ -153,7 +153,7 @@ export namespace GitActions {
 				expand?: boolean | number;
 			},
 		) {
-			const view = branch.remote ? Container.instance.remotesView : Container.instance.branchesView;
+			const view = Container.instance.remotesView;
 			const node = view.canReveal
 				? await view.revealBranch(branch, options)
 				: await Container.instance.repositoriesView.revealBranch(branch, options);
@@ -677,11 +677,7 @@ export namespace GitActions {
 				expand?: boolean | number;
 			},
 		) {
-			const views = [
-				Container.instance.commitsView,
-				Container.instance.branchesView,
-				Container.instance.remotesView,
-			];
+			const views = [Container.instance.commitsView, Container.instance.remotesView];
 
 			// TODO@eamodio stop duplicate notifications
 
