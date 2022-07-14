@@ -192,35 +192,45 @@ export class ViewProvider implements WebviewViewProvider {
 				}
 				case 'link-submit': {
 					const { docId, code, url } = message.args;
-					await vscode.window.withProgress(
-						{
-							location: vscode.ProgressLocation.Notification,
-							title: 'Connecting documentation with code',
-						},
-						async () => {
-							try {
-								const authParams = await this.container.storage.getAuthParams();
-								const response = await axios.put(
-									`${API_ENDPOINT}/links`,
-									{ docId: docId, code: code, url: url },
-									{
-										params: authParams,
-									},
-								);
-								await this.prefillDoc(response.data.doc);
-								await vscode.commands.executeCommand('mintlify.refresh-views');
-								await executeCommand(Commands.RefreshLinks);
-								return vscode.window.showInformationMessage(
-									`Successfully connected code with ${response.data.doc.title}`,
-								);
-							} catch (err) {
-								const errMessage =
-									err?.response?.data?.error ??
-									`Error connecting code. Please log back in, re-install the extension, or report bug to hi@mintlify.com`;
-								return vscode.window.showInformationMessage(errMessage);
-							}
-						},
-					);
+					try {
+						const progress: string = await vscode.window.withProgress(
+							{
+								location: vscode.ProgressLocation.Notification,
+								title: 'Connecting documentation with code',
+							},
+							() => {
+								return new Promise((resolve, reject) => {
+									this.container.storage
+										.getAuthParams()
+										.then(authParams =>
+											axios.put(
+												`${API_ENDPOINT}/links`,
+												{ docId: docId, code: code, url: url },
+												{
+													params: authParams,
+												},
+											),
+										)
+										.then(response => {
+											return this.prefillDoc(response.data.doc)
+												.then(() => vscode.commands.executeCommand('mintlify.refresh-links'))
+												.then(() => vscode.commands.executeCommand('mintlify.refresh-views'))
+												.then(() => resolve(response.data.doc.title));
+										})
+										.catch(err => {
+											const errMessage =
+												err?.response?.data?.error ??
+												`Error connecting code. Please log back in, re-install the extension, or report bug to hi@mintlify.com`;
+											return reject(errMessage);
+										});
+								});
+							},
+						);
+						await vscode.window.showInformationMessage(`Successfully connected code with ${progress}`);
+					} catch (errMessage) {
+						await vscode.window.showInformationMessage(errMessage);
+					}
+
 					break;
 				}
 				case 'refresh-code': {
