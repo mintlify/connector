@@ -3170,8 +3170,16 @@
 				"title": "Link Code to Documentation"
 			},
 			{
+				"command": "mintlify.linkCode",
+				"title": "Mintlify: Link Code to Documentation"
+			},
+			{
 				"command": "mintlify.link-dir",
 				"title": "Link folder/file to documentation"
+			},
+			{
+				"command": "mintlify.linkDir",
+				"title": "Mintlify: Link folder/file to documentation"
 			},
 			{
 				"command": "mintlify.login",
@@ -7286,7 +7294,7 @@
 			],
 			"explorer/context": [
 				{
-					"command": "mintlify.link-dir",
+					"command": "mintlify.linkDir",
 					"group": "mintlify"
 				},
 				{

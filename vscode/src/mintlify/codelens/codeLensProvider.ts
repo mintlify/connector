@@ -76,11 +76,16 @@ export class DocCodeLensProvider implements CodeLensProvider {
 			if (blame == null || blame?.lines.length === 0) return lenses;
 		}
 
-		relatedLinks.forEach(link => {
+		// TODO - seprate promises from non-promise lenses
+		const lensPromises: Promise<CodeLens | undefined>[] = relatedLinks.map(async link => {
 			let firstLine = document.lineAt(0);
 			let lastLine = document.lineAt(document.lineCount - 1);
 			if (link.type === 'lines' && link?.line && link?.endLine) {
-				return;
+				if (document.isDirty) {
+					return;
+				}
+				const diff = await this.container.git.getDiffForFileContents(gitUri, fileName, link.sha);
+				console.log({ diff: diff, link: link });
 			}
 			if (lastLine.lineNumber > document.lineCount - 1) {
 				lastLine = document.lineAt(document.lineCount - 1);
@@ -96,12 +101,15 @@ export class DocCodeLensProvider implements CodeLensProvider {
 				arguments: [link.doc],
 			};
 			const lens: CodeLens = new CodeLens(range, command);
-			lenses.push(lens);
+			return lens;
 		});
 
 		if (token.isCancellationRequested) return lenses;
 
-		return lenses;
+		const resolvedLenses = await Promise.all(lensPromises);
+		const filteredLens = resolvedLenses.filter(lens => lens != null) as CodeLens[];
+
+		return filteredLens;
 	}
 
 	private formatTitle(link: Link): string {

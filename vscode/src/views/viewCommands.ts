@@ -21,7 +21,6 @@ import {
 	executeEditorCommand,
 } from '../system/command';
 import { debug } from '../system/decorators/log';
-import { OpenWorkspaceLocation } from '../system/utils';
 import { runGitCommandInTerminal } from '../terminal';
 import {
 	BranchesNode,
@@ -57,8 +56,6 @@ import {
 	ViewNode,
 	ViewRefFileNode,
 	ViewRefNode,
-	WorktreeNode,
-	WorktreesNode,
 } from './nodes';
 
 interface CompareSelectedInfo {
