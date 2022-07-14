@@ -5,7 +5,7 @@ import { GitUri } from '../../git/gitUri';
 import { Logger } from '../../logger';
 import { Messages } from '../../messages';
 import { getHighlightedText } from '../../mintlify-functionality/utils';
-import { Code, newGetGitData } from '../../mintlify-functionality/utils/git';
+import { Code, getGitData } from '../../mintlify-functionality/utils/git';
 import { command } from '../../system/command';
 import { first } from '../../system/iterable';
 import {
@@ -75,11 +75,10 @@ export class LinkCode extends ActiveEditorCommand {
 				const selectedLines: number[] = [selection.start.line, selection.end.line];
 
 				const code: Code = await this.getCode(fileFsPath, 'lines', activeEditor, uri, args, selectedLines);
-				// await this.container.
-				console.log({ code: code });
+				await this.container.viewProvider.postCode(code);
 			} else {
 				const code: Code = await this.getCode(fileFsPath, 'file', activeEditor, uri, args);
-				console.log({ code: code });
+				await this.container.viewProvider.postCode(code);
 			}
 		} else {
 			if (uri == null) return;
@@ -87,7 +86,7 @@ export class LinkCode extends ActiveEditorCommand {
 			const type = this.getIsFolder(fileStat) ? 'folder' : 'file';
 			const fileFsPath: string = uri.fsPath;
 			const code: Code = await this.getCode(fileFsPath, type, editor, uri, args);
-			console.log({ code: code });
+			await this.container.viewProvider.postCode(code);
 		}
 	}
 
@@ -99,7 +98,7 @@ export class LinkCode extends ActiveEditorCommand {
 		args?: LinkCommandArgs,
 		lines?: number[],
 	): Promise<Code> {
-		const code: Code = await newGetGitData(fileFsPath, type, lines);
+		const code: Code = await getGitData(fileFsPath, type, lines);
 		const sha = await this.getSha(editor, uri, args);
 		if (sha != null) {
 			code.sha = sha;

@@ -11,6 +11,7 @@ import {
 } from 'vscode';
 import * as vscode from 'vscode';
 import { getNonce } from '@env/crypto';
+import { Commands } from '../../constants';
 import { Container } from '../../container';
 import { Logger } from '../../logger';
 import { API_ENDPOINT } from '../../mintlify-functionality/utils/api';
@@ -32,16 +33,26 @@ export type Link = {
 	doc: Doc;
 	codes: Code[];
 };
-// TODO - create webviewbase, message handler
+// TODO - create webviewbase, message handler, and view commands, onReady
 export class ViewProvider implements WebviewViewProvider {
 	public static readonly viewType = 'create';
 	private _view?: WebviewView;
 	protected readonly disposables: Disposable[] = [];
 	protected isReady: boolean = false;
 	private _disposableView: Disposable | undefined;
+	private _uriHandler = { handleUri: this.handleUri };
 
 	constructor(private readonly container: Container) {
-		this.disposables.push(window.registerWebviewViewProvider(ViewProvider.viewType, this));
+		this.disposables.push(
+			window.registerWebviewViewProvider(ViewProvider.viewType, this),
+			window.registerUriHandler(this._uriHandler),
+			vscode.commands.registerCommand('mintlify.login', async () => {
+				await this.displaySignin();
+			}),
+			vscode.commands.registerCommand('mintlify.logout', async () => {
+				await this.logout();
+			}),
+		);
 	}
 
 	dispose() {
@@ -85,6 +96,38 @@ export class ViewProvider implements WebviewViewProvider {
 		}
 	}
 
+	private async handleUri(uri: vscode.Uri) {
+		if (uri.path === '/auth') {
+			try {
+				const query = new URLSearchParams(uri.query);
+				const userRaw = query.get('user');
+				if (userRaw == null) {
+					await vscode.window.showErrorMessage('Unable to authenticate. Try again later');
+					return;
+				}
+
+				const user = JSON.parse(userRaw);
+				if (user?.email == null) {
+					await vscode.window.showErrorMessage('User has insufficient credentials. Try again later');
+					return;
+				}
+
+				await this.authenticate(user);
+			} catch (err) {
+				await vscode.window.showErrorMessage('Error authenticating user');
+			}
+		} else if (uri.path === '/prefill-doc') {
+			const query = new URLSearchParams(uri.query);
+			const docId = query.get('docId');
+			if (!docId) {
+				await vscode.window.showErrorMessage('No document identifier selected');
+				return;
+			}
+
+			await this.prefillDocWithDocId(docId);
+		}
+	}
+
 	private async deleteAuthSecrets() {
 		await this.container.storage.deleteSecret('userId');
 		await this.container.storage.deleteSecret('subdomain');
@@ -94,7 +137,7 @@ export class ViewProvider implements WebviewViewProvider {
 		await this.container.storage.storeSecret('userId', user.userId);
 		await vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', true);
 		await vscode.window.showInformationMessage(`🙌 Successfully signed in with ${user.email}`);
-		await vscode.commands.executeCommand('mintlify.refresh-links');
+		await executeCommand(Commands.RefreshLinks);
 		await vscode.commands.executeCommand('mintlify.refresh-views');
 		await this._view?.webview.postMessage({ command: 'auth', args: user });
 	}
@@ -118,7 +161,7 @@ export class ViewProvider implements WebviewViewProvider {
 		await this.deleteAuthSecrets();
 		await vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', false);
 		await vscode.commands.executeCommand('mintlify.refresh-views');
-		await vscode.commands.executeCommand('mintlify.refresh-links');
+		await executeCommand(Commands.RefreshLinks);
 		await vscode.window.showInformationMessage('Successfully logged out of account');
 	}
 
@@ -131,21 +174,6 @@ export class ViewProvider implements WebviewViewProvider {
 		_context: WebviewViewResolveContext<unknown>,
 		_token: CancellationToken,
 	) {
-		this._view = webviewView;
-
-		webviewView.webview.options = {
-			// Allow scripts in the webview
-			enableScripts: true,
-			localResourceRoots: [this.container.context.extensionUri],
-		};
-
-		this._disposableView = Disposable.from(
-			this._view.onDidDispose(this.onViewDisposed, this),
-			this._view.onDidChangeVisibility(this.onViewVisibilityChanged, this),
-		);
-
-		this.refresh();
-
 		webviewView.webview.onDidReceiveMessage(async message => {
 			switch (message.command) {
 				case 'login-oauth': {
@@ -190,14 +218,13 @@ export class ViewProvider implements WebviewViewProvider {
 									`Error connecting code. Please log back in, re-install the extension, or report bug to hi@mintlify.com`;
 								await vscode.window.showInformationMessage(errMessage);
 							}
-							await vscode.commands.executeCommand('mintlify.refresh-links');
+							await executeCommand(Commands.RefreshLinks);
 						},
 					);
 					break;
 				}
 				case 'refresh-code': {
-					const editor = vscode.window.activeTextEditor;
-					await vscode.commands.executeCommand('mintlify.link-code', { editor: editor, scheme: 'file' });
+					await executeCommand(Commands.LinkCode);
 					break;
 				}
 				case 'error': {
@@ -206,6 +233,21 @@ export class ViewProvider implements WebviewViewProvider {
 				}
 			}
 		});
+
+		webviewView.webview.options = {
+			// Allow scripts in the webview
+			enableScripts: true,
+			localResourceRoots: [this.container.context.extensionUri],
+		};
+
+		this._view = webviewView;
+
+		this._disposableView = Disposable.from(
+			this._view.onDidDispose(this.onViewDisposed, this),
+			this._view.onDidChangeVisibility(this.onViewVisibilityChanged, this),
+		);
+
+		this.refresh();
 
 		await this._view?.webview.postMessage({ command: 'start', args: API_ENDPOINT });
 	}

@@ -5,7 +5,7 @@ import * as vscode from 'vscode';
 import { API_ENDPOINT } from '../utils/api';
 import { Code, getRepoInfo } from '../utils/git';
 import { GlobalState } from '../utils/globalState';
-import { Doc } from '../viewProvider';
+import { Doc } from '../utils/types';
 
 export type CodeReturned = Code & { doc: Doc };
 

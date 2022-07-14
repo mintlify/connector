@@ -20,6 +20,8 @@ export * from './commands/gitCommands';
 export * from './commands/inviteToLiveShare';
 export * from './commands/logging';
 export * from './commands/mintlify/link';
+export * from './commands/mintlify/openPreview';
+export * from './commands/mintlify/prefillDoc';
 export * from './commands/mintlify/refreshLinks';
 export * from './commands/openAssociatedPullRequestOnRemote';
 export * from './commands/openBranchesOnRemote';

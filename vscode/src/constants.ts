@@ -222,6 +222,8 @@ export const enum Commands {
 	RefreshLinks = 'mintlify.refreshLinks',
 	LinkCode = 'mintlify.linkCode',
 	LinkDir = 'mintlify.linkDir',
+	PreviewDoc = 'mintlify.previewDoc',
+	PrefillDoc = 'mintlify.prefillDoc',
 }
 
 export const enum ContextKeys {

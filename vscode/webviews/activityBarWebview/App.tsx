@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { DocumentTextIcon, XIcon } from '@heroicons/react/solid';
 import { FolderIcon } from '@heroicons/react/outline';
+import { DocumentTextIcon, XIcon } from '@heroicons/react/solid';
+import React, { useEffect, useState } from 'react';
 import { vscode } from '../common/message';
-import { CodeSymbolIcon, CodeFileIcon } from '../common/svgs';
+import { CodeFileIcon, CodeSymbolIcon } from '../common/svgs';
 import Authenticate, { formatSignInUrl } from './Authenticate';
 
-export type Doc = {  
+export type Doc = {
   _id: string;
   title: string;
   url: string;
@@ -64,34 +64,42 @@ const App = () => {
       const message = event.data;
       switch (message.command) {
         case 'start':
-          const API_ENDPOINT = message?.args;
-          vscode.setState({ ...initialState, API_ENDPOINT });
-          setAPI_ENDPOINT(API_ENDPOINT);
-          break;
+          {
+            const API_ENDPOINT = message?.args;
+            vscode.setState({ ...initialState, API_ENDPOINT: API_ENDPOINT });
+            setAPI_ENDPOINT(API_ENDPOINT);
+            break;
+          }
         case 'auth':
-          const user = message?.args;
-          if (signInUrl) {
-            const newDashboardUrl = formatSignInUrl(signInUrl);
-            vscode.setState({ ...initialState, user, dashboardUrl: newDashboardUrl });
-            setDashboardUrl(newDashboardUrl);
-          };
-          setUser(user);
-          setIsDisplayingSignin(false);
-          clearSelectedDoc();
-          break;
+          {
+            const user = message?.args;
+            if (signInUrl) {
+              const newDashboardUrl = formatSignInUrl(signInUrl);
+              vscode.setState({ ...initialState, user: user, dashboardUrl: newDashboardUrl });
+              setDashboardUrl(newDashboardUrl);
+            };
+            setUser(user);
+            setIsDisplayingSignin(false);
+            clearSelectedDoc();
+            break;
+        }
         case 'display-signin':
           setIsDisplayingSignin(true);
           break;
         case 'prefill-doc':
+        {
           const doc = message?.args;
           vscode.setState({ ...initialState, selectedDoc: doc });
           setSelectedDoc(doc);
           break;
+        }
         case 'post-code':
+        {
           const code = message?.args;
-          vscode.setState({ ...initialState, code });
+          vscode.setState({ ...initialState, code: code });
           setCode(code);
           break;
+        }
         case 'logout':
           onLogout();
           clearSelectedDoc();
@@ -132,7 +140,7 @@ const App = () => {
         url: query
       };
     }
-    vscode.postMessage({ command: 'link-submit', args });
+    vscode.postMessage({ command: 'link-submit', args: args });
   };
 
   const updateQuery = (newQuery: string) => {
@@ -228,7 +236,7 @@ const App = () => {
             </div>
             <button
               type="submit"
-              className={classNames("submit", hasDocSelected ? 'opacity-100 hover:cursor-pointer' : 'opacity-50 hover:cursor-default')}
+              className={classNames('submit', hasDocSelected ? 'opacity-100 hover:cursor-pointer' : 'opacity-50 hover:cursor-default')}
               disabled={!hasDocSelected}
             >
               Submit

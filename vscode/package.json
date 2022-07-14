@@ -35,9 +35,6 @@
   "activationEvents": [
     "onStartupFinished",
 		"onView:primary",
-		"onCommand:mintlify.link-code",
-		"onCommand:mintlify.link-dir",
-		"onCommand:mintlify.prefill-doc",
 		"onAuthenticationRequest:gitlens-gitkraken",
 		"onFileSystem:gitlens",
 		"onView:gitlens.views.repositories",
@@ -3166,16 +3163,8 @@
 		],
 		"commands": [
 			{
-				"command": "mintlify.link-code",
-				"title": "Link Code to Documentation"
-			},
-			{
 				"command": "mintlify.linkCode",
 				"title": "Mintlify: Link Code to Documentation"
-			},
-			{
-				"command": "mintlify.link-dir",
-				"title": "Link folder/file to documentation"
 			},
 			{
 				"command": "mintlify.linkDir",
@@ -3190,15 +3179,11 @@
 				"title": "Logout of Mintlify"
 			},
 			{
-				"command": "mintlify.refresh-links",
-				"title": "Refresh links"
-			},
-			{
 				"command": "mintlify.refreshLinks",
 				"title": "Refresh Mintlify links"
 			},
 			{
-				"command": "mintlify.prefill-doc",
+				"command": "mintlify.prefillDoc",
 				"title": "Prefill document"
 			},
 			{

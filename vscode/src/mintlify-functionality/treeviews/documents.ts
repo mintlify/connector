@@ -2,9 +2,10 @@
 import * as path from 'path';
 import axios from 'axios';
 import * as vscode from 'vscode';
+import { Commands } from '../../constants';
 import { API_ENDPOINT } from '../utils/api';
 import { GlobalState } from '../utils/globalState';
-import { Doc } from '../viewProvider';
+import { Doc } from '../utils/types';
 
 type Group = {
 	_id: string;
@@ -104,8 +105,8 @@ class DocOption extends vscode.TreeItem {
 
 		const onClickCommand: vscode.Command = {
 			title: 'Prefill Doc',
-			command: 'mintlify.prefill-doc',
-			arguments: [this.doc],
+			command: Commands.PrefillDoc,
+			arguments: [{ doc: this.doc }],
 		};
 
 		this.command = onClickCommand;

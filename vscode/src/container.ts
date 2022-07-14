@@ -28,6 +28,7 @@ import { LineHoverController } from './hovers/lineHoverController';
 import { Keyboard } from './keyboard';
 import { Logger } from './logger';
 import { DocCodeLensController } from './mintlify/codelens/codeLensController';
+import { ViewProvider } from './mintlify/webview/viewProvider';
 import { Storage } from './storage';
 import { executeCommand } from './system/command';
 import { log } from './system/decorators/log';
@@ -171,6 +172,8 @@ export class Container {
 		context.subscriptions.push((this._tagsView = new TagsView(this)));
 		context.subscriptions.push((this._contributorsView = new ContributorsView(this)));
 		context.subscriptions.push((this._searchAndCompareView = new SearchAndCompareView(this)));
+
+		context.subscriptions.push((this._viewProvider = new ViewProvider(this)));
 
 		if (config.terminalLinks.enabled) {
 			context.subscriptions.push((this._terminalLinks = new GitTerminalLinkProvider(this)));
@@ -438,6 +441,11 @@ export class Container {
 			this._viewCommands = new ViewCommands(this);
 		}
 		return this._viewCommands;
+	}
+
+	private _viewProvider: ViewProvider;
+	get viewProvider() {
+		return this._viewProvider;
 	}
 
 	private _vsls: VslsController;
