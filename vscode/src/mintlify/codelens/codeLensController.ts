@@ -1,9 +1,10 @@
 import { ConfigurationChangeEvent, Disposable, languages } from 'vscode';
 import { configuration } from '../../configuration';
-import { ContextKeys } from '../../constants';
+import { Commands, ContextKeys } from '../../constants';
 import { Container } from '../../container';
 import { setContext } from '../../context';
 import { Logger } from '../../logger';
+import { executeCommand } from '../../system/command';
 import { once } from '../../system/event';
 import {
 	DocumentBlameStateChangeEvent,
@@ -30,7 +31,8 @@ export class DocCodeLensController implements Disposable {
 		this._disposable?.dispose();
 	}
 
-	private onReady(): void {
+	private async onReady() {
+		await executeCommand(Commands.RefreshLinks);
 		this.onConfigurationChanged();
 	}
 
