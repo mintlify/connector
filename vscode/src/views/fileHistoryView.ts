@@ -17,7 +17,7 @@ export class FileHistoryView extends ViewBase<FileHistoryTrackerNode | LineHisto
 	private _followEditor: boolean = true;
 
 	constructor(container: Container) {
-		super('gitlens.views.fileHistory', 'File History', container);
+		super('mintlify.views.fileHistory', 'File History', container);
 
 		void setContext(ContextKeys.ViewsFileHistoryCursorFollowing, this._followCursor);
 		void setContext(ContextKeys.ViewsFileHistoryEditorFollowing, this._followEditor);

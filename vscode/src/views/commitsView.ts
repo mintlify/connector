@@ -175,7 +175,7 @@ export class CommitsView extends ViewBase<CommitsViewNode, CommitsViewConfig> {
 	protected readonly configKey = 'commits';
 
 	constructor(container: Container) {
-		super('gitlens.views.commits', 'Commits', container);
+		super('mintlify.views.commits', 'Commits', container);
 	}
 
 	override get canReveal(): boolean {

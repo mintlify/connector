@@ -107,7 +107,7 @@ export class RemotesView extends ViewBase<RemotesViewNode, RemotesViewConfig> {
 	protected readonly configKey = 'remotes';
 
 	constructor(container: Container) {
-		super('gitlens.views.remotes', 'Remotes', container);
+		super('mintlify.views.remotes', 'Remotes', container);
 	}
 
 	override get canReveal(): boolean {

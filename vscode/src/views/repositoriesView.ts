@@ -58,7 +58,7 @@ export class RepositoriesView extends ViewBase<RepositoriesNode, RepositoriesVie
 	protected readonly configKey = 'repositories';
 
 	constructor(container: Container) {
-		super('gitlens.views.repositories', 'Repositories', container);
+		super('mintlify.views.repositories', 'Repositories', container);
 	}
 
 	private _onDidChangeAutoRefresh = new EventEmitter<void>();

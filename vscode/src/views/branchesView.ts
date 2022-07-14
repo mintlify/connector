@@ -113,7 +113,7 @@ export class BranchesView extends ViewBase<BranchesViewNode, BranchesViewConfig>
 	protected readonly configKey = 'branches';
 
 	constructor(container: Container) {
-		super('gitlens.views.branches', 'Branches', container);
+		super('mintlify.views.branches', 'Branches', container);
 	}
 
 	override get canReveal(): boolean {

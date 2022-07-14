@@ -10121,7 +10121,7 @@
 			],
 			"scm": [
 				{
-					"id": "gitlens.views.commits",
+					"id": "mintlify.views.commits",
 					"name": "Commits",
 					"when": "!gitlens:disabled",
 					"contextualTitle": "GitLens",
@@ -10129,7 +10129,7 @@
 					"visibility": "visible"
 				},
 				{
-					"id": "gitlens.views.repositories",
+					"id": "mintlify.views.repositories",
 					"name": "Repositories",
 					"when": "!gitlens:disabled && !gitlens:hasVirtualFolders",
 					"contextualTitle": "GitLens",
@@ -10137,7 +10137,7 @@
 					"visibility": "hidden"
 				},
 				{
-					"id": "gitlens.views.fileHistory",
+					"id": "mintlify.views.fileHistory",
 					"name": "File History",
 					"when": "!gitlens:disabled",
 					"contextualTitle": "GitLens",
@@ -10145,7 +10145,7 @@
 					"visibility": "visible"
 				},
 				{
-					"id": "gitlens.views.lineHistory",
+					"id": "mintlify.views.lineHistory",
 					"name": "Line History",
 					"when": "!gitlens:disabled && !gitlens:hasVirtualFolders",
 					"contextualTitle": "GitLens",
@@ -10153,7 +10153,7 @@
 					"visibility": "hidden"
 				},
 				{
-					"id": "gitlens.views.branches",
+					"id": "mintlify.views.branches",
 					"name": "Branches",
 					"when": "!gitlens:disabled",
 					"contextualTitle": "GitLens",
@@ -10161,7 +10161,7 @@
 					"visibility": "collapsed"
 				},
 				{
-					"id": "gitlens.views.remotes",
+					"id": "mintlify.views.remotes",
 					"name": "Remotes",
 					"when": "!gitlens:disabled",
 					"contextualTitle": "GitLens",
@@ -10169,7 +10169,7 @@
 					"visibility": "collapsed"
 				},
 				{
-					"id": "gitlens.views.stashes",
+					"id": "mintlify.views.stashes",
 					"name": "Stashes",
 					"when": "!gitlens:disabled && !gitlens:hasVirtualFolders",
 					"contextualTitle": "GitLens",
@@ -10177,7 +10177,7 @@
 					"visibility": "collapsed"
 				},
 				{
-					"id": "gitlens.views.tags",
+					"id": "mintlify.views.tags",
 					"name": "Tags",
 					"when": "!gitlens:disabled",
 					"contextualTitle": "GitLens",
@@ -10185,7 +10185,7 @@
 					"visibility": "collapsed"
 				},
 				{
-					"id": "gitlens.views.worktrees",
+					"id": "mintlify.views.worktrees",
 					"name": "Worktrees",
 					"when": "!gitlens:disabled && !gitlens:hasVirtualFolders && config.gitlens.plusFeatures.enabled",
 					"contextualTitle": "GitLens",
@@ -10193,7 +10193,7 @@
 					"visibility": "collapsed"
 				},
 				{
-					"id": "gitlens.views.contributors",
+					"id": "mintlify.views.contributors",
 					"name": "Contributors",
 					"when": "!gitlens:disabled",
 					"contextualTitle": "GitLens",
@@ -10201,7 +10201,7 @@
 					"visibility": "hidden"
 				},
 				{
-					"id": "gitlens.views.searchAndCompare",
+					"id": "mintlify.views.searchAndCompare",
 					"name": "Search & Compare",
 					"when": "!gitlens:disabled",
 					"contextualTitle": "GitLens",

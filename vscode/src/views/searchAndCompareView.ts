@@ -260,7 +260,7 @@ export class SearchAndCompareView extends ViewBase<SearchAndCompareViewNode, Sea
 	protected readonly configKey = 'searchAndCompare';
 
 	constructor(container: Container) {
-		super('gitlens.views.searchAndCompare', 'Search & Compare', container);
+		super('mintlify.views.searchAndCompare', 'Search & Compare', container);
 
 		void setContext(ContextKeys.ViewsSearchAndCompareKeepResults, this.keepResults);
 	}

@@ -120,7 +120,7 @@ export class ContributorsView extends ViewBase<ContributorsViewNode, Contributor
 	protected readonly configKey = 'contributors';
 
 	constructor(container: Container) {
-		super('gitlens.views.contributors', 'Contributors', container);
+		super('mintlify.views.contributors', 'Contributors', container);
 	}
 
 	override get canReveal(): boolean {

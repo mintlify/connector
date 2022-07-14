@@ -95,7 +95,7 @@ export class TagsView extends ViewBase<TagsViewNode, TagsViewConfig> {
 	protected readonly configKey = 'tags';
 
 	constructor(container: Container) {
-		super('gitlens.views.tags', 'Tags', container);
+		super('mintlify.views.tags', 'Tags', container);
 	}
 
 	override get canReveal(): boolean {

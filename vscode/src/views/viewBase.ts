@@ -59,7 +59,7 @@ export type View =
 	| RepositoriesView
 	| SearchAndCompareView
 	| StashesView
-	| TagsView
+	| TagsView;
 export type ViewsWithCommits = Exclude<View, FileHistoryView | LineHistoryView | StashesView>;
 export type ViewsWithRepositoryFolders = Exclude<View, RepositoriesView | FileHistoryView | LineHistoryView>;
 
@@ -79,7 +79,7 @@ export abstract class ViewBase<
 		| RepositoriesViewConfig
 		| SearchAndCompareViewConfig
 		| StashesViewConfig
-		| TagsViewConfig
+		| TagsViewConfig,
 > implements TreeDataProvider<ViewNode>, Disposable
 {
 	protected _onDidChangeTreeData = new EventEmitter<ViewNode | undefined>();
@@ -104,7 +104,7 @@ export abstract class ViewBase<
 	private readonly _lastKnownLimits = new Map<string, number | undefined>();
 
 	constructor(
-		public readonly id: `gitlens.views.${string}`,
+		public readonly id: `mintlify.views.${string}`,
 		public readonly name: string,
 		public readonly container: Container,
 	) {

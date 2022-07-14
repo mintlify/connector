@@ -13,7 +13,7 @@ export class LineHistoryView extends ViewBase<LineHistoryTrackerNode, LineHistor
 	protected readonly configKey = 'lineHistory';
 
 	constructor(container: Container) {
-		super('gitlens.views.lineHistory', 'Line History', container);
+		super('mintlify.views.lineHistory', 'Line History', container);
 
 		void setContext(ContextKeys.ViewsLineHistoryEditorFollowing, true);
 	}
