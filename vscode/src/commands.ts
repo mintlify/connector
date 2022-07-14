@@ -61,7 +61,6 @@ export * from './commands/showQuickCommitFile';
 export * from './commands/showQuickFileHistory';
 export * from './commands/showQuickRepoStatus';
 export * from './commands/showQuickStashList';
-export * from './commands/showView';
 export * from './commands/stashApply';
 export * from './commands/stashSave';
 export * from './commands/switchMode';

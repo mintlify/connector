@@ -3224,46 +3224,6 @@
 				"category": "GitLens"
 			},
 			{
-				"command": "gitlens.showBranchesView",
-				"title": "Show Branches View",
-				"category": "GitLens"
-			},
-			{
-				"command": "gitlens.showCommitsView",
-				"title": "Show Commits View",
-				"category": "GitLens"
-			},
-			{
-				"command": "gitlens.showContributorsView",
-				"title": "Show Contributors View",
-				"category": "GitLens"
-			},
-			{
-				"command": "gitlens.showFileHistoryView",
-				"title": "Show File History View",
-				"category": "GitLens"
-			},
-			{
-				"command": "gitlens.showLineHistoryView",
-				"title": "Show Line History View",
-				"category": "GitLens"
-			},
-			{
-				"command": "gitlens.showRemotesView",
-				"title": "Show Remotes View",
-				"category": "GitLens"
-			},
-			{
-				"command": "gitlens.showRepositoriesView",
-				"title": "Show Repositories View",
-				"category": "GitLens"
-			},
-			{
-				"command": "gitlens.showSearchAndCompareView",
-				"title": "Show Search And Compare Commits View",
-				"category": "GitLens"
-			},
-			{
 				"command": "gitlens.showStashesView",
 				"title": "Show Stashes View",
 				"category": "GitLens"
@@ -5469,38 +5429,6 @@
 					"when": "false"
 				},
 				{
-					"command": "gitlens.showBranchesView",
-					"when": "gitlens:enabled"
-				},
-				{
-					"command": "gitlens.showCommitsView",
-					"when": "gitlens:enabled"
-				},
-				{
-					"command": "gitlens.showContributorsView",
-					"when": "gitlens:enabled"
-				},
-				{
-					"command": "gitlens.showFileHistoryView",
-					"when": "gitlens:enabled"
-				},
-				{
-					"command": "gitlens.showLineHistoryView",
-					"when": "gitlens:enabled && !gitlens:hasVirtualFolders"
-				},
-				{
-					"command": "gitlens.showRemotesView",
-					"when": "gitlens:enabled"
-				},
-				{
-					"command": "gitlens.showRepositoriesView",
-					"when": "gitlens:enabled && !gitlens:hasVirtualFolders"
-				},
-				{
-					"command": "gitlens.showSearchAndCompareView",
-					"when": "gitlens:enabled"
-				},
-				{
 					"command": "gitlens.showStashesView",
 					"when": "gitlens:enabled && !gitlens:hasVirtualFolders"
 				},
@@ -5909,10 +5837,6 @@
 					"when": "false"
 				},
 				{
-					"command": "gitlens.stashApply",
-					"when": "gitlens:enabled && !gitlens:readonly && !gitlens:untrusted && !gitlens:hasVirtualFolders"
-				},
-				{
 					"command": "gitlens.views.deleteStash",
 					"when": "false"
 				},
@@ -5925,32 +5849,8 @@
 					"when": "false"
 				},
 				{
-					"command": "gitlens.resetAvatarCache",
-					"when": "gitlens:enabled"
-				},
-				{
-					"command": "gitlens.resetSuppressedWarnings",
-					"when": "gitlens:enabled"
-				},
-				{
 					"command": "gitlens.inviteToLiveShare",
 					"when": "false"
-				},
-				{
-					"command": "gitlens.browseRepoAtRevision",
-					"when": "!gitlens:hasVirtualFolders && gitlens:activeFileStatus =~ /revision/"
-				},
-				{
-					"command": "gitlens.browseRepoAtRevisionInNewWindow",
-					"when": "!gitlens:hasVirtualFolders && gitlens:activeFileStatus =~ /revision/"
-				},
-				{
-					"command": "gitlens.browseRepoBeforeRevision",
-					"when": "!gitlens:hasVirtualFolders && gitlens:activeFileStatus =~ /revision/"
-				},
-				{
-					"command": "gitlens.browseRepoBeforeRevisionInNewWindow",
-					"when": "!gitlens:hasVirtualFolders && gitlens:activeFileStatus =~ /revision/"
 				},
 				{
 					"command": "gitlens.views.browseRepoAtRevision",
@@ -5967,18 +5867,6 @@
 				{
 					"command": "gitlens.views.browseRepoBeforeRevisionInNewWindow",
 					"when": "false"
-				},
-				{
-					"command": "gitlens.fetchRepositories",
-					"when": "gitlens:hasRemotes && !gitlens:readonly && !gitlens:untrusted && !gitlens:hasVirtualFolders"
-				},
-				{
-					"command": "gitlens.pullRepositories",
-					"when": "gitlens:hasRemotes && !gitlens:readonly && !gitlens:untrusted && !gitlens:hasVirtualFolders"
-				},
-				{
-					"command": "gitlens.pushRepositories",
-					"when": "gitlens:hasRemotes && !gitlens:readonly && !gitlens:untrusted && !gitlens:hasVirtualFolders"
 				},
 				{
 					"command": "gitlens.views.addRemote",
@@ -7363,11 +7251,6 @@
 					"group": "5_gitlens@2"
 				},
 				{
-					"command": "gitlens.showRepositoriesView",
-					"when": "!gitlens:hasVirtualFolders && view =~ /^gitlens\\.views\\.commits/",
-					"group": "8_gitlens_toggles@0"
-				},
-				{
 					"command": "gitlens.views.addAuthors",
 					"when": "view =~ /^gitlens\\.views\\.contributors/",
 					"group": "navigation@10"
@@ -7486,11 +7369,6 @@
 					"command": "gitlens.views.fileHistory.setShowAvatarsOff",
 					"when": "view =~ /^gitlens\\.views\\.fileHistory/ && config.gitlens.views.fileHistory.avatars",
 					"group": "5_gitlens@0"
-				},
-				{
-					"command": "gitlens.showLineHistoryView",
-					"when": "!gitlens:hasVirtualFolders && view =~ /^gitlens\\.views\\.fileHistory/",
-					"group": "8_gitlens_toggles@0"
 				},
 				{
 					"command": "gitlens.views.lineHistory.setEditorFollowingOn",
