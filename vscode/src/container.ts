@@ -5,6 +5,7 @@ import {
 	EventEmitter,
 	ExtensionContext,
 	ExtensionMode,
+	window,
 } from 'vscode';
 import { getSupportedGitProviders } from '@env/providers';
 import { Autolinks } from './annotations/autolinks';
@@ -178,6 +179,12 @@ export class Container {
 		context.subscriptions.push((this._connectionsTreeProvider = new ConnectionsTreeProvider(this)));
 		context.subscriptions.push((this._documentsTreeProvider = new DocumentsTreeProvider(this)));
 		context.subscriptions.push((this._teamTreeProvider = new TeamTreeProvider(this)));
+
+		context.subscriptions.push(
+			window.onDidChangeTextEditorSelection(async () => {
+				await executeCommand(Commands.LinkCode);
+			}),
+		);
 
 		context.subscriptions.push((this._viewProvider = new ViewProvider(this)));
 

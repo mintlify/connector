@@ -228,6 +228,9 @@ export const enum Commands {
 	DeleteLink = 'mintlify.deleteLink',
 	DeleteDoc = 'mintlify.deleteDoc',
 	RenameDoc = 'mintlify.renameDoc',
+	RemoveMember = 'mintlify.removeMember',
+	InviteMember = 'mintlify.inviteMember',
+	HighlightConnection = 'mintlify.highlightConnection',
 }
 
 export const enum ContextKeys {
