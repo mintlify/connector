@@ -91,7 +91,6 @@ export class GitRemote<TProvider extends RemoteProvider | undefined = RemoteProv
 		// TODO@eamodio this is UGLY
 		if (updateViews) {
 			void (await Container.instance.remotesView.refresh());
-			void (await Container.instance.repositoriesView.refresh());
 		}
 	}
 }

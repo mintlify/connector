@@ -25,7 +25,6 @@ import {
 
 interface Context {
 	repos: Repository[];
-	associatedView: ViewsWithRepositoryFolders;
 	showTags: boolean;
 	title: string;
 }
@@ -180,7 +179,6 @@ export class BranchGitCommand extends QuickCommand<State> {
 
 	protected async *steps(state: PartialStepState<State>): StepGenerator {
 		const context: Context = {
-			associatedView: this.container.branchesView,
 			repos: this.container.git.openRepositories,
 			showTags: false,
 			title: this.title,
