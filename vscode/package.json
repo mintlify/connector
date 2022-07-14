@@ -3215,7 +3215,7 @@
 				}
 			},
 			{
-				"command": "mintlify.remove-member",
+				"command": "mintlify.removeMember",
 				"title": "Remove member from team",
 				"icon": {
 				  "light": "assets/icons/remove-user.svg",
@@ -3223,13 +3223,17 @@
 				}
 			},
 			{
-				"command": "mintlify.invite-member",
+				"command": "mintlify.inviteMember",
 				"title": "Invite team member"
 			},
 			{
 				"command": "mintlify.refreshViews",
 				"title": "Refresh views"
 			},
+			{
+				"command": "mintlify.hightlightConnection",
+				"title": "Highlight connection"
+			  },
 			{
 				"command": "gitlens.plus.learn",
 				"title": "Learn about GitLens+ Features",
