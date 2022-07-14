@@ -1436,21 +1436,9 @@ export async function* pickWorktreeStep<
 				case QuickCommandButtons.OpenInNewWindow:
 					void GitActions.Worktree.open(item, { location: OpenWorkspaceLocation.NewWindow });
 					break;
-				case QuickCommandButtons.RevealInSideBar:
-					void GitActions.Worktree.reveal(item, { select: true, focus: false, expand: true });
-					break;
 			}
 		},
 		keys: ['right', 'alt+right', 'ctrl+right'],
-		onDidPressKey: async quickpick => {
-			if (quickpick.activeItems.length === 0) return;
-
-			await GitActions.Worktree.reveal(quickpick.activeItems[0].item, {
-				select: true,
-				focus: false,
-				expand: true,
-			});
-		},
 	});
 	const selection: StepSelection<typeof step> = yield step;
 	return QuickCommand.canPickStepContinue(step, state, selection) ? selection[0].item : StepResult.Break;
@@ -1497,21 +1485,9 @@ export async function* pickWorktreesStep<
 				case QuickCommandButtons.OpenInNewWindow:
 					void GitActions.Worktree.open(item, { location: OpenWorkspaceLocation.NewWindow });
 					break;
-				case QuickCommandButtons.RevealInSideBar:
-					void GitActions.Worktree.reveal(item, { select: true, focus: false, expand: true });
-					break;
 			}
 		},
 		keys: ['right', 'alt+right', 'ctrl+right'],
-		onDidPressKey: async quickpick => {
-			if (quickpick.activeItems.length === 0) return;
-
-			await GitActions.Worktree.reveal(quickpick.activeItems[0].item, {
-				select: true,
-				focus: false,
-				expand: true,
-			});
-		},
 	});
 	const selection: StepSelection<typeof step> = yield step;
 	return QuickCommand.canPickStepContinue(step, state, selection) ? selection.map(i => i.item) : StepResult.Break;

@@ -9058,14 +9058,6 @@
 					"visibility": "visible"
 				},
 				{
-					"id": "mintlify.views.repositories",
-					"name": "Repositories",
-					"when": "!gitlens:disabled && !gitlens:hasVirtualFolders",
-					"contextualTitle": "GitLens",
-					"icon": "images/views/repositories.svg",
-					"visibility": "hidden"
-				},
-				{
 					"id": "mintlify.views.fileHistory",
 					"name": "File History",
 					"when": "!gitlens:disabled",

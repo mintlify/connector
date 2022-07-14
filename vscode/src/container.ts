@@ -45,7 +45,6 @@ import { ContributorsView } from './views/contributorsView';
 import { FileHistoryView } from './views/fileHistoryView';
 import { LineHistoryView } from './views/lineHistoryView';
 import { RemotesView } from './views/remotesView';
-import { RepositoriesView } from './views/repositoriesView';
 import { SearchAndCompareView } from './views/searchAndCompareView';
 import { StashesView } from './views/stashesView';
 import { TagsView } from './views/tagsView';
@@ -165,7 +164,6 @@ export class Container {
 
 		context.subscriptions.push(new ViewFileDecorationProvider());
 
-		context.subscriptions.push((this._repositoriesView = new RepositoriesView(this)));
 		context.subscriptions.push((this._commitsView = new CommitsView(this)));
 		context.subscriptions.push((this._fileHistoryView = new FileHistoryView(this)));
 		context.subscriptions.push((this._lineHistoryView = new LineHistoryView(this)));
@@ -400,15 +398,6 @@ export class Container {
 		}
 
 		return this._remotesView;
-	}
-
-	private _repositoriesView: RepositoriesView | undefined;
-	get repositoriesView(): RepositoriesView {
-		if (this._repositoriesView == null) {
-			this._context.subscriptions.push((this._repositoriesView = new RepositoriesView(this)));
-		}
-
-		return this._repositoriesView;
 	}
 
 	private _searchAndCompareView: SearchAndCompareView | undefined;

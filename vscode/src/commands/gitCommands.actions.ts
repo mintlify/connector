@@ -154,9 +154,7 @@ export namespace GitActions {
 			},
 		) {
 			const view = Container.instance.remotesView;
-			const node = view.canReveal
-				? await view.revealBranch(branch, options)
-				: await Container.instance.repositoriesView.revealBranch(branch, options);
+			const node = await view.revealBranch(branch, options);
 			return node;
 		}
 	}
@@ -682,9 +680,7 @@ export namespace GitActions {
 			// TODO@eamodio stop duplicate notifications
 
 			for (const view of views) {
-				const node = view.canReveal
-					? await view.revealCommit(commit, options)
-					: await Container.instance.repositoriesView.revealCommit(commit, options);
+				const node = await view.revealCommit(commit, options);
 				if (node != null) return node;
 			}
 
@@ -709,9 +705,7 @@ export namespace GitActions {
 			},
 		) {
 			const view = Container.instance.contributorsView;
-			const node = view.canReveal
-				? await view.revealContributor(contributor, options)
-				: await Container.instance.repositoriesView.revealContributor(contributor, options);
+			const node = await view.revealContributor(contributor, options);
 			return node;
 		}
 	}
@@ -775,9 +769,7 @@ export namespace GitActions {
 			},
 		) {
 			const view = Container.instance.remotesView;
-			const node = view.canReveal
-				? await view.revealRemote(remote, options)
-				: await Container.instance.repositoriesView.revealRemote(remote, options);
+			const node = await view.revealRemote(remote, options);
 			return node;
 		}
 	}
@@ -792,9 +784,7 @@ export namespace GitActions {
 				expand?: boolean | number;
 			},
 		) {
-			const node = view?.canReveal
-				? await view.revealRepository(repoPath, options)
-				: await Container.instance.repositoriesView.revealRepository(repoPath, options);
+			const node = await view?.revealRepository(repoPath, options);
 			return node;
 		}
 	}
@@ -843,9 +833,7 @@ export namespace GitActions {
 			},
 		) {
 			const view = Container.instance.stashesView;
-			const node = view.canReveal
-				? await view.revealStash(stash, options)
-				: await Container.instance.repositoriesView.revealStash(stash, options);
+			const node = await view.revealStash(stash, options);
 			return node;
 		}
 	}
@@ -883,9 +871,7 @@ export namespace GitActions {
 			},
 		) {
 			const view = Container.instance.tagsView;
-			const node = view.canReveal
-				? await view.revealTag(tag, options)
-				: await Container.instance.repositoriesView.revealTag(tag, options);
+			const node = await view.revealTag(tag, options);
 			return node;
 		}
 	}
@@ -907,14 +893,6 @@ export namespace GitActions {
 				command: 'worktree',
 				state: { subcommand: 'delete', repo: repo, uris: ensure(uri) },
 			});
-		}
-
-		export async function reveal(
-			worktree: GitWorktree,
-			options?: { select?: boolean; focus?: boolean; expand?: boolean | number },
-		) {
-			const node = await Container.instance.repositoriesView.revealWorktree(worktree, options);
-			return node;
 		}
 
 		export async function revealInFileExplorer(worktree: GitWorktree) {
