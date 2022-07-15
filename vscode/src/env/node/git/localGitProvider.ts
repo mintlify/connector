@@ -164,7 +164,7 @@ export class LocalGitProvider implements GitProvider, Disposable {
 	readonly supportedSchemes: Set<string> = new Set([
 		Schemes.File,
 		Schemes.Git,
-		Schemes.GitLens,
+		Schemes.MintLens,
 		Schemes.PRs,
 		// DocumentSchemes.Vsls,
 	]);
@@ -725,7 +725,7 @@ export class LocalGitProvider implements GitProvider, Disposable {
 		};
 
 		const uri = Uri.from({
-			scheme: Schemes.GitLens,
+			scheme: Schemes.MintLens,
 			authority: encodeGitLensRevisionUriAuthority(metadata),
 			path: path,
 			query: ref ? JSON.stringify({ ref: GitRevision.shorten(ref) }) : undefined,
