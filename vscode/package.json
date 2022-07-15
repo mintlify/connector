@@ -3,7 +3,7 @@
   "publisher": "mintlify",
   "displayName": "Document Connector",
   "description": "Create connections between documentation and code",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "icon": "assets/logo.png",
   "repository": {
     "url": "https://github.com/mintlify/connect"
@@ -30,7 +30,6 @@
     "website"
   ],
   "main": "./dist/gitlens.js",
-	"browser": "./dist/browser/gitlens.js",
   "preview": false,
   "activationEvents": [
 		"onStartupFinished",
