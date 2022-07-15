@@ -998,7 +998,7 @@
 				{
 					"id": "mintlify.views.lineHistory",
 					"name": "Line History",
-					"when": "!gitlens:disabled && !gitlens:hasVirtualFolders",
+					"when": "false",
 					"contextualTitle": "GitLens",
 					"icon": "images/views/history.svg",
 					"visibility": "hidden"
@@ -1006,7 +1006,7 @@
 				{
 					"id": "mintlify.views.remotes",
 					"name": "Remotes",
-					"when": "!gitlens:disabled",
+					"when": "false",
 					"contextualTitle": "GitLens",
 					"icon": "images/views/remotes.svg",
 					"visibility": "collapsed"
@@ -1014,7 +1014,7 @@
 				{
 					"id": "mintlify.views.stashes",
 					"name": "Stashes",
-					"when": "!gitlens:disabled && !gitlens:hasVirtualFolders",
+					"when": "false",
 					"contextualTitle": "GitLens",
 					"icon": "images/views/stashes.svg",
 					"visibility": "collapsed"
@@ -1022,7 +1022,7 @@
 				{
 					"id": "mintlify.views.tags",
 					"name": "Tags",
-					"when": "!gitlens:disabled",
+					"when": "false",
 					"contextualTitle": "GitLens",
 					"icon": "images/views/tags.svg",
 					"visibility": "collapsed"
@@ -1030,7 +1030,7 @@
 				{
 					"id": "mintlify.views.worktrees",
 					"name": "Worktrees",
-					"when": "!gitlens:disabled && !gitlens:hasVirtualFolders && config.gitlens.plusFeatures.enabled",
+					"when": "false",
 					"contextualTitle": "GitLens",
 					"icon": "images/views/worktrees.svg",
 					"visibility": "collapsed"
@@ -1038,7 +1038,7 @@
 				{
 					"id": "mintlify.views.contributors",
 					"name": "Contributors",
-					"when": "!gitlens:disabled",
+					"when": "false",
 					"contextualTitle": "GitLens",
 					"icon": "images/views/contributors.svg",
 					"visibility": "hidden"
@@ -1046,7 +1046,7 @@
 				{
 					"id": "mintlify.views.searchAndCompare",
 					"name": "Search & Compare",
-					"when": "!gitlens:disabled",
+					"when": "false",
 					"contextualTitle": "GitLens",
 					"icon": "images/views/search.svg",
 					"visibility": "collapsed"
