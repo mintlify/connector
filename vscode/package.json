@@ -49,51 +49,6 @@
 	"contributes": {
 		"configuration": [
 			{
-				"id": "current-line-blame",
-				"title": "Current Line Blame",
-				"order": 10,
-				"properties": {
-					"gitlens.currentLine.enabled": {
-						"type": "boolean",
-						"default": true,
-						"markdownDescription": "Specifies whether to provide a blame annotation for the current line, by default. Use the `Toggle Line Blame Annotations` command (`gitlens.toggleLineBlame`) to toggle the annotations on and off for the current window",
-						"scope": "window",
-						"order": 10
-					},
-					"gitlens.currentLine.pullRequests.enabled": {
-						"type": "boolean",
-						"default": true,
-						"markdownDescription": "Specifies whether to provide information about the Pull Request (if any) that introduced the commit in the current line blame annotation. Requires a connection to a supported remote service (e.g. GitHub)",
-						"scope": "window",
-						"order": 20
-					},
-					"gitlens.currentLine.format": {
-						"type": "string",
-						"default": "${author, }${agoOrDate}${' via 'pullRequest}${ • message|50?}",
-						"markdownDescription": "Specifies the format of the current line blame annotation. See [_Commit Tokens_](https://github.com/gitkraken/vscode-gitlens/wiki/Custom-Formatting#commit-tokens) in the GitLens docs. Date formatting is controlled by the `#gitlens.currentLine.dateFormat#` setting",
-						"scope": "window",
-						"order": 30
-					},
-					"gitlens.currentLine.scrollable": {
-						"type": "boolean",
-						"default": true,
-						"markdownDescription": "Specifies whether the current line blame annotation can be scrolled into view when it is outside the viewport. **NOTE**: Setting this to `false` will inhibit the hovers from showing over the annotation; Set `#gitlens.hovers.currentLine.over#` to `line` to enable the hovers to show anywhere over the line.",
-						"scope": "window",
-						"order": 40
-					},
-					"gitlens.currentLine.dateFormat": {
-						"type": [
-							"string",
-							"null"
-						],
-						"default": null,
-						"markdownDescription": "Specifies how to format absolute dates (e.g. using the `${date}` token) for the current line blame annotation. See the [Moment.js docs](https://momentjs.com/docs/#/displaying/format/) for supported formats",
-						"scope": "window",
-						"order": 50
-					}
-				}
-			},
-			{
 				"id": "terminal",
 				"title": "Terminal",
 				"order": 112,
