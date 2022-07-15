@@ -53,7 +53,7 @@
 				"title": "Terminal",
 				"order": 112,
 				"properties": {
-					"gitlens.terminalLinks.enabled": {
+					"mintlens.terminalLinks.enabled": {
 						"type": "boolean",
 						"default": true,
 						"markdownDescription": "Specifies whether to enable terminal links &mdash; autolinks in the integrated terminal to quickly jump to more details for commits, branches, tags, and more",
@@ -66,7 +66,7 @@
 				"title": "Menus & Toolbars",
 				"order": 121,
 				"properties": {
-					"gitlens.menus": {
+					"mintlens.menus": {
 						"anyOf": [
 							{
 								"enum": [
@@ -321,7 +321,7 @@
 				"title": "Keyboard Shortcuts",
 				"order": 122,
 				"properties": {
-					"gitlens.keymap": {
+					"mintlens.keymap": {
 						"type": "string",
 						"default": "chorded",
 						"enum": [
@@ -345,13 +345,13 @@
 				"title": "Modes",
 				"order": 123,
 				"properties": {
-					"gitlens.mode.active": {
+					"mintlens.mode.active": {
 						"type": "string",
 						"markdownDescription": "Specifies the active GitLens mode, if any",
 						"scope": "window",
 						"order": 20
 					},
-					"gitlens.modes": {
+					"mintlens.modes": {
 						"type": "object",
 						"properties": {
 							"zen": {
@@ -474,14 +474,14 @@
 				"title": "Advanced",
 				"order": 1000,
 				"properties": {
-					"gitlens.detectNestedRepositories": {
+					"mintlens.detectNestedRepositories": {
 						"type": "boolean",
 						"default": false,
 						"markdownDescription": "Specifies whether to attempt to detect nested repositories when opening files",
 						"scope": "resource",
 						"order": 0
 					},
-					"gitlens.advanced.messages": {
+					"mintlens.advanced.messages": {
 						"type": "object",
 						"default": {
 							"suppressCommitHasNoPreviousCommitWarning": false,
@@ -558,28 +558,28 @@
 						"scope": "window",
 						"order": 1
 					},
-					"gitlens.advanced.repositorySearchDepth": {
+					"mintlens.advanced.repositorySearchDepth": {
 						"type": "number",
 						"default": 1,
 						"markdownDescription": "Specifies how many folders deep to search for repositories",
 						"scope": "resource",
 						"order": 10
 					},
-					"gitlens.advanced.abbreviatedShaLength": {
+					"mintlens.advanced.abbreviatedShaLength": {
 						"type": "number",
 						"default": 7,
 						"markdownDescription": "Specifies the length of abbreviated commit SHAs",
 						"scope": "window",
 						"order": 20
 					},
-					"gitlens.advanced.abbreviateShaOnCopy": {
+					"mintlens.advanced.abbreviateShaOnCopy": {
 						"type": "boolean",
 						"default": false,
 						"markdownDescription": "Specifies whether to copy full or abbreviated commit SHAs to the clipboard. Abbreviates to the length of `#gitlens.advanced.abbreviatedShaLength#`.",
 						"scope": "window",
 						"order": 21
 					},
-					"gitlens.advanced.commitOrdering": {
+					"mintlens.advanced.commitOrdering": {
 						"type": [
 							"string",
 							"null"
@@ -601,14 +601,14 @@
 						"scope": "window",
 						"order": 30
 					},
-					"gitlens.blame.ignoreWhitespace": {
+					"mintlens.blame.ignoreWhitespace": {
 						"type": "boolean",
 						"default": false,
 						"markdownDescription": "Specifies whether to ignore whitespace when comparing revisions during blame operations",
 						"scope": "resource",
 						"order": 40
 					},
-					"gitlens.advanced.blame.customArguments": {
+					"mintlens.advanced.blame.customArguments": {
 						"type": [
 							"array",
 							"null"
@@ -621,21 +621,21 @@
 						"scope": "resource",
 						"order": 41
 					},
-					"gitlens.advanced.blame.delayAfterEdit": {
+					"mintlens.advanced.blame.delayAfterEdit": {
 						"type": "number",
 						"default": 5000,
 						"markdownDescription": "Specifies the time (in milliseconds) to wait before re-blaming an unsaved document after an edit. Use 0 to specify an infinite wait",
 						"scope": "window",
 						"order": 42
 					},
-					"gitlens.advanced.blame.sizeThresholdAfterEdit": {
+					"mintlens.advanced.blame.sizeThresholdAfterEdit": {
 						"type": "number",
 						"default": 5000,
 						"markdownDescription": "Specifies the maximum document size (in lines) allowed to be re-blamed after an edit while still unsaved. Use 0 to specify no maximum",
 						"scope": "window",
 						"order": 43
 					},
-					"gitlens.advanced.similarityThreshold": {
+					"mintlens.advanced.similarityThreshold": {
 						"type": [
 							"number",
 							"null"
@@ -645,7 +645,7 @@
 						"scope": "window",
 						"order": 50
 					},
-					"gitlens.advanced.externalDiffTool": {
+					"mintlens.advanced.externalDiffTool": {
 						"type": [
 							"string",
 							"null"
@@ -655,7 +655,7 @@
 						"scope": "window",
 						"order": 60
 					},
-					"gitlens.advanced.externalDirectoryDiffTool": {
+					"mintlens.advanced.externalDirectoryDiffTool": {
 						"type": [
 							"string",
 							"null"
@@ -665,42 +665,42 @@
 						"scope": "window",
 						"order": 61
 					},
-					"gitlens.advanced.quickPick.closeOnFocusOut": {
+					"mintlens.advanced.quickPick.closeOnFocusOut": {
 						"type": "boolean",
 						"default": true,
 						"markdownDescription": "Specifies whether to dismiss quick pick menus when focus is lost (if not, press `ESC` to dismiss)",
 						"scope": "window",
 						"order": 70
 					},
-					"gitlens.advanced.maxListItems": {
+					"mintlens.advanced.maxListItems": {
 						"type": "number",
 						"default": 200,
 						"markdownDescription": "Specifies the maximum number of items to show in a list. Use 0 to specify no maximum",
 						"scope": "window",
 						"order": 80
 					},
-					"gitlens.advanced.maxSearchItems": {
+					"mintlens.advanced.maxSearchItems": {
 						"type": "number",
 						"default": 200,
 						"markdownDescription": "Specifies the maximum number of items to show in a search. Use 0 to specify no maximum",
 						"scope": "window",
 						"order": 81
 					},
-					"gitlens.advanced.caching.enabled": {
+					"mintlens.advanced.caching.enabled": {
 						"type": "boolean",
 						"default": true,
 						"markdownDescription": "Specifies whether git output will be cached — changing the default is not recommended",
 						"scope": "window",
 						"order": 90
 					},
-					"gitlens.debug": {
+					"mintlens.debug": {
 						"type": "boolean",
 						"default": false,
 						"markdownDescription": "Specifies debug mode",
 						"scope": "window",
 						"order": 100
 					},
-					"gitlens.advanced.useSymmetricDifferenceNotation": {
+					"mintlens.advanced.useSymmetricDifferenceNotation": {
 						"deprecationMessage": "Deprecated. This setting is no longer used",
 						"markdownDescription": "Deprecated. This setting is no longer used"
 					}
@@ -711,21 +711,21 @@
 				"title": "General",
 				"order": 0,
 				"properties": {
-					"gitlens.showWelcomeOnInstall": {
+					"mintlens.showWelcomeOnInstall": {
 						"type": "boolean",
 						"default": true,
 						"markdownDescription": "Specifies whether to show the Welcome (Quick Setup) experience on first install",
 						"scope": "window",
 						"order": 10
 					},
-					"gitlens.showWhatsNewAfterUpgrades": {
+					"mintlens.showWhatsNewAfterUpgrades": {
 						"type": "boolean",
 						"default": true,
 						"markdownDescription": "Specifies whether to show the What's New notification after upgrading to new feature releases",
 						"scope": "window",
 						"order": 20
 					},
-					"gitlens.outputLevel": {
+					"mintlens.outputLevel": {
 						"type": "string",
 						"default": "errors",
 						"enum": [
@@ -744,7 +744,7 @@
 						"scope": "window",
 						"order": 30
 					},
-					"gitlens.defaultGravatarsStyle": {
+					"mintlens.defaultGravatarsStyle": {
 						"type": "string",
 						"default": "robohash",
 						"enum": [
@@ -767,7 +767,7 @@
 						"scope": "window",
 						"order": 40
 					},
-					"gitlens.fileAnnotations.command": {
+					"mintlens.fileAnnotations.command": {
 						"type": [
 							"string",
 							"null"
@@ -789,21 +789,21 @@
 						"scope": "window",
 						"order": 50
 					},
-					"gitlens.plusFeatures.enabled": {
+					"mintlens.plusFeatures.enabled": {
 						"type": "boolean",
 						"default": true,
 						"markdownDescription": "Specifies whether to enable GitLens+ features",
 						"scope": "window",
 						"order": 60
 					},
-					"gitlens.virtualRepositories.enabled": {
+					"mintlens.virtualRepositories.enabled": {
 						"type": "boolean",
 						"default": true,
 						"markdownDescription": "Specifies whether to enable virtual repositories support",
 						"scope": "window",
 						"order": 70
 					},
-					"gitlens.insiders": {
+					"mintlens.insiders": {
 						"deprecationMessage": "Deprecated. Use the Insiders edition of GitLens instead",
 						"markdownDeprecationMessage": "Deprecated. Use the [Insiders edition](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens-insiders) of GitLens instead"
 					}
