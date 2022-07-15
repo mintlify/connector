@@ -23,7 +23,7 @@ export class DocCodeLensProvider implements CodeLensProvider {
 	static selector: DocumentSelector = [
 		{ scheme: Schemes.File },
 		{ scheme: Schemes.Git },
-		{ scheme: Schemes.GitLens },
+		{ scheme: Schemes.MintLens },
 		{ scheme: Schemes.PRs },
 		{ scheme: Schemes.Vsls },
 		{ scheme: Schemes.VslsScc },

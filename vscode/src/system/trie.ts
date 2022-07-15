@@ -20,7 +20,7 @@ function normalizeUri(uri: Uri): { path: string; ignoreCase: boolean } {
 			// TODO@eamodio parse the ref out of the query
 			return { path: path, ignoreCase: !isLinux };
 
-		case Schemes.GitLens:
+		case Schemes.MintLens:
 			path = uri.path;
 			if (path.charCodeAt(path.length - 1) === slash) {
 				path = path.slice(0, -1);

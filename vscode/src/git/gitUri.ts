@@ -59,7 +59,7 @@ export class GitUri extends (Uri as any as UriEx) {
 			return;
 		}
 
-		if (uri.scheme === Schemes.GitLens) {
+		if (uri.scheme === Schemes.MintLens) {
 			super({
 				scheme: uri.scheme,
 				authority: uri.authority,
@@ -248,7 +248,7 @@ export class GitUri extends (Uri as any as UriEx) {
 	static async fromUri(uri: Uri): Promise<GitUri> {
 		if (GitUri.is(uri)) return uri;
 		if (!Container.instance.git.isTrackable(uri)) return new GitUri(uri);
-		if (uri.scheme === Schemes.GitLens) return new GitUri(uri);
+		if (uri.scheme === Schemes.MintLens) return new GitUri(uri);
 
 		// If this is a git uri, find its repoPath
 		if (uri.scheme === Schemes.Git) {

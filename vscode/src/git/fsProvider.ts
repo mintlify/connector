@@ -33,7 +33,7 @@ export class GitFileSystemProvider implements FileSystemProvider, Disposable {
 
 	constructor(private readonly container: Container) {
 		this._disposable = Disposable.from(
-			workspace.registerFileSystemProvider(Schemes.GitLens, this, {
+			workspace.registerFileSystemProvider(Schemes.MintLens, this, {
 				isCaseSensitive: isLinux,
 				isReadonly: true,
 			}),

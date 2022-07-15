@@ -92,7 +92,7 @@ export async function openEditor(
 			uri = uri.documentUri();
 		}
 
-		if (uri.scheme === Schemes.GitLens && ImageMimetypes[extname(uri.fsPath)]) {
+		if (uri.scheme === Schemes.MintLens && ImageMimetypes[extname(uri.fsPath)]) {
 			await executeCoreCommand(CoreCommands.Open, uri);
 
 			return undefined;

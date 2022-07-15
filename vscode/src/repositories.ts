@@ -24,7 +24,7 @@ export function normalizeRepoUri(uri: Uri): { path: string; ignoreCase: boolean 
 			return { path: path, ignoreCase: !isLinux };
 
 		case Schemes.Git:
-		case Schemes.GitLens:
+		case Schemes.MintLens:
 			path = uri.path;
 			if (path.charCodeAt(path.length - 1) === slash) {
 				path = path.slice(1, -1);
