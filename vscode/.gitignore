@@ -1,3 +1,12 @@
 node_modules
 dist
 package-lock.json
+.eslintcache*
+.vscode-clean/**
+.vscode-test/**
+.vscode-test-web/**
+out
+images/settings
+gitlens-*.vsix
+tsconfig*.tsbuildinfo
+yarn-error.log

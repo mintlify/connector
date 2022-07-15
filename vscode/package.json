@@ -3,13 +3,13 @@
   "publisher": "mintlify",
   "displayName": "Document Connector",
   "description": "Create connections between documentation and code",
-  "version": "0.6.7",
+  "version": "0.8.0",
   "icon": "assets/logo.png",
   "repository": {
     "url": "https://github.com/mintlify/connect"
   },
   "engines": {
-    "vscode": "^1.66.0"
+    "vscode": "^1.64.0"
   },
   "module": "es2020",
   "categories": [
@@ -29,222 +29,1158 @@
     "webpage",
     "website"
   ],
+  "main": "./dist/gitlens.js",
+  "preview": false,
   "activationEvents": [
-    "onStartupFinished",
-    "onView:primary",
-    "onCommand:mintlify.link-code",
-    "onCommand:mintlify.link-dir",
-    "onCommand:mintlify.prefill-doc"
-  ],
-  "main": "./dist/extension.js",
-  "browser": "./dist/browser/extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "mintlify.link-code",
-        "title": "Link Code to Documentation"
-      },
-      {
-        "command": "mintlify.link-dir",
-        "title": "Link folder/file to documentation"
-      },
-      {
-        "command": "mintlify.login",
-        "title": "Login to Mintlify"
-      },
-      {
-        "command": "mintlify.logout",
-        "title": "Logout of Mintlify"
-      },
-      {
-        "command": "mintlify.refresh-links",
-        "title": "Refresh links"
-      },
-      {
-        "command": "mintlify.prefill-doc",
-        "title": "Prefill document"
-      },
-      {
-        "command": "mintlify.hightlight-connection",
-        "title": "Highlight connection"
-      },
-      {
-        "command": "mintlify.delete-document",
-        "title": "Delete Document",
-        "icon": {
-          "light": "assets/icons/delete.svg",
-          "dark": "assets/icons/delete-dark.svg"
-        }
-      },
-      {
-        "command": "mintlify.rename-document",
-        "title": "Rename Document",
-        "icon": {
-          "light": "assets/icons/edit.svg",
-          "dark": "assets/icons/edit-dark.svg"
-        }
-      },
-      {
-        "command": "mintlify.delete-connection",
-        "title": "Delete Connection",
-        "icon": {
-          "light": "assets/icons/delete.svg",
-          "dark": "assets/icons/delete-dark.svg"
-        }
-      },
-      {
-        "command": "mintlify.remove-member",
-        "title": "Remove member from team",
-        "icon": {
-          "light": "assets/icons/remove-user.svg",
-          "dark": "assets/icons/remove-user-dark.svg"
-        }
-      },
-      {
-        "command": "mintlify.invite-member",
-        "title": "Invite team member"
-      },
-      {
-        "command": "mintlify.refresh-views",
-        "title": "Refresh views"
-      }
-    ],
-    "menus": {
-      "view/title": [
-        {
-          "command": "mintlify.login",
-          "when": "view == create && !mintlify.isLoggedIn"
-        },
-        {
-          "command": "mintlify.logout",
-          "when": "view == create && mintlify.isLoggedIn"
-        },
-        {
-          "command": "mintlify.login",
-          "when": "view == teammates && !mintlify.isLoggedIn"
-        },
-        {
-          "command": "mintlify.invite-member",
-          "when": "view == teammates && mintlify.isLoggedIn"
-        },
-        {
-          "command": "mintlify.logout",
-          "when": "view == teammates && mintlify.isLoggedIn"
-        }
-      ],
-      "explorer/context": [
-        {
-          "command": "mintlify.link-dir",
-          "group": "mintlify"
-        }
-      ],
-      "view/item/context": [
-        {
-          "command": "mintlify.rename-document",
-          "when": "view == documents && viewItem == document",
-          "group": "inline"
-        },
-        {
-          "command": "mintlify.delete-document",
-          "when": "view == documents && viewItem == document",
-          "group": "inline"
-        },
-        {
-          "command": "mintlify.delete-connection",
-          "when": "view == connections && viewItem == connection",
-          "group": "inline"
-        },
-        {
-          "command": "mintlify.remove-member",
-          "when": "view == teammates && viewItem == member",
-          "group": "inline"
-        }
-      ]
-    },
-    "views": {
-      "primary": [
-        {
-          "type": "webview",
-          "id": "create",
-          "name": "Create connection"
-        },
-        {
-          "id": "documents",
-          "name": "Documents"
-        },
-        {
-          "id": "connections",
-          "name": "Connections"
-        },
-        {
-          "id": "teammates",
-          "name": "Team Members",
-          "when": "mintlify.hasDocuments"
-        }
-      ]
-    },
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "primary",
-          "title": "Documents",
-          "icon": "assets/icon.png"
-        }
-      ]
-    }
-  },
+		"onStartupFinished",
+		"onView:primary",
+		"onCommand:mintlify.linkCode",
+		"onCommand:mintlify.linkDir",
+		"onCommand:mintlify.prefillDoc",
+		"onCommand:mintlify.refreshLinks"
+	],
+	"capabilities": {
+		"virtualWorkspaces": true,
+		"untrustedWorkspaces": {
+			"supported": "limited"
+		}
+	},
+	"contributes": {
+		"configuration": [
+			{
+				"id": "terminal",
+				"title": "Terminal",
+				"order": 112,
+				"properties": {
+					"mintlens.terminalLinks.enabled": {
+						"type": "boolean",
+						"default": true,
+						"markdownDescription": "Specifies whether to enable terminal links &mdash; autolinks in the integrated terminal to quickly jump to more details for commits, branches, tags, and more",
+						"scope": "window"
+					}
+				}
+			},
+			{
+				"id": "menus-toolbars",
+				"title": "Menus & Toolbars",
+				"order": 121,
+				"properties": {
+					"mintlens.menus": {
+						"anyOf": [
+							{
+								"enum": [
+									false
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"editor": {
+										"anyOf": [
+											{
+												"enum": [
+													false
+												]
+											},
+											{
+												"type": "object",
+												"properties": {
+													"blame": {
+														"type": "boolean"
+													},
+													"clipboard": {
+														"type": "boolean"
+													},
+													"compare": {
+														"type": "boolean"
+													},
+													"history": {
+														"type": "boolean"
+													},
+													"remote": {
+														"type": "boolean"
+													}
+												}
+											}
+										]
+									},
+									"editorGroup": {
+										"anyOf": [
+											{
+												"enum": [
+													false
+												]
+											},
+											{
+												"type": "object",
+												"properties": {
+													"blame": {
+														"type": "boolean"
+													},
+													"compare": {
+														"type": "boolean"
+													}
+												}
+											}
+										]
+									},
+									"editorTab": {
+										"anyOf": [
+											{
+												"enum": [
+													false
+												]
+											},
+											{
+												"type": "object",
+												"properties": {
+													"clipboard": {
+														"type": "boolean"
+													},
+													"compare": {
+														"type": "boolean"
+													},
+													"history": {
+														"type": "boolean"
+													},
+													"remote": {
+														"type": "boolean"
+													}
+												}
+											}
+										]
+									},
+									"explorer": {
+										"anyOf": [
+											{
+												"enum": [
+													false
+												]
+											},
+											{
+												"type": "object",
+												"properties": {
+													"clipboard": {
+														"type": "boolean"
+													},
+													"compare": {
+														"type": "boolean"
+													},
+													"history": {
+														"type": "boolean"
+													},
+													"remote": {
+														"type": "boolean"
+													}
+												}
+											}
+										]
+									},
+									"scm": {
+										"anyOf": [
+											{
+												"enum": [
+													false
+												]
+											},
+											{
+												"type": "object",
+												"properties": {
+													"authors": {
+														"type": "boolean"
+													}
+												}
+											}
+										]
+									},
+									"scmGroupInline": {
+										"anyOf": [
+											{
+												"enum": [
+													false
+												]
+											},
+											{
+												"type": "object",
+												"properties": {
+													"stash": {
+														"type": "boolean"
+													}
+												}
+											}
+										]
+									},
+									"scmGroup": {
+										"anyOf": [
+											{
+												"enum": [
+													false
+												]
+											},
+											{
+												"type": "object",
+												"properties": {
+													"compare": {
+														"type": "boolean"
+													},
+													"openClose": {
+														"type": "boolean"
+													},
+													"stash": {
+														"type": "boolean"
+													}
+												}
+											}
+										]
+									},
+									"scmItem": {
+										"anyOf": [
+											{
+												"enum": [
+													false
+												]
+											},
+											{
+												"type": "object",
+												"properties": {
+													"clipboard": {
+														"type": "boolean"
+													},
+													"compare": {
+														"type": "boolean"
+													},
+													"history": {
+														"type": "boolean"
+													},
+													"remote": {
+														"type": "boolean"
+													},
+													"stash": {
+														"type": "boolean"
+													}
+												}
+											}
+										]
+									}
+								},
+								"additionalProperties": false
+							}
+						],
+						"default": {
+							"editor": {
+								"blame": false,
+								"clipboard": true,
+								"compare": true,
+								"history": false,
+								"remote": false
+							},
+							"editorGroup": {
+								"blame": true,
+								"compare": true
+							},
+							"editorTab": {
+								"clipboard": true,
+								"compare": true,
+								"history": true,
+								"remote": true
+							},
+							"explorer": {
+								"clipboard": true,
+								"compare": true,
+								"history": true,
+								"remote": true
+							},
+							"scm": {
+								"authors": true
+							},
+							"scmGroupInline": {
+								"stash": true
+							},
+							"scmGroup": {
+								"compare": true,
+								"openClose": true,
+								"stash": true
+							},
+							"scmItem": {
+								"clipboard": true,
+								"compare": true,
+								"history": true,
+								"remote": false,
+								"stash": true
+							}
+						},
+						"markdownDescription": "Specifies which commands will be added to which menus",
+						"scope": "window",
+						"order": 10
+					}
+				}
+			},
+			{
+				"id": "keyboard",
+				"title": "Keyboard Shortcuts",
+				"order": 122,
+				"properties": {
+					"mintlens.keymap": {
+						"type": "string",
+						"default": "chorded",
+						"enum": [
+							"alternate",
+							"chorded",
+							"none"
+						],
+						"enumDescriptions": [
+							"Adds an alternate set of shortcut keys that start with `Alt` (⌥ on macOS)",
+							"Adds a chorded set of shortcut keys that start with `Ctrl+Alt+G` (`⌥⌘G` on macOS)",
+							"No shortcut keys will be added"
+						],
+						"markdownDescription": "Specifies the keymap to use for GitLens shortcut keys",
+						"scope": "window",
+						"order": 10
+					}
+				}
+			},
+			{
+				"id": "modes",
+				"title": "Modes",
+				"order": 123,
+				"properties": {
+					"mintlens.mode.active": {
+						"type": "string",
+						"markdownDescription": "Specifies the active GitLens mode, if any",
+						"scope": "window",
+						"order": 20
+					},
+					"mintlens.modes": {
+						"type": "object",
+						"properties": {
+							"zen": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string",
+										"description": "Specifies the friendly name of this user-defined mode"
+									},
+									"description": {
+										"type": "string",
+										"description": "Specifies the description of this user-defined mode"
+									},
+									"codeLens": {
+										"type": "boolean",
+										"description": "Specifies whether to show any Git CodeLens when this user-defined mode is active"
+									},
+									"currentLine": {
+										"type": "boolean",
+										"description": "Specifies whether to show a blame annotation for the current line when this user-defined mode is active"
+									},
+									"hovers": {
+										"type": "boolean",
+										"description": "Specifies whether to show any hovers when this user-defined mode is active"
+									}
+								}
+							},
+							"review": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string",
+										"description": "Specifies the friendly name of this user-defined mode"
+									},
+									"description": {
+										"type": "string",
+										"description": "Specifies the description of this user-defined mode"
+									},
+									"codeLens": {
+										"type": "boolean",
+										"description": "Specifies whether to show any Git CodeLens when this user-defined mode is active"
+									},
+									"currentLine": {
+										"type": "boolean",
+										"description": "Specifies whether to show a blame annotation for the current line when this user-defined mode is active"
+									},
+									"hovers": {
+										"type": "boolean",
+										"description": "Specifies whether to show any hovers when this user-defined mode is active"
+									}
+								}
+							}
+						},
+						"additionalProperties": {
+							"type": "object",
+							"required": [
+								"name"
+							],
+							"properties": {
+								"name": {
+									"type": "string",
+									"description": "Specifies the friendly name of this user-defined mode"
+								},
+								"description": {
+									"type": "string",
+									"description": "Specifies the description of this user-defined mode"
+								},
+								"annotations": {
+									"type": "string",
+									"enum": [
+										"blame",
+										"changes",
+										"heatmap"
+									],
+									"enumDescriptions": [
+										"Shows the gutter blame annotations",
+										"Shows the gutter changes annotations",
+										"Shows the gutter heatmap annotations"
+									],
+									"description": "Specifies which (if any) file annotations will be shown when this user-defined mode is active"
+								},
+								"codeLens": {
+									"type": "boolean",
+									"description": "Specifies whether to show any Git CodeLens when this user-defined mode is active"
+								},
+								"currentLine": {
+									"type": "boolean",
+									"description": "Specifies whether to show a blame annotation for the current line when this user-defined mode is active"
+								},
+								"hovers": {
+									"type": "boolean",
+									"description": "Specifies whether to show any hovers when this user-defined mode is active"
+								}
+							}
+						},
+						"default": {
+							"zen": {
+								"name": "Zen",
+								"description": "for a zen-like experience, disables many visual features",
+								"codeLens": false,
+								"currentLine": false,
+								"hovers": false
+							},
+							"review": {
+								"name": "Review",
+								"description": "for reviewing code, enables many visual features",
+								"codeLens": true,
+								"currentLine": true,
+								"hovers": true
+							}
+						},
+						"markdownDescription": "Specifies the user-defined GitLens modes",
+						"scope": "window",
+						"order": 30
+					}
+				}
+			},
+			{
+				"id": "advanced",
+				"title": "Advanced",
+				"order": 1000,
+				"properties": {
+					"mintlens.detectNestedRepositories": {
+						"type": "boolean",
+						"default": false,
+						"markdownDescription": "Specifies whether to attempt to detect nested repositories when opening files",
+						"scope": "resource",
+						"order": 0
+					},
+					"mintlens.advanced.messages": {
+						"type": "object",
+						"default": {
+							"suppressCommitHasNoPreviousCommitWarning": false,
+							"suppressCommitNotFoundWarning": false,
+							"suppressCreatePullRequestPrompt": false,
+							"suppressDebugLoggingWarning": false,
+							"suppressFileNotUnderSourceControlWarning": false,
+							"suppressGitDisabledWarning": false,
+							"suppressGitMissingWarning": false,
+							"suppressGitVersionWarning": false,
+							"suppressLineUncommittedWarning": false,
+							"suppressNoRepositoryWarning": false,
+							"suppressRebaseSwitchToTextWarning": false
+						},
+						"properties": {
+							"suppressCommitHasNoPreviousCommitWarning": {
+								"type": "boolean",
+								"default": false,
+								"description": "Commit Has No Previous Commit Warning"
+							},
+							"suppressCommitNotFoundWarning": {
+								"type": "boolean",
+								"default": false,
+								"description": "Commit Not Found Warning"
+							},
+							"suppressCreatePullRequestPrompt": {
+								"type": "boolean",
+								"default": false,
+								"description": "Create Pull Request Prompt"
+							},
+							"suppressDebugLoggingWarning": {
+								"type": "boolean",
+								"default": false,
+								"description": "Debug Logging Warning"
+							},
+							"suppressFileNotUnderSourceControlWarning": {
+								"type": "boolean",
+								"default": false,
+								"description": "File Not Under Source Control Warning"
+							},
+							"suppressGitDisabledWarning": {
+								"type": "boolean",
+								"default": false,
+								"description": "Git Disabled Warning"
+							},
+							"suppressGitMissingWarning": {
+								"type": "boolean",
+								"default": false,
+								"description": "Git Missing Warning"
+							},
+							"suppressGitVersionWarning": {
+								"type": "boolean",
+								"default": false,
+								"description": "Git Version Warning"
+							},
+							"suppressLineUncommittedWarning": {
+								"type": "boolean",
+								"default": false,
+								"description": "Line Uncommitted Warning"
+							},
+							"suppressNoRepositoryWarning": {
+								"type": "boolean",
+								"default": false,
+								"description": "No Repository Warning"
+							},
+							"suppressRebaseSwitchToTextWarning": {
+								"type": "boolean",
+								"default": false,
+								"description": "Rebase Switch To Text Warning"
+							}
+						},
+						"additionalProperties": false,
+						"markdownDescription": "Specifies which messages should be suppressed",
+						"scope": "window",
+						"order": 1
+					},
+					"mintlens.advanced.repositorySearchDepth": {
+						"type": "number",
+						"default": 1,
+						"markdownDescription": "Specifies how many folders deep to search for repositories",
+						"scope": "resource",
+						"order": 10
+					},
+					"mintlens.advanced.abbreviatedShaLength": {
+						"type": "number",
+						"default": 7,
+						"markdownDescription": "Specifies the length of abbreviated commit SHAs",
+						"scope": "window",
+						"order": 20
+					},
+					"mintlens.advanced.abbreviateShaOnCopy": {
+						"type": "boolean",
+						"default": false,
+						"markdownDescription": "Specifies whether to copy full or abbreviated commit SHAs to the clipboard. Abbreviates to the length of `#gitlens.advanced.abbreviatedShaLength#`.",
+						"scope": "window",
+						"order": 21
+					},
+					"mintlens.advanced.commitOrdering": {
+						"type": [
+							"string",
+							"null"
+						],
+						"default": null,
+						"enum": [
+							null,
+							"date",
+							"author-date",
+							"topo"
+						],
+						"enumDescriptions": [
+							"Shows commits in reverse chronological order",
+							"Shows commits in reverse chronological order of the commit timestamp",
+							"Shows commits in reverse chronological order of the author timestamp",
+							"Shows commits in reverse chronological order of the commit timestamp, but avoids intermixing multiple lines of history"
+						],
+						"markdownDescription": "Specifies the order by which commits will be shown. If unspecified, commits will be shown in reverse chronological order",
+						"scope": "window",
+						"order": 30
+					},
+					"mintlens.blame.ignoreWhitespace": {
+						"type": "boolean",
+						"default": false,
+						"markdownDescription": "Specifies whether to ignore whitespace when comparing revisions during blame operations",
+						"scope": "resource",
+						"order": 40
+					},
+					"mintlens.advanced.blame.customArguments": {
+						"type": [
+							"array",
+							"null"
+						],
+						"default": null,
+						"items": {
+							"type": "string"
+						},
+						"markdownDescription": "Specifies additional arguments to pass to the `git blame` command",
+						"scope": "resource",
+						"order": 41
+					},
+					"mintlens.advanced.blame.delayAfterEdit": {
+						"type": "number",
+						"default": 5000,
+						"markdownDescription": "Specifies the time (in milliseconds) to wait before re-blaming an unsaved document after an edit. Use 0 to specify an infinite wait",
+						"scope": "window",
+						"order": 42
+					},
+					"mintlens.advanced.blame.sizeThresholdAfterEdit": {
+						"type": "number",
+						"default": 5000,
+						"markdownDescription": "Specifies the maximum document size (in lines) allowed to be re-blamed after an edit while still unsaved. Use 0 to specify no maximum",
+						"scope": "window",
+						"order": 43
+					},
+					"mintlens.advanced.similarityThreshold": {
+						"type": [
+							"number",
+							"null"
+						],
+						"default": null,
+						"markdownDescription": "Specifies the amount (percent) of similarity a deleted and added file pair must have to be considered a rename",
+						"scope": "window",
+						"order": 50
+					},
+					"mintlens.advanced.externalDiffTool": {
+						"type": [
+							"string",
+							"null"
+						],
+						"default": null,
+						"markdownDescription": "Specifies an optional external diff tool to use when comparing files. Must be a configured [Git difftool](https://git-scm.com/docs/git-config#Documentation/git-config.txt-difftool).",
+						"scope": "window",
+						"order": 60
+					},
+					"mintlens.advanced.externalDirectoryDiffTool": {
+						"type": [
+							"string",
+							"null"
+						],
+						"default": null,
+						"markdownDescription": "Specifies an optional external diff tool to use when comparing directories. Must be a configured [Git difftool](https://git-scm.com/docs/git-config#Documentation/git-config.txt-difftool).",
+						"scope": "window",
+						"order": 61
+					},
+					"mintlens.advanced.quickPick.closeOnFocusOut": {
+						"type": "boolean",
+						"default": true,
+						"markdownDescription": "Specifies whether to dismiss quick pick menus when focus is lost (if not, press `ESC` to dismiss)",
+						"scope": "window",
+						"order": 70
+					},
+					"mintlens.advanced.maxListItems": {
+						"type": "number",
+						"default": 200,
+						"markdownDescription": "Specifies the maximum number of items to show in a list. Use 0 to specify no maximum",
+						"scope": "window",
+						"order": 80
+					},
+					"mintlens.advanced.maxSearchItems": {
+						"type": "number",
+						"default": 200,
+						"markdownDescription": "Specifies the maximum number of items to show in a search. Use 0 to specify no maximum",
+						"scope": "window",
+						"order": 81
+					},
+					"mintlens.advanced.caching.enabled": {
+						"type": "boolean",
+						"default": true,
+						"markdownDescription": "Specifies whether git output will be cached — changing the default is not recommended",
+						"scope": "window",
+						"order": 90
+					},
+					"mintlens.debug": {
+						"type": "boolean",
+						"default": false,
+						"markdownDescription": "Specifies debug mode",
+						"scope": "window",
+						"order": 100
+					},
+					"mintlens.advanced.useSymmetricDifferenceNotation": {
+						"deprecationMessage": "Deprecated. This setting is no longer used",
+						"markdownDescription": "Deprecated. This setting is no longer used"
+					}
+				}
+			},
+			{
+				"id": "general",
+				"title": "General",
+				"order": 0,
+				"properties": {
+					"mintlens.showWelcomeOnInstall": {
+						"type": "boolean",
+						"default": true,
+						"markdownDescription": "Specifies whether to show the Welcome (Quick Setup) experience on first install",
+						"scope": "window",
+						"order": 10
+					},
+					"mintlens.showWhatsNewAfterUpgrades": {
+						"type": "boolean",
+						"default": true,
+						"markdownDescription": "Specifies whether to show the What's New notification after upgrading to new feature releases",
+						"scope": "window",
+						"order": 20
+					},
+					"mintlens.outputLevel": {
+						"type": "string",
+						"default": "errors",
+						"enum": [
+							"silent",
+							"errors",
+							"verbose",
+							"debug"
+						],
+						"enumDescriptions": [
+							"Logs nothing",
+							"Logs only errors",
+							"Logs all errors, warnings, and messages",
+							"Logs all errors, warnings, and messages with extra context useful for debugging"
+						],
+						"markdownDescription": "Specifies how much (if any) output will be sent to the GitLens output channel",
+						"scope": "window",
+						"order": 30
+					},
+					"mintlens.defaultGravatarsStyle": {
+						"type": "string",
+						"default": "robohash",
+						"enum": [
+							"identicon",
+							"mp",
+							"monsterid",
+							"retro",
+							"robohash",
+							"wavatar"
+						],
+						"enumDescriptions": [
+							"A geometric pattern",
+							"A simple, cartoon-style silhouetted outline of a person (does not vary by email hash)",
+							"A monster with different colors, faces, etc",
+							"8-bit arcade-style pixelated faces",
+							"A robot with different colors, faces, etc",
+							"A face with differing features and backgrounds"
+						],
+						"markdownDescription": "Specifies the style of the gravatar default (fallback) images",
+						"scope": "window",
+						"order": 40
+					},
+					"mintlens.fileAnnotations.command": {
+						"type": [
+							"string",
+							"null"
+						],
+						"default": null,
+						"enum": [
+							null,
+							"blame",
+							"heatmap",
+							"changes"
+						],
+						"enumDescriptions": [
+							"Shows a menu to choose which file annotations to toggle",
+							"Toggles gutter blame annotations",
+							"Toggles gutter heatmap annotations",
+							"Toggles gutter changes annotations"
+						],
+						"markdownDescription": "Specifies whether the file annotations button in the editor title shows a menu or immediately toggles the specified file annotations",
+						"scope": "window",
+						"order": 50
+					},
+					"mintlens.plusFeatures.enabled": {
+						"type": "boolean",
+						"default": true,
+						"markdownDescription": "Specifies whether to enable GitLens+ features",
+						"scope": "window",
+						"order": 60
+					},
+					"mintlens.virtualRepositories.enabled": {
+						"type": "boolean",
+						"default": true,
+						"markdownDescription": "Specifies whether to enable virtual repositories support",
+						"scope": "window",
+						"order": 70
+					},
+					"mintlens.insiders": {
+						"deprecationMessage": "Deprecated. Use the Insiders edition of GitLens instead",
+						"markdownDeprecationMessage": "Deprecated. Use the [Insiders edition](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens-insiders) of GitLens instead"
+					}
+				}
+			}
+		],
+		"commands": [
+			{
+				"command": "mintlify.linkCode",
+				"title": "Mintlify: Link Code to Documentation"
+			},
+			{
+				"command": "mintlify.linkDir",
+				"title": "Mintlify: Link folder/file to documentation"
+			},
+			{
+				"command": "mintlify.login",
+				"title": "Login to Mintlify"
+			},
+			{
+				"command": "mintlify.logout",
+				"title": "Logout of Mintlify"
+			},
+			{
+				"command": "mintlify.refreshLinks",
+				"title": "Refresh Mintlify links"
+			},
+			{
+				"command": "mintlify.prefillDoc",
+				"title": "Prefill document"
+			},
+			{
+				"command": "mintlify.hightlight-connection",
+				"title": "Highlight connection"
+			},
+			{
+				"command": "mintlify.deleteDoc",
+				"title": "Delete Document",
+				"icon": {
+					"light": "assets/icons/delete.svg",
+					"dark": "assets/icons/delete-dark.svg"
+				}
+			},
+			{
+				"command": "mintlify.renameDoc",
+				"title": "Rename Document",
+				"icon": {
+					"light": "assets/icons/edit.svg",
+					"dark": "assets/icons/edit-dark.svg"
+				}
+			},
+			{
+				"command": "mintlify.deleteLink",
+				"title": "Delete Connection",
+				"icon": {
+					"light": "assets/icons/delete.svg",
+					"dark": "assets/icons/delete-dark.svg"
+				}
+			},
+			{
+				"command": "mintlify.removeMember",
+				"title": "Remove member from team",
+				"icon": {
+				  "light": "assets/icons/remove-user.svg",
+				  "dark": "assets/icons/remove-user-dark.svg"
+				}
+			},
+			{
+				"command": "mintlify.inviteMember",
+				"title": "Invite team member"
+			},
+			{
+				"command": "mintlify.refreshViews",
+				"title": "Refresh views"
+			},
+			{
+				"command": "mintlify.hightlightConnection",
+				"title": "Highlight connection"
+			  }
+		],
+		"menus": {
+			"explorer/context": [
+				{
+					"command": "mintlify.linkDir",
+					"group": "mintlify"
+				}
+			],
+			"view/title": [
+				{
+					"command": "mintlify.login",
+					"when": "view == create && !mintlify.isLoggedIn"
+				},
+				{
+					"command": "mintlify.logout",
+					"when": "view == create && mintlify.isLoggedIn"
+				},
+				{
+					"command": "mintlify.login",
+					"when": "view == teammates && !mintlify.isLoggedIn"
+				},
+				{
+					"command": "mintlify.inviteMember",
+					"when": "view == teammates && mintlify.isLoggedIn"
+				},
+				{
+					"command": "mintlify.logout",
+					"when": "view == teammates && mintlify.isLoggedIn"
+				}
+			],
+			"view/item/context": [
+				{
+					"command": "mintlify.renameDoc",
+					"when": "view == documents && viewItem == document",
+					"group": "inline"
+				},
+				{
+					"command": "mintlify.deleteDoc",
+					"when": "view == documents && viewItem == document",
+					"group": "inline"
+				},
+				{
+					"command": "mintlify.deleteLink",
+					"when": "view == connections && viewItem == connection",
+					"group": "inline"
+				},
+				{
+				  "command": "mintlify.removeMember",
+				  "when": "view == teammates && viewItem == member",
+				  "group": "inline"
+				}
+			]
+		},
+		"resourceLabelFormatters": [
+			{
+				"scheme": "gitlens",
+				"authority": "*",
+				"formatting": {
+					"label": "${path} (${query.ref})",
+					"separator": "/",
+					"workspaceSuffix": "GitLens",
+					"stripPathStartingSeparator": true
+				}
+			}
+		],
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "primary",
+					"title": "Documents",
+					"icon": "assets/icon.png"
+				}
+			]
+		},
+		"views": {
+			"primary": [
+				{
+					"type": "webview",
+					"id": "create",
+					"name": "Create connection"
+				},
+				{
+					"id": "documents",
+					"name": "Documents"
+				},
+				{
+					"id": "connections",
+					"name": "Connections"
+				},
+				{
+				  "id": "teammates",
+				  "name": "Team Members",
+				  "when": "mintlify.hasDocuments"
+				}
+			],
+			"scm": [
+				{
+					"id": "mintlify.views.commits",
+					"name": "Commits",
+					"when": "!gitlens:disabled",
+					"contextualTitle": "GitLens",
+					"icon": "images/views/commits.svg",
+					"visibility": "visible"
+				},
+				{
+					"id": "mintlify.views.fileHistory",
+					"name": "File History",
+					"when": "!gitlens:disabled",
+					"contextualTitle": "GitLens",
+					"icon": "images/views/history.svg",
+					"visibility": "visible"
+				},
+				{
+					"id": "mintlify.views.lineHistory",
+					"name": "Line History",
+					"when": "false",
+					"contextualTitle": "GitLens",
+					"icon": "images/views/history.svg",
+					"visibility": "hidden"
+				},
+				{
+					"id": "mintlify.views.remotes",
+					"name": "Remotes",
+					"when": "false",
+					"contextualTitle": "GitLens",
+					"icon": "images/views/remotes.svg",
+					"visibility": "collapsed"
+				},
+				{
+					"id": "mintlify.views.stashes",
+					"name": "Stashes",
+					"when": "false",
+					"contextualTitle": "GitLens",
+					"icon": "images/views/stashes.svg",
+					"visibility": "collapsed"
+				},
+				{
+					"id": "mintlify.views.tags",
+					"name": "Tags",
+					"when": "false",
+					"contextualTitle": "GitLens",
+					"icon": "images/views/tags.svg",
+					"visibility": "collapsed"
+				},
+				{
+					"id": "mintlify.views.worktrees",
+					"name": "Worktrees",
+					"when": "false",
+					"contextualTitle": "GitLens",
+					"icon": "images/views/worktrees.svg",
+					"visibility": "collapsed"
+				},
+				{
+					"id": "mintlify.views.contributors",
+					"name": "Contributors",
+					"when": "false",
+					"contextualTitle": "GitLens",
+					"icon": "images/views/contributors.svg",
+					"visibility": "hidden"
+				},
+				{
+					"id": "mintlify.views.searchAndCompare",
+					"name": "Search & Compare",
+					"when": "false",
+					"contextualTitle": "GitLens",
+					"icon": "images/views/search.svg",
+					"visibility": "collapsed"
+				}
+			]
+		}
+	},
   "scripts": {
-    "vscode:prepublish": "npm run bundle",
+    "analyze:bundle": "webpack --mode production --env analyzeBundle",
+		"analyze:deps": "webpack --env analyzeDeps",
+		"build": "webpack --mode development",
+		"build:extension": "webpack --mode development --config-name extension",
+		"build:webviews": "webpack --mode development --config-name webviews",
+		"build:tests": "tsc -p tsconfig.test.json && tsc-alias -p tsconfig.test.json",
+		"-build:tests": "webpack -c webpack.config.test.js --mode development",
+		"clean": "npx rimraf dist out .vscode-test .vscode-test-web .eslintcache* tsconfig*.tsbuildinfo",
+		"copy:images": "webpack --config webpack.config.images.js",
+		"lint": "eslint src/**/*.ts --fix",
+		"package": "vsce package --yarn",
+		"package-insiders": "yarn run patch-insiders && yarn run package",
+		"patch-insiders": "node ./scripts/applyPatchForInsiders.js",
+		"pretty": "prettier --config .prettierrc --loglevel warn --write .",
+		"pub": "vsce publish --yarn",
+		"rebuild": "yarn run reset && yarn run build",
+		"reset": "yarn run clean && yarn --frozen-lockfile",
+		"test": "node ./out/test/runTest.js",
+		"watch": "webpack --watch --mode development",
+		"watch:extension": "webpack --watch --mode development --config-name extension",
+		"watch:webviews": "webpack --watch --mode development --config-name webviews",
+		"watch:tests": "concurrently \"tsc-alias -p tsconfig.test.json -w\" \"tsc -p tsconfig.test.json -w\"",
+		"-watch:tests": "webpack --watch -c webpack.config.test.js --mode development",
+		"web": "vscode-test-web --extensionDevelopmentPath=. --folder-uri=vscode-vfs://github/gitkraken/vscode-gitlens",
+		"web:serve": "npx serve --cors -l 5000",
+		"web:tunnel": "npx localtunnel -p 5000",
+		"update-dts": "pushd \"src/@types\" && npx vscode-dts dev && popd",
+		"update-dts:master": "pushd \"src/@types\" && npx vscode-dts master && popd",
+		"update-emoji": "node ./scripts/generateEmojiShortcodeMap.js",
+		"update-licenses": "node ./scripts/generateLicenses.mjs",
+		"-pretest": "yarn run build:tests",
+		"vscode:prepublish": "yarn run bundle",
     "bundle": "webpack --mode production --config-name extension:node --config-name webviews",
     "compile": "webpack --mode development --config-name extension:node --config-name webviews",
-    "publish": "vsce publish",
-    "watch": "webpack --watch --mode development --env esbuild"
+    "publish": "vsce publish"
   },
-  "extensionDependencies": ["eamodio.gitlens"],
   "devDependencies": {
-    "@types/find-parent-dir": "^0.3.0",
-    "@types/glob": "^7.2.0",
-    "@types/ini": "^1.3.31",
-    "@types/mocha": "^9.1.0",
-    "@types/node": "14.x",
-    "@types/react": "^17.0.43",
-    "@types/react-dom": "^17.0.14",
-    "@types/react-tooltip": "^4.2.4",
-    "@types/vscode": "^1.66.0",
-    "@typescript-eslint/eslint-plugin": "^5.12.1",
-    "@typescript-eslint/parser": "^5.12.1",
-    "@vscode/test-electron": "^2.1.2",
-    "axios": "^0.26.1",
-    "css-loader": "^6.7.1",
-    "esbuild-loader": "^2.18.0",
-    "eslint": "^8.9.0",
-    "find-parent-dir": "^0.3.1",
-    "fork-ts-checker-webpack-plugin": "^7.2.2",
-    "git-rev-2": "^0.1.0",
-    "git-url-parse": "^11.6.0",
-    "glob": "^7.2.0",
-    "ini": "^2.0.0",
-    "json5": "^2.2.1",
-    "mocha": "^9.2.1",
-    "postcss": "^8.4.12",
-    "querystring": "^0.2.1",
-    "style-loader": "^3.3.1",
-    "svg-inline-loader": "^0.8.2",
-    "tailwindcss": "^3.0.24",
-    "ts-loader": "^9.2.8",
-    "typescript": "^4.5.5",
-    "webpack": "^5.69.1",
-    "webpack-cli": "^4.9.2"
+    "@heroicons/react": "^1.0.6",
+		"@octokit/core": "3.5.1",
+		"@tailwindcss/forms": "^0.5.2",
+		"@types/find-parent-dir": "^0.3.0",
+		"@types/react": "^18.0.15",
+		"@vscode/codicons": "0.0.28",
+		"@vscode/webview-ui-toolkit": "0.9.1",
+		"ansi-regex": "6.0.1",
+		"axios": "^0.27.2",
+		"billboard.js": "3.3.2",
+		"chroma-js": "2.3.0",
+		"dayjs": "^1.11.3",
+		"find-parent-dir": "^0.3.1",
+		"git-rev-2": "^0.1.0",
+		"git-url-parse": "^12.0.0",
+		"iconv-lite": "0.6.3",
+		"ini": "^3.0.0",
+		"lodash-es": "4.17.21",
+		"md5.js": "1.3.5",
+		"node-fetch": "2.6.7",
+		"path-browserify": "1.0.1",
+		"postcss": "^8.4.14",
+		"postcss-preset-env": "^7.7.2",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
+		"sortablejs": "1.14.0",
+		"uuid": "8.3.2"
   },
   "dependencies": {
-    "@headlessui/react": "^1.6.1",
-    "@heroicons/react": "^1.0.6",
-    "@tailwindcss/forms": "^0.5.1",
-    "dayjs": "^1.11.3",
-    "postcss-loader": "^6.2.1",
-    "postcss-preset-env": "^7.5.0",
-    "prepend-http": "^4.0.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
-  }
+    	"@squoosh/lib": "^0.4.0",
+		"@types/axios": "^0.14.0",
+		"@types/chroma-js": "2.1.3",
+		"@types/glob": "7.2.0",
+		"@types/ini": "^1.3.31",
+		"@types/lodash-es": "4.17.6",
+		"@types/mocha": "9.1.0",
+		"@types/node": "14.17.4",
+		"@types/react-dom": "^18.0.6",
+		"@types/sortablejs": "1.10.7",
+		"@types/uuid": "8.3.4",
+		"@types/vscode": "1.64.0",
+		"@typescript-eslint/eslint-plugin": "5.13.0",
+		"@typescript-eslint/parser": "5.13.0",
+		"@vscode/test-electron": "2.1.2",
+		"@vscode/test-web": "0.0.22",
+		"circular-dependency-plugin": "5.2.2",
+		"clean-webpack-plugin": "4.0.0",
+		"concurrently": "7.0.0",
+		"copy-webpack-plugin": "10.2.4",
+		"csp-html-webpack-plugin": "5.1.0",
+		"css-loader": "^6.7.1",
+		"esbuild": "0.14.23",
+		"esbuild-loader": "^2.19.0",
+		"eslint": "8.10.0",
+		"eslint-cli": "1.1.1",
+		"eslint-config-prettier": "8.4.0",
+		"eslint-import-resolver-typescript": "2.5.0",
+		"eslint-plugin-anti-trojan-source": "1.1.0",
+		"eslint-plugin-import": "2.25.4",
+		"fork-ts-checker-webpack-plugin": "6.5.0",
+		"glob": "7.2.0",
+		"html-loader": "3.1.0",
+		"html-webpack-plugin": "5.5.0",
+		"image-minimizer-webpack-plugin": "3.2.1",
+		"imagemin": "8.0.1",
+		"imagemin-webp": "7.0.0",
+		"json5": "2.2.0",
+		"license-checker-rseidelsohn": "3.1.0",
+		"mini-css-extract-plugin": "2.5.3",
+		"mocha": "9.2.0",
+		"postcss-loader": "^7.0.0",
+		"prettier": "2.5.1",
+		"sass": "1.49.8",
+		"sass-loader": "12.6.0",
+		"style-loader": "^3.3.1",
+		"svg-inline-loader": "^0.8.2",
+		"tailwindcss": "^3.1.5",
+		"terser-webpack-plugin": "5.3.1",
+		"ts-loader": "^9.3.1",
+		"tsc-alias": "1.6.3",
+		"typescript": "^4.7.4",
+		"vsce": "2.6.7",
+		"webpack": "5.69.1",
+		"webpack-bundle-analyzer": "4.5.0",
+		"webpack-cli": "4.9.2",
+		"webpack-node-externals": "3.0.0"
+  },
+	"resolutions": {
+		"node-fetch": "2.6.7",
+		"semver-regex": "3.1.3",
+		"trim-newlines": "4.0.2"
+	}
 }

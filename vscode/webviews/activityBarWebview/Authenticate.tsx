@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
 import { LockClosedIcon } from '@heroicons/react/solid';
 import prependHttp from 'prepend-http';
+import React, { useState } from 'react';
 import { vscode } from '../common/message';
-import { getSubdomain } from './App';
 import { GitHubButton, GoogleButton, MintlifyButton } from '../common/svgs';
+import { getSubdomain } from './App';
 
 const classNames = (...classes) => {
   return classes.filter(Boolean).join(' ');
@@ -31,13 +31,13 @@ export default function Authenticate({ signInUrl, setSignInUrl, onBack }: Signup
     if (!signInUrl) {
       return;
     }
-    let signInWithProtocol = formatSignInUrl(signInUrl);
+    const signInWithProtocol = formatSignInUrl(signInUrl);
     const subdomain = getSubdomain(signInUrl);
-    vscode.postMessage({ command: 'login', args: {signInWithProtocol, subdomain} });
+    vscode.postMessage({ command: 'login', args: {signInWithProtocol: signInWithProtocol, subdomain: subdomain} });
   };
 
   const onClickSignInWithOAuth = (provider: 'google' | 'github') => {
-    vscode.postMessage({ command: 'login-oauth', args: { provider } });
+    vscode.postMessage({ command: 'login-oauth', args: { provider: provider } });
   };
 
   if (signInMethod === 'mintlify') {
@@ -52,7 +52,7 @@ export default function Authenticate({ signInUrl, setSignInUrl, onBack }: Signup
     />
     <button
       type="submit"
-      className={classNames("flex items-center justify-center submit mt-2", !signInUrl ? 'opacity-50 hover:cursor-default' : 'opacity-100 hover:cursor-pointer')}
+      className={classNames('flex items-center justify-center submit mt-2', !signInUrl ? 'opacity-50 hover:cursor-default' : 'opacity-100 hover:cursor-pointer')}
       onClick={onClickSignInWithMintlify}
       disabled={!signInUrl}
     >

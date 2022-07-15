@@ -1,51 +1,60 @@
 //@ts-check
-
-'use strict';
-
-const execFile = require('child_process').execFile;
-const path = require('path');
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const { ESBuildMinifyPlugin } = require('esbuild-loader');
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const ForkTsCheckerPlugin = require('fork-ts-checker-webpack-plugin');
-const JSON5 = require('json5');
-const { parse } = JSON5; //
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const TerserPlugin = require('terser-webpack-plugin');
-const webpack = require('webpack');
-
-//@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
 
-async function resolveTSConfig(configFile) {
-	const data = await new Promise((resolve, reject) => {
-		execFile(
-			'yarn',
-			['tsc', `-p ${configFile}`, '--showConfig'],
-			{ cwd: __dirname, encoding: 'utf8', shell: true },
-			function (error, stdout, stderr) {
-				if (error !== null) {
-					reject(error);
-				}
-				resolve(stdout);
-			},
-		);
-	});
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
+/* eslint-disable @typescript-eslint/prefer-optional-chain */
+const { spawnSync } = require('child_process');
+const path = require('path');
+const CircularDependencyPlugin = require('circular-dependency-plugin');
+const { CleanWebpackPlugin: CleanPlugin } = require('clean-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
+const CspHtmlPlugin = require('csp-html-webpack-plugin');
+const esbuild = require('esbuild');
+const ForkTsCheckerPlugin = require('fork-ts-checker-webpack-plugin');
+const HtmlPlugin = require('html-webpack-plugin');
+const ImageMinimizerPlugin = require('image-minimizer-webpack-plugin');
+const JSON5 = require('json5');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+const { WebpackError } = require('webpack');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const { ESBuildMinifyPlugin } = require('esbuild-loader');
 
-	const index = data.indexOf('{\n');
-	const endIndex = data.indexOf('Done in');
-	const substr = data.substring(index, endIndex > index ? endIndex : undefined);
-	const json = parse(substr);
-	return json;
-}
+module.exports =
+	/**
+	 * @param {{ analyzeBundle?: boolean; analyzeDeps?: boolean; esbuild?: boolean; squoosh?: boolean } | undefined } env
+	 * @param {{ mode: 'production' | 'development' | 'none' | undefined }} argv
+	 * @returns { WebpackConfig[] }
+	 */
+	function (env, argv) {
+		const mode = argv.mode || 'none';
+
+		env = {
+			analyzeBundle: false,
+			analyzeDeps: false,
+			esbuild: true,
+			squoosh: true,
+			...env,
+		};
+
+		return [
+			getExtensionConfig('node', mode, env),
+			// getExtensionConfig('webworker', mode, env), Todo - add back in to support web
+			getWebviewConfig(mode, env, {
+				'webviewActivityBar': './webviews/activityBarWebview/index.ts'
+			})
+		];
+	};
 
 /**
  * @param { 'production' | 'development' | 'none' } mode
  * @param {{ esbuild?: boolean; }} env
  * @param { WebpackConfig['entry'] } entry
- * @returns { Promise<WebpackConfig> }
+ * @returns { WebpackConfig }
  */
- async function getWebviewConfig(mode, env, entry) {
+function getWebviewConfig(mode, env, entry) {
 	const basePath = path.join(__dirname, 'webviews');
 
 	/**
@@ -107,7 +116,7 @@ async function resolveTSConfig(configFile) {
 							options: {
 								loader: 'tsx',
 								target: 'es2020',
-								tsconfigRaw: await resolveTSConfig(path.join(__dirname, 'tsconfig.webviews.json')),
+								tsconfigRaw: resolveTSConfig(path.join(__dirname, 'tsconfig.webviews.json')),
 							},
 						}
 						: {
@@ -139,140 +148,332 @@ async function resolveTSConfig(configFile) {
 /**
  * @param { 'node' | 'webworker' } target
  * @param { 'production' | 'development' | 'none' } mode
- * @param {{ esbuild?: boolean; }} env
- * @returns { Promise<WebpackConfig> }
+ * @param {{ analyzeBundle?: boolean; analyzeDeps?: boolean; esbuild?: boolean; squoosh?: boolean } | undefined } env
+ * @returns { WebpackConfig }
  */
-async function getExtensionConfig(target, mode, env) {
-  const basePath = path.join(__dirname, 'src');
-
+function getExtensionConfig(target, mode, env) {
 	/**
 	 * @type WebpackConfig['plugins'] | any
 	 */
 	const plugins = [
+		new CleanPlugin({ cleanOnceBeforeBuildPatterns: ['!dist/webviews/**'] }),
 		new ForkTsCheckerPlugin({
 			async: false,
 			formatter: 'basic',
 			typescript: {
 				configFile: path.join(__dirname, target === 'webworker' ? 'tsconfig.browser.json' : 'tsconfig.json'),
 			},
-		})
+		}),
 	];
 
-  if (target === 'webworker') {
-		plugins.push(new webpack.ProvidePlugin({
-			process: path.join(
-				__dirname,
-				'node_modules',
-				'process',
-				'browser.js')
-		}));
-	}
-  const entry = {
-		extension: './src/extension.ts',
-	};
+	if (env?.analyzeDeps) {
+		plugins.push(
+			new CircularDependencyPlugin({
+				cwd: __dirname,
+				exclude: /node_modules/,
+				failOnError: false,
+				onDetected: function ({ module: _webpackModuleRecord, paths, compilation }) {
+					if (paths.some(p => p.includes('container.ts'))) return;
 
-  return {
-    name: `extension:${target}`,
-    entry,
-    mode: mode,
-    target: target,
-    devtool: mode !== 'production' ? 'source-map' : undefined,
-    output: {
-		path: target === 'webworker' ? path.join(__dirname, 'dist', 'browser') : path.join(__dirname, 'dist'),
-		libraryTarget: 'commonjs2',
-		filename: '[name].js',
-		chunkFilename: 'feature-[name].js',
-	},
-	optimization: {
-		minimizer: [
-			// @ts-ignore
-			env.esbuild
-				? new ESBuildMinifyPlugin({
-					format: 'cjs',
-					minify: true,
-					treeShaking: true,
-					// // Keep the class names
-					// keepNames: true,
-					target: 'es2020',
-				})
-				: new TerserPlugin({
-					extractComments: false,
-					parallel: true,
-					terserOptions: {
-						ecma: 2020,
-						// // Keep the class names
-						// keep_classnames: true,
-						module: true,
-					},
-				}),
-		],
-	},
-	module: {
-		rules: [
-		  {
-			exclude: /node_modules/,
-			include: path.join(__dirname, 'src'),
-			test: /\.tsx?$/,
-			use: {
-				loader: 'ts-loader',
-				options: {
-					configFile: path.join(
-						__dirname,
-						target === 'webworker' ? 'tsconfig.browser.json' : 'tsconfig.json',
-					),
-					experimentalWatchApi: true,
-					transpileOnly: true,
+					// @ts-ignore
+					compilation.warnings.push(new WebpackError(paths.join(' -> ')));
 				},
-			}
-		  }
-		]
-	},
-	resolve: {
-		// support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
-		extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
-		symlinks: false,
-	},
-    externals: {
-      vscode: 'commonjs vscode', // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
-      // modules added here also need to be added in the .vscodeignore file
-	  'fs': 'fs'
-    },
-    plugins: plugins,
-    stats: {
-		preset: 'errors-warnings',
-		assets: true,
-		colors: true,
-		env: true,
-		errorsCount: true,
-		warningsCount: true,
-		timings: true,
-	},
-    infrastructureLogging: {
-      level: "log", // enables logging required for problem matchers
-    }
-  };
+			}),
+		);
+	}
+
+	if (env?.analyzeBundle) {
+		plugins.push(new BundleAnalyzerPlugin({ analyzerPort: 'auto' }));
+	}
+
+	return {
+		name: `extension:${target}`,
+		entry: {
+			extension: './src/extension.ts',
+		},
+		mode: mode,
+		target: target,
+		devtool: 'source-map',
+		output: {
+			path: target === 'webworker' ? path.join(__dirname, 'dist', 'browser') : path.join(__dirname, 'dist'),
+			libraryTarget: 'commonjs2',
+			filename: 'gitlens.js',
+			chunkFilename: 'feature-[name].js',
+		},
+		optimization: {
+			minimizer: [
+				new TerserPlugin(
+					env?.esbuild
+						? {
+								minify: TerserPlugin.esbuildMinify,
+								terserOptions: {
+									// @ts-ignore
+									drop: ['debugger'],
+									format: 'cjs',
+									minify: true,
+									treeShaking: true,
+									// Keep the class names otherwise @log won't provide a useful name
+									keepNames: true,
+									target: 'es2020',
+								},
+						  }
+						: {
+								extractComments: false,
+								parallel: true,
+								terserOptions: {
+									ecma: 2020,
+									// Keep the class names otherwise @log won't provide a useful name
+									keep_classnames: true,
+									module: true,
+								},
+						  },
+				),
+			],
+			splitChunks:
+				target === 'webworker'
+					? false
+					: {
+							// Disable all non-async code splitting
+							chunks: () => false,
+							cacheGroups: {
+								default: false,
+								vendors: false,
+							},
+					  },
+		},
+		externals: {
+			vscode: 'commonjs vscode',
+		},
+		module: {
+			rules: [
+				{
+					exclude: /\.d\.ts$/,
+					include: path.join(__dirname, 'src'),
+					test: /\.tsx?$/,
+					use: env?.esbuild
+						? {
+								loader: 'esbuild-loader',
+								options: {
+									implementation: esbuild,
+									loader: 'ts',
+									target: ['es2020', 'chrome91', 'node14.16'],
+									tsconfigRaw: resolveTSConfig(
+										path.join(
+											__dirname,
+											target === 'webworker' ? 'tsconfig.browser.json' : 'tsconfig.json',
+										),
+									),
+								},
+						  }
+						: {
+								loader: 'ts-loader',
+								options: {
+									configFile: path.join(
+										__dirname,
+										target === 'webworker' ? 'tsconfig.browser.json' : 'tsconfig.json',
+									),
+									experimentalWatchApi: true,
+									transpileOnly: true,
+								},
+						  },
+				},
+			],
+		},
+		resolve: {
+			alias: {
+				'@env': path.resolve(__dirname, 'src', 'env', target === 'webworker' ? 'browser' : target),
+				// This dependency is very large, and isn't needed for our use-case
+				// tr46: path.resolve(__dirname, 'patches', 'tr46.js'),
+			},
+			fallback: target === 'webworker' ? { path: require.resolve('path-browserify') } : undefined,
+			mainFields: target === 'webworker' ? ['browser', 'module', 'main'] : ['module', 'main'],
+			extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
+		},
+		plugins: plugins,
+		infrastructureLogging: {
+			level: 'log', // enables logging required for problem matchers
+		},
+		stats: {
+			preset: 'errors-warnings',
+			assets: true,
+			colors: true,
+			env: true,
+			errorsCount: true,
+			warningsCount: true,
+			timings: true,
+		},
+	};
 }
 
-module.exports =
-	/**
-	 * @param {{ esbuild?: boolean; } | undefined } env
-	 * @param {{ mode: 'production' | 'development' | 'none' | undefined; }} argv
-	 * @returns { Promise<WebpackConfig[]> }
-	 */
-	async function (env, argv) {
-		const mode = argv.mode || 'none';
+/**
+ * @param { 'production' | 'development' | 'none' } mode
+ * @param {{ analyzeBundle?: boolean; analyzeDeps?: boolean; esbuild?: boolean; squoosh?: boolean } | undefined } env
+ * @returns { CspHtmlPlugin }
+ */
+function getCspHtmlPlugin(mode, env) {
+	const cspPlugin = new CspHtmlPlugin(
+		{
+			'default-src': "'none'",
+			'img-src': ['#{cspSource}', 'https:', 'data:'],
+			'script-src':
+				mode !== 'production'
+					? ['#{cspSource}', "'nonce-#{cspNonce}'", "'unsafe-eval'"]
+					: ['#{cspSource}', "'nonce-#{cspNonce}'"],
+			'style-src': ['#{cspSource}', "'nonce-#{cspNonce}'", "'unsafe-hashes'"],
+			'font-src': ['#{cspSource}'],
+		},
+		{
+			enabled: true,
+			hashingMethod: 'sha256',
+			hashEnabled: {
+				'script-src': true,
+				'style-src': true,
+			},
+			nonceEnabled: {
+				'script-src': true,
+				'style-src': true,
+			},
+		},
+	);
+	// Override the nonce creation so we can dynamically generate them at runtime
+	// @ts-ignore
+	cspPlugin.createNonce = () => '#{cspNonce}';
 
-		env = {
-			esbuild: false,
-			...env,
-		};
+	return cspPlugin;
+}
 
-		// @ts-ignore
-		return Promise.all([
-			getExtensionConfig('node', mode, env),
-			getExtensionConfig('webworker', mode, env),
-			getWebviewConfig(mode, env, {
-				'webviewActivityBar': './webviews/activityBarWebview/index.ts'
-			}),
-		]);
-	};
+/**
+ * @param { 'production' | 'development' | 'none' } mode
+ * @param {{ analyzeBundle?: boolean; analyzeDeps?: boolean; esbuild?: boolean; squoosh?: boolean } | undefined } env
+ * @returns { ImageMinimizerPlugin.Generator<any> }
+ */
+function getImageMinimizerConfig(mode, env) {
+	/** @type ImageMinimizerPlugin.Generator<any> */
+	// @ts-ignore
+	return env.squoosh
+		? {
+				type: 'asset',
+				implementation: ImageMinimizerPlugin.squooshGenerate,
+				options: {
+					encodeOptions: {
+						webp: {
+							// quality: 90,
+							lossless: 1,
+						},
+					},
+				},
+		  }
+		: {
+				type: 'asset',
+				implementation: ImageMinimizerPlugin.imageminGenerate,
+				options: {
+					plugins: [
+						[
+							'imagemin-webp',
+							{
+								lossless: true,
+								nearLossless: 0,
+								quality: 100,
+								method: mode === 'production' ? 4 : 0,
+							},
+						],
+					],
+				},
+		  };
+}
+
+/**
+ * @param { string } name
+ * @param { boolean } plus
+ * @param { 'production' | 'development' | 'none' } mode
+ * @param {{ analyzeBundle?: boolean; analyzeDeps?: boolean; esbuild?: boolean; squoosh?: boolean } | undefined } env
+ * @returns { HtmlPlugin }
+ */
+function getHtmlPlugin(name, plus, mode, env) {
+	return new HtmlPlugin({
+		template: plus ? path.join('plus', name, `${name}.html`) : path.join(name, `${name}.html`),
+		chunks: [name],
+		filename: path.join(__dirname, 'dist', 'webviews', `${name}.html`),
+		inject: true,
+		scriptLoading: 'module',
+		inlineSource: mode === 'production' ? '.css$' : undefined,
+		minify:
+			mode === 'production'
+				? {
+						removeComments: true,
+						collapseWhitespace: true,
+						removeRedundantAttributes: false,
+						useShortDoctype: true,
+						removeEmptyAttributes: true,
+						removeStyleLinkTypeAttributes: true,
+						keepClosingSlash: true,
+						minifyCSS: true,
+				  }
+				: false,
+	});
+}
+
+class InlineChunkHtmlPlugin {
+	constructor(htmlPlugin, patterns) {
+		this.htmlPlugin = htmlPlugin;
+		this.patterns = patterns;
+	}
+
+	getInlinedTag(publicPath, assets, tag) {
+		if (
+			(tag.tagName !== 'script' || !(tag.attributes && tag.attributes.src)) &&
+			(tag.tagName !== 'link' || !(tag.attributes && tag.attributes.href))
+		) {
+			return tag;
+		}
+
+		let chunkName = tag.tagName === 'link' ? tag.attributes.href : tag.attributes.src;
+		if (publicPath) {
+			chunkName = chunkName.replace(publicPath, '');
+		}
+		if (!this.patterns.some(pattern => chunkName.match(pattern))) {
+			return tag;
+		}
+
+		const asset = assets[chunkName];
+		if (asset == null) {
+			return tag;
+		}
+
+		return { tagName: tag.tagName === 'link' ? 'style' : tag.tagName, innerHTML: asset.source(), closeTag: true };
+	}
+
+	apply(compiler) {
+		let publicPath = compiler.options.output.publicPath || '';
+		if (publicPath && !publicPath.endsWith('/')) {
+			publicPath += '/';
+		}
+
+		compiler.hooks.compilation.tap('InlineChunkHtmlPlugin', compilation => {
+			const getInlinedTagFn = tag => this.getInlinedTag(publicPath, compilation.assets, tag);
+			const sortFn = (a, b) => (a.tagName === 'script' ? 1 : -1) - (b.tagName === 'script' ? 1 : -1);
+			this.htmlPlugin.getHooks(compilation).alterAssetTagGroups.tap('InlineChunkHtmlPlugin', assets => {
+				assets.headTags = assets.headTags.map(getInlinedTagFn).sort(sortFn);
+				assets.bodyTags = assets.bodyTags.map(getInlinedTagFn).sort(sortFn);
+			});
+		});
+	}
+}
+
+/**
+ * @param { string } configFile
+ * @returns { string }
+ */
+function resolveTSConfig(configFile) {
+	const result = spawnSync('yarn', ['tsc', `-p ${configFile}`, '--showConfig'], {
+		cwd: __dirname,
+		encoding: 'utf8',
+		shell: true,
+	});
+
+	const data = result.stdout;
+	const start = data.indexOf('{');
+	const end = data.lastIndexOf('}') + 1;
+	const json = JSON5.parse(data.substring(start, end));
+	return json;
+}

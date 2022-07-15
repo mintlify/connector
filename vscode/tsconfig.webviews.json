@@ -1,6 +1,28 @@
 {
-	"extends": "./tsconfig.browser.json",
 	"compilerOptions": {
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"incremental": true,
+		"isolatedModules": false,
+		"jsx": "react",
+		"module": "esnext",
+		"moduleResolution": "node",
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitAny": false,
+		"noImplicitReturns": false,
+		"noUnusedLocals": false,
+		"outDir": "dist",
+		"resolveJsonModule": true,
+		"rootDir": ".",
+		"skipLibCheck": true,
+		"sourceMap": true,
+		"strict": false,
+		"strictNullChecks": false,
+		"target": "ES2020",
+		"useDefineForClassFields": true,
+        "lib": ["dom", "dom.iterable", "es2020"],
 		"tsBuildInfoFile": "tsconfig.webviews.tsbuildinfo"
-	}
+	},
+	"include": ["webviews"],
+	"exclude": ["node_modules"]
 }
