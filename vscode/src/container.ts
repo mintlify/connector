@@ -517,19 +517,6 @@ export class Container {
 	}
 
 	private applyModeConfigurationTransform(e: ConfigurationChangeEvent): ConfigurationChangeEvent {
-		if (this._configsAffectedByMode == null) {
-			this._configsAffectedByMode = [
-				`gitlens.${configuration.name('mode')}`,
-				`gitlens.${configuration.name('modes')}`,
-				`gitlens.${configuration.name('blame.toggleMode')}`,
-				`gitlens.${configuration.name('changes.toggleMode')}`,
-				`gitlens.${configuration.name('codeLens')}`,
-				`gitlens.${configuration.name('currentLine')}`,
-				`gitlens.${configuration.name('heatmap.toggleMode')}`,
-				`gitlens.${configuration.name('hovers')}`,
-			];
-		}
-
 		const original = e.affectsConfiguration;
 		return {
 			...e,
