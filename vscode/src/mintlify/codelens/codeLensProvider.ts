@@ -9,10 +9,12 @@ import {
 	Range,
 	TextDocument,
 } from 'vscode';
+import { LocalGitProvider } from '@env/git/localGitProvider';
+import type { Repository as BuiltInGitRepository } from '../../@types/vscode.git';
 import { Commands, ContextKeys, Schemes } from '../../constants';
 import { Container } from '../../container';
 import { getContext } from '../../context';
-import { GitBlame } from '../../git/models';
+import { GitProviderId } from '../../git/gitProvider';
 import { getFilePath } from '../../mintlify-functionality/utils/git';
 import { mapOldPositionToNew } from '../../mintlify-functionality/utils/git/diffPositionMapping';
 import { Link } from '../../mintlify-functionality/utils/links';
@@ -43,19 +45,6 @@ export class DocCodeLensProvider implements CodeLensProvider {
 		const trackedDocument = await this.container.tracker.getOrAdd(document);
 		if (!trackedDocument.isBlameable) return [];
 
-		let dirty = false;
-		if (document.isDirty) {
-			// Only allow dirty blames if we are idle
-			if (trackedDocument.isDirtyIdle) {
-				const maxLines = this.container.config.advanced.blame.sizeThresholdAfterEdit;
-				if (maxLines > 0 && document.lineCount > maxLines) {
-					dirty = true;
-				}
-			} else {
-				dirty = true;
-			}
-		}
-
 		const lenses: CodeLens[] = [];
 
 		const links: Link[] | undefined = getContext<Link[]>(ContextKeys.Links);
@@ -68,13 +57,14 @@ export class DocCodeLensProvider implements CodeLensProvider {
 			return link.file === fileName || fileName.includes(link.file) || link.file.includes(fileName);
 		});
 
-		const gitUri = trackedDocument.uri;
-		let blame: GitBlame | undefined;
+		const gitProviders = this.container.git.getOpenProviders();
 
-		if (!dirty) {
-			if (token.isCancellationRequested) return lenses;
-			blame = await this.container.git.getBlame(gitUri, document);
-			if (blame == null || blame?.lines.length === 0) return lenses;
+		const git: LocalGitProvider | undefined = gitProviders.find(
+			provider => provider.descriptor.id === GitProviderId.Git,
+		) as LocalGitProvider;
+		let repo: BuiltInGitRepository | undefined;
+		if (git != null) {
+			repo = await git.openScmRepository(document.uri);
 		}
 
 		// TODO - seprate promises from non-promise lenses
@@ -86,19 +76,12 @@ export class DocCodeLensProvider implements CodeLensProvider {
 					return;
 				}
 				try {
-					const diffForFileContents = await this.container.git.getDiffForFileContents(
-						gitUri,
-						fileName,
-						link.sha,
-					);
-					console.log({ diffForFileContents: diffForFileContents });
-					let diff = diffForFileContents?.diff;
-					if (diff == null && diffForFileContents?.hunks != null && diffForFileContents.hunks.length > 0) {
-						diff = diffForFileContents.hunks[0].diff;
-					}
-					if (diff != null) {
-						firstLine = document.lineAt(mapOldPositionToNew(diff, link.line));
-						lastLine = document.lineAt(mapOldPositionToNew(diff, link.endLine) - 1);
+					if (repo != null) {
+						const diff = await this.getContentDiff(repo, document, fileName, link.sha);
+						if (diff != null) {
+							firstLine = document.lineAt(mapOldPositionToNew(diff, link.line));
+							lastLine = document.lineAt(mapOldPositionToNew(diff, link.endLine) - 1);
+						}
 					}
 				} catch {
 					return;
@@ -138,5 +121,19 @@ export class DocCodeLensProvider implements CodeLensProvider {
 			formattedTitle = `${formattedTitle.slice(0, 30)}...`;
 		}
 		return formattedTitle;
+	}
+
+	private async getContentDiff(
+		repo: BuiltInGitRepository,
+		document: TextDocument,
+		fileName: string,
+		sha: string,
+	): Promise<string> {
+		if (document.isDirty) {
+			const documentText = document.getText();
+			const idOfCurrentText = await repo.hashObject(documentText);
+			return repo.diffBlobs(sha, idOfCurrentText);
+		}
+		return repo.diffWith(sha, fileName);
 	}
 }

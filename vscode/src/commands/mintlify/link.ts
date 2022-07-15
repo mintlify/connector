@@ -99,10 +99,10 @@ export class LinkCode extends ActiveEditorCommand {
 		lines?: number[],
 	): Promise<Code> {
 		const code: Code = await getGitData(fileFsPath, type, lines);
-		const sha = await this.getSha(editor, uri, args);
-		if (sha != null) {
-			code.sha = sha;
-		}
+		// const sha = await this.getSha(editor, uri, args);
+		// if (sha != null) {
+		// 	code.sha = sha;
+		// }
 		return code;
 	}
 

@@ -3840,7 +3840,7 @@ export class LocalGitProvider implements GitProvider, Disposable {
 	}
 
 	private _scmGitApi: Promise<BuiltInGitApi | undefined> | undefined;
-	private async getScmGitApi(): Promise<BuiltInGitApi | undefined> {
+	public async getScmGitApi(): Promise<BuiltInGitApi | undefined> {
 		return this._scmGitApi ?? (this._scmGitApi = this.getScmGitApiCore());
 	}
 
@@ -3899,7 +3899,7 @@ export class LocalGitProvider implements GitProvider, Disposable {
 	}
 
 	@log()
-	private async openScmRepository(uri: Uri): Promise<BuiltInGitRepository | undefined> {
+	public async openScmRepository(uri: Uri): Promise<BuiltInGitRepository | undefined> {
 		const cc = Logger.getCorrelationContext();
 		try {
 			const gitApi = await this.getScmGitApi();
