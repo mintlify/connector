@@ -111,8 +111,8 @@ export class ViewProvider implements WebviewViewProvider {
 					await vscode.window.showErrorMessage('User has insufficient credentials. Try again later');
 					return;
 				}
-
-				await this.authenticate(user);
+				const subdomain = query.get('subdomain');
+				await this.authenticate(user, subdomain);
 			} catch (err) {
 				await vscode.window.showErrorMessage('Error authenticating user');
 			}
@@ -133,8 +133,11 @@ export class ViewProvider implements WebviewViewProvider {
 		await this.container.storage.deleteSecret('subdomain');
 	}
 
-	public async authenticate(user: any) {
+	public async authenticate(user: any, subdomain?: string | null) {
 		await this.container.storage.storeSecret('userId', user.userId);
+		if (subdomain) {
+			await this.container.storage.storeSecret('subdomain', subdomain);
+		}
 		await vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', true);
 		await vscode.window.showInformationMessage(`🙌 Successfully signed in with ${user.email}`);
 		await executeCommand(Commands.RefreshLinks);

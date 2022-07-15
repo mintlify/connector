@@ -187,7 +187,6 @@ export const getGitData = async (fileFsPath: string, type: string, lines?: numbe
 					}
 				}
 				if (rawUri == null) {
-					await vscode.window.showWarningMessage(`No remote found on branch.`);
 					return;
 				}
 
