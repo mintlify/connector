@@ -2,7 +2,6 @@ import axios from 'axios';
 import express from 'express';
 import { userMiddleware } from './user';
 import Doc, { DocType } from '../models/Doc';
-import Event from '../models/Event';
 import { ContentData, ScrapingMethod } from '../services/webscraper';
 import { deleteDocForSearch, indexDocsForSearch } from '../services/algolia';
 import Org from '../models/Org';
@@ -19,31 +18,27 @@ export const extractFromDoc = async (doc: DocType, orgId: string): Promise<Conte
     const org = await Org.findById(orgId);
     const notionAccessToken = org?.integrations?.notion?.access_token;
     if (notionAccessToken == null) {
-      throw 'Unable to get organization by ID for Notion'
+      throw 'Unable to get organization by ID for Notion';
     }
     return getNotionPageDataWithId(doc.notion.pageId, notionAccessToken);
-  }
-
-  else if (doc.method === 'googledocs-private' && doc.googledocs?.id) {
+  } else if (doc.method === 'googledocs-private' && doc.googledocs?.id) {
     const org = await Org.findById(orgId);
     const googleCredentials = org?.integrations?.google;
     if (googleCredentials == null) {
-      throw 'Unable to get organization by ID for Google Docs'
+      throw 'Unable to get organization by ID for Google Docs';
     }
     return getGoogleDocsPrivateData(doc.googledocs.id, googleCredentials);
-  }
-
-  else if (doc.method === 'confluence-private' && doc.confluence?.id) {
+  } else if (doc.method === 'confluence-private' && doc.confluence?.id) {
     const org = await Org.findById(orgId);
     const confluenceCredentials = org?.integrations?.confluence;
     if (confluenceCredentials == null) {
-      throw 'Unable to get organization by ID for Confluence'
+      throw 'Unable to get organization by ID for Confluence';
     }
     return getConfluenceContentFromPageById(doc.confluence.id, confluenceCredentials);
   }
 
   return null;
-}
+};
 
 export const getDataFromUrl = async (urlInput: string) => {
   let urlWithProtocol = urlInput;
@@ -69,11 +64,11 @@ export const getDataFromUrl = async (urlInput: string) => {
         favicon = undefined;
       }
     }
-    return {title, favicon, urlWithProtocol};
+    return { title, favicon, urlWithProtocol };
   } catch (err) {
     return { title: urlInput, favicon: undefined, urlWithProtocol };
   }
-}
+};
 
 docsRouter.get('/preview', async (req, res) => {
   let url = req.query.url as string;
@@ -83,9 +78,9 @@ docsRouter.get('/preview', async (req, res) => {
 
   try {
     const { title, favicon } = await getDataFromUrl(url);
-    return res.send({title, favicon});
+    return res.send({ title, favicon });
   } catch {
-    return res.status(400).send({error: 'Unable to fetch content from URL'});
+    return res.status(400).send({ error: 'Unable to fetch content from URL' });
   }
 });
 
@@ -113,28 +108,17 @@ docsRouter.get('/', userMiddleware, async (req, res) => {
       },
       {
         $lookup: {
-          from: "tasks",
-          let: { doc: "$_id" },
-          pipeline: [
-             { $match:
-                { $expr:
-                   { $and:
-                      [
-                        { $eq: [ "$doc",  "$$doc" ] },
-                        { $eq: [ "$status", "todo" ] }
-                      ]
-                   }
-                }
-             },
-          ],
-          as: "tasks"
+          from: 'tasks',
+          let: { doc: '$_id' },
+          pipeline: [{ $match: { $expr: { $and: [{ $eq: ['$doc', '$$doc'] }, { $eq: ['$status', 'todo'] }] } } }],
+          as: 'tasks',
         },
       },
       {
         $set: {
-          tasksCount: { $size: "$tasks" },
-          codesCount: { $size: "$code" }
-        }
+          tasksCount: { $size: '$tasks' },
+          codesCount: { $size: '$code' },
+        },
       },
       {
         $sort: { tasksCount: -1, codesCount: -1, lastUpdatedAt: -1 },
@@ -165,28 +149,17 @@ docsRouter.get('/method/:method', userMiddleware, async (req, res) => {
       },
       {
         $lookup: {
-          from: "tasks",
-          let: { doc: "$_id" },
-          pipeline: [
-             { $match:
-                { $expr:
-                   { $and:
-                      [
-                        { $eq: [ "$doc",  "$$doc" ] },
-                        { $eq: [ "$status", "todo" ] }
-                      ]
-                   }
-                }
-             },
-          ],
-          as: "tasks"
+          from: 'tasks',
+          let: { doc: '$_id' },
+          pipeline: [{ $match: { $expr: { $and: [{ $eq: ['$doc', '$$doc'] }, { $eq: ['$status', 'todo'] }] } } }],
+          as: 'tasks',
         },
       },
       {
         $set: {
-          tasksCount: { $size: "$tasks" },
-          codesCount: { $size: "$code" }
-        }
+          tasksCount: { $size: '$tasks' },
+          codesCount: { $size: '$code' },
+        },
       },
       {
         $sort: { tasksCount: -1, codesCount: -1, lastUpdatedAt: -1 },
@@ -196,65 +169,55 @@ docsRouter.get('/method/:method', userMiddleware, async (req, res) => {
   } catch (error) {
     return res.status(500).send({ error, docs: [] });
   }
-})
+});
 
-const groupMap: Record<ScrapingMethod, { name: string, importStatusId: string, id:  ScrapingMethod }> = {
+const groupMap: Record<ScrapingMethod, { name: string; importStatusId: string; id: ScrapingMethod }> = {
   'notion-private': { name: 'Notion', importStatusId: 'notion', id: 'notion-private' },
   'confluence-private': { name: 'Confluence', importStatusId: 'confluence', id: 'confluence-private' },
   'googledocs-private': { name: 'Google Docs', importStatusId: 'googledocs', id: 'googledocs-private' },
-  'github': { name: 'GitHub', importStatusId: 'github', id: 'github' },
-  'web': { name: 'Web Pages', importStatusId: '', id: 'web' },
-}
+  github: { name: 'GitHub', importStatusId: 'github', id: 'github' },
+  web: { name: 'Web Pages', importStatusId: '', id: 'web' },
+};
 
 docsRouter.get('/groups', userMiddleware, async (_, res) => {
   const { org } = res.locals.user;
   const groups = await Doc.aggregate([
-    { $match: {
-      org: org._id
-    },
+    {
+      $match: {
+        org: org._id,
+      },
     },
     {
-      $sort: { lastUpdatedAt: -1 }
+      $sort: { lastUpdatedAt: -1 },
     },
     {
       $lookup: {
-        from: "tasks",
-        let: { doc: "$_id" },
-        pipeline: [
-           { $match:
-              { $expr:
-                 { $and:
-                    [
-                      { $eq: [ "$doc",  "$$doc" ] },
-                      { $eq: [ "$status", "todo" ] }
-                    ]
-                 }
-              }
-           },
-        ],
-        as: "tasks"
+        from: 'tasks',
+        let: { doc: '$_id' },
+        pipeline: [{ $match: { $expr: { $and: [{ $eq: ['$doc', '$$doc'] }, { $eq: ['$status', 'todo'] }] } } }],
+        as: 'tasks',
       },
     },
     {
       $set: {
-        tasksCount: { $size: '$tasks' }
-      }
-    },
-    {
-      $group: {
-        _id: "$method",
-        count: { $sum: 1 },
-        tasksCount: { $sum: '$tasksCount' },
-        lastUpdatedDoc: { $first: "$$ROOT" }
+        tasksCount: { $size: '$tasks' },
       },
     },
     {
-      $sort: { 'lastUpdatedDoc.lastUpdatedAt': -1 }
+      $group: {
+        _id: '$method',
+        count: { $sum: 1 },
+        tasksCount: { $sum: '$tasksCount' },
+        lastUpdatedDoc: { $first: '$$ROOT' },
+      },
+    },
+    {
+      $sort: { 'lastUpdatedDoc.lastUpdatedAt': -1 },
     },
   ]);
 
   const groupsWithNames: any[] = [];
-  
+
   groups.forEach((group: { _id: ScrapingMethod }) => {
     const groupData = groupMap[group._id];
     if (groupData == null) {
@@ -264,26 +227,28 @@ docsRouter.get('/groups', userMiddleware, async (_, res) => {
     groupsWithNames.push({
       ...group,
       name: groupData.name,
-      isLoading: Boolean(org.importStatus[groupData.importStatusId])
-    })
+      isLoading: Boolean(org.importStatus[groupData.importStatusId]),
+    });
   });
 
   // Add currently importing apps to display
   Object.entries(org.importStatus).forEach(([importingApp, isImporting]) => {
-    const isAlreadyInList = groupsWithNames.some((group: { _id: ScrapingMethod }) => groupMap[group._id]?.importStatusId === importingApp);
+    const isAlreadyInList = groupsWithNames.some(
+      (group: { _id: ScrapingMethod }) => groupMap[group._id]?.importStatusId === importingApp
+    );
     if (isImporting && !isAlreadyInList) {
       const group = Object.values(groupMap).find((groupData) => {
         return groupData.importStatusId === importingApp;
-      })
+      });
       groupsWithNames.unshift({
         _id: group?.id,
         name: group?.name || '',
         isLoading: true,
-      })
+      });
     }
   });
 
-  return res.send({ groups: groupsWithNames })
+  return res.send({ groups: groupsWithNames });
 });
 
 docsRouter.post('/webpage', userMiddleware, async (req, res) => {
@@ -292,24 +257,28 @@ docsRouter.post('/webpage', userMiddleware, async (req, res) => {
 
   try {
     const { title, favicon, urlWithProtocol } = await getDataFromUrl(url);
-    const doc = await Doc.findOneAndUpdate({
-      org: org._id,
-      url: urlWithProtocol,
-    }, {
-      org: org._id,
-      url: urlWithProtocol,
-      method: 'web',
-      favicon,
-      title,
-      isJustAdded: true,
-      createdBy: userId
-    }, { upsert: true, new: true });
+    const doc = await Doc.findOneAndUpdate(
+      {
+        org: org._id,
+        url: urlWithProtocol,
+      },
+      {
+        org: org._id,
+        url: urlWithProtocol,
+        method: 'web',
+        favicon,
+        title,
+        isJustAdded: true,
+        createdBy: userId,
+      },
+      { upsert: true, new: true }
+    );
     indexDocsForSearch([doc]);
-    res.send({doc})
+    res.send({ doc });
   } catch (error) {
-    res.status(500).send({error});
+    res.status(500).send({ error });
   }
-})
+});
 
 docsRouter.delete('/:docId', userMiddleware, async (req, res) => {
   const { docId } = req.params;
@@ -317,11 +286,10 @@ docsRouter.delete('/:docId', userMiddleware, async (req, res) => {
 
   try {
     const deleteDocPromise = Doc.findOneAndDelete({ _id: docId, org: org._id });
-    const deleteEventsPromise = Event.deleteMany({ doc: docId });
     const deleteCodesPromise = Code.deleteMany({ doc: docId });
     const deleteDocForSearchPromise = deleteDocForSearch(docId);
 
-    await Promise.all([deleteDocPromise, deleteEventsPromise, deleteCodesPromise, deleteDocForSearchPromise]);
+    await Promise.all([deleteDocPromise, deleteCodesPromise, deleteDocForSearchPromise]);
     res.end();
   } catch (error) {
     res.status(500).send({ error });
@@ -359,7 +327,7 @@ docsRouter.put('/:docId/email', async (req, res) => {
     const { email } = req.body;
     const doc = await Doc.findById(docId);
     if (doc == null) return res.status(400).json({ error: 'Invalid doc ID' });
-    await Doc.findByIdAndUpdate(doc._id, { email }, {new: true, strict: false});
+    await Doc.findByIdAndUpdate(doc._id, { email }, { new: true, strict: false });
     return res.end();
   } catch (error) {
     return res.status(500).send({ error });
@@ -387,16 +355,15 @@ docsRouter.get('/content/:id', userMiddleware, async (req, res) => {
     const orgId = doc.org;
     const docData = await extractFromDoc(doc, orgId);
     if (docData == null) {
-      return res.status(400).send('Invalid doc')
+      return res.status(400).send('Invalid doc');
     }
 
     const { content, title, favicon, method } = docData;
     return res.send({ content, title, favicon, method });
   } catch (error) {
     console.log(error);
-    return res.status(500).send({error: 'Internal systems error'});
+    return res.status(500).send({ error: 'Internal systems error' });
   }
 });
-
 
 export default docsRouter;
