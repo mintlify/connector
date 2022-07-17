@@ -4,6 +4,8 @@
 
 Link documentation to your codebase
 
+🎥 [Demo](https://www.loom.com/embed/5eac4e3c0083419481260be33909b47b)
+
 <img src="/vscode/assets/connector.png" width="650px" />
 
 ## Get Started
