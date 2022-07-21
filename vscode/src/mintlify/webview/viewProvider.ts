@@ -40,7 +40,7 @@ export class ViewProvider implements WebviewViewProvider {
 	protected readonly disposables: Disposable[] = [];
 	protected isReady: boolean = false;
 	private _disposableView: Disposable | undefined;
-	private _uriHandler = { handleUri: this.handleUri };
+	private _uriHandler = new UriHandler(this);
 
 	constructor(private readonly container: Container) {
 		this.disposables.push(
@@ -96,43 +96,6 @@ export class ViewProvider implements WebviewViewProvider {
 		}
 	}
 
-	private async handleUri(uri: vscode.Uri) {
-		if (uri.path === '/auth') {
-			try {
-				const query = new URLSearchParams(uri.query);
-				const userRaw = query.get('user');
-				if (userRaw == null) {
-					await vscode.window.showErrorMessage('Unable to authenticate. Try again later');
-					return;
-				}
-
-				const user = JSON.parse(userRaw);
-				if (user?.email == null) {
-					await vscode.window.showErrorMessage('User has insufficient credentials. Try again later');
-					return;
-				}
-				const subdomain = query.get('subdomain');
-				await this.authenticate(user, subdomain);
-			} catch (err) {
-				await vscode.window.showErrorMessage('Error authenticating user');
-			}
-		} else if (uri.path === '/prefill-doc') {
-			const query = new URLSearchParams(uri.query);
-			const docId = query.get('docId');
-			if (!docId) {
-				await vscode.window.showErrorMessage('No document identifier selected');
-				return;
-			}
-
-			await this.prefillDocWithDocId(docId);
-		}
-	}
-
-	private async deleteAuthSecrets() {
-		await this.container.storage.deleteSecret('userId');
-		await this.container.storage.deleteSecret('subdomain');
-	}
-
 	public async authenticate(user: any, subdomain?: string | null) {
 		await this.container.storage.storeSecret('userId', user.userId);
 		if (subdomain) {
@@ -143,6 +106,11 @@ export class ViewProvider implements WebviewViewProvider {
 		await executeCommand(Commands.RefreshLinks);
 		await executeCommand(Commands.RefreshViews);
 		await this._view?.webview.postMessage({ command: 'auth', args: user });
+	}
+
+	private async deleteAuthSecrets() {
+		await this.container.storage.deleteSecret('userId');
+		await this.container.storage.deleteSecret('subdomain');
 	}
 
 	public prefillDocWithDocId = async (docId: string) => {
@@ -294,3 +262,40 @@ export class ViewProvider implements WebviewViewProvider {
 export const openLogin = (endpoint: string) => {
 	return vscode.env.openExternal(vscode.Uri.parse(`${endpoint}/api/login/vscode`));
 };
+
+class UriHandler {
+	constructor (private viewProvider: ViewProvider) {
+
+	}
+	public async handleUri(uri: vscode.Uri) {
+		if (uri.path === '/auth') {
+			try {
+				const query = new URLSearchParams(uri.query);
+				const userRaw = query.get('user');
+				if (userRaw == null) {
+					await vscode.window.showErrorMessage('Unable to authenticate. Try again later');
+					return;
+				}
+
+				const user = JSON.parse(userRaw);
+				if (user?.email == null) {
+					await vscode.window.showErrorMessage('User has insufficient credentials. Try again later');
+					return;
+				}
+				const subdomain = query.get('subdomain');
+				await this.viewProvider.authenticate(user, subdomain);
+			} catch (err) {
+				await vscode.window.showErrorMessage('Error authenticating user');
+			}
+		} else if (uri.path === '/prefill-doc') {
+			const query = new URLSearchParams(uri.query);
+			const docId = query.get('docId');
+			if (!docId) {
+				await vscode.window.showErrorMessage('No document identifier selected');
+				return;
+			}
+
+			await this.viewProvider.prefillDocWithDocId(docId);
+		}
+	}
+}
