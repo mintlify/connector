@@ -2,7 +2,9 @@ import axios from 'axios';
 import {
 	CancellationToken,
 	Disposable,
+	EventEmitter,
 	Uri,
+	UriHandler,
 	Webview,
 	WebviewView,
 	WebviewViewProvider,
@@ -40,7 +42,7 @@ export class ViewProvider implements WebviewViewProvider {
 	protected readonly disposables: Disposable[] = [];
 	protected isReady: boolean = false;
 	private _disposableView: Disposable | undefined;
-	private _uriHandler = new UriHandler(this);
+	private _uriHandler = new UriEventHandler(this);
 
 	constructor(private readonly container: Container) {
 		this.disposables.push(
@@ -102,10 +104,10 @@ export class ViewProvider implements WebviewViewProvider {
 			await this.container.storage.storeSecret('subdomain', subdomain);
 		}
 		await vscode.commands.executeCommand('setContext', 'mintlify.isLoggedIn', true);
-		await vscode.window.showInformationMessage(`🙌 Successfully signed in with ${user.email}`);
 		await executeCommand(Commands.RefreshLinks);
 		await executeCommand(Commands.RefreshViews);
 		await this._view?.webview.postMessage({ command: 'auth', args: user });
+		await vscode.window.showInformationMessage(`🙌 Successfully signed in with ${user.email}`);
 	}
 
 	private async deleteAuthSecrets() {
@@ -263,9 +265,9 @@ export const openLogin = (endpoint: string) => {
 	return vscode.env.openExternal(vscode.Uri.parse(`${endpoint}/api/login/vscode`));
 };
 
-class UriHandler {
-	constructor (private viewProvider: ViewProvider) {
-
+class UriEventHandler extends EventEmitter<Uri> implements UriHandler {
+	constructor(private viewProvider: ViewProvider) {
+		super();
 	}
 	public async handleUri(uri: vscode.Uri) {
 		if (uri.path === '/auth') {
