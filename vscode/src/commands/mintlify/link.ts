@@ -86,6 +86,11 @@ export class LinkCode extends ActiveEditorCommand {
 			const type = this.getIsFolder(fileStat) ? 'folder' : 'file';
 			const fileFsPath: string = uri.fsPath;
 			const code: Code = await this.getCode(fileFsPath, type, editor, uri, args);
+			await this.container.viewProvider.show();
+			function delay(time: number) {
+				return new Promise(resolve => setTimeout(resolve, time));
+			}
+			await delay(200);
 			await this.container.viewProvider.postCode(code);
 		}
 	}

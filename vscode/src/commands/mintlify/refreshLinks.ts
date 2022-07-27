@@ -15,7 +15,8 @@ export class RefreshLinks extends ActiveEditorCommand {
 	}
 
 	async execute(editor: TextEditor) {
-		const fileFsPath: string = editor.document.uri.fsPath;
+		const fileFsPath: string = editor?.document?.uri?.fsPath;
+		if (fileFsPath == null) return;
 		const { gitOrg, repo } = await getRepoInfo(fileFsPath);
 		try {
 			const authParams = await this.container.storage.getAuthParams();

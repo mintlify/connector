@@ -46,24 +46,24 @@ export class TeamTreeProvider implements vscode.TreeDataProvider<Account>, Dispo
 	}
 
 	async getChildren(): Promise<any[]> {
-		const currentUserId = this.container.storage.getSecret('userId');
+		const authParams = await this.container.storage.getAuthParams();
 
-		if (currentUserId == null) {
+		if (authParams?.userId == null) {
 			return [new NotLoggedIn()];
 		}
-		const authParams = await this.container.storage.getAuthParams();
+
 		const {
 			data: { users },
 		} = await axios.get(`${API_ENDPOINT}/org/users`, {
 			params: authParams,
 		});
 
-		const currentUser = users.find((user: any) => user.userId === currentUserId);
-		const allOtherMembers = users.filter((user: any) => user?.email !== currentUser.email);
+		const currentUser = await users.find((user: any) => user.userId === authParams?.userId);
+		const allOtherMembers = users.filter((user: any) => user?.email !== currentUser?.email);
 
 		return [
-			new Account(currentUser.email, false, true),
-			...allOtherMembers.map((user: any) => new Account(user.email, user?.pending)),
+			new Account(currentUser?.email, false, true),
+			...allOtherMembers.map((user: any) => new Account(user?.email, user?.pending)),
 			new InviteMember(),
 		];
 	}

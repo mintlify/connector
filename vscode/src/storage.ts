@@ -43,7 +43,7 @@ export class Storage implements Disposable {
 		return this.context.secrets.store(key, value);
 	}
 
-	async getAuthParams(): Promise<object> {
+	async getAuthParams(): Promise<any> {
 		const userId = await this.getSecret('userId');
 		const subdomain = await this.getSecret('subdomain');
 		return {
