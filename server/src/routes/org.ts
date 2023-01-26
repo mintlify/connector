@@ -6,7 +6,6 @@ import { track } from '../services/segment';
 import { client } from '../services/stytch';
 import { checkIfUserHasVSCodeInstalled, removeUnneededDataFromOrg, userMiddleware } from './user';
 
-// import { sendEmail } from '../services/mandrill';
 
 const orgRouter = express.Router();
 
@@ -188,9 +187,6 @@ orgRouter.post('/', async (req, res) => {
       subdomain,
       from: 'webflow',
     });
-
-    // Send new organization welcome email
-    // await sendEmail(emails[0].email, undefined, 'welcome-new-organization', [{ name: 'org_url', content: org.subdomain }]);
 
     return res.send({ redirectUrl });
   } catch (error) {
